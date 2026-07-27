@@ -1,11 +1,27 @@
+from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Annotated, Literal
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, HttpUrl, field_validator
+from pydantic import (
+    AfterValidator,
+    AwareDatetime,
+    BaseModel,
+    ConfigDict,
+    Field,
+    HttpUrl,
+    field_validator,
+)
 
 NonEmptyStr = Annotated[str, Field(min_length=1)]
-NonEmptyStrList = Annotated[list[str], Field(min_length=1)]
+NonEmptyStrList = Annotated[list[NonEmptyStr], Field(min_length=1)]
 NonNegativeInt = Annotated[int, Field(ge=0)]
+
+
+def normalize_utc(value: datetime) -> datetime:
+    return value.astimezone(UTC)
+
+
+UtcDatetime = Annotated[AwareDatetime, AfterValidator(normalize_utc)]
 
 
 class StrictModel(BaseModel):
@@ -40,8 +56,8 @@ ALLOWED_TAGS = frozenset(
 class RawPaper(StrictModel):
     arxiv_id: str = Field(pattern=r"^\d{4}\.\d{4,5}$")
     version: int = Field(ge=1)
-    published_at: AwareDatetime
-    updated_at: AwareDatetime
+    published_at: UtcDatetime
+    updated_at: UtcDatetime
     title: str = Field(min_length=1)
     authors: list[str] = Field(min_length=1)
     arxiv_categories: list[str] = Field(min_length=1)
@@ -85,14 +101,14 @@ class Provenance(StrictModel):
     analysis_scope: Literal["title_and_abstract"]
     model: str = Field(min_length=1)
     prompt_version: str = Field(min_length=1)
-    analyzed_at: AwareDatetime
+    analyzed_at: UtcDatetime
 
 
 class PaperRecord(StrictModel):
     arxiv_id: str = Field(pattern=r"^\d{4}\.\d{4,5}$")
     version: int = Field(ge=1)
-    published_at: AwareDatetime
-    updated_at: AwareDatetime
+    published_at: UtcDatetime
+    updated_at: UtcDatetime
     title: NonEmptyStr
     title_zh: NonEmptyStr
     authors: NonEmptyStrList
@@ -125,7 +141,7 @@ class RunStats(StrictModel):
 
 class DataFile(StrictModel):
     schema_version: Literal["1"] = "1"
-    generated_at: AwareDatetime
+    generated_at: UtcDatetime
     stats: RunStats
     papers: list[PaperRecord]
 

@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta, timezone
 
 import pytest
 from pydantic import ValidationError
@@ -118,6 +118,14 @@ def test_paper_record_rejects_empty_persisted_public_fields(field: str) -> None:
         PaperRecord(**record)
 
 
+def test_paper_record_rejects_empty_list_members() -> None:
+    record = make_record().model_dump()
+    record["authors"] = [""]
+
+    with pytest.raises(ValidationError):
+        PaperRecord(**record)
+
+
 def test_cache_entry_rejects_empty_key() -> None:
     with pytest.raises(ValidationError):
         CacheEntry(key="", record=make_record())
@@ -151,6 +159,51 @@ def test_persisted_models_reject_naive_datetimes() -> None:
         PaperRecord(**record)
     with pytest.raises(ValidationError):
         DataFile(generated_at=naive, stats=RunStats(), papers=[])
+
+
+def test_persisted_models_normalize_aware_datetimes_to_utc() -> None:
+    offset_time = datetime(2026, 7, 27, 8, 0, tzinfo=timezone(timedelta(hours=8)))
+    expected = datetime(2026, 7, 27, tzinfo=UTC)
+    record_data = make_record().model_dump()
+    record_data["published_at"] = offset_time
+    record_data["updated_at"] = offset_time
+    record_data["provenance"]["analyzed_at"] = offset_time
+
+    raw_paper = RawPaper(
+        arxiv_id="2607.12345",
+        version=1,
+        published_at=offset_time,
+        updated_at=offset_time,
+        title="Paper",
+        authors=["Author"],
+        arxiv_categories=["cs.RO"],
+        abstract="Abstract",
+    )
+    provenance = Provenance(
+        analysis_scope="title_and_abstract",
+        model="model",
+        prompt_version="1",
+        analyzed_at=offset_time,
+    )
+    record = PaperRecord(**record_data)
+    data_file = DataFile(
+        generated_at=offset_time,
+        stats=RunStats(),
+        papers=[record],
+    )
+
+    assert raw_paper.published_at == expected
+    assert raw_paper.updated_at == expected
+    assert provenance.analyzed_at == expected
+    assert record.published_at == expected
+    assert record.updated_at == expected
+    assert record.provenance.analyzed_at == expected
+    assert data_file.generated_at == expected
+    payload = data_file.model_dump(mode="json")
+    assert payload["generated_at"] == "2026-07-27T00:00:00Z"
+    assert payload["papers"][0]["published_at"] == "2026-07-27T00:00:00Z"
+    assert payload["papers"][0]["updated_at"] == "2026-07-27T00:00:00Z"
+    assert payload["papers"][0]["provenance"]["analyzed_at"] == "2026-07-27T00:00:00Z"
 
 
 def test_data_file_rejects_unknown_schema_version() -> None:
