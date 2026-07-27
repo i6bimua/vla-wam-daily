@@ -87,6 +87,47 @@ def test_rejects_empty_prefilter_rules(tmp_path: Path, config_payload: dict[str,
         load_config(path, prompt_dir=prompt_dir)
 
 
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda payload: payload["prefilter"]["exact_phrases"].__setitem__(0, "..."),
+        lambda payload: payload["prefilter"]["composite_rules"].__getitem__(0)["groups"]
+        .__getitem__(0)
+        .__setitem__(0, "---"),
+    ],
+)
+def test_rejects_prefilter_phrases_without_word_characters(
+    tmp_path: Path, config_payload: dict[str, object], mutate: object
+) -> None:
+    mutate(config_payload)
+    path, prompt_dir = write_config(tmp_path, config_payload)
+
+    with pytest.raises(ValidationError):
+        load_config(path, prompt_dir=prompt_dir)
+
+
+@pytest.mark.parametrize("name", ["Vision-Language", "vision-language", "1vision"])
+def test_rejects_unstable_composite_rule_names(
+    tmp_path: Path, config_payload: dict[str, object], name: str
+) -> None:
+    config_payload["prefilter"]["composite_rules"].__getitem__(0).__setitem__("name", name)
+    path, prompt_dir = write_config(tmp_path, config_payload)
+
+    with pytest.raises(ValidationError):
+        load_config(path, prompt_dir=prompt_dir)
+
+
+def test_rejects_duplicate_composite_rule_names(
+    tmp_path: Path, config_payload: dict[str, object]
+) -> None:
+    duplicate = config_payload["prefilter"]["composite_rules"].__getitem__(0).copy()
+    config_payload["prefilter"]["composite_rules"].append(duplicate)
+    path, prompt_dir = write_config(tmp_path, config_payload)
+
+    with pytest.raises(ValidationError):
+        load_config(path, prompt_dir=prompt_dir)
+
+
 @pytest.mark.parametrize("profiles", [{}, {"economy": "deepseek-v4-flash"}])
 def test_requires_nonblank_quality_model_profile(
     tmp_path: Path, config_payload: dict[str, object], profiles: dict[str, str]

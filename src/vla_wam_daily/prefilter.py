@@ -17,19 +17,24 @@ def normalize(text: str) -> str:
 
 def contains_phrase(haystack: str, phrase: str) -> bool:
     normalized_phrase = normalize(phrase)
+    if not normalized_phrase:
+        return False
     return re.search(rf"\b{re.escape(normalized_phrase)}\b", haystack) is not None
 
 
 def match_paper(paper: RawPaper, config: PrefilterConfig) -> list[str]:
-    text = normalize(f"{paper.title}\n{paper.abstract}")
+    fields = [normalize(paper.title), normalize(paper.abstract)]
     matches: list[str] = []
 
     for phrase in config.exact_phrases:
-        if contains_phrase(text, phrase):
+        if any(contains_phrase(field, phrase) for field in fields):
             matches.append(f"exact:{normalize(phrase).replace(' ', '-')}")
 
     for rule in config.composite_rules:
-        if all(any(contains_phrase(text, phrase) for phrase in group) for group in rule.groups):
+        if all(
+            any(contains_phrase(field, phrase) for field in fields for phrase in group)
+            for group in rule.groups
+        ):
             matches.append(f"composite:{rule.name}")
 
     return list(dict.fromkeys(matches))
