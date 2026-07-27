@@ -1,7 +1,11 @@
-from datetime import datetime
 from enum import StrEnum
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, HttpUrl, field_validator
+
+NonEmptyStr = Annotated[str, Field(min_length=1)]
+NonEmptyStrList = Annotated[list[str], Field(min_length=1)]
+NonNegativeInt = Annotated[int, Field(ge=0)]
 
 
 class StrictModel(BaseModel):
@@ -36,8 +40,8 @@ ALLOWED_TAGS = frozenset(
 class RawPaper(StrictModel):
     arxiv_id: str = Field(pattern=r"^\d{4}\.\d{4,5}$")
     version: int = Field(ge=1)
-    published_at: datetime
-    updated_at: datetime
+    published_at: AwareDatetime
+    updated_at: AwareDatetime
     title: str = Field(min_length=1)
     authors: list[str] = Field(min_length=1)
     arxiv_categories: list[str] = Field(min_length=1)
@@ -78,23 +82,23 @@ class Resources(StrictModel):
 
 
 class Provenance(StrictModel):
-    analysis_scope: str = Field(pattern=r"^title_and_abstract$")
+    analysis_scope: Literal["title_and_abstract"]
     model: str = Field(min_length=1)
     prompt_version: str = Field(min_length=1)
-    analyzed_at: datetime
+    analyzed_at: AwareDatetime
 
 
 class PaperRecord(StrictModel):
     arxiv_id: str = Field(pattern=r"^\d{4}\.\d{4,5}$")
     version: int = Field(ge=1)
-    published_at: datetime
-    updated_at: datetime
-    title: str
-    title_zh: str
-    authors: list[str]
-    arxiv_categories: list[str]
-    abstract: str
-    matched_rules: list[str]
+    published_at: AwareDatetime
+    updated_at: AwareDatetime
+    title: NonEmptyStr
+    title_zh: NonEmptyStr
+    authors: NonEmptyStrList
+    arxiv_categories: NonEmptyStrList
+    abstract: NonEmptyStr
+    matched_rules: NonEmptyStrList
     analysis: Analysis
     resources: Resources
     provenance: Provenance
@@ -116,16 +120,16 @@ class RunStats(StrictModel):
     prompt_tokens: int = Field(default=0, ge=0)
     completion_tokens: int = Field(default=0, ge=0)
     total_tokens: int = Field(default=0, ge=0)
-    error_categories: dict[str, int] = Field(default_factory=dict)
+    error_categories: dict[str, NonNegativeInt] = Field(default_factory=dict)
 
 
 class DataFile(StrictModel):
-    schema_version: str = "1"
-    generated_at: datetime
+    schema_version: Literal["1"] = "1"
+    generated_at: AwareDatetime
     stats: RunStats
     papers: list[PaperRecord]
 
 
 class CacheEntry(StrictModel):
-    key: str
+    key: NonEmptyStr
     record: PaperRecord

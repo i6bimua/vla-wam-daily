@@ -4,7 +4,17 @@ import pytest
 from pydantic import ValidationError
 
 from tests.factories import make_record
-from vla_wam_daily.models import Analysis, DataFile, Topic
+from vla_wam_daily.models import (
+    Analysis,
+    CacheEntry,
+    DataFile,
+    PaperRecord,
+    Provenance,
+    RawPaper,
+    Resources,
+    RunStats,
+    Topic,
+)
 
 
 def test_analysis_rejects_out_of_range_score() -> None:
@@ -33,3 +43,177 @@ def test_data_file_serializes_public_contract() -> None:
     payload = data.model_dump(mode="json")
     assert payload["papers"][0]["analysis"]["primary_topic"] == "VLA"
     assert payload["papers"][0]["provenance"]["analysis_scope"] == "title_and_abstract"
+
+
+def test_strict_models_reject_extra_fields() -> None:
+    with pytest.raises(ValidationError):
+        Analysis(
+            relevance_score=8,
+            primary_topic=Topic.VLA,
+            tags=["Vision-Language"],
+            one_sentence_summary="总结",
+            main_contribution="贡献",
+            method="方法",
+            key_results="摘要未说明",
+            limitations="摘要未说明",
+            relation_to_vla_wam="直接相关",
+            unexpected="not allowed",
+        )
+
+
+def test_analysis_deduplicates_tags_in_input_order() -> None:
+    analysis = Analysis(
+        relevance_score=8,
+        primary_topic=Topic.VLA,
+        tags=["Vision-Language", "Robot Manipulation", "Vision-Language"],
+        one_sentence_summary="总结",
+        main_contribution="贡献",
+        method="方法",
+        key_results="摘要未说明",
+        limitations="摘要未说明",
+        relation_to_vla_wam="直接相关",
+    )
+
+    assert analysis.tags == ["Vision-Language", "Robot Manipulation"]
+
+
+def test_analysis_rejects_unsupported_tags() -> None:
+    with pytest.raises(ValidationError):
+        Analysis(
+            relevance_score=8,
+            primary_topic=Topic.VLA,
+            tags=["unsupported"],
+            one_sentence_summary="总结",
+            main_contribution="贡献",
+            method="方法",
+            key_results="摘要未说明",
+            limitations="摘要未说明",
+            relation_to_vla_wam="直接相关",
+        )
+
+
+def test_resources_reject_invalid_urls() -> None:
+    with pytest.raises(ValidationError):
+        Resources(arxiv_url="not a URL", pdf_url="https://arxiv.org/pdf/2607.12345")
+
+
+@pytest.mark.parametrize(
+    ("arxiv_id", "version"),
+    [("invalid", 1), ("2607.12345", 0)],
+)
+def test_paper_record_rejects_invalid_identity(arxiv_id: str, version: int) -> None:
+    with pytest.raises(ValidationError):
+        make_record(arxiv_id=arxiv_id, version=version)
+
+
+@pytest.mark.parametrize(
+    "field",
+    ["title", "title_zh", "authors", "arxiv_categories", "abstract", "matched_rules"],
+)
+def test_paper_record_rejects_empty_persisted_public_fields(field: str) -> None:
+    record = make_record().model_dump()
+    record[field] = [] if field in {"authors", "arxiv_categories", "matched_rules"} else ""
+
+    with pytest.raises(ValidationError):
+        PaperRecord(**record)
+
+
+def test_cache_entry_rejects_empty_key() -> None:
+    with pytest.raises(ValidationError):
+        CacheEntry(key="", record=make_record())
+
+
+def test_persisted_models_reject_naive_datetimes() -> None:
+    naive = datetime(2026, 7, 27, 1, 0)
+    record = make_record().model_dump()
+    record["published_at"] = naive
+    record["updated_at"] = naive
+
+    with pytest.raises(ValidationError):
+        RawPaper(
+            arxiv_id="2607.12345",
+            version=1,
+            published_at=naive,
+            updated_at=naive,
+            title="Paper",
+            authors=["Author"],
+            arxiv_categories=["cs.RO"],
+            abstract="Abstract",
+        )
+    with pytest.raises(ValidationError):
+        Provenance(
+            analysis_scope="title_and_abstract",
+            model="model",
+            prompt_version="1",
+            analyzed_at=naive,
+        )
+    with pytest.raises(ValidationError):
+        PaperRecord(**record)
+    with pytest.raises(ValidationError):
+        DataFile(generated_at=naive, stats=RunStats(), papers=[])
+
+
+def test_data_file_rejects_unknown_schema_version() -> None:
+    with pytest.raises(ValidationError):
+        DataFile(
+            schema_version="2",
+            generated_at=datetime(2026, 7, 27, tzinfo=UTC),
+            stats=RunStats(),
+            papers=[],
+        )
+
+
+def test_run_stats_rejects_negative_error_category_counts() -> None:
+    with pytest.raises(ValidationError):
+        RunStats(error_categories={"network": -1})
+
+
+def test_run_stats_defaults_to_zero_counts() -> None:
+    assert RunStats().model_dump() == {
+        "fetched": 0,
+        "prefiltered": 0,
+        "cache_hits": 0,
+        "model_calls": 0,
+        "published": 0,
+        "failed": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0,
+        "error_categories": {},
+    }
+
+
+def test_data_file_serializes_complete_public_json_shape() -> None:
+    record = make_record()
+    data = DataFile(
+        generated_at=datetime(2026, 7, 27, tzinfo=UTC),
+        stats=RunStats(fetched=1, published=1),
+        papers=[record],
+    )
+
+    payload = data.model_dump(mode="json")
+
+    assert set(payload) == {"schema_version", "generated_at", "stats", "papers"}
+    assert payload["schema_version"] == "1"
+    assert payload["stats"]["fetched"] == 1
+    assert set(payload["papers"][0]) == {
+        "arxiv_id",
+        "version",
+        "published_at",
+        "updated_at",
+        "title",
+        "title_zh",
+        "authors",
+        "arxiv_categories",
+        "abstract",
+        "matched_rules",
+        "analysis",
+        "resources",
+        "provenance",
+    }
+    assert payload["papers"][0]["resources"] == {
+        "arxiv_url": "https://arxiv.org/abs/2607.12345",
+        "pdf_url": "https://arxiv.org/pdf/2607.12345",
+        "project_url": None,
+        "code_url": None,
+    }
