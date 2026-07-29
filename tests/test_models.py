@@ -3,11 +3,14 @@ from datetime import UTC, datetime, timedelta, timezone
 import pytest
 from pydantic import ValidationError
 
-from tests.factories import make_record
+from tests.factories import make_gallery, make_record
 from vla_wam_daily.models import (
     Analysis,
     CacheEntry,
     DataFile,
+    FigureAsset,
+    FigureGallery,
+    FigureStatus,
     PaperRecord,
     Provenance,
     RawPaper,
@@ -43,6 +46,146 @@ def test_data_file_serializes_public_contract() -> None:
     payload = data.model_dump(mode="json")
     assert payload["papers"][0]["analysis"]["primary_topic"] == "VLA"
     assert payload["papers"][0]["provenance"]["analysis_scope"] == "title_and_abstract"
+
+
+def test_available_figure_gallery_serializes_public_contract() -> None:
+    gallery = FigureGallery(
+        status=FigureStatus.AVAILABLE,
+        html_url="https://arxiv.org/html/2607.12345v1",
+        figures=[
+            FigureAsset(
+                number=1,
+                label="Figure 1",
+                caption="The model architecture.",
+                image_urls=[
+                    "https://arxiv.org/html/2607.12345v1/x1.png",
+                    "https://arxiv.org/html/2607.12345v1/x2.png",
+                ],
+                source_url="https://arxiv.org/html/2607.12345v1",
+            )
+        ],
+        checked_at=datetime(2026, 7, 27, tzinfo=UTC),
+    )
+
+    assert gallery.model_dump(mode="json") == {
+        "status": "available",
+        "html_url": "https://arxiv.org/html/2607.12345v1",
+        "figures": [
+            {
+                "number": 1,
+                "label": "Figure 1",
+                "caption": "The model architecture.",
+                "image_urls": [
+                    "https://arxiv.org/html/2607.12345v1/x1.png",
+                    "https://arxiv.org/html/2607.12345v1/x2.png",
+                ],
+                "source_url": "https://arxiv.org/html/2607.12345v1",
+                "source": "arxiv_html",
+            }
+        ],
+        "checked_at": "2026-07-27T00:00:00Z",
+    }
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "http://arxiv.org/html/2607.12345v1/x1.png",
+        "https://example.com/x1.png",
+        "data:image/png;base64,AAAA",
+    ],
+)
+def test_figure_asset_rejects_non_arxiv_https_image_urls(url: str) -> None:
+    with pytest.raises(ValidationError):
+        FigureAsset(
+            number=1,
+            label="Figure 1",
+            caption="The model architecture.",
+            image_urls=[url],
+            source_url="https://arxiv.org/html/2607.12345v1",
+        )
+
+
+def test_available_figure_gallery_rejects_empty_figures() -> None:
+    with pytest.raises(ValidationError):
+        FigureGallery(
+            status=FigureStatus.AVAILABLE,
+            html_url="https://arxiv.org/html/2607.12345v1",
+            figures=[],
+            checked_at=datetime(2026, 7, 27, tzinfo=UTC),
+        )
+
+
+@pytest.mark.parametrize(
+    "status",
+    [
+        FigureStatus.HTML_UNAVAILABLE,
+        FigureStatus.NOT_FOUND,
+        FigureStatus.FETCH_FAILED,
+    ],
+)
+def test_unavailable_figure_gallery_rejects_figures(status: FigureStatus) -> None:
+    with pytest.raises(ValidationError):
+        FigureGallery(
+            status=status,
+            html_url="https://arxiv.org/html/2607.12345v1",
+            figures=[make_gallery().figures[0]],
+            checked_at=datetime(2026, 7, 27, tzinfo=UTC),
+        )
+
+
+def test_data_file_rejects_unchecked_figure_gallery() -> None:
+    record_data = make_record().model_dump()
+    record_data["figure_gallery"] = None
+    record = PaperRecord(**record_data)
+
+    with pytest.raises(ValidationError, match="2607.12345"):
+        DataFile(
+            generated_at=datetime(2026, 7, 27, tzinfo=UTC),
+            stats=RunStats(),
+            papers=[record],
+        )
+
+
+def test_figure_gallery_deduplicates_urls_sorts_figures_and_rejects_duplicates() -> None:
+    figure_one = FigureAsset(
+        number=1,
+        label="Figure 1",
+        caption="The model architecture.",
+        image_urls=[
+            "https://arxiv.org/html/2607.12345v1/x1.png",
+            "https://arxiv.org/html/2607.12345v1/x1.png",
+            "https://arxiv.org/html/2607.12345v1/x2.png",
+        ],
+        source_url="https://arxiv.org/html/2607.12345v1",
+    )
+    figure_two = FigureAsset(
+        number=2,
+        label="Figure 2",
+        caption="Robot evaluation environments.",
+        image_urls=["https://arxiv.org/html/2607.12345v1/x3.png"],
+        source_url="https://arxiv.org/html/2607.12345v1",
+    )
+
+    gallery = FigureGallery(
+        status=FigureStatus.AVAILABLE,
+        html_url="https://arxiv.org/html/2607.12345v1",
+        figures=[figure_two, figure_one],
+        checked_at=datetime(2026, 7, 27, tzinfo=UTC),
+    )
+
+    assert [figure.number for figure in gallery.figures] == [1, 2]
+    assert [str(url) for url in gallery.figures[0].image_urls] == [
+        "https://arxiv.org/html/2607.12345v1/x1.png",
+        "https://arxiv.org/html/2607.12345v1/x2.png",
+    ]
+    with pytest.raises(ValidationError):
+        FigureGallery(
+            status=FigureStatus.AVAILABLE,
+            html_url="https://arxiv.org/html/2607.12345v1",
+            figures=[figure_one, figure_one],
+            checked_at=datetime(2026, 7, 27, tzinfo=UTC),
+        )
 
 
 def test_strict_models_reject_extra_fields() -> None:
@@ -226,6 +369,11 @@ def test_run_stats_defaults_to_zero_counts() -> None:
         "fetched": 0,
         "prefiltered": 0,
         "cache_hits": 0,
+        "figure_cache_hits": 0,
+        "figure_requests": 0,
+        "figure_available": 0,
+        "figure_unavailable": 0,
+        "figure_failed": 0,
         "model_calls": 0,
         "published": 0,
         "failed": 0,
@@ -263,6 +411,7 @@ def test_data_file_serializes_complete_public_json_shape() -> None:
         "analysis",
         "resources",
         "provenance",
+        "figure_gallery",
     }
     assert payload["papers"][0]["resources"] == {
         "arxiv_url": "https://arxiv.org/abs/2607.12345",

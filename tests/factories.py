@@ -1,6 +1,49 @@
 from datetime import UTC, datetime
 
-from vla_wam_daily.models import Analysis, PaperRecord, Provenance, Resources, Topic
+from vla_wam_daily.models import (
+    Analysis,
+    FigureAsset,
+    FigureGallery,
+    FigureStatus,
+    PaperRecord,
+    Provenance,
+    Resources,
+    Topic,
+)
+
+
+def make_gallery(
+    *,
+    arxiv_id: str = "2607.12345",
+    version: int = 1,
+    status: FigureStatus = FigureStatus.AVAILABLE,
+) -> FigureGallery:
+    timestamp = datetime(2026, 7, 27, 1, 0, tzinfo=UTC)
+    html_url = f"https://arxiv.org/html/{arxiv_id}v{version}"
+    figures = []
+    if status is FigureStatus.AVAILABLE:
+        figures = [
+            FigureAsset(
+                number=1,
+                label="Figure 1",
+                caption="The model architecture.",
+                image_urls=[f"https://arxiv.org/html/{arxiv_id}v{version}/x1.png"],
+                source_url=html_url,
+            ),
+            FigureAsset(
+                number=2,
+                label="Figure 2",
+                caption="Robot evaluation environments.",
+                image_urls=[f"https://arxiv.org/html/{arxiv_id}v{version}/x2.png"],
+                source_url=html_url,
+            ),
+        ]
+    return FigureGallery(
+        status=status,
+        html_url=html_url,
+        figures=figures,
+        checked_at=timestamp,
+    )
 
 
 def make_record(
@@ -43,4 +86,33 @@ def make_record(
             prompt_version="1",
             analyzed_at=timestamp,
         ),
+        figure_gallery=make_gallery(arxiv_id=arxiv_id, version=version),
     )
+
+
+def make_figure_fixture_records() -> list[PaperRecord]:
+    records = [make_record()]
+    statuses = [
+        FigureStatus.HTML_UNAVAILABLE,
+        FigureStatus.NOT_FOUND,
+        FigureStatus.FETCH_FAILED,
+    ]
+    for index, status in enumerate(statuses, start=1):
+        arxiv_id = f"2607.2000{index}"
+        record_data = make_record(arxiv_id=arxiv_id, score=6).model_dump()
+        record_data.update(
+            title=f"Figure fallback fixture {index}",
+            title_zh=f"图片降级状态测试 {index}",
+            abstract="A fixture paper without the primary search keyword.",
+            figure_gallery=make_gallery(arxiv_id=arxiv_id, status=status),
+        )
+        record_data["analysis"].update(
+            one_sentence_summary=f"图片降级测试摘要 {index}",
+            main_contribution=f"图片降级测试贡献 {index}",
+            method=f"图片降级测试方法 {index}",
+            key_results=f"图片降级测试结果 {index}",
+            limitations=f"图片降级测试局限 {index}",
+            relation_to_vla_wam=f"图片降级测试关联 {index}",
+        )
+        records.append(PaperRecord(**record_data))
+    return records
