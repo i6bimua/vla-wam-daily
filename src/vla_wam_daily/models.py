@@ -1,6 +1,9 @@
+import re
+from collections.abc import Mapping
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Annotated, Literal, Self
+from types import MappingProxyType
+from typing import Annotated, Any, Literal, Self
 
 from pydantic import (
     AfterValidator,
@@ -9,16 +12,28 @@ from pydantic import (
     ConfigDict,
     Field,
     HttpUrl,
+    field_serializer,
     field_validator,
     model_validator,
 )
 
 NonEmptyStr = Annotated[str, Field(min_length=1)]
 NonEmptyStrList = Annotated[list[NonEmptyStr], Field(min_length=1)]
+NonEmptyStrTuple = Annotated[tuple[NonEmptyStr, ...], Field(min_length=1)]
 NonNegativeInt = Annotated[int, Field(ge=0)]
 ARXIV_FIGURE_HOSTS = frozenset({"arxiv.org", "www.arxiv.org"})
+ARXIV_HTML_PATH_PATTERN = re.compile(
+    r"^/html/(?P<arxiv_id>\d{4}\.\d{4,5})v(?P<version>[1-9]\d*)$"
+)
+ARXIV_IMAGE_PATH_PATTERN = re.compile(
+    r"^/html/\d{4}\.\d{4,5}v[1-9]\d*/.+$"
+)
 FigureNumber = Literal[1, 2]
-FigureImageList = Annotated[list[HttpUrl], Field(min_length=1)]
+FigureImageTuple = Annotated[tuple[HttpUrl, ...], Field(min_length=1)]
+FigureCacheKey = Annotated[
+    str,
+    Field(pattern=r"^\d{4}\.\d{4,5}:v[1-9]\d*$"),
+]
 
 
 def normalize_utc(value: datetime) -> datetime:
@@ -28,14 +43,61 @@ def normalize_utc(value: datetime) -> datetime:
 UtcDatetime = Annotated[AwareDatetime, AfterValidator(normalize_utc)]
 
 
-def validate_arxiv_https_url(url: HttpUrl) -> HttpUrl:
+def validate_arxiv_url_authority(url: HttpUrl) -> HttpUrl:
     if url.scheme != "https" or url.host not in ARXIV_FIGURE_HOSTS:
         raise ValueError("URL must use https and an allowed arXiv host")
+    if url.username is not None or url.password is not None:
+        raise ValueError("arXiv URL must not contain credentials")
+    if url.port != 443:
+        raise ValueError("arXiv URL must use the default https port")
+    return url
+
+
+def validate_arxiv_html_url(url: HttpUrl) -> HttpUrl:
+    validate_arxiv_url_authority(url)
+    if url.fragment is not None:
+        raise ValueError("arXiv HTML URL must not contain a fragment")
+    if url.path is None or ARXIV_HTML_PATH_PATTERN.fullmatch(url.path) is None:
+        raise ValueError("arXiv HTML URL must identify a versioned paper")
+    return url
+
+
+def validate_arxiv_image_url(url: HttpUrl) -> HttpUrl:
+    validate_arxiv_url_authority(url)
+    if url.fragment is not None:
+        raise ValueError("arXiv image URL must not contain a fragment")
+    if url.path is None or ARXIV_IMAGE_PATH_PATTERN.fullmatch(url.path) is None:
+        raise ValueError("arXiv image URL must belong to a versioned HTML paper")
+    return url
+
+
+def validate_arxiv_source_url(url: HttpUrl) -> HttpUrl:
+    validate_arxiv_url_authority(url)
+    if not url.fragment:
+        raise ValueError("arXiv figure source URL must contain a nonempty fragment")
+    if url.path is None or ARXIV_HTML_PATH_PATTERN.fullmatch(url.path) is None:
+        raise ValueError("arXiv figure source URL must identify a versioned paper")
     return url
 
 
 class StrictModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
+
+
+class FrozenStrictModel(StrictModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    def model_copy(
+        self,
+        *,
+        update: Mapping[str, Any] | None = None,
+        deep: bool = False,
+    ) -> Self:
+        if update is None:
+            return super().model_copy(deep=deep)
+        data = self.model_dump(mode="python", round_trip=True)
+        data.update(update)
+        return type(self).model_validate(data)
 
 
 class Topic(StrEnum):
@@ -75,10 +137,10 @@ class RawPaper(StrictModel):
     comment: str | None = None
 
 
-class Analysis(StrictModel):
+class Analysis(FrozenStrictModel):
     relevance_score: int = Field(ge=1, le=10)
     primary_topic: Topic
-    tags: list[str]
+    tags: tuple[str, ...]
     one_sentence_summary: str = Field(min_length=1)
     main_contribution: str = Field(min_length=1)
     method: str = Field(min_length=1)
@@ -88,11 +150,11 @@ class Analysis(StrictModel):
 
     @field_validator("tags")
     @classmethod
-    def validate_tags(cls, tags: list[str]) -> list[str]:
+    def validate_tags(cls, tags: tuple[str, ...]) -> tuple[str, ...]:
         unknown = sorted(set(tags) - ALLOWED_TAGS)
         if unknown:
             raise ValueError(f"unsupported tags: {', '.join(unknown)}")
-        return list(dict.fromkeys(tags))
+        return tuple(dict.fromkeys(tags))
 
 
 class AIOutput(StrictModel):
@@ -100,7 +162,7 @@ class AIOutput(StrictModel):
     analysis: Analysis
 
 
-class Resources(StrictModel):
+class Resources(FrozenStrictModel):
     arxiv_url: HttpUrl
     pdf_url: HttpUrl
     project_url: HttpUrl | None = None
@@ -114,82 +176,112 @@ class FigureStatus(StrEnum):
     FETCH_FAILED = "fetch_failed"
 
 
-class FigureAsset(StrictModel):
+class FigureAsset(FrozenStrictModel):
     number: FigureNumber
     label: NonEmptyStr
     caption: NonEmptyStr
-    image_urls: FigureImageList
+    image_urls: FigureImageTuple
     source_url: HttpUrl
     source: Literal["arxiv_html"] = "arxiv_html"
 
     @field_validator("source_url")
     @classmethod
     def validate_source_url(cls, url: HttpUrl) -> HttpUrl:
-        return validate_arxiv_https_url(url)
+        return validate_arxiv_source_url(url)
 
     @field_validator("image_urls")
     @classmethod
-    def validate_and_deduplicate_image_urls(cls, urls: list[HttpUrl]) -> list[HttpUrl]:
+    def validate_and_deduplicate_image_urls(
+        cls, urls: tuple[HttpUrl, ...]
+    ) -> tuple[HttpUrl, ...]:
         deduplicated: list[HttpUrl] = []
         seen: set[str] = set()
         for url in urls:
-            validate_arxiv_https_url(url)
+            validate_arxiv_image_url(url)
             if str(url) not in seen:
                 seen.add(str(url))
                 deduplicated.append(url)
-        return deduplicated
+        return tuple(deduplicated)
 
 
-class FigureGallery(StrictModel):
+class FigureGallery(FrozenStrictModel):
     status: FigureStatus
     html_url: HttpUrl
-    figures: Annotated[list[FigureAsset], Field(max_length=2)] = Field(default_factory=list)
+    figures: Annotated[tuple[FigureAsset, ...], Field(max_length=2)] = Field(
+        default_factory=tuple
+    )
     checked_at: UtcDatetime
 
     @field_validator("html_url")
     @classmethod
     def validate_html_url(cls, url: HttpUrl) -> HttpUrl:
-        return validate_arxiv_https_url(url)
+        return validate_arxiv_html_url(url)
 
     @field_validator("figures")
     @classmethod
-    def validate_and_sort_figures(cls, figures: list[FigureAsset]) -> list[FigureAsset]:
+    def validate_and_sort_figures(
+        cls, figures: tuple[FigureAsset, ...]
+    ) -> tuple[FigureAsset, ...]:
         numbers = [figure.number for figure in figures]
         if len(numbers) != len(set(numbers)):
             raise ValueError("duplicate figure numbers")
-        return sorted(figures, key=lambda figure: figure.number)
+        return tuple(sorted(figures, key=lambda figure: figure.number))
 
     @model_validator(mode="after")
-    def validate_status_figures(self) -> Self:
+    def validate_gallery_contract(self) -> Self:
         if self.status is FigureStatus.AVAILABLE and not self.figures:
             raise ValueError("available figure gallery requires at least one figure")
         if self.status is not FigureStatus.AVAILABLE and self.figures:
             raise ValueError("unavailable figure gallery must not contain figures")
+        html_path = self.html_url.path
+        if html_path is None:
+            raise ValueError("arXiv HTML URL must contain a path")
+        for figure in self.figures:
+            if figure.source_url.path != html_path:
+                raise ValueError("figure source URL must match gallery paper and version")
+            image_prefix = f"{html_path}/"
+            if any(
+                image_url.path is None
+                or not image_url.path.startswith(image_prefix)
+                for image_url in figure.image_urls
+            ):
+                raise ValueError("figure image URL must match gallery paper and version")
         return self
 
 
-class Provenance(StrictModel):
+class Provenance(FrozenStrictModel):
     analysis_scope: Literal["title_and_abstract"]
     model: str = Field(min_length=1)
     prompt_version: str = Field(min_length=1)
     analyzed_at: UtcDatetime
 
 
-class PaperRecord(StrictModel):
+class AnalyzedPaperRecord(FrozenStrictModel):
     arxiv_id: str = Field(pattern=r"^\d{4}\.\d{4,5}$")
     version: int = Field(ge=1)
     published_at: UtcDatetime
     updated_at: UtcDatetime
     title: NonEmptyStr
     title_zh: NonEmptyStr
-    authors: NonEmptyStrList
-    arxiv_categories: NonEmptyStrList
+    authors: NonEmptyStrTuple
+    arxiv_categories: NonEmptyStrTuple
     abstract: NonEmptyStr
-    matched_rules: NonEmptyStrList
+    matched_rules: NonEmptyStrTuple
     analysis: Analysis
     resources: Resources
     provenance: Provenance
-    figure_gallery: FigureGallery | None = None
+
+
+class PaperRecord(AnalyzedPaperRecord):
+    figure_gallery: FigureGallery
+
+    @model_validator(mode="before")
+    @classmethod
+    def reject_null_figure_gallery(cls, value: object) -> object:
+        if isinstance(value, Mapping) and value.get("figure_gallery") is None:
+            arxiv_id = value.get("arxiv_id", "unknown")
+            raise ValueError(f"paper {arxiv_id} requires a checked figure gallery")
+        return value
 
 
 class TokenUsage(StrictModel):
@@ -198,7 +290,7 @@ class TokenUsage(StrictModel):
     total_tokens: int = Field(default=0, ge=0)
 
 
-class RunStats(StrictModel):
+class RunStats(FrozenStrictModel):
     fetched: int = Field(default=0, ge=0)
     prefiltered: int = Field(default=0, ge=0)
     cache_hits: int = Field(default=0, ge=0)
@@ -213,33 +305,35 @@ class RunStats(StrictModel):
     prompt_tokens: int = Field(default=0, ge=0)
     completion_tokens: int = Field(default=0, ge=0)
     total_tokens: int = Field(default=0, ge=0)
-    error_categories: dict[str, NonNegativeInt] = Field(default_factory=dict)
+    error_categories: Mapping[str, NonNegativeInt] = Field(
+        default_factory=dict,
+        validate_default=True,
+    )
+
+    @field_validator("error_categories")
+    @classmethod
+    def freeze_error_categories(
+        cls, value: Mapping[str, int]
+    ) -> Mapping[str, int]:
+        return MappingProxyType(dict(value))
+
+    @field_serializer("error_categories")
+    def serialize_error_categories(self, value: Mapping[str, int]) -> dict[str, int]:
+        return dict(value)
 
 
-class DataFile(StrictModel):
+class DataFile(FrozenStrictModel):
     schema_version: Literal["1"] = "1"
     generated_at: UtcDatetime
     stats: RunStats
-    papers: list[PaperRecord]
-
-    @model_validator(mode="after")
-    def reject_unchecked_figure_galleries(self) -> Self:
-        unchecked_ids = sorted(
-            paper.arxiv_id for paper in self.papers if paper.figure_gallery is None
-        )
-        if unchecked_ids:
-            raise ValueError(
-                "public data file contains papers with unchecked figure galleries: "
-                + ", ".join(unchecked_ids)
-            )
-        return self
+    papers: tuple[PaperRecord, ...]
 
 
-class CacheEntry(StrictModel):
+class CacheEntry(FrozenStrictModel):
     key: NonEmptyStr
-    record: PaperRecord
+    record: AnalyzedPaperRecord
 
 
-class FigureCacheEntry(StrictModel):
-    key: NonEmptyStr
+class FigureCacheEntry(FrozenStrictModel):
+    key: FigureCacheKey
     gallery: FigureGallery

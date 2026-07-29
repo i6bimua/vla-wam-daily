@@ -3,12 +3,14 @@ from datetime import UTC, datetime, timedelta, timezone
 import pytest
 from pydantic import ValidationError
 
+import vla_wam_daily.models as models
 from tests.factories import make_gallery, make_record
 from vla_wam_daily.models import (
     Analysis,
     CacheEntry,
     DataFile,
     FigureAsset,
+    FigureCacheEntry,
     FigureGallery,
     FigureStatus,
     PaperRecord,
@@ -96,6 +98,233 @@ def test_figure_factory_uses_anchored_source_urls() -> None:
     ]
 
 
+def test_published_models_are_frozen_and_collections_are_tuples() -> None:
+    gallery = make_gallery()
+    record = make_record()
+    data_file = DataFile(
+        generated_at=datetime(2026, 7, 27, tzinfo=UTC),
+        stats=RunStats(),
+        papers=[record],
+    )
+
+    assert isinstance(gallery.figures, tuple)
+    assert isinstance(gallery.figures[0].image_urls, tuple)
+    assert isinstance(record.authors, tuple)
+    assert isinstance(record.arxiv_categories, tuple)
+    assert isinstance(record.matched_rules, tuple)
+    assert isinstance(record.analysis.tags, tuple)
+    assert isinstance(data_file.papers, tuple)
+    with pytest.raises(ValidationError):
+        gallery.status = FigureStatus.NOT_FOUND
+    with pytest.raises(ValidationError):
+        record.analysis.relevance_score = 11
+    with pytest.raises(ValidationError):
+        data_file.stats.fetched = -1
+    with pytest.raises(AttributeError):
+        gallery.figures.clear()  # type: ignore[attr-defined]
+    with pytest.raises(AttributeError):
+        gallery.figures[0].image_urls.append("https://arxiv.org/html/2607.12345v1/x3.png")  # type: ignore[attr-defined]
+    with pytest.raises(AttributeError):
+        record.authors.clear()  # type: ignore[attr-defined]
+    with pytest.raises(AttributeError):
+        record.analysis.tags.append("unsupported")  # type: ignore[attr-defined]
+    with pytest.raises(AttributeError):
+        data_file.papers.append(make_record())  # type: ignore[attr-defined]
+    with pytest.raises(AttributeError):
+        data_file.stats.error_categories.update(network=-1)  # type: ignore[attr-defined]
+
+
+def test_frozen_model_copy_revalidates_updates() -> None:
+    with pytest.raises(ValidationError):
+        make_gallery().model_copy(update={"status": FigureStatus.NOT_FOUND})
+
+
+def test_strict_models_remain_mutable_for_configuration_workflows() -> None:
+    raw_paper = RawPaper(
+        arxiv_id="2607.12345",
+        version=1,
+        published_at=datetime(2026, 7, 27, tzinfo=UTC),
+        updated_at=datetime(2026, 7, 27, tzinfo=UTC),
+        title="Original title",
+        authors=["Author"],
+        arxiv_categories=["cs.RO"],
+        abstract="Abstract",
+    )
+
+    raw_paper.title = "Updated title"
+
+    assert raw_paper.title == "Updated title"
+
+
+def test_public_record_requires_gallery_while_analyzed_record_does_not() -> None:
+    record_data = make_record().model_dump()
+    record_data.pop("figure_gallery")
+
+    analyzed_record = models.AnalyzedPaperRecord(**record_data)
+
+    assert analyzed_record.arxiv_id == "2607.12345"
+    with pytest.raises(ValidationError):
+        PaperRecord(**record_data)
+    assert CacheEntry(key="analysis-key", record=analyzed_record).record == analyzed_record
+
+
+def test_public_data_file_schema_requires_non_nullable_figure_gallery() -> None:
+    schema = DataFile.model_json_schema()
+    paper_schema = schema["$defs"]["PaperRecord"]
+
+    assert "figure_gallery" in paper_schema["required"]
+    assert "anyOf" not in paper_schema["properties"]["figure_gallery"]
+
+
+@pytest.mark.parametrize(
+    "html_url",
+    [
+        "https://reader@arxiv.org/html/2607.12345v1",
+        "https://reader:secret@arxiv.org/html/2607.12345v1",
+        "https://arxiv.org:444/html/2607.12345v1",
+    ],
+)
+def test_figure_gallery_rejects_insecure_arxiv_url_authority(html_url: str) -> None:
+    with pytest.raises(ValidationError):
+        FigureGallery(
+            status=FigureStatus.NOT_FOUND,
+            html_url=html_url,
+            checked_at=datetime(2026, 7, 27, tzinfo=UTC),
+        )
+
+
+@pytest.mark.parametrize(
+    ("field", "url"),
+    [
+        ("source_url", "https://reader@arxiv.org/html/2607.12345v1#S1.F1"),
+        ("source_url", "https://arxiv.org:444/html/2607.12345v1#S1.F1"),
+        ("image_url", "https://reader:secret@arxiv.org/html/2607.12345v1/x1.png"),
+        ("image_url", "https://arxiv.org:444/html/2607.12345v1/x1.png"),
+    ],
+)
+def test_figure_asset_rejects_insecure_arxiv_url_authority(
+    field: str, url: str
+) -> None:
+    source_url = "https://arxiv.org/html/2607.12345v1#S1.F1"
+    image_url = "https://arxiv.org/html/2607.12345v1/x1.png"
+    if field == "source_url":
+        source_url = url
+    else:
+        image_url = url
+
+    with pytest.raises(ValidationError):
+        FigureAsset(
+            number=1,
+            label="Figure 1",
+            caption="The model architecture.",
+            image_urls=[image_url],
+            source_url=source_url,
+        )
+
+
+def test_figure_urls_allow_explicit_https_default_port() -> None:
+    gallery = FigureGallery(
+        status=FigureStatus.AVAILABLE,
+        html_url="https://arxiv.org:443/html/2607.12345v1",
+        figures=[
+            FigureAsset(
+                number=1,
+                label="Figure 1",
+                caption="The model architecture.",
+                image_urls=["https://arxiv.org:443/html/2607.12345v1/x1.png"],
+                source_url="https://arxiv.org:443/html/2607.12345v1#S1.F1",
+            )
+        ],
+        checked_at=datetime(2026, 7, 27, tzinfo=UTC),
+    )
+
+    assert str(gallery.html_url) == "https://arxiv.org/html/2607.12345v1"
+
+
+def test_figure_urls_require_their_expected_fragment_shapes() -> None:
+    with pytest.raises(ValidationError):
+        FigureGallery(
+            status=FigureStatus.NOT_FOUND,
+            html_url="https://arxiv.org/html/2607.12345v1#section",
+            checked_at=datetime(2026, 7, 27, tzinfo=UTC),
+        )
+    with pytest.raises(ValidationError):
+        FigureAsset(
+            number=1,
+            label="Figure 1",
+            caption="The model architecture.",
+            image_urls=["https://arxiv.org/html/2607.12345v1/x1.png"],
+            source_url="https://arxiv.org/html/2607.12345v1",
+        )
+    with pytest.raises(ValidationError):
+        FigureAsset(
+            number=1,
+            label="Figure 1",
+            caption="The model architecture.",
+            image_urls=["https://arxiv.org/html/2607.12345v1/x1.png#fragment"],
+            source_url="https://arxiv.org/html/2607.12345v1#S1.F1",
+        )
+
+
+@pytest.mark.parametrize(
+    ("source_url", "image_url"),
+    [
+        (
+            "https://arxiv.org/html/2607.99999v1#S1.F1",
+            "https://arxiv.org/html/2607.12345v1/x1.png",
+        ),
+        (
+            "https://arxiv.org/html/2607.12345v2#S1.F1",
+            "https://arxiv.org/html/2607.12345v1/x1.png",
+        ),
+        (
+            "https://arxiv.org/html/2607.12345v1#S1.F1",
+            "https://arxiv.org/html/2607.99999v1/x1.png",
+        ),
+        (
+            "https://arxiv.org/html/2607.12345v1#S1.F1",
+            "https://arxiv.org/html/2607.12345v2/x1.png",
+        ),
+    ],
+)
+def test_figure_gallery_rejects_cross_paper_or_version_urls(
+    source_url: str, image_url: str
+) -> None:
+    figure = FigureAsset(
+        number=1,
+        label="Figure 1",
+        caption="The model architecture.",
+        image_urls=[image_url],
+        source_url=source_url,
+    )
+
+    with pytest.raises(ValidationError):
+        FigureGallery(
+            status=FigureStatus.AVAILABLE,
+            html_url="https://arxiv.org/html/2607.12345v1",
+            figures=[figure],
+            checked_at=datetime(2026, 7, 27, tzinfo=UTC),
+        )
+
+
+@pytest.mark.parametrize(
+    "invalid_key",
+    [
+        "2606.30552:2",
+        "2606.30552:v0",
+        "2606.30552:v-1",
+        "2606.305:v2",
+        "not-an-arxiv-key",
+    ],
+)
+def test_figure_cache_entry_requires_arxiv_version_key(invalid_key: str) -> None:
+    entry = FigureCacheEntry(key="2606.30552:v2", gallery=make_gallery())
+
+    assert entry.key == "2606.30552:v2"
+    with pytest.raises(ValidationError):
+        FigureCacheEntry(key=invalid_key, gallery=make_gallery())
+
+
 @pytest.mark.parametrize(
     "url",
     [
@@ -111,7 +340,7 @@ def test_figure_asset_rejects_non_arxiv_https_image_urls(url: str) -> None:
             label="Figure 1",
             caption="The model architecture.",
             image_urls=[url],
-            source_url="https://arxiv.org/html/2607.12345v1",
+            source_url="https://arxiv.org/html/2607.12345v1#S1.F1",
         )
 
 
@@ -143,17 +372,11 @@ def test_unavailable_figure_gallery_rejects_figures(status: FigureStatus) -> Non
         )
 
 
-def test_data_file_rejects_unchecked_figure_gallery() -> None:
+def test_paper_record_rejects_unchecked_figure_gallery() -> None:
     record_data = make_record().model_dump()
     record_data["figure_gallery"] = None
-    record = PaperRecord(**record_data)
-
     with pytest.raises(ValidationError, match="2607.12345"):
-        DataFile(
-            generated_at=datetime(2026, 7, 27, tzinfo=UTC),
-            stats=RunStats(),
-            papers=[record],
-        )
+        PaperRecord(**record_data)
 
 
 def test_figure_gallery_deduplicates_urls_sorts_figures_and_rejects_duplicates() -> None:
@@ -166,14 +389,14 @@ def test_figure_gallery_deduplicates_urls_sorts_figures_and_rejects_duplicates()
             "https://arxiv.org/html/2607.12345v1/x1.png",
             "https://arxiv.org/html/2607.12345v1/x2.png",
         ],
-        source_url="https://arxiv.org/html/2607.12345v1",
+        source_url="https://arxiv.org/html/2607.12345v1#S1.F1",
     )
     figure_two = FigureAsset(
         number=2,
         label="Figure 2",
         caption="Robot evaluation environments.",
         image_urls=["https://arxiv.org/html/2607.12345v1/x3.png"],
-        source_url="https://arxiv.org/html/2607.12345v1",
+        source_url="https://arxiv.org/html/2607.12345v1#S2.F2",
     )
 
     gallery = FigureGallery(
@@ -226,7 +449,7 @@ def test_analysis_deduplicates_tags_in_input_order() -> None:
         relation_to_vla_wam="直接相关",
     )
 
-    assert analysis.tags == ["Vision-Language", "Robot Manipulation"]
+    assert analysis.tags == ("Vision-Language", "Robot Manipulation")
 
 
 def test_analysis_rejects_unsupported_tags() -> None:
