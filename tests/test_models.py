@@ -61,7 +61,7 @@ def test_available_figure_gallery_serializes_public_contract() -> None:
                     "https://arxiv.org/html/2607.12345v1/x1.png",
                     "https://arxiv.org/html/2607.12345v1/x2.png",
                 ],
-                source_url="https://arxiv.org/html/2607.12345v1",
+                source_url="https://arxiv.org/html/2607.12345v1#S1.F1",
             )
         ],
         checked_at=datetime(2026, 7, 27, tzinfo=UTC),
@@ -79,7 +79,7 @@ def test_available_figure_gallery_serializes_public_contract() -> None:
                     "https://arxiv.org/html/2607.12345v1/x1.png",
                     "https://arxiv.org/html/2607.12345v1/x2.png",
                 ],
-                "source_url": "https://arxiv.org/html/2607.12345v1",
+                "source_url": "https://arxiv.org/html/2607.12345v1#S1.F1",
                 "source": "arxiv_html",
             }
         ],
