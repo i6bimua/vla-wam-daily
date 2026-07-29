@@ -57,18 +57,24 @@ def atom_feed(
     total_results: int | None = None,
     start_index: int = 0,
     items_per_page: int | None = None,
+    omit_opensearch: frozenset[str] = frozenset(),
 ) -> bytes:
     total = len(entries) if total_results is None else total_results
     items = len(entries) if items_per_page is None else items_per_page
+    metadata = []
+    if "total_results" not in omit_opensearch:
+        metadata.append(f"<opensearch:totalResults>{total}</opensearch:totalResults>")
+    if "start_index" not in omit_opensearch:
+        metadata.append(f"<opensearch:startIndex>{start_index}</opensearch:startIndex>")
+    if "items_per_page" not in omit_opensearch:
+        metadata.append(f"<opensearch:itemsPerPage>{items}</opensearch:itemsPerPage>")
     return (
         '<?xml version="1.0" encoding="UTF-8"?>'
         '<feed xmlns="http://www.w3.org/2005/Atom" '
         'xmlns:arxiv="http://arxiv.org/schemas/atom" '
         'xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">'
         "<title>ArXiv Query</title>"
-        f"<opensearch:totalResults>{total}</opensearch:totalResults>"
-        f"<opensearch:startIndex>{start_index}</opensearch:startIndex>"
-        f"<opensearch:itemsPerPage>{items}</opensearch:itemsPerPage>"
+        f"{''.join(metadata)}"
         f"{''.join(entries)}"
         "</feed>"
     ).encode()
@@ -153,7 +159,15 @@ def test_fetch_by_ids_uses_stably_deduplicated_id_list() -> None:
 
 @respx.mock
 def test_fetch_recent_rejects_a_truncated_inclusive_time_window() -> None:
-    respx.get(ARXIV_API_URL).mock(return_value=httpx.Response(200, content=FIXTURE.read_bytes()))
+    respx.get(ARXIV_API_URL).mock(
+        return_value=atom_response(
+            atom_feed(
+                atom_entry("2607.12345", updated="2026-07-27T01:00:00Z"),
+                total_results=2,
+                items_per_page=1,
+            )
+        )
+    )
     client = ArxivClient(
         user_agent=USER_AGENT,
         request_delay_seconds=0,
@@ -167,6 +181,34 @@ def test_fetch_recent_rejects_a_truncated_inclusive_time_window() -> None:
             until=datetime(2026, 7, 28, tzinfo=UTC),
             max_results_per_category=1,
         )
+
+
+@respx.mock
+def test_fetch_recent_accepts_an_exact_known_total_at_the_cap() -> None:
+    respx.get(ARXIV_API_URL).mock(
+        return_value=atom_response(
+            atom_feed(
+                atom_entry("2607.12345", updated="2026-07-27T01:00:00Z"),
+                total_results=1,
+                items_per_page=1,
+            )
+        )
+    )
+    client = ArxivClient(
+        user_agent=USER_AGENT,
+        request_delay_seconds=0,
+        retries=1,
+    )
+
+    with client:
+        papers = client.fetch_recent(
+            categories=["cs.RO"],
+            since=datetime(2026, 7, 27, 1, tzinfo=UTC),
+            until=datetime(2026, 7, 28, tzinfo=UTC),
+            max_results_per_category=1,
+        )
+
+    assert [paper.arxiv_id for paper in papers] == ["2607.12345"]
 
 
 def test_fetch_recent_requests_a_second_page_and_stops_on_a_short_page() -> None:
@@ -219,6 +261,185 @@ def test_fetch_recent_requests_a_second_page_and_stops_on_a_short_page() -> None
         "2607.00001",
         "2607.00003",
     ]
+
+
+def test_fetch_recent_continues_after_a_short_page_when_total_has_more() -> None:
+    requests: list[httpx.Request] = []
+    responses = iter(
+        [
+            atom_response(
+                atom_feed(
+                    atom_entry("2607.00003", updated="2026-07-27T03:00:00Z"),
+                    total_results=3,
+                    start_index=0,
+                    items_per_page=1,
+                )
+            ),
+            atom_response(
+                atom_feed(
+                    atom_entry("2607.00002", updated="2026-07-27T02:00:00Z"),
+                    atom_entry("2607.00001", updated="2026-07-27T01:00:00Z"),
+                    total_results=3,
+                    start_index=1,
+                    items_per_page=2,
+                )
+            ),
+        ]
+    )
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return next(responses)
+
+    with (
+        httpx.Client(transport=httpx.MockTransport(handler)) as http_client,
+        ArxivClient(
+            user_agent=USER_AGENT,
+            request_delay_seconds=0,
+            retries=1,
+            page_size=2,
+            http_client=http_client,
+        ) as client,
+    ):
+        papers = client.fetch_recent(
+            categories=["cs.RO"],
+            since=datetime(2026, 7, 25, tzinfo=UTC),
+            until=datetime(2026, 7, 28, tzinfo=UTC),
+            max_results_per_category=10,
+        )
+
+    assert [request.url.params["start"] for request in requests] == ["0", "1"]
+    assert [paper.arxiv_id for paper in papers] == [
+        "2607.00003",
+        "2607.00002",
+        "2607.00001",
+    ]
+
+
+def test_fetch_recent_without_metadata_continues_then_truncates_at_cap() -> None:
+    requests: list[httpx.Request] = []
+    without_metadata = frozenset({"total_results", "start_index", "items_per_page"})
+    responses = iter(
+        [
+            atom_response(
+                atom_feed(
+                    atom_entry("2607.00003", updated="2026-07-27T03:00:00Z"),
+                    atom_entry("2607.00002", updated="2026-07-27T02:00:00Z"),
+                    omit_opensearch=without_metadata,
+                )
+            ),
+            atom_response(
+                atom_feed(
+                    atom_entry("2607.00001", updated="2026-07-27T01:00:00Z"),
+                    omit_opensearch=without_metadata,
+                )
+            ),
+        ]
+    )
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return next(responses)
+
+    with (
+        httpx.Client(transport=httpx.MockTransport(handler)) as http_client,
+        ArxivClient(
+            user_agent=USER_AGENT,
+            request_delay_seconds=0,
+            retries=1,
+            page_size=2,
+            http_client=http_client,
+        ) as client,
+        pytest.raises(ArxivWindowTruncatedError, match="cs.RO"),
+    ):
+        client.fetch_recent(
+            categories=["cs.RO"],
+            since=datetime(2026, 7, 25, tzinfo=UTC),
+            until=datetime(2026, 7, 28, tzinfo=UTC),
+            max_results_per_category=3,
+        )
+
+    assert [request.url.params["start"] for request in requests] == ["0", "2"]
+
+
+@respx.mock
+def test_fetch_recent_rejects_a_mismatched_start_index() -> None:
+    respx.get(ARXIV_API_URL).mock(
+        return_value=atom_response(
+            atom_feed(
+                atom_entry("2607.00001"),
+                total_results=1,
+                start_index=1,
+                items_per_page=1,
+            )
+        )
+    )
+    client = ArxivClient(
+        user_agent=USER_AGENT,
+        request_delay_seconds=0,
+        retries=1,
+    )
+
+    with client, pytest.raises(ValueError, match="startIndex"):
+        client.fetch_recent(
+            categories=["cs.RO"],
+            since=datetime(2026, 7, 25, tzinfo=UTC),
+            until=datetime(2026, 7, 28, tzinfo=UTC),
+            max_results_per_category=10,
+        )
+
+
+@respx.mock
+def test_fetch_recent_rejects_items_per_page_below_entry_count() -> None:
+    respx.get(ARXIV_API_URL).mock(
+        return_value=atom_response(
+            atom_feed(
+                atom_entry("2607.00001"),
+                total_results=1,
+                items_per_page=0,
+            )
+        )
+    )
+    client = ArxivClient(
+        user_agent=USER_AGENT,
+        request_delay_seconds=0,
+        retries=1,
+    )
+
+    with client, pytest.raises(ValueError, match="itemsPerPage"):
+        client.fetch_recent(
+            categories=["cs.RO"],
+            since=datetime(2026, 7, 25, tzinfo=UTC),
+            until=datetime(2026, 7, 28, tzinfo=UTC),
+            max_results_per_category=10,
+        )
+
+
+@respx.mock
+def test_fetch_recent_rejects_progress_beyond_total_results() -> None:
+    respx.get(ARXIV_API_URL).mock(
+        return_value=atom_response(
+            atom_feed(
+                atom_entry("2607.00002"),
+                atom_entry("2607.00001"),
+                total_results=1,
+                items_per_page=2,
+            )
+        )
+    )
+    client = ArxivClient(
+        user_agent=USER_AGENT,
+        request_delay_seconds=0,
+        retries=1,
+    )
+
+    with client, pytest.raises(ValueError, match="totalResults"):
+        client.fetch_recent(
+            categories=["cs.RO"],
+            since=datetime(2026, 7, 25, tzinfo=UTC),
+            until=datetime(2026, 7, 28, tzinfo=UTC),
+            max_results_per_category=10,
+        )
 
 
 def test_fetch_recent_deduplicates_categories_and_papers_with_deterministic_sort() -> None:
@@ -375,6 +596,40 @@ def test_fetch_by_ids_batches_and_preserves_requested_order() -> None:
         "2607.00002",
         "2607.00001",
     ]
+
+
+def test_fetch_by_ids_rejects_an_entry_from_a_different_batch() -> None:
+    requests: list[httpx.Request] = []
+    responses = iter(
+        [
+            atom_response(
+                atom_feed(
+                    atom_entry("2607.00001"),
+                    atom_entry("2607.00002", version=99),
+                )
+            ),
+            atom_response(atom_feed(atom_entry("2607.00002", version=2))),
+        ]
+    )
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return next(responses)
+
+    with (
+        httpx.Client(transport=httpx.MockTransport(handler)) as http_client,
+        ArxivClient(
+            user_agent=USER_AGENT,
+            request_delay_seconds=0,
+            retries=1,
+            max_ids_per_request=1,
+            http_client=http_client,
+        ) as client,
+        pytest.raises(ValueError, match="current ID batch"),
+    ):
+        client.fetch_by_ids(["2607.00001", "2607.00002v2"])
+
+    assert [request.url.params["id_list"] for request in requests] == ["2607.00001"]
 
 
 @pytest.mark.parametrize(
@@ -548,6 +803,28 @@ def test_feed_rejects_entries_missing_critical_fields(missing: str) -> None:
 def test_empty_feed_that_claims_results_is_rejected() -> None:
     respx.get(ARXIV_API_URL).mock(
         return_value=atom_response(atom_feed(total_results=1, items_per_page=0))
+    )
+    client = ArxivClient(user_agent=USER_AGENT, request_delay_seconds=0, retries=1)
+
+    with client, pytest.raises(ValueError, match="claims"):
+        client.fetch_recent(
+            categories=["cs.RO"],
+            since=datetime(2026, 7, 25, tzinfo=UTC),
+            until=datetime(2026, 7, 27, tzinfo=UTC),
+            max_results_per_category=100,
+        )
+
+
+@respx.mock
+def test_empty_feed_without_start_index_that_claims_results_is_rejected() -> None:
+    respx.get(ARXIV_API_URL).mock(
+        return_value=atom_response(
+            atom_feed(
+                total_results=1,
+                items_per_page=0,
+                omit_opensearch=frozenset({"start_index"}),
+            )
+        )
     )
     client = ArxivClient(user_agent=USER_AGENT, request_delay_seconds=0, retries=1)
 

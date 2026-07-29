@@ -30,9 +30,9 @@ XML_CONTENT_TYPES = frozenset({"application/atom+xml", "application/xml", "text/
 class _FeedPage:
     papers: tuple[RawPaper, ...]
     raw_entry_count: int
-    total_results: int
-    start_index: int
-    items_per_page: int
+    total_results: int | None
+    start_index: int | None
+    items_per_page: int | None
 
 
 class RetryableArxivError(RuntimeError):
@@ -113,12 +113,10 @@ def _parse_entry_datetime(value: object, *, field: str) -> datetime:
 def _parse_feed_integer(
     feed: Mapping[str, Any],
     key: str,
-    *,
-    default: int,
-) -> int:
+) -> int | None:
     value = feed.get(key)
     if value is None:
-        return default
+        return None
     try:
         parsed = int(value)
     except (TypeError, ValueError) as error:
@@ -301,19 +299,23 @@ class ArxivClient:
         total_results = _parse_feed_integer(
             feed,
             "opensearch_totalresults",
-            default=raw_entry_count,
         )
         start_index = _parse_feed_integer(
             feed,
             "opensearch_startindex",
-            default=0,
         )
         items_per_page = _parse_feed_integer(
             feed,
             "opensearch_itemsperpage",
-            default=raw_entry_count,
         )
-        if raw_entry_count == 0 and total_results > start_index:
+        if items_per_page is not None and items_per_page < raw_entry_count:
+            raise ValueError("arXiv feed itemsPerPage is smaller than its entry count")
+        if (
+            raw_entry_count == 0
+            and total_results is not None
+            and start_index is not None
+            and total_results > start_index
+        ):
             raise ValueError("arXiv feed claims results remain but contains no entries")
 
         papers: list[RawPaper] = []
@@ -414,6 +416,11 @@ class ArxivClient:
                         }
                     )
                 )
+                if page.start_index is not None and page.start_index != start:
+                    raise ValueError(
+                        f"arXiv feed startIndex {page.start_index} "
+                        f"does not match requested start {start}"
+                    )
                 for paper in page.papers:
                     if since_utc <= paper.updated_at <= until_utc:
                         _keep_preferred_paper(papers, paper)
@@ -423,23 +430,37 @@ class ArxivClient:
                     default=since_utc,
                 )
                 next_start = start + page.raw_entry_count
-                page_is_short = page.raw_entry_count < requested
-                exhausted_results = next_start >= page.total_results
+                total_results = page.total_results
+                if total_results is not None and next_start > total_results:
+                    raise ValueError("arXiv feed pagination progressed beyond totalResults")
+                if (
+                    page.raw_entry_count == 0
+                    and total_results is not None
+                    and start < total_results
+                ):
+                    raise ValueError("arXiv feed claims results remain but contains no entries")
                 crossed_window = oldest_update < since_utc
+                page_is_full = page.raw_entry_count == requested
+                if total_results is None:
+                    exhausted_results = False
+                    more_results_possible = page_is_full
+                else:
+                    exhausted_results = next_start >= total_results
+                    more_results_possible = next_start < total_results
 
                 if (
                     next_start >= max_results_per_category
-                    and page.raw_entry_count == requested
                     and oldest_update >= since_utc
+                    and more_results_possible
                 ):
                     raise ArxivWindowTruncatedError(
                         f"{category} exceeded {max_results_per_category} results in the time window"
                     )
                 if (
                     page.raw_entry_count == 0
-                    or page_is_short
                     or exhausted_results
                     or crossed_window
+                    or (total_results is None and not page_is_full)
                 ):
                     break
                 start = next_start
@@ -468,6 +489,7 @@ class ArxivClient:
         papers: dict[tuple[str, int], RawPaper] = {}
         for batch_start in range(0, len(ids), self.max_ids_per_request):
             batch = ids[batch_start : batch_start + self.max_ids_per_request]
+            batch_requested = requested[batch_start : batch_start + self.max_ids_per_request]
             page = self._parse_feed(
                 self._request(
                     {
@@ -477,6 +499,13 @@ class ArxivClient:
                 )
             )
             for paper in page.papers:
+                belongs_to_batch = any(
+                    paper.arxiv_id == requested_id
+                    and (requested_version is None or paper.version == requested_version)
+                    for requested_id, requested_version in batch_requested
+                )
+                if not belongs_to_batch:
+                    raise ValueError("arXiv feed returned an entry outside the current ID batch")
                 _keep_preferred_paper(papers, paper)
 
         papers_by_id: dict[str, list[RawPaper]] = {}
