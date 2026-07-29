@@ -18,6 +18,22 @@ SECRET = "test-deepseek-secret"
 
 
 @pytest.fixture
+def real_cli_paths(tmp_path: Path) -> tuple[Path, Path, Path]:
+    config_dir = tmp_path / "config"
+    prompt_dir = tmp_path / "prompts"
+    config_dir.mkdir()
+    prompt_dir.mkdir()
+    config_path = config_dir / "topics.yaml"
+    config_path.write_text(
+        Path("config/topics.yaml").read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+    prompt_path = prompt_dir / "analysis-v1.md"
+    prompt_path.write_text("只返回一个 JSON 对象。", encoding="utf-8")
+    return config_path, prompt_path, tmp_path / "data"
+
+
+@pytest.fixture
 def config() -> AppConfig:
     return load_config(Path("config/topics.yaml"))
 
@@ -155,6 +171,36 @@ def invoke_daily(
     )
 
 
+def install_client_sentries(
+    monkeypatch: pytest.MonkeyPatch,
+    events: list[str],
+) -> None:
+    def unexpected_client(kind: str) -> Callable[..., None]:
+        def construct(**kwargs: object) -> None:
+            events.append(kind)
+            raise AssertionError(f"{kind} client must not be constructed")
+
+        return construct
+
+    monkeypatch.setattr(cli_module, "ArxivClient", unexpected_client("arxiv"))
+    monkeypatch.setattr(cli_module, "DeepSeekClient", unexpected_client("analysis"))
+    monkeypatch.setattr(cli_module, "ArxivFigureClient", unexpected_client("figure"))
+    monkeypatch.setattr(
+        cli_module,
+        "run_daily",
+        lambda **kwargs: pytest.fail("pipeline must not run"),
+    )
+
+
+def assert_parameter_error(result: Any, option: str) -> None:
+    assert result.exit_code == 2
+    assert option in result.stderr
+    assert "Traceback" not in result.stdout
+    assert "Traceback" not in result.stderr
+    assert SECRET not in result.stdout
+    assert SECRET not in result.stderr
+
+
 def test_daily_help_lists_all_options_without_environment_files_or_network(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -195,6 +241,130 @@ def test_root_help_lists_daily_without_side_effects(monkeypatch: pytest.MonkeyPa
 
     assert result.exit_code == 0
     assert "daily" in result.stdout
+
+
+@pytest.mark.parametrize(
+    "selector",
+    [
+        "not-an-arxiv-id",
+        "2607.12345v0",
+        "2607.12345 ",
+        "0601.12345",
+    ],
+)
+def test_invalid_force_id_is_a_parameter_error_before_any_client_construction(
+    monkeypatch: pytest.MonkeyPatch,
+    real_cli_paths: tuple[Path, Path, Path],
+    selector: str,
+) -> None:
+    config_path, prompt_path, data_dir = real_cli_paths
+    monkeypatch.setenv("DEEPSEEK_API_KEY", SECRET)
+    events: list[str] = []
+    install_client_sentries(monkeypatch, events)
+
+    result = invoke_daily(
+        prompt_path,
+        "--force-arxiv-id",
+        selector,
+        config_path=config_path,
+        data_dir=data_dir,
+    )
+
+    assert_parameter_error(result, "--force-arxiv-id")
+    assert events == []
+
+
+@pytest.mark.parametrize(
+    "failure",
+    ["missing", "directory", "invalid-yaml", "invalid-schema"],
+)
+def test_invalid_real_config_path_is_a_clean_parameter_error(
+    monkeypatch: pytest.MonkeyPatch,
+    real_cli_paths: tuple[Path, Path, Path],
+    failure: str,
+) -> None:
+    config_path, prompt_path, data_dir = real_cli_paths
+    if failure == "missing":
+        config_path.unlink()
+    elif failure == "directory":
+        config_path.unlink()
+        config_path.mkdir()
+    elif failure == "invalid-yaml":
+        config_path.write_text("analysis: [", encoding="utf-8")
+    else:
+        config_path.write_text("arxiv: {}\n", encoding="utf-8")
+    monkeypatch.setenv("DEEPSEEK_API_KEY", SECRET)
+    events: list[str] = []
+    install_client_sentries(monkeypatch, events)
+
+    result = invoke_daily(
+        prompt_path,
+        config_path=config_path,
+        data_dir=data_dir,
+    )
+
+    assert_parameter_error(result, "--config-path")
+    assert str(config_path.parent.parent) not in result.stdout
+    assert str(config_path.parent.parent) not in result.stderr
+    assert events == []
+
+
+@pytest.mark.parametrize("failure", ["missing", "directory", "invalid-utf8"])
+def test_invalid_real_prompt_path_is_a_clean_parameter_error(
+    monkeypatch: pytest.MonkeyPatch,
+    real_cli_paths: tuple[Path, Path, Path],
+    failure: str,
+) -> None:
+    config_path, prompt_path, data_dir = real_cli_paths
+    if failure == "missing":
+        prompt_path.unlink()
+    elif failure == "directory":
+        prompt_path.unlink()
+        prompt_path.mkdir()
+    else:
+        prompt_path.write_bytes(b"\xff")
+    monkeypatch.setenv("DEEPSEEK_API_KEY", SECRET)
+    events: list[str] = []
+    install_client_sentries(monkeypatch, events)
+
+    result = invoke_daily(
+        prompt_path,
+        config_path=config_path,
+        data_dir=data_dir,
+    )
+
+    assert_parameter_error(result, "--prompt-path")
+    assert str(prompt_path.parent.parent) not in result.stdout
+    assert str(prompt_path.parent.parent) not in result.stderr
+    assert events == []
+
+
+def test_missing_configured_prompt_version_is_a_prompt_parameter_error(
+    monkeypatch: pytest.MonkeyPatch,
+    real_cli_paths: tuple[Path, Path, Path],
+) -> None:
+    config_path, prompt_path, data_dir = real_cli_paths
+    config_path.write_text(
+        config_path.read_text(encoding="utf-8").replace(
+            'prompt_version: "1"',
+            'prompt_version: "2"',
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("DEEPSEEK_API_KEY", SECRET)
+    events: list[str] = []
+    install_client_sentries(monkeypatch, events)
+
+    result = invoke_daily(
+        prompt_path,
+        config_path=config_path,
+        data_dir=data_dir,
+    )
+
+    assert_parameter_error(result, "--prompt-path")
+    assert str(prompt_path.parent.parent) not in result.stdout
+    assert str(prompt_path.parent.parent) not in result.stderr
+    assert events == []
 
 
 def test_defaults_use_config_values_and_quality_model(
@@ -477,6 +647,9 @@ def test_failures_close_every_previously_opened_client_in_reverse_order(
     assert SECRET not in result.stdout
     assert SECRET not in result.stderr
     assert SECRET not in str(result.exception)
+    if failure_stage == "run":
+        assert type(result.exception) is RuntimeError
+        assert str(result.exception) == "pipeline failed"
 
 
 def test_success_closes_all_clients_once_in_reverse_order(

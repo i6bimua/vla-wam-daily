@@ -6,12 +6,14 @@ from pathlib import Path
 from typing import Annotated
 
 import typer
+from pydantic import ValidationError
+from yaml import YAMLError
 
 from vla_wam_daily.arxiv_client import ArxivClient
 from vla_wam_daily.config import load_config
 from vla_wam_daily.deepseek_client import DeepSeekClient
 from vla_wam_daily.figures import ArxivFigureClient
-from vla_wam_daily.pipeline import run_daily
+from vla_wam_daily.pipeline import normalize_force_ids, run_daily
 
 DEFAULT_CONFIG_PATH = Path("config/topics.yaml")
 DEFAULT_DATA_DIR = Path("data")
@@ -19,6 +21,18 @@ DEFAULT_PROMPT_PATH = Path("prompts/analysis-v1.md")
 DEFAULT_USER_AGENT = "VLA-WAM-Daily/0.1 (https://github.com/vla-wam-daily/vla-wam-daily)"
 
 app = typer.Typer(no_args_is_help=True)
+
+
+def _require_input_file(path: Path, *, param_hint: str, label: str) -> None:
+    try:
+        is_file = path.is_file()
+    except OSError:
+        is_file = False
+    if not is_file:
+        raise typer.BadParameter(
+            f"{label} must be an existing readable file",
+            param_hint=param_hint,
+        )
 
 
 @app.callback()
@@ -62,7 +76,51 @@ def daily(
     ] = DEFAULT_PROMPT_PATH,
 ) -> None:
     """Fetch, analyze, enrich, and publish the daily paper set."""
-    config = load_config(config_path, prompt_dir=prompt_path.parent)
+    _require_input_file(
+        config_path,
+        param_hint="--config-path",
+        label="configuration",
+    )
+    _require_input_file(
+        prompt_path,
+        param_hint="--prompt-path",
+        label="prompt",
+    )
+    try:
+        config = load_config(config_path, prompt_dir=prompt_path.parent)
+    except FileNotFoundError:
+        try:
+            config_still_exists = config_path.is_file()
+        except OSError:
+            config_still_exists = False
+        if not config_still_exists:
+            raise typer.BadParameter(
+                "configuration must remain an existing readable file",
+                param_hint="--config-path",
+            ) from None
+        raise typer.BadParameter(
+            "the configured prompt version is unavailable",
+            param_hint="--prompt-path",
+        ) from None
+    except (OSError, UnicodeError, YAMLError, ValidationError):
+        raise typer.BadParameter(
+            "configuration must be valid UTF-8 YAML matching the expected schema",
+            param_hint="--config-path",
+        ) from None
+
+    expected_prompt_name = f"analysis-v{config.analysis.prompt_version}.md"
+    if prompt_path.name != expected_prompt_name:
+        raise typer.BadParameter(
+            f"prompt path must select configured version {config.analysis.prompt_version!r}",
+            param_hint="--prompt-path",
+        )
+    try:
+        prompt = prompt_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeError):
+        raise typer.BadParameter(
+            "prompt must be a readable UTF-8 file",
+            param_hint="--prompt-path",
+        ) from None
 
     try:
         configured_model = config.analysis.model_for(profile)
@@ -76,20 +134,20 @@ def daily(
         else configured_model
     )
 
+    try:
+        normalized_force_ids = normalize_force_ids(force_arxiv_id or [])
+    except (TypeError, ValueError):
+        raise typer.BadParameter(
+            "must contain modern arXiv IDs with optional positive version suffixes",
+            param_hint="--force-arxiv-id",
+        ) from None
+
     api_key = os.getenv("DEEPSEEK_API_KEY")
     if api_key is None or not api_key.strip():
         raise typer.BadParameter(
             "DEEPSEEK_API_KEY is required",
             param_hint="DEEPSEEK_API_KEY",
         )
-
-    expected_prompt_name = f"analysis-v{config.analysis.prompt_version}.md"
-    if prompt_path.name != expected_prompt_name:
-        raise typer.BadParameter(
-            f"prompt path must select configured version {config.analysis.prompt_version!r}",
-            param_hint="--prompt-path",
-        )
-    prompt = prompt_path.read_text(encoding="utf-8")
 
     user_agent = os.getenv("ARXIV_USER_AGENT", DEFAULT_USER_AGENT)
     resolved_lookback = config.arxiv.lookback_days if lookback_days is None else lookback_days
@@ -124,7 +182,7 @@ def daily(
             prompt=prompt,
             lookback_days=resolved_lookback,
             threshold=resolved_threshold,
-            force_ids=force_arxiv_id or [],
+            force_ids=normalized_force_ids,
             dry_run=dry_run,
             now=datetime.now(UTC),
         )

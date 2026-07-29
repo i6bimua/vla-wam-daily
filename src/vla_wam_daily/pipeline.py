@@ -132,6 +132,20 @@ def _parse_force_selector(value: object) -> _ForceSelector:
     )
 
 
+def normalize_force_ids(force_ids: object) -> list[str]:
+    if type(force_ids) is not list:
+        raise TypeError("force_ids must be a list")
+
+    normalized: list[str] = []
+    seen: set[str] = set()
+    for value in force_ids:
+        selector = _parse_force_selector(value)
+        if selector.raw not in seen:
+            seen.add(selector.raw)
+            normalized.append(selector.raw)
+    return normalized
+
+
 def _validate_run_inputs(
     *,
     data_dir: object,
@@ -167,25 +181,15 @@ def _validate_run_inputs(
         raise TypeError("prompt must be a string")
     if not prompt.strip():
         raise ValueError("prompt must not be blank")
-    if type(force_ids) is not list:
-        raise TypeError("force_ids must be a list")
-
-    selectors: list[_ForceSelector] = []
-    normalized_force_ids: list[str] = []
-    seen: set[str] = set()
-    for value in force_ids:
-        selector = _parse_force_selector(value)
-        if selector.raw not in seen:
-            seen.add(selector.raw)
-            selectors.append(selector)
-            normalized_force_ids.append(selector.raw)
+    normalized_force_ids = normalize_force_ids(force_ids)
+    selectors = tuple(_parse_force_selector(value) for value in normalized_force_ids)
     return (
         data_dir,
         prompt,
         normalized_lookback,
         normalized_threshold,
         normalized_force_ids,
-        tuple(selectors),
+        selectors,
         dry_run,
         normalized_now,
     )

@@ -364,6 +364,32 @@ def test_invalid_runtime_input_is_rejected_before_fetch_or_cache_access(
     assert not any(tmp_path.iterdir())
 
 
+def test_public_force_id_normalizer_stably_deduplicates_valid_selectors() -> None:
+    assert pipeline_module.normalize_force_ids(
+        [
+            "2607.12345v2",
+            "2607.12345v2",
+            "2607.12345",
+            "2607.12345",
+        ]
+    ) == ["2607.12345v2", "2607.12345"]
+
+
+@pytest.mark.parametrize(
+    "force_ids",
+    [
+        ("2607.12345",),
+        [" 2607.12345"],
+        ["2607.12345v0"],
+        ["0601.12345"],
+        [123],
+    ],
+)
+def test_public_force_id_normalizer_rejects_invalid_input(force_ids: object) -> None:
+    with pytest.raises((TypeError, ValueError)):
+        pipeline_module.normalize_force_ids(force_ids)
+
+
 def test_runtime_normalizes_now_preserves_prompt_and_stably_deduplicates_force_ids(
     tmp_path: Path,
 ) -> None:
