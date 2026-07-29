@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import stat
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -159,6 +160,20 @@ def test_load_cache_applies_strict_model_validation(tmp_path: Path) -> None:
         load_cache(tmp_path)
 
 
+def test_load_cache_rejects_string_version_in_persisted_json(tmp_path: Path) -> None:
+    key, entry = cache_entry()
+    payload = entry.model_dump(mode="json")
+    record_payload = payload["record"]
+    assert isinstance(record_payload, dict)
+    record_payload["version"] = "1"
+    path = tmp_path / "cache/analyses.json"
+    path.parent.mkdir(parents=True)
+    path.write_text(json.dumps({key: payload}), encoding="utf-8")
+
+    with pytest.raises(ValidationError):
+        load_cache(tmp_path)
+
+
 def test_latest_is_replaced_by_each_successful_batch_including_an_empty_batch(
     tmp_path: Path,
 ) -> None:
@@ -235,6 +250,23 @@ def test_archives_merge_idempotently_preserve_versions_and_partition_by_publishe
     ]
 
 
+def test_save_rejects_duplicate_published_identity_before_writing(tmp_path: Path) -> None:
+    record = make_record()
+
+    with pytest.raises(ValueError, match="duplicate published paper identity"):
+        save_successful_run(
+            tmp_path,
+            [record, record],
+            {},
+            RunStats(published=2),
+            datetime(2026, 7, 27, 2, tzinfo=UTC),
+        )
+
+    assert not (tmp_path / "latest.json").exists()
+    assert not (tmp_path / "cache/analyses.json").exists()
+    assert not (tmp_path / "archive/2026-07.json").exists()
+
+
 def test_archive_sort_has_a_deterministic_total_order(tmp_path: Path) -> None:
     now = datetime(2026, 7, 27, tzinfo=UTC)
     records = [
@@ -278,6 +310,24 @@ def test_atomic_json_is_utf8_deterministic_and_newline_terminated(tmp_path: Path
 
     assert path.read_bytes() == first
     assert first == '{\n  "a": "机器人",\n  "z": 1\n}\n'.encode()
+
+
+def test_atomic_json_fsyncs_file_then_parent_directory(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fsync_targets: list[str] = []
+    real_fsync = os.fsync
+
+    def track_fsync(descriptor: int) -> None:
+        mode = os.fstat(descriptor).st_mode
+        fsync_targets.append("directory" if stat.S_ISDIR(mode) else "file")
+        real_fsync(descriptor)
+
+    monkeypatch.setattr(storage_module.os, "fsync", track_fsync)
+    atomic_write_json(tmp_path / "payload.json", {"durable": True})
+
+    assert fsync_targets == ["file", "directory"]
 
 
 def temporary_files_for(path: Path) -> list[Path]:
@@ -331,6 +381,54 @@ def test_atomic_json_replace_failure_preserves_target_and_cleans_temp_file(
 
     assert path.read_text(encoding="utf-8") == '{"old": true}\n'
     assert temporary_files_for(path) == []
+
+
+def test_later_output_failure_keeps_latest_as_last_commit_marker_and_cleans_temp(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    generated_at = datetime(2026, 7, 27, 2, tzinfo=UTC)
+    first = make_record(version=1)
+    first_key, first_entry = cache_entry(analyzed_record(first))
+    save_successful_run(
+        tmp_path,
+        [first],
+        {first_key: first_entry},
+        RunStats(published=1),
+        generated_at,
+    )
+    latest_before = (tmp_path / "latest.json").read_bytes()
+    archive_before = (tmp_path / "archive/2026-07.json").read_bytes()
+    second = make_record(version=2)
+    second_key, second_entry = cache_entry(analyzed_record(second))
+    archive_path = tmp_path / "archive/2026-07.json"
+    real_replace = os.replace
+
+    def fail_archive_replace(
+        source: os.PathLike[str],
+        target: os.PathLike[str],
+    ) -> None:
+        if Path(target) == archive_path:
+            raise OSError("archive replace failed")
+        real_replace(source, target)
+
+    monkeypatch.setattr(storage_module.os, "replace", fail_archive_replace)
+    with pytest.raises(OSError, match="archive replace failed"):
+        save_successful_run(
+            tmp_path,
+            [first, second],
+            {
+                first_key: first_entry,
+                second_key: second_entry,
+            },
+            RunStats(published=2),
+            generated_at + timedelta(days=1),
+        )
+
+    assert second_key in load_cache(tmp_path)
+    assert (tmp_path / "archive/2026-07.json").read_bytes() == archive_before
+    assert (tmp_path / "latest.json").read_bytes() == latest_before
+    assert list(tmp_path.rglob(".*.tmp")) == []
 
 
 def test_save_validates_and_serializes_every_payload_before_writing_any_file(
@@ -390,6 +488,84 @@ def test_save_revalidates_constructed_models_before_creating_output(tmp_path: Pa
     assert not (tmp_path / "cache/analyses.json").exists()
 
 
+def test_save_allows_a_normal_not_yet_created_nested_data_directory(
+    tmp_path: Path,
+) -> None:
+    data_dir = tmp_path / "data"
+
+    save_successful_run(
+        data_dir,
+        [],
+        {},
+        RunStats(),
+        datetime(2026, 7, 27, 2, tzinfo=UTC),
+    )
+
+    assert load_data_file(data_dir / "latest.json") is not None
+    assert load_cache(data_dir) == {}
+
+
+def test_save_rejects_cache_directory_symlink_escape_before_any_write(
+    tmp_path: Path,
+) -> None:
+    data_dir = tmp_path / "data"
+    outside = tmp_path / "outside"
+    data_dir.mkdir()
+    outside.mkdir()
+    (data_dir / "cache").symlink_to(outside, target_is_directory=True)
+
+    with pytest.raises(ValueError, match="outside data directory"):
+        save_successful_run(
+            data_dir,
+            [],
+            {},
+            RunStats(),
+            datetime(2026, 7, 27, 2, tzinfo=UTC),
+        )
+
+    assert not (outside / "analyses.json").exists()
+    assert not (data_dir / "latest.json").exists()
+
+
+def test_save_rejects_archive_directory_symlink_escape_before_any_write(
+    tmp_path: Path,
+) -> None:
+    data_dir = tmp_path / "data"
+    outside = tmp_path / "outside"
+    data_dir.mkdir()
+    outside.mkdir()
+    (data_dir / "archive").symlink_to(outside, target_is_directory=True)
+
+    with pytest.raises(ValueError, match="outside data directory"):
+        save_successful_run(
+            data_dir,
+            [make_record()],
+            {},
+            RunStats(published=1),
+            datetime(2026, 7, 27, 2, tzinfo=UTC),
+        )
+
+    assert not (outside / "2026-07.json").exists()
+    assert not (data_dir / "cache/analyses.json").exists()
+    assert not (data_dir / "latest.json").exists()
+
+
+def test_load_cache_rejects_cache_directory_symlink_escape(tmp_path: Path) -> None:
+    data_dir = tmp_path / "data"
+    outside = tmp_path / "outside"
+    data_dir.mkdir()
+    outside.mkdir()
+    key, entry = cache_entry()
+    (outside / "analyses.json").write_text(
+        json.dumps({key: entry.model_dump(mode="json")}),
+        encoding="utf-8",
+    )
+    (data_dir / "cache").symlink_to(outside, target_is_directory=True)
+
+    with pytest.raises(ValueError, match="outside data directory"):
+        load_cache(data_dir)
+
+
 def test_data_file_loader_rejects_invalid_public_records(tmp_path: Path) -> None:
     payload = DataFile(
         generated_at=datetime(2026, 7, 27, tzinfo=UTC),
@@ -404,3 +580,45 @@ def test_data_file_loader_rejects_invalid_public_records(tmp_path: Path) -> None
 
     with pytest.raises(ValidationError):
         load_data_file(path)
+
+
+def test_data_file_loader_rejects_string_version_in_persisted_json(
+    tmp_path: Path,
+) -> None:
+    payload = DataFile(
+        generated_at=datetime(2026, 7, 27, 2, tzinfo=UTC),
+        stats=RunStats(published=1),
+        papers=[make_record()],
+    ).model_dump(mode="json")
+    paper_payload = payload["papers"][0]
+    assert isinstance(paper_payload, dict)
+    paper_payload["version"] = "1"
+    path = tmp_path / "latest.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ValidationError):
+        load_data_file(path)
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        Path("tests/fixtures/data/latest.json"),
+        Path("tests/fixtures/data/archive/2026-07.json"),
+    ],
+)
+def test_fixture_generation_time_is_not_before_paper_events(path: Path) -> None:
+    data = load_data_file(path)
+    assert data is not None
+
+    event_times = [
+        event_time
+        for paper in data.papers
+        for event_time in (
+            paper.published_at,
+            paper.updated_at,
+            paper.provenance.analyzed_at,
+            paper.figure_gallery.checked_at,
+        )
+    ]
+    assert data.generated_at >= max(event_times)
