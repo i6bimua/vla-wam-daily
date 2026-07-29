@@ -80,6 +80,7 @@ def test_ci_runs_frozen_python_and_complete_fixture_web_gates() -> None:
     assert "pull_request" in payload["on"]
     assert payload["permissions"] == {"contents": "read"}
     assert set(payload["jobs"]) == {"python", "web"}
+    assert "env" not in payload["jobs"]["web"]
     assert "uv sync --frozen" in source
     assert "uv run ruff check src tests" in source
     assert "uv run mypy" in source
@@ -103,6 +104,11 @@ def test_ci_runs_frozen_python_and_complete_fixture_web_gates() -> None:
     assert pnpm_step["with"]["version"] == package_manager.removeprefix("pnpm@")
     assert pnpm_step["with"]["package_json_file"] == "web/package.json"
     assert node_step["with"]["node-version"] == "24"
+    build_step = step_named(payload, "web", "Build fixture site")
+    assert build_step["env"] == {
+        "BASE_PATH": "/",
+        "VLA_WAM_DATA_DIR": "../tests/fixtures/data",
+    }
 
 
 def test_pages_builds_existing_data_only_and_deploys_with_minimal_permissions() -> None:
