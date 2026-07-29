@@ -1,0 +1,236 @@
+---
+name: Daily arXiv Update
+
+on:
+  schedule:
+    - cron: "30 2 * * *"
+  workflow_dispatch:
+    inputs:
+      lookback_days:
+        description: Days of recent arXiv papers to query
+        type: number
+        default: 3
+      profile:
+        description: Configured DeepSeek model profile
+        type: choice
+        options: [quality, economy]
+        default: quality
+      threshold:
+        description: Minimum relevance score to publish
+        type: number
+        default: 6
+      force_arxiv_id:
+        description: Optional modern arXiv ID to reanalyze
+        type: string
+        required: false
+      dry_run:
+        description: Analyze without writing, committing, or deploying
+        type: boolean
+        default: false
+
+permissions: {}
+
+concurrency:
+  group: daily-data-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      dry_run: ${{ steps.options.outputs.dry_run }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9  # v9.0.0
+        with:
+          enable-cache: true
+          python-version: "3.13"
+      - name: Install Python dependencies
+        run: uv sync --frozen
+      - name: Validate options
+        id: options
+        shell: bash
+        env:
+          INPUT_DRY_RUN: ${{ inputs.dry_run }}
+          INPUT_FORCE_ARXIV_ID: ${{ inputs.force_arxiv_id }}
+          INPUT_LOOKBACK_DAYS: ${{ inputs.lookback_days }}
+          INPUT_PROFILE: ${{ inputs.profile }}
+          INPUT_THRESHOLD: ${{ inputs.threshold }}
+        run: |
+          set -euo pipefail
+          lookback_days="${INPUT_LOOKBACK_DAYS:-3}"
+          profile="${INPUT_PROFILE:-quality}"
+          threshold="${INPUT_THRESHOLD:-6}"
+          force_arxiv_id="${INPUT_FORCE_ARXIV_ID:-}"
+          dry_run="${INPUT_DRY_RUN:-false}"
+
+          if [[ ! "$lookback_days" =~ ^([1-9]|[12][0-9]|3[01])$ ]]; then
+            echo "lookback_days must be an integer from 1 to 31" >&2
+            exit 2
+          fi
+          case "$profile" in
+            quality|economy) ;;
+            *)
+              echo "profile must be quality or economy" >&2
+              exit 2
+              ;;
+          esac
+          if [[ ! "$threshold" =~ ^([1-9]|10)$ ]]; then
+            echo "threshold must be an integer from 1 to 10" >&2
+            exit 2
+          fi
+          if [[ -n "$force_arxiv_id" && ! "$force_arxiv_id" =~ ^[0-9]{4}\.[0-9]{4,5}(v[1-9][0-9]*)?$ ]]; then
+            echo "force_arxiv_id must look like 2607.12345v2" >&2
+            exit 2
+          fi
+          case "$dry_run" in
+            true|false) ;;
+            *)
+              echo "dry_run must be true or false" >&2
+              exit 2
+              ;;
+          esac
+
+          {
+            echo "lookback_days=$lookback_days"
+            echo "profile=$profile"
+            echo "threshold=$threshold"
+            echo "force_arxiv_id=$force_arxiv_id"
+            echo "dry_run=$dry_run"
+          } >> "$GITHUB_OUTPUT"
+      - name: Run pipeline and validate report
+        shell: bash
+        env:
+          ARXIV_USER_AGENT: VLA-WAM-Daily/0.1 (https://github.com/${{ github.repository }})
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL }}
+          RUN_DRY_RUN: ${{ steps.options.outputs.dry_run }}
+          RUN_FORCE_ARXIV_ID: ${{ steps.options.outputs.force_arxiv_id }}
+          RUN_LOOKBACK_DAYS: ${{ steps.options.outputs.lookback_days }}
+          RUN_PROFILE: ${{ steps.options.outputs.profile }}
+          RUN_THRESHOLD: ${{ steps.options.outputs.threshold }}
+        run: |
+          set -euo pipefail
+          args=(
+            daily
+            --lookback-days "$RUN_LOOKBACK_DAYS"
+            --profile "$RUN_PROFILE"
+            --threshold "$RUN_THRESHOLD"
+          )
+          if [[ "$RUN_DRY_RUN" == "true" ]]; then
+            args+=(--dry-run)
+          fi
+          if [[ -n "$RUN_FORCE_ARXIV_ID" ]]; then
+            args+=(--force-arxiv-id "$RUN_FORCE_ARXIV_ID")
+          fi
+
+          uv run vla-wam-daily "${args[@]}" | tee run-report.json
+          uv run python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          report = json.loads(Path("run-report.json").read_text(encoding="utf-8"))
+          expected_dry_run = os.environ["RUN_DRY_RUN"] == "true"
+          if set(report) != {"dry_run", "published_ids", "stats"}:
+              raise SystemExit("run report has an unexpected shape")
+          if report["dry_run"] is not expected_dry_run:
+              raise SystemExit("run report dry_run does not match validated input")
+          if not isinstance(report["stats"], dict):
+              raise SystemExit("run report stats must be an object")
+          if not isinstance(report["published_ids"], list) or not all(
+              isinstance(arxiv_id, str) for arxiv_id in report["published_ids"]
+          ):
+              raise SystemExit("run report published_ids must be a string array")
+          PY
+          {
+            echo "## VLA/WAM Daily"
+            echo '```json'
+            cat run-report.json
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Validate persisted data
+        if: steps.options.outputs.dry_run == 'false'
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv run pytest
+          uv run python - <<'PY'
+          from pathlib import Path
+
+          from vla_wam_daily.storage import load_cache, load_data_file, load_figure_cache
+
+          data_dir = Path("data")
+          if load_data_file(data_dir / "latest.json") is None:
+              raise SystemExit("data/latest.json is missing")
+          for archive_path in sorted((data_dir / "archive").glob("*.json")):
+              if load_data_file(archive_path) is None:
+                  raise SystemExit(f"{archive_path} is missing")
+          load_cache(data_dir)
+          load_figure_cache(data_dir)
+          PY
+      - name: Commit and push generated data
+        if: steps.options.outputs.dry_run == 'false'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "vla-wam-daily-bot"
+          git config user.email "vla-wam-daily-bot@users.noreply.github.com"
+          git add -- data
+          mapfile -t staged_paths < <(git diff --cached --name-only)
+          for staged_path in "${staged_paths[@]}"; do
+            if [[ "$staged_path" != data/* ]]; then
+              echo "refusing to commit non-data path" >&2
+              exit 1
+            fi
+          done
+          if git diff --cached --quiet; then
+            echo "No generated data changes"
+          else
+            git commit -m "data: update daily papers"
+            git fetch origin main
+            git rebase origin/main
+            git push origin HEAD:main
+          fi
+
+  build:
+    needs: update
+    if: needs.update.outputs.dry_run == 'false'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout latest main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          ref: main
+      - name: Build and upload Pages artifact
+        uses: withastro/action@e84f40bd8d2caa9e768ec82ad30dd81f0b280853  # v6.1.2
+        with:
+          path: web
+          node-version: "24"
+          package-manager: pnpm@11.9.0
+
+  deploy:
+    needs: [update, build]
+    if: needs.update.outputs.dry_run == 'false'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy Pages
+        id: deployment
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128  # v5.0.0

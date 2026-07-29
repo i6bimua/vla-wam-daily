@@ -1,0 +1,77 @@
+---
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9  # v9.0.0
+        with:
+          enable-cache: true
+          python-version: "3.13"
+      - name: Install Python dependencies
+        run: uv sync --frozen
+      - name: Lint Python
+        run: uv run ruff check src tests
+      - name: Type-check Python
+        run: uv run mypy
+      - name: Test Python
+        run: uv run pytest --cov=vla_wam_daily --cov-report=term-missing
+
+  web:
+    runs-on: ubuntu-latest
+    env:
+      BASE_PATH: /
+      VLA_WAM_DATA_DIR: ../tests/fixtures/data
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - name: Set up pnpm
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271  # v6.0.9
+        with:
+          package_json_file: web/package.json
+          version: "11.9.0"
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        with:
+          node-version: "24"
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+      - name: Install web dependencies
+        working-directory: web
+        run: pnpm install --frozen-lockfile
+      - name: Install Playwright Chromium
+        working-directory: web
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Test web units
+        working-directory: web
+        run: pnpm test
+      - name: Check web formatting
+        working-directory: web
+        run: pnpm format:check
+      - name: Build fixture site
+        working-directory: web
+        run: pnpm build
+      - name: Verify Figure build
+        working-directory: web
+        run: pnpm verify:figure-build
+      - name: Verify information build
+        working-directory: web
+        run: pnpm verify:information-build
+      - name: Verify search build
+        working-directory: web
+        run: pnpm verify:search-build
+      - name: Test browser flows
+        working-directory: web
+        run: pnpm test:e2e
