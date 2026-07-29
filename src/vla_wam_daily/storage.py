@@ -16,6 +16,7 @@ from pydantic import Field, TypeAdapter
 from vla_wam_daily.models import (
     CacheEntry,
     DataFile,
+    FigureCacheEntry,
     PaperRecord,
     RunStats,
     UtcDatetime,
@@ -366,6 +367,20 @@ def _validate_persisted_record(value: object) -> None:
             _validate_strict_integer(figure["number"])
 
 
+def _validate_persisted_figure_entry(value: object) -> None:
+    if not isinstance(value, Mapping):
+        return
+    gallery = value.get("gallery")
+    if not isinstance(gallery, Mapping):
+        return
+    figures = gallery.get("figures")
+    if not isinstance(figures, list):
+        return
+    for figure in figures:
+        if isinstance(figure, Mapping) and "number" in figure:
+            _validate_strict_integer(figure["number"])
+
+
 def _validate_data_file_payload(raw: object) -> None:
     if isinstance(raw, dict):
         _validate_persisted_run_stats(raw.get("stats"))
@@ -448,6 +463,63 @@ def load_cache(data_dir: Path) -> dict[str, CacheEntry]:
         _close_storage_descriptors(descriptors, primary_error)
 
 
+def _validated_figure_cache_entry(
+    top_level_key: str,
+    value: object,
+) -> FigureCacheEntry:
+    if isinstance(value, FigureCacheEntry):
+        value = value.model_dump(mode="json")
+    _validate_persisted_figure_entry(value)
+    entry = FigureCacheEntry.model_validate(value)
+    if top_level_key != entry.key:
+        raise ValueError("top-level figure cache key must match FigureCacheEntry.key")
+    return entry
+
+
+def _validated_figure_cache(
+    cache: Mapping[str, object],
+) -> dict[str, FigureCacheEntry]:
+    validated: dict[str, FigureCacheEntry] = {}
+    for key, value in cache.items():
+        if not isinstance(key, str):
+            raise TypeError("figure cache keys must be strings")
+        validated[key] = _validated_figure_cache_entry(key, value)
+    return validated
+
+
+def _load_figure_cache_text(content: str) -> dict[str, FigureCacheEntry]:
+    raw = json.loads(content)
+    if not isinstance(raw, dict):
+        raise ValueError("figure cache root must be a JSON object")
+    return _validated_figure_cache(raw)
+
+
+def load_figure_cache(data_dir: Path) -> dict[str, FigureCacheEntry]:
+    root_descriptor = _open_data_root(data_dir, create=False)
+    if root_descriptor is None:
+        return {}
+    descriptors = [root_descriptor]
+    primary_error: BaseException | None = None
+    try:
+        cache_descriptor = _open_relative_directory(
+            root_descriptor,
+            "cache",
+            create=False,
+        )
+        if cache_descriptor is None:
+            return {}
+        descriptors.append(cache_descriptor)
+        content = _read_text_at(cache_descriptor, "figures.json")
+        if content is None:
+            return {}
+        return _load_figure_cache_text(content)
+    except BaseException as error:
+        primary_error = error
+        raise
+    finally:
+        _close_storage_descriptors(descriptors, primary_error)
+
+
 def _validated_paper(record: PaperRecord) -> PaperRecord:
     payload = record.model_dump(mode="python")
     _validate_persisted_record(payload)
@@ -511,6 +583,8 @@ def save_successful_run(
     cache: Mapping[str, CacheEntry],
     stats: RunStats,
     generated_at: UtcDatetime,
+    *,
+    figure_cache: Mapping[str, FigureCacheEntry] | None = None,
 ) -> None:
     """Persist a validated run beneath a trusted, pre-existing data_dir parent.
 
@@ -522,6 +596,9 @@ def save_successful_run(
     validated_published = [_validated_paper(paper) for paper in published]
     _reject_duplicate_published_identities(validated_published)
     validated_cache = _validated_cache(cache)
+    validated_figure_cache = (
+        _validated_figure_cache(figure_cache) if figure_cache is not None else None
+    )
     validated_stats = _validated_stats(stats)
     latest = _data_file(
         generated_at=generated_at,
@@ -557,6 +634,16 @@ def save_successful_run(
         cache_content = _serialize_json(
             {key: entry.model_dump(mode="json") for key, entry in sorted(validated_cache.items())}
         )
+        figure_cache_content = (
+            _serialize_json(
+                {
+                    key: entry.model_dump(mode="json")
+                    for key, entry in sorted(validated_figure_cache.items())
+                }
+            )
+            if validated_figure_cache is not None
+            else None
+        )
         archive_contents = {
             filename: _serialize_json(archive.model_dump(mode="json"))
             for filename, archive in sorted(archive_files.items())
@@ -565,6 +652,8 @@ def save_successful_run(
 
         # Keep latest last: it is the public commit marker for a fully persisted run.
         _atomic_write_text_at(cache_descriptor, "analyses.json", cache_content)
+        if figure_cache_content is not None:
+            _atomic_write_text_at(cache_descriptor, "figures.json", figure_cache_content)
         if archive_descriptor is not None:
             for filename, content in archive_contents.items():
                 _atomic_write_text_at(archive_descriptor, filename, content)

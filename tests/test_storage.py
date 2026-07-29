@@ -9,11 +9,13 @@ import pytest
 from pydantic import ValidationError
 
 import vla_wam_daily.storage as storage_module
-from tests.factories import make_record
+from tests.factories import make_gallery, make_record
+from vla_wam_daily.figures import figure_cache_key
 from vla_wam_daily.models import (
     AnalyzedPaperRecord,
     CacheEntry,
     DataFile,
+    FigureCacheEntry,
     PaperRecord,
     RunStats,
 )
@@ -22,6 +24,7 @@ from vla_wam_daily.storage import (
     cache_key,
     load_cache,
     load_data_file,
+    load_figure_cache,
     save_successful_run,
 )
 
@@ -41,6 +44,18 @@ def cache_entry(record: AnalyzedPaperRecord | None = None) -> tuple[str, CacheEn
         resolved.provenance.prompt_version,
     )
     return key, CacheEntry(key=key, record=resolved)
+
+
+def figure_cache_entry(
+    *,
+    arxiv_id: str = "2607.12345",
+    version: int = 1,
+) -> tuple[str, FigureCacheEntry]:
+    key = figure_cache_key(arxiv_id, version)
+    return key, FigureCacheEntry(
+        key=key,
+        gallery=make_gallery(arxiv_id=arxiv_id, version=version),
+    )
 
 
 def test_cache_key_changes_with_every_identity_component_without_delimiter_ambiguity() -> None:
@@ -78,6 +93,117 @@ def test_cache_key_rejects_noncanonical_components(
 def test_missing_data_and_cache_load_as_empty(tmp_path: Path) -> None:
     assert load_data_file(tmp_path / "latest.json") is None
     assert load_cache(tmp_path) == {}
+    assert load_figure_cache(tmp_path) == {}
+
+
+def test_save_and_load_figure_metadata_without_image_bytes(tmp_path: Path) -> None:
+    key, entry = figure_cache_entry()
+
+    save_successful_run(
+        tmp_path,
+        [make_record()],
+        {},
+        RunStats(published=1, figure_available=1),
+        datetime(2026, 7, 29, tzinfo=UTC),
+        figure_cache={key: entry},
+    )
+
+    loaded = load_figure_cache(tmp_path)
+    assert loaded[key].gallery.figures[0].number == 1
+    raw = (tmp_path / "cache/figures.json").read_text(encoding="utf-8")
+    assert "https://arxiv.org/html/" in raw
+    assert "data:image/" not in raw
+    assert "base64," not in raw
+
+
+def test_load_figure_cache_rejects_non_object_root(tmp_path: Path) -> None:
+    path = tmp_path / "cache/figures.json"
+    path.parent.mkdir(parents=True)
+    path.write_text("[]\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="JSON object"):
+        load_figure_cache(tmp_path)
+
+
+def test_load_figure_cache_rejects_top_level_and_entry_key_mismatch(
+    tmp_path: Path,
+) -> None:
+    _, entry = figure_cache_entry()
+    path = tmp_path / "cache/figures.json"
+    path.parent.mkdir(parents=True)
+    path.write_text(
+        json.dumps({"2607.54321:v1": entry.model_dump(mode="json")}),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="top-level figure cache key"):
+        load_figure_cache(tmp_path)
+
+
+def test_load_figure_cache_rejects_gallery_identity_mismatch(tmp_path: Path) -> None:
+    key, entry = figure_cache_entry()
+    payload = entry.model_dump(mode="json")
+    gallery_payload = payload["gallery"]
+    assert isinstance(gallery_payload, dict)
+    gallery_payload["html_url"] = "https://arxiv.org/html/2607.54321v1"
+    figures_payload = gallery_payload["figures"]
+    assert isinstance(figures_payload, list)
+    for figure_payload in figures_payload:
+        assert isinstance(figure_payload, dict)
+        figure_payload["source_url"] = str(figure_payload["source_url"]).replace(
+            "2607.12345v1",
+            "2607.54321v1",
+        )
+        figure_payload["image_urls"] = [
+            str(image_url).replace("2607.12345v1", "2607.54321v1")
+            for image_url in figure_payload["image_urls"]
+        ]
+    path = tmp_path / "cache/figures.json"
+    path.parent.mkdir(parents=True)
+    path.write_text(json.dumps({key: payload}), encoding="utf-8")
+
+    with pytest.raises(ValidationError, match="figure cache key and gallery identities"):
+        load_figure_cache(tmp_path)
+
+
+@pytest.mark.parametrize("number", ["1", 1.0, True])
+def test_load_figure_cache_rejects_non_integer_figure_number(
+    tmp_path: Path,
+    number: object,
+) -> None:
+    key, entry = figure_cache_entry()
+    payload = entry.model_dump(mode="json")
+    gallery_payload = payload["gallery"]
+    assert isinstance(gallery_payload, dict)
+    figures_payload = gallery_payload["figures"]
+    assert isinstance(figures_payload, list)
+    first_figure = figures_payload[0]
+    assert isinstance(first_figure, dict)
+    first_figure["number"] = number
+    path = tmp_path / "cache/figures.json"
+    path.parent.mkdir(parents=True)
+    path.write_text(json.dumps({key: payload}), encoding="utf-8")
+
+    with pytest.raises(ValidationError):
+        load_figure_cache(tmp_path)
+
+
+def test_load_figure_cache_rejects_embedded_data_image(tmp_path: Path) -> None:
+    key, entry = figure_cache_entry()
+    payload = entry.model_dump(mode="json")
+    gallery_payload = payload["gallery"]
+    assert isinstance(gallery_payload, dict)
+    figures_payload = gallery_payload["figures"]
+    assert isinstance(figures_payload, list)
+    first_figure = figures_payload[0]
+    assert isinstance(first_figure, dict)
+    first_figure["image_urls"] = ["data:image/png;base64,AAAA"]
+    path = tmp_path / "cache/figures.json"
+    path.parent.mkdir(parents=True)
+    path.write_text(json.dumps({key: payload}), encoding="utf-8")
+
+    with pytest.raises(ValidationError):
+        load_figure_cache(tmp_path)
 
 
 def test_cache_round_trip_uses_internal_analyzed_record_without_figure_gallery(
@@ -239,12 +365,20 @@ def test_load_cache_rejects_non_integer_relevance_score(
 def test_normal_persisted_json_loads_datetime_urls_and_json_arrays() -> None:
     data = load_data_file(Path("tests/fixtures/data/latest.json"))
     cache = load_cache(Path("tests/fixtures/data"))
+    figure_cache = load_figure_cache(Path("tests/fixtures/data"))
 
     assert data is not None
     assert isinstance(data.generated_at, datetime)
     assert isinstance(data.papers[0].authors, tuple)
     assert str(data.papers[0].resources.arxiv_url).startswith("https://arxiv.org/")
     assert isinstance(next(iter(cache.values())).record.authors, tuple)
+    assert figure_cache == {}
+
+
+@pytest.mark.parametrize("data_dir", [Path("data"), Path("tests/fixtures/data")])
+def test_seed_figure_caches_are_valid_empty_objects(data_dir: Path) -> None:
+    assert load_figure_cache(data_dir) == {}
+    assert (data_dir / "cache/figures.json").read_bytes() == b"{}\n"
 
 
 def test_latest_is_replaced_by_each_successful_batch_including_an_empty_batch(
@@ -512,6 +646,104 @@ def test_later_output_failure_keeps_latest_as_last_commit_marker_and_cleans_temp
     assert list(tmp_path.rglob(".*.tmp")) == []
 
 
+def test_figure_cache_write_failure_keeps_latest_as_last_commit_marker(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    generated_at = datetime(2026, 7, 27, 2, tzinfo=UTC)
+    figure_key, figure_entry = figure_cache_entry()
+    save_successful_run(
+        tmp_path,
+        [make_record()],
+        {},
+        RunStats(published=1, figure_available=1),
+        generated_at,
+        figure_cache={figure_key: figure_entry},
+    )
+    latest_before = (tmp_path / "latest.json").read_bytes()
+    figures_before = (tmp_path / "cache/figures.json").read_bytes()
+    real_replace = os.replace
+
+    def fail_figure_replace(
+        source: os.PathLike[str],
+        target: os.PathLike[str],
+        *,
+        src_dir_fd: int | None = None,
+        dst_dir_fd: int | None = None,
+    ) -> None:
+        if Path(target).name == "figures.json":
+            raise OSError("figure cache replace failed")
+        real_replace(
+            source,
+            target,
+            src_dir_fd=src_dir_fd,
+            dst_dir_fd=dst_dir_fd,
+        )
+
+    monkeypatch.setattr(storage_module.os, "replace", fail_figure_replace)
+    with pytest.raises(OSError, match="figure cache replace failed"):
+        save_successful_run(
+            tmp_path,
+            [make_record(version=2)],
+            {},
+            RunStats(published=1, figure_available=1),
+            generated_at + timedelta(days=1),
+            figure_cache={figure_key: figure_entry},
+        )
+
+    assert (tmp_path / "cache/figures.json").read_bytes() == figures_before
+    assert (tmp_path / "latest.json").read_bytes() == latest_before
+    assert list(tmp_path.rglob(".*.tmp")) == []
+
+
+def test_omitted_figure_cache_does_not_overwrite_existing_file(tmp_path: Path) -> None:
+    figure_key, figure_entry = figure_cache_entry()
+    save_successful_run(
+        tmp_path,
+        [make_record()],
+        {},
+        RunStats(published=1, figure_available=1),
+        datetime(2026, 7, 27, 2, tzinfo=UTC),
+        figure_cache={figure_key: figure_entry},
+    )
+    figures_before = (tmp_path / "cache/figures.json").read_bytes()
+
+    save_successful_run(
+        tmp_path,
+        [],
+        {},
+        RunStats(),
+        datetime(2026, 7, 28, 2, tzinfo=UTC),
+    )
+
+    assert (tmp_path / "cache/figures.json").read_bytes() == figures_before
+    assert figure_key in load_figure_cache(tmp_path)
+
+
+def test_explicit_empty_figure_cache_overwrites_existing_file(tmp_path: Path) -> None:
+    figure_key, figure_entry = figure_cache_entry()
+    save_successful_run(
+        tmp_path,
+        [make_record()],
+        {},
+        RunStats(published=1, figure_available=1),
+        datetime(2026, 7, 27, 2, tzinfo=UTC),
+        figure_cache={figure_key: figure_entry},
+    )
+
+    save_successful_run(
+        tmp_path,
+        [],
+        {},
+        RunStats(),
+        datetime(2026, 7, 28, 2, tzinfo=UTC),
+        figure_cache={},
+    )
+
+    assert load_figure_cache(tmp_path) == {}
+    assert (tmp_path / "cache/figures.json").read_text(encoding="utf-8") == "{}\n"
+
+
 def test_save_validates_and_serializes_every_payload_before_writing_any_file(
     tmp_path: Path,
 ) -> None:
@@ -548,6 +780,42 @@ def test_save_validates_and_serializes_every_payload_before_writing_any_file(
 
     assert (tmp_path / "latest.json").read_bytes() == latest_before
     assert (tmp_path / "cache/analyses.json").read_bytes() == cache_before
+    assert (tmp_path / "archive/2026-07.json").read_bytes() == archive_before
+
+
+def test_save_revalidates_figure_cache_before_writing_any_file(tmp_path: Path) -> None:
+    now = datetime(2026, 7, 27, tzinfo=UTC)
+    figure_key, figure_entry = figure_cache_entry()
+    save_successful_run(
+        tmp_path,
+        [make_record()],
+        {},
+        RunStats(published=1, figure_available=1),
+        now,
+        figure_cache={figure_key: figure_entry},
+    )
+    latest_before = (tmp_path / "latest.json").read_bytes()
+    analyses_before = (tmp_path / "cache/analyses.json").read_bytes()
+    figures_before = (tmp_path / "cache/figures.json").read_bytes()
+    archive_before = (tmp_path / "archive/2026-07.json").read_bytes()
+    invalid_entry = FigureCacheEntry.model_construct(
+        key=figure_key,
+        gallery=make_gallery(arxiv_id="2607.54321"),
+    )
+
+    with pytest.raises(ValidationError, match="figure cache key and gallery identities"):
+        save_successful_run(
+            tmp_path,
+            [make_record(arxiv_id="2607.54321")],
+            {},
+            RunStats(published=1, figure_available=1),
+            now + timedelta(days=1),
+            figure_cache={figure_key: invalid_entry},
+        )
+
+    assert (tmp_path / "latest.json").read_bytes() == latest_before
+    assert (tmp_path / "cache/analyses.json").read_bytes() == analyses_before
+    assert (tmp_path / "cache/figures.json").read_bytes() == figures_before
     assert (tmp_path / "archive/2026-07.json").read_bytes() == archive_before
 
 
@@ -781,6 +1049,47 @@ def test_save_holds_cache_directory_fd_across_symlink_swap(
     assert load_data_file(data_dir / "latest.json") is not None
 
 
+def test_save_writes_figure_cache_through_held_directory_fd_after_symlink_swap(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    data_dir = tmp_path / "data"
+    cache_dir = data_dir / "cache"
+    held_cache_dir = data_dir / "held-cache"
+    outside = tmp_path / "outside"
+    cache_dir.mkdir(parents=True)
+    outside.mkdir()
+    figure_key, figure_entry = figure_cache_entry()
+    real_atomic_write = storage_module._atomic_write_text_at
+    swapped = False
+
+    def write_then_swap(
+        directory_descriptor: int,
+        target_name: str,
+        content: str,
+    ) -> None:
+        nonlocal swapped
+        real_atomic_write(directory_descriptor, target_name, content)
+        if target_name == "analyses.json" and not swapped:
+            swapped = True
+            cache_dir.rename(held_cache_dir)
+            cache_dir.symlink_to(outside, target_is_directory=True)
+
+    monkeypatch.setattr(storage_module, "_atomic_write_text_at", write_then_swap)
+    save_successful_run(
+        data_dir,
+        [],
+        {},
+        RunStats(),
+        datetime(2026, 7, 27, 2, tzinfo=UTC),
+        figure_cache={figure_key: figure_entry},
+    )
+
+    assert not (outside / "figures.json").exists()
+    assert (held_cache_dir / "figures.json").exists()
+    assert load_data_file(data_dir / "latest.json") is not None
+
+
 def test_load_cache_rejects_cache_directory_symlink_escape(tmp_path: Path) -> None:
     data_dir = tmp_path / "data"
     outside = tmp_path / "outside"
@@ -795,6 +1104,38 @@ def test_load_cache_rejects_cache_directory_symlink_escape(tmp_path: Path) -> No
 
     with pytest.raises(ValueError, match="outside data directory"):
         load_cache(data_dir)
+
+
+def test_load_figure_cache_rejects_cache_directory_symlink_escape(tmp_path: Path) -> None:
+    data_dir = tmp_path / "data"
+    outside = tmp_path / "outside"
+    data_dir.mkdir()
+    outside.mkdir()
+    key, entry = figure_cache_entry()
+    (outside / "figures.json").write_text(
+        json.dumps({key: entry.model_dump(mode="json")}),
+        encoding="utf-8",
+    )
+    (data_dir / "cache").symlink_to(outside, target_is_directory=True)
+
+    with pytest.raises(ValueError, match="outside data directory"):
+        load_figure_cache(data_dir)
+
+
+def test_load_figure_cache_rejects_symlinked_cache_file(tmp_path: Path) -> None:
+    data_dir = tmp_path / "data"
+    cache_dir = data_dir / "cache"
+    cache_dir.mkdir(parents=True)
+    outside = tmp_path / "outside-figures.json"
+    key, entry = figure_cache_entry()
+    outside.write_text(
+        json.dumps({key: entry.model_dump(mode="json")}),
+        encoding="utf-8",
+    )
+    (cache_dir / "figures.json").symlink_to(outside)
+
+    with pytest.raises(ValueError, match="outside data directory"):
+        load_figure_cache(data_dir)
 
 
 def test_load_cache_attempts_every_close_before_raising_close_error(
