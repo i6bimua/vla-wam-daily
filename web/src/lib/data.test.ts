@@ -177,6 +177,46 @@ describe("the public data contract", () => {
     expect(parsed.provenance.model).toBe("deepseek-v4-pro");
   });
 
+  it("normalizes every Python NonEmptyStr public field", () => {
+    const raw = paper();
+    const parsed = paperSchema.parse({
+      ...raw,
+      title: " Original title ",
+      authors: [" Ada Robot "],
+      arxiv_categories: [" cs.RO "],
+      abstract: " Original abstract ",
+      matched_rules: [" vision language action "],
+      figure_gallery: {
+        ...raw.figure_gallery,
+        figures: raw.figure_gallery.figures.map((figure) => ({
+          ...figure,
+          label: ` ${figure.label} `,
+          caption: ` ${figure.caption} `,
+        })),
+      },
+    });
+
+    expect(parsed.title).toBe("Original title");
+    expect(parsed.authors).toEqual(["Ada Robot"]);
+    expect(parsed.arxiv_categories).toEqual(["cs.RO"]);
+    expect(parsed.abstract).toBe("Original abstract");
+    expect(parsed.matched_rules).toEqual(["vision language action"]);
+    expect(parsed.figure_gallery.figures[0].label).toBe("Figure 1");
+    expect(parsed.figure_gallery.figures[0].caption).toBe(
+      "The model architecture.",
+    );
+  });
+
+  it.each([
+    ["title", { title: " \n " }],
+    ["authors", { authors: [" \n "] }],
+    ["arxiv categories", { arxiv_categories: [" \n "] }],
+    ["abstract", { abstract: " \n " }],
+    ["matched rules", { matched_rules: [" \n "] }],
+  ])("rejects blank persisted %s", (_label, override) => {
+    expect(() => paperSchema.parse({ ...paper(), ...override })).toThrow();
+  });
+
   it("requires token totals to equal prompt plus completion tokens", () => {
     const payload = dataFile([paper()]);
     const stats = payload.stats;

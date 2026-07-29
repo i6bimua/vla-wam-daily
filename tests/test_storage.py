@@ -321,6 +321,28 @@ def test_data_file_loader_rejects_non_integer_published_stats(
         load_data_file(path)
 
 
+def test_data_file_loader_rejects_inconsistent_token_totals(
+    tmp_path: Path,
+) -> None:
+    payload = DataFile(
+        generated_at=datetime(2026, 7, 27, 2, tzinfo=UTC),
+        stats=RunStats(
+            prompt_tokens=7,
+            completion_tokens=5,
+            total_tokens=12,
+        ),
+        papers=[],
+    ).model_dump(mode="json")
+    stats_payload = payload["stats"]
+    assert isinstance(stats_payload, dict)
+    stats_payload["total_tokens"] = 13
+    path = tmp_path / "latest.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ValidationError, match="total_tokens"):
+        load_data_file(path)
+
+
 @pytest.mark.parametrize("score", ["8", 8.0])
 def test_data_file_loader_rejects_non_integer_relevance_score(
     tmp_path: Path,

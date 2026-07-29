@@ -123,6 +123,85 @@ def test_persisted_record_boundaries_normalize_text_and_provenance(
     assert record.provenance.prompt_version == "prompt-v1"
 
 
+@pytest.mark.parametrize("boundary", PERSISTED_RECORD_BOUNDARIES)
+@pytest.mark.parametrize(
+    "field",
+    ["title", "authors", "arxiv_categories", "abstract", "matched_rules"],
+)
+def test_persisted_record_boundaries_reject_blank_public_text(
+    boundary: str,
+    field: str,
+) -> None:
+    payload = make_record().model_dump(mode="json")
+    if field in {"authors", "arxiv_categories", "matched_rules"}:
+        payload[field] = ["valid", " \n\t "]
+    else:
+        payload[field] = " \n\t "
+
+    with pytest.raises(ValidationError):
+        load_persisted_record(boundary, payload)
+
+
+@pytest.mark.parametrize("boundary", PERSISTED_RECORD_BOUNDARIES)
+def test_persisted_record_boundaries_normalize_public_text(
+    boundary: str,
+) -> None:
+    payload = make_record().model_dump(mode="json")
+    payload.update(
+        title=" Original title ",
+        authors=[" Ada Robot ", "\n Wei Model\t"],
+        arxiv_categories=[" cs.RO ", "\ncs.CV\t"],
+        abstract=" Original abstract ",
+        matched_rules=[" vision language action "],
+    )
+
+    record = load_persisted_record(boundary, payload)
+
+    assert record.title == "Original title"
+    assert record.authors == ("Ada Robot", "Wei Model")
+    assert record.arxiv_categories == ("cs.RO", "cs.CV")
+    assert record.abstract == "Original abstract"
+    assert record.matched_rules == ("vision language action",)
+
+
+@pytest.mark.parametrize("boundary", ["paper-record", "data-file"])
+@pytest.mark.parametrize("field", ["label", "caption"])
+def test_public_figure_text_is_nonblank_and_normalized(
+    boundary: str,
+    field: str,
+) -> None:
+    payload = make_record().model_dump(mode="json")
+    gallery = payload["figure_gallery"]
+    assert isinstance(gallery, dict)
+    figures = gallery["figures"]
+    assert isinstance(figures, list)
+    first_figure = figures[0]
+    assert isinstance(first_figure, dict)
+    first_figure[field] = f"  {field} value \n"
+
+    record = load_persisted_record(boundary, payload)
+    assert getattr(record.figure_gallery.figures[0], field) == f"{field} value"
+
+    first_figure[field] = " \n\t "
+    with pytest.raises(ValidationError):
+        load_persisted_record(boundary, payload)
+
+
+def test_cache_entry_key_is_nonblank_and_normalized() -> None:
+    record_payload = make_record().model_dump(mode="json")
+    record_payload.pop("figure_gallery")
+
+    entry = CacheEntry.model_validate_json(
+        json.dumps({"key": " analysis-key ", "record": record_payload})
+    )
+
+    assert entry.key == "analysis-key"
+    with pytest.raises(ValidationError):
+        CacheEntry.model_validate_json(
+            json.dumps({"key": " \n\t ", "record": record_payload})
+        )
+
+
 @pytest.mark.parametrize(
     "field",
     [
@@ -759,6 +838,21 @@ def test_data_file_rejects_unknown_schema_version() -> None:
 def test_run_stats_rejects_negative_error_category_counts() -> None:
     with pytest.raises(ValidationError):
         RunStats(error_categories={"network": -1})
+
+
+@pytest.mark.parametrize("boundary", ["direct", "json"])
+def test_run_stats_rejects_inconsistent_token_totals(boundary: str) -> None:
+    payload = {
+        "prompt_tokens": 7,
+        "completion_tokens": 5,
+        "total_tokens": 13,
+    }
+
+    with pytest.raises(ValidationError, match="total_tokens"):
+        if boundary == "direct":
+            RunStats.model_validate(payload)
+        else:
+            RunStats.model_validate_json(json.dumps(payload))
 
 
 def test_run_stats_defaults_to_zero_counts() -> None:

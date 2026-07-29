@@ -4,11 +4,8 @@ const arxivIdPattern = /^\d{4}\.\d{4,5}$/;
 const arxivHtmlPathPattern = /^\/html\/(\d{4}\.\d{4,5})v([1-9]\d*)$/;
 const allowedArxivHosts = new Set(["arxiv.org", "www.arxiv.org"]);
 
-const nonBlankString = z
-  .string()
-  .min(1)
-  .refine((value) => value.trim().length > 0, "String must not be blank");
-const normalizedNonBlankString = z.string().trim().min(1);
+const nonBlankString = z.string().trim().min(1);
+const normalizedNonBlankString = nonBlankString;
 const nonBlankStringList = z.array(nonBlankString).min(1);
 const utcDatetimeSchema = z.iso
   .datetime()

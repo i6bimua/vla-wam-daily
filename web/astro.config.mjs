@@ -22,9 +22,33 @@ function repositoryCoordinates(value) {
   return { owner: match[1], repository: match[2] };
 }
 
+function siteUrl(value) {
+  let url;
+  try {
+    url = new URL(value);
+  } catch (error) {
+    throw new Error("SITE_URL must be a valid HTTP or HTTPS URL", {
+      cause: error,
+    });
+  }
+  if (
+    !["http:", "https:"].includes(url.protocol) ||
+    url.username ||
+    url.password ||
+    url.search ||
+    url.hash ||
+    url.href !== `${url.origin}${url.pathname}`
+  ) {
+    throw new Error(
+      "SITE_URL must use HTTP or HTTPS without credentials, query, or fragment",
+    );
+  }
+  return url;
+}
+
 const coordinates = repositoryCoordinates(process.env.GITHUB_REPOSITORY);
 const configuredSite = process.env.SITE_URL
-  ? new URL(process.env.SITE_URL)
+  ? siteUrl(process.env.SITE_URL)
   : new URL(
       coordinates
         ? `https://${coordinates.owner}.github.io/`

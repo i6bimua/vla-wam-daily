@@ -17,9 +17,6 @@ from pydantic import (
     model_validator,
 )
 
-NonEmptyStr = Annotated[str, Field(min_length=1)]
-NonEmptyStrList = Annotated[list[NonEmptyStr], Field(min_length=1)]
-NonEmptyStrTuple = Annotated[tuple[NonEmptyStr, ...], Field(min_length=1)]
 NonNegativeInt = Annotated[int, Field(ge=0)]
 ARXIV_FIGURE_HOSTS = frozenset({"arxiv.org", "www.arxiv.org"})
 ARXIV_HTML_PATH_PATTERN = re.compile(
@@ -55,6 +52,9 @@ NormalizedNonBlankStr = Annotated[
     Field(min_length=1),
     AfterValidator(normalize_nonblank_text),
 ]
+NonEmptyStr = NormalizedNonBlankStr
+NonEmptyStrList = Annotated[list[NonEmptyStr], Field(min_length=1)]
+NonEmptyStrTuple = Annotated[tuple[NonEmptyStr, ...], Field(min_length=1)]
 
 
 def validate_arxiv_url_authority(url: HttpUrl) -> HttpUrl:
@@ -336,6 +336,14 @@ class RunStats(FrozenStrictModel):
         default_factory=dict,
         validate_default=True,
     )
+
+    @model_validator(mode="after")
+    def validate_token_total(self) -> Self:
+        if self.total_tokens != self.prompt_tokens + self.completion_tokens:
+            raise ValueError(
+                "total_tokens must equal prompt_tokens plus completion_tokens"
+            )
+        return self
 
     @field_validator("error_categories")
     @classmethod
