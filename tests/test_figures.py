@@ -1,3 +1,4 @@
+import logging
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -5,6 +6,7 @@ import httpx
 import pytest
 import respx
 
+import vla_wam_daily.figures as figures_module
 from vla_wam_daily.figures import (
     ArxivFigureClient,
     figure_cache_key,
@@ -187,6 +189,66 @@ def test_parser_requires_caption_to_start_with_target_label() -> None:
     """
 
     assert parse_figure_gallery(html, HTML_URL, CHECKED_AT).status is FigureStatus.NOT_FOUND
+
+
+@pytest.mark.parametrize(
+    "caption",
+    [
+        "Figure 10: A different numbered figure.",
+        "Figure 20. A different numbered figure.",
+        "Figure 1.2: A decimal subsection, not Figure 1.",
+    ],
+)
+def test_parser_rejects_longer_or_decimal_figure_numbers(caption: str) -> None:
+    html = f"""
+    <figure id="S9.F9">
+      <img src="wrong-number.png">
+      <figcaption>{caption}</figcaption>
+    </figure>
+    """
+
+    assert parse_figure_gallery(html, HTML_URL, CHECKED_AT).status is FigureStatus.NOT_FOUND
+
+
+@pytest.mark.parametrize(
+    "caption",
+    [
+        "Figure 1: Colon delimiter.",
+        "Figure 1. Period delimiter.",
+        "Fig. 2: Abbreviated label.",
+    ],
+)
+def test_parser_accepts_target_numbers_with_valid_delimiters(caption: str) -> None:
+    html = f"""
+    <figure id="S1.F1">
+      <img src="target.png">
+      <figcaption>{caption}</figcaption>
+    </figure>
+    """
+
+    assert parse_figure_gallery(html, HTML_URL, CHECKED_AT).status is FigureStatus.AVAILABLE
+
+
+def test_parser_uses_caption_owned_by_current_figure() -> None:
+    html = """
+    <figure id="S1.F1">
+      <figure id="S1.F1-a">
+        <img src="panel-a.png">
+        <figcaption>Figure 1(a): Panel A.</figcaption>
+      </figure>
+      <img src="overview.png">
+      <figcaption>Figure 1: Overall caption.</figcaption>
+    </figure>
+    """
+
+    gallery = parse_figure_gallery(html, HTML_URL, CHECKED_AT)
+
+    assert gallery.status is FigureStatus.AVAILABLE
+    assert gallery.figures[0].caption == "Overall caption."
+    assert [str(url) for url in gallery.figures[0].image_urls] == [
+        "https://arxiv.org/html/2607.12345v1/panel-a.png",
+        "https://arxiv.org/html/2607.12345v1/overview.png",
+    ]
 
 
 @respx.mock
@@ -404,11 +466,23 @@ def test_client_follows_redirects_with_external_client() -> None:
     external_client.close()
 
 
-def test_client_contains_unexpected_transport_errors() -> None:
-    def fail(_request: httpx.Request) -> httpx.Response:
-        raise RuntimeError("unexpected transport failure")
+@pytest.mark.parametrize(
+    "location",
+    [
+        "http://169.254.169.254/latest/meta-data",
+        "https://example.com/collect",
+        "https://arxiv.org/html/2607.99999v1",
+        "https://arxiv.org/html/2607.12345v2",
+    ],
+)
+def test_client_rejects_unsafe_redirect_without_following(location: str) -> None:
+    requests: list[httpx.Request] = []
 
-    external_client = httpx.Client(transport=httpx.MockTransport(fail))
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return httpx.Response(302, headers={"location": location})
+
+    external_client = httpx.Client(transport=httpx.MockTransport(handler))
     client = make_client(client=external_client)
 
     gallery = client.fetch("2607.12345", 1, CHECKED_AT)
@@ -416,6 +490,72 @@ def test_client_contains_unexpected_transport_errors() -> None:
     external_client.close()
 
     assert gallery.status is FigureStatus.FETCH_FAILED
+    assert len(requests) == 1
+
+
+def test_client_rejects_redirect_over_configured_limit() -> None:
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return httpx.Response(302, headers={"location": HTML_URL})
+
+    external_client = httpx.Client(transport=httpx.MockTransport(handler))
+    client = make_client(client=external_client, max_redirects=0)
+
+    gallery = client.fetch("2607.12345", 1, CHECKED_AT)
+    client.close()
+    external_client.close()
+
+    assert gallery.status is FigureStatus.FETCH_FAILED
+    assert len(requests) == 1
+
+
+def test_client_contains_and_logs_unexpected_transport_errors(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    def fail(_request: httpx.Request) -> httpx.Response:
+        raise RuntimeError("unexpected transport failure")
+
+    external_client = httpx.Client(transport=httpx.MockTransport(fail))
+    client = make_client(client=external_client)
+
+    with caplog.at_level(logging.ERROR, logger="vla_wam_daily.figures"):
+        gallery = client.fetch("2607.12345", 1, CHECKED_AT)
+    client.close()
+    external_client.close()
+
+    assert gallery.status is FigureStatus.FETCH_FAILED
+    assert "unexpected arXiv figure fetch failure" in caplog.text
+    assert fixture_html() not in caplog.text
+
+
+def test_client_contains_and_logs_unexpected_parser_errors(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    def fail_parser(_html: str, _url: str, _checked_at: datetime) -> None:
+        raise RuntimeError("unexpected parser failure")
+
+    monkeypatch.setattr(figures_module, "parse_figure_gallery", fail_parser)
+    transport = httpx.MockTransport(
+        lambda _request: httpx.Response(
+            200,
+            headers={"content-type": "text/html"},
+            text="<html></html>",
+        )
+    )
+    external_client = httpx.Client(transport=transport)
+    client = make_client(client=external_client)
+
+    with caplog.at_level(logging.ERROR, logger="vla_wam_daily.figures"):
+        gallery = client.fetch("2607.12345", 1, CHECKED_AT)
+    client.close()
+    external_client.close()
+
+    assert gallery.status is FigureStatus.FETCH_FAILED
+    assert "unexpected arXiv figure parsing failure" in caplog.text
+    assert "<html></html>" not in caplog.text
 
 
 @pytest.mark.parametrize(
@@ -426,6 +566,7 @@ def test_client_contains_unexpected_transport_errors() -> None:
         ("timeout_seconds", -0.1),
         ("max_attempts", 0),
         ("max_html_bytes", 0),
+        ("max_redirects", -1),
     ],
 )
 def test_client_rejects_invalid_limits(name: str, value: float) -> None:
@@ -447,6 +588,13 @@ def test_negative_cache_handles_clock_skew_without_long_future_freshness() -> No
 
     assert is_figure_cache_fresh(entry, CHECKED_AT - timedelta(minutes=5))
     assert not is_figure_cache_fresh(entry, CHECKED_AT - timedelta(hours=25))
+
+
+def test_negative_cache_rejects_large_future_checked_at() -> None:
+    gallery = parse_figure_gallery("<html></html>", HTML_URL, CHECKED_AT)
+    entry = FigureCacheEntry(key=figure_cache_key("2607.12345", 1), gallery=gallery)
+
+    assert not is_figure_cache_fresh(entry, CHECKED_AT - timedelta(hours=23))
 
 
 def test_successful_cache_does_not_expire_for_same_version() -> None:

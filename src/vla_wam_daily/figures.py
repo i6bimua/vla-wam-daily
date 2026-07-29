@@ -1,3 +1,4 @@
+import logging
 import re
 import time
 from collections.abc import Callable
@@ -20,10 +21,12 @@ from vla_wam_daily.models import (
 
 ARXIV_ID_RE = re.compile(r"^\d{4}\.\d{4,5}$")
 FIGURE_NUMBER_RE = re.compile(
-    r"^(?:figure|fig\.)\s*([12])\s*[:.]?\s*",
+    r"^(?:figure|fig\.)\s*([12])(?!\d|\.\d)\s*[:.]?\s*",
     re.IGNORECASE,
 )
 NEGATIVE_CACHE_TTL = timedelta(hours=24)
+NEGATIVE_CACHE_CLOCK_SKEW = timedelta(minutes=5)
+LOGGER = logging.getLogger(__name__)
 
 
 class HtmlUnavailableError(RuntimeError):
@@ -75,6 +78,32 @@ def _is_current_paper_image(candidate: str, html_url: str) -> bool:
     )
 
 
+def _resolve_safe_redirect(
+    current_url: str,
+    location: str,
+    expected_path: str,
+) -> str:
+    if not location.strip():
+        raise ValueError("arXiv redirect is missing a location")
+    candidate = urljoin(current_url, location)
+    parsed = urlsplit(candidate)
+    try:
+        port = parsed.port
+    except ValueError as error:
+        raise ValueError("arXiv redirect has an invalid port") from error
+    if (
+        parsed.scheme != "https"
+        or parsed.hostname not in ARXIV_FIGURE_HOSTS
+        or parsed.username is not None
+        or parsed.password is not None
+        or port not in (None, 443)
+        or parsed.fragment
+        or parsed.path != expected_path
+    ):
+        raise ValueError("arXiv redirect changed the paper document identity")
+    return candidate
+
+
 def parse_figure_gallery(
     html: str,
     html_url: str,
@@ -84,7 +113,16 @@ def parse_figure_gallery(
     by_number: dict[int, FigureAsset] = {}
 
     for node in tree.css("figure"):
-        caption_node = node.css_first("figcaption")
+        caption_node = next(
+            (
+                candidate
+                for candidate in node.css("figcaption")
+                if candidate.parent is not None
+                and candidate.parent.tag == "figure"
+                and candidate.parent == node
+            ),
+            None,
+        )
         if caption_node is None:
             continue
         raw_caption = _normalize_caption(caption_node.text(separator=" ", strip=True))
@@ -151,7 +189,8 @@ def parse_figure_gallery(
 def is_figure_cache_fresh(entry: FigureCacheEntry, now: datetime) -> bool:
     if entry.gallery.status is FigureStatus.AVAILABLE:
         return True
-    return abs(now - entry.gallery.checked_at) < NEGATIVE_CACHE_TTL
+    age = now - entry.gallery.checked_at
+    return -NEGATIVE_CACHE_CLOCK_SKEW <= age < NEGATIVE_CACHE_TTL
 
 
 class ArxivFigureClient:
@@ -164,6 +203,7 @@ class ArxivFigureClient:
         retry_wait_seconds: float = 1,
         max_attempts: int = 3,
         max_html_bytes: int = 5_000_000,
+        max_redirects: int = 3,
         client: httpx.Client | None = None,
         sleep: Callable[[float], None] = time.sleep,
         clock: Callable[[], float] = time.monotonic,
@@ -178,6 +218,8 @@ class ArxivFigureClient:
             raise ValueError("max_attempts must be at least 1")
         if max_html_bytes < 1:
             raise ValueError("max_html_bytes must be positive")
+        if type(max_redirects) is not int or max_redirects < 0:
+            raise ValueError("max_redirects must be a nonnegative integer")
 
         self.client = client or httpx.Client()
         self._owns_client = client is None
@@ -187,6 +229,7 @@ class ArxivFigureClient:
         self.retry_wait_seconds = retry_wait_seconds
         self.max_attempts = max_attempts
         self.max_html_bytes = max_html_bytes
+        self.max_redirects = max_redirects
         self.sleep = sleep
         self.clock = clock
         self._last_request_at: float | None = None
@@ -215,34 +258,55 @@ class ArxivFigureClient:
         self._last_request_at = self.clock()
 
     def _read_html(self, url: str) -> str:
-        self._throttle()
-        with self.client.stream(
-            "GET",
-            url,
-            headers={"User-Agent": self.user_agent},
-            timeout=self.timeout_seconds,
-            follow_redirects=True,
-        ) as response:
-            if response.status_code == 404:
-                raise HtmlUnavailableError
-            if response.status_code == 429 or response.status_code >= 500:
-                raise TransientFigureFetchError(
-                    f"arXiv HTML returned {response.status_code}"
+        expected_path = urlsplit(url).path
+        current_url = url
+        redirects_followed = 0
+
+        while True:
+            self._throttle()
+            with self.client.stream(
+                "GET",
+                current_url,
+                headers={"User-Agent": self.user_agent},
+                timeout=self.timeout_seconds,
+                follow_redirects=False,
+            ) as response:
+                if 300 <= response.status_code < 400:
+                    if redirects_followed >= self.max_redirects:
+                        raise ValueError("arXiv HTML exceeded the redirect limit")
+                    current_url = _resolve_safe_redirect(
+                        current_url,
+                        response.headers.get("location", ""),
+                        expected_path,
+                    )
+                    redirects_followed += 1
+                    continue
+                if response.status_code == 404:
+                    raise HtmlUnavailableError
+                if response.status_code == 429 or response.status_code >= 500:
+                    raise TransientFigureFetchError(
+                        f"arXiv HTML returned {response.status_code}"
+                    )
+                response.raise_for_status()
+                if "text/html" not in response.headers.get(
+                    "content-type", ""
+                ).casefold():
+                    raise HtmlUnavailableError
+
+                declared_size = int(
+                    response.headers.get("content-length", "0") or 0
                 )
-            response.raise_for_status()
-            if "text/html" not in response.headers.get("content-type", "").casefold():
-                raise HtmlUnavailableError
-
-            declared_size = int(response.headers.get("content-length", "0") or 0)
-            if declared_size > self.max_html_bytes:
-                raise ValueError("arXiv HTML exceeds configured size limit")
-
-            body = bytearray()
-            for chunk in response.iter_bytes():
-                body.extend(chunk)
-                if len(body) > self.max_html_bytes:
+                if declared_size > self.max_html_bytes:
                     raise ValueError("arXiv HTML exceeds configured size limit")
-            return bytes(body).decode(response.encoding or "utf-8")
+
+                body = bytearray()
+                for chunk in response.iter_bytes():
+                    body.extend(chunk)
+                    if len(body) > self.max_html_bytes:
+                        raise ValueError(
+                            "arXiv HTML exceeds configured size limit"
+                        )
+                return bytes(body).decode(response.encoding or "utf-8")
 
     def _failure_gallery(
         self,
@@ -281,7 +345,17 @@ class ArxivFigureClient:
                     url,
                     checked_at,
                 )
+            except (httpx.HTTPStatusError, UnicodeError, ValueError):
+                return self._failure_gallery(
+                    FigureStatus.FETCH_FAILED,
+                    url,
+                    checked_at,
+                )
             except Exception:
+                LOGGER.exception(
+                    "unexpected arXiv figure fetch failure for %s",
+                    url,
+                )
                 return self._failure_gallery(
                     FigureStatus.FETCH_FAILED,
                     url,
@@ -290,7 +364,17 @@ class ArxivFigureClient:
 
             try:
                 return parse_figure_gallery(html, url, checked_at)
+            except (TypeError, UnicodeError, ValueError):
+                return self._failure_gallery(
+                    FigureStatus.FETCH_FAILED,
+                    url,
+                    checked_at,
+                )
             except Exception:
+                LOGGER.exception(
+                    "unexpected arXiv figure parsing failure for %s",
+                    url,
+                )
                 return self._failure_gallery(
                     FigureStatus.FETCH_FAILED,
                     url,
