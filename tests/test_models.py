@@ -202,6 +202,64 @@ def test_cache_entry_key_is_nonblank_and_normalized() -> None:
         )
 
 
+def test_public_boundaries_share_explicit_unicode_whitespace_normalization() -> None:
+    payload = make_record().model_dump(mode="json")
+    payload["title"] = "\ufeff\u0085  Outer\u0085Inner \u3000\ufeff"
+    payload["authors"] = ["\u0085 Ada Robot \ufeff"]
+    gallery = payload["figure_gallery"]
+    assert isinstance(gallery, dict)
+    figures = gallery["figures"]
+    assert isinstance(figures, list)
+    first_figure = figures[0]
+    assert isinstance(first_figure, dict)
+    first_figure["label"] = "\ufeff\u0085 Figure\u00851 \u3000"
+
+    data_record = load_persisted_record("data-file", payload)
+    cache_record = load_persisted_record("cache-entry", payload)
+    cache_payload = cache_record.model_dump(mode="json")
+    cache_entry = CacheEntry.model_validate(
+        {"key": "\ufeff\u0085 analysis-key \u3000", "record": cache_payload}
+    )
+
+    assert data_record.title == "Outer\u0085Inner"
+    assert data_record.authors == ("Ada Robot",)
+    assert data_record.figure_gallery.figures[0].label == "Figure\u00851"
+    assert cache_record.title == "Outer\u0085Inner"
+    assert cache_entry.key == "analysis-key"
+
+
+@pytest.mark.parametrize("whitespace", ["\ufeff", "\u0085", "\ufeff\u0085"])
+@pytest.mark.parametrize(
+    "boundary",
+    ["data-file", "cache-entry", "figure-label", "cache-key"],
+)
+def test_public_boundaries_reject_explicit_unicode_whitespace_only(
+    whitespace: str,
+    boundary: str,
+) -> None:
+    payload = make_record().model_dump(mode="json")
+    if boundary in {"data-file", "cache-entry"}:
+        payload["title"] = whitespace
+        with pytest.raises(ValidationError):
+            load_persisted_record(boundary, payload)
+        return
+    if boundary == "figure-label":
+        gallery = payload["figure_gallery"]
+        assert isinstance(gallery, dict)
+        figures = gallery["figures"]
+        assert isinstance(figures, list)
+        first_figure = figures[0]
+        assert isinstance(first_figure, dict)
+        first_figure["label"] = whitespace
+        with pytest.raises(ValidationError):
+            load_persisted_record("data-file", payload)
+        return
+
+    payload.pop("figure_gallery")
+    with pytest.raises(ValidationError):
+        CacheEntry.model_validate({"key": whitespace, "record": payload})
+
+
 @pytest.mark.parametrize(
     "field",
     [

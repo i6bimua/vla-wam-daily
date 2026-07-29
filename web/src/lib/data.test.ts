@@ -217,6 +217,48 @@ describe("the public data contract", () => {
     expect(() => paperSchema.parse({ ...paper(), ...override })).toThrow();
   });
 
+  it("uses the shared explicit Unicode boundary whitespace set", () => {
+    const raw = paper();
+    const parsed = paperSchema.parse({
+      ...raw,
+      title: "\ufeff\u0085  Outer\u0085Inner \u3000\ufeff",
+      authors: ["\u0085 Ada Robot \ufeff"],
+      figure_gallery: {
+        ...raw.figure_gallery,
+        figures: raw.figure_gallery.figures.map((figure) => ({
+          ...figure,
+          label: `\ufeff\u0085 ${figure.label}\u0085inside \u3000`,
+        })),
+      },
+    });
+
+    expect(parsed.title).toBe("Outer\u0085Inner");
+    expect(parsed.authors).toEqual(["Ada Robot"]);
+    expect(parsed.figure_gallery.figures[0].label).toBe("Figure 1\u0085inside");
+  });
+
+  it.each(["\ufeff", "\u0085", "\ufeff\u0085"])(
+    "rejects explicit Unicode boundary whitespace-only text %#",
+    (whitespace) => {
+      expect(() =>
+        paperSchema.parse({ ...paper(), title: whitespace }),
+      ).toThrow();
+      const raw = paper();
+      expect(() =>
+        paperSchema.parse({
+          ...raw,
+          figure_gallery: {
+            ...raw.figure_gallery,
+            figures: raw.figure_gallery.figures.map((figure) => ({
+              ...figure,
+              label: whitespace,
+            })),
+          },
+        }),
+      ).toThrow();
+    },
+  );
+
   it("requires token totals to equal prompt plus completion tokens", () => {
     const payload = dataFile([paper()]);
     const stats = payload.stats;

@@ -3,8 +3,13 @@ import { z } from "zod";
 const arxivIdPattern = /^\d{4}\.\d{4,5}$/;
 const arxivHtmlPathPattern = /^\/html\/(\d{4}\.\d{4,5})v([1-9]\d*)$/;
 const allowedArxivHosts = new Set(["arxiv.org", "www.arxiv.org"]);
+const persistedBoundaryWhitespacePattern =
+  /^[\u0009-\u000D\u001C-\u001F\u0020\u0085\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]+|[\u0009-\u000D\u001C-\u001F\u0020\u0085\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]+$/gu;
 
-const nonBlankString = z.string().trim().min(1);
+const nonBlankString = z
+  .string()
+  .transform((value) => value.replace(persistedBoundaryWhitespacePattern, ""))
+  .pipe(z.string().min(1));
 const normalizedNonBlankString = nonBlankString;
 const nonBlankStringList = z.array(nonBlankString).min(1);
 const utcDatetimeSchema = z.iso

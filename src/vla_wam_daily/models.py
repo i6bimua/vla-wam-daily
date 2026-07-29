@@ -39,9 +39,16 @@ def normalize_utc(value: datetime) -> datetime:
 
 UtcDatetime = Annotated[AwareDatetime, AfterValidator(normalize_utc)]
 
+PERSISTED_BOUNDARY_WHITESPACE_PATTERN = re.compile(
+    r"^[\u0009-\u000D\u001C-\u001F\u0020\u0085\u00A0\u1680"
+    r"\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]+|"
+    r"[\u0009-\u000D\u001C-\u001F\u0020\u0085\u00A0\u1680"
+    r"\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]+$"
+)
+
 
 def normalize_nonblank_text(value: str) -> str:
-    normalized = value.strip()
+    normalized = PERSISTED_BOUNDARY_WHITESPACE_PATTERN.sub("", value)
     if not normalized:
         raise ValueError("text must contain non-whitespace characters")
     return normalized
