@@ -28,14 +28,14 @@ def make_gallery(
                 label="Figure 1",
                 caption="The model architecture.",
                 image_urls=[f"https://arxiv.org/html/{arxiv_id}v{version}/x1.png"],
-                source_url=html_url,
+                source_url=f"{html_url}#S1.F1",
             ),
             FigureAsset(
                 number=2,
                 label="Figure 2",
                 caption="Robot evaluation environments.",
                 image_urls=[f"https://arxiv.org/html/{arxiv_id}v{version}/x2.png"],
-                source_url=html_url,
+                source_url=f"{html_url}#S2.F2",
             ),
         ]
     return FigureGallery(

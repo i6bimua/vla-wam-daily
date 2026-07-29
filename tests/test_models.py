@@ -87,6 +87,15 @@ def test_available_figure_gallery_serializes_public_contract() -> None:
     }
 
 
+def test_figure_factory_uses_anchored_source_urls() -> None:
+    figures = make_gallery().figures
+
+    assert [str(figure.source_url) for figure in figures] == [
+        "https://arxiv.org/html/2607.12345v1#S1.F1",
+        "https://arxiv.org/html/2607.12345v1#S2.F2",
+    ]
+
+
 @pytest.mark.parametrize(
     "url",
     [
