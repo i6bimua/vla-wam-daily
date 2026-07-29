@@ -1,0 +1,44 @@
+---
+import Header from "../components/Header.astro";
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "VLA/WAM Daily",
+  description = "每日筛选 Vision-Language-Action、World Action Model 与机器人世界模型研究。",
+} = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin);
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f2eee4" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="canonical" href={canonical} />
+    <title>{title}</title>
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#content">跳到正文</a>
+    <Header />
+    <main id="content">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <p>
+        论文元数据来自 arXiv。中文标题与结构化分析由 AI
+        生成，且仅依据论文标题和摘要。
+      </p>
+      <p>VLA/WAM Daily · 为机器人学习研究者整理的每日阅读信号</p>
+    </footer>
+  </body>
+</html>

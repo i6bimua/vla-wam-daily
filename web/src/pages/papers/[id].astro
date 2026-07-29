@@ -1,0 +1,49 @@
+---
+import PaperCard from "../../components/PaperCard.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { loadArchive } from "../../lib/data";
+import type { Paper } from "../../lib/schema";
+
+export async function getStaticPaths() {
+  const papers = await loadArchive();
+  return papers.map((paper) => ({
+    params: { id: paper.arxiv_id },
+    props: { paper },
+  }));
+}
+
+interface Props {
+  paper: Paper;
+}
+
+const { paper } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<BaseLayout
+  title={`${paper.title_zh} · VLA/WAM Daily`}
+  description={paper.analysis.one_sentence_summary}
+>
+  <nav class="breadcrumbs" aria-label="面包屑">
+    <a href={base}>VLA/WAM Daily</a>
+    <span aria-hidden="true">/</span>
+    <span>arXiv:{paper.arxiv_id}</span>
+  </nav>
+
+  <header class="paper-hero">
+    <p class="eyebrow">{paper.analysis.primary_topic} · RESEARCH NOTE</p>
+    <h1>{paper.title_zh}</h1>
+    <p lang="en">{paper.title}</p>
+  </header>
+
+  <div class="paper-detail" data-pagefind-body>
+    <PaperCard paper={paper} />
+    <section class="abstract" aria-labelledby="abstract-heading">
+      <p class="section-number">SOURCE / ABSTRACT</p>
+      <div>
+        <h2 id="abstract-heading">原始摘要</h2>
+        <p lang="en">{paper.abstract}</p>
+      </div>
+    </section>
+  </div>
+</BaseLayout>

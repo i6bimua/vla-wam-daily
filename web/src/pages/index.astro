@@ -1,0 +1,80 @@
+---
+import PaperCard from "../components/PaperCard.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { loadLatestDataFile, selectCurrentPapers } from "../lib/data";
+
+const latest = await loadLatestDataFile();
+const papers = selectCurrentPapers(latest.papers);
+const updated = new Intl.DateTimeFormat("zh-CN", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+  timeZone: "UTC",
+}).format(new Date(latest.generated_at));
+const topics = [
+  ...new Set(papers.map((paper) => paper.analysis.primary_topic)),
+];
+---
+
+<BaseLayout>
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero__issue">
+      <span>DAILY BRIEF</span>
+      <time datetime={latest.generated_at}>{updated}</time>
+    </div>
+    <div class="hero__copy">
+      <p class="eyebrow">Vision · Language · Action · World</p>
+      <h1 id="hero-title">把机器人前沿，<br />压缩成每天一页。</h1>
+      <p class="hero__lede">
+        聚焦 VLA、World Action Model 与具身世界模型。先做规则筛选，再由 DeepSeek
+        判断相关性，并保留可追溯的标题与摘要分析。
+      </p>
+    </div>
+    <dl class="hero__stats" aria-label="本期统计">
+      <div>
+        <dt>收录</dt>
+        <dd>{papers.length}</dd>
+      </div>
+      <div>
+        <dt>模型调用</dt>
+        <dd>{latest.stats.model_calls}</dd>
+      </div>
+      <div>
+        <dt>方向</dt>
+        <dd>{topics.length}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="edition-note" aria-label="编辑说明">
+    <p>NO. {latest.generated_at.slice(0, 10).replaceAll("-", "")}</p>
+    <p>
+      默认只展示相关性评分 6 分及以上的论文；AI
+      不读取论文全文，也不补写摘要未披露的结论。
+    </p>
+  </section>
+
+  <section id="latest" class="latest" aria-labelledby="latest-heading">
+    <header class="section-heading">
+      <div>
+        <p class="eyebrow">Today’s selection</p>
+        <h2 id="latest-heading">今日研究</h2>
+      </div>
+      <p>{papers.length} 篇 · 按发布时间与相关性整理</p>
+    </header>
+
+    {
+      papers.length ? (
+        <div class="paper-grid">
+          {papers.map((paper) => (
+            <PaperCard paper={paper} />
+          ))}
+        </div>
+      ) : (
+        <p class="empty-state">
+          今天尚无论文达到发布阈值。下一次每日任务成功后会自动更新。
+        </p>
+      )
+    }
+  </section>
+</BaseLayout>

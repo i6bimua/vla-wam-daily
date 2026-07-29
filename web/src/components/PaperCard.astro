@@ -1,0 +1,107 @@
+---
+import type { Paper } from "../lib/schema";
+
+interface Props {
+  paper: Paper;
+  compact?: boolean;
+}
+
+const { paper, compact = false } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const titleId = `paper-${paper.arxiv_id.replace(".", "-")}`;
+const publicationDate = new Intl.DateTimeFormat("zh-CN", {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  timeZone: "UTC",
+}).format(new Date(paper.published_at));
+const links = [
+  ["arXiv", paper.resources.arxiv_url],
+  ["PDF", paper.resources.pdf_url],
+  ["项目主页", paper.resources.project_url],
+  ["代码", paper.resources.code_url],
+].filter((entry): entry is [string, string] => entry[1] !== null);
+---
+
+<article
+  class:list={["paper-card", { "paper-card--compact": compact }]}
+  aria-labelledby={titleId}
+  data-paper-card
+  data-topic={paper.analysis.primary_topic}
+  data-score={paper.analysis.relevance_score}
+  data-code={paper.resources.code_url ? "yes" : "no"}
+>
+  <header class="paper-card__header">
+    <div class="paper-card__rubric">
+      <span class="topic">{paper.analysis.primary_topic}</span>
+      <span
+        class="score"
+        aria-label={`相关性评分 ${paper.analysis.relevance_score} 分，共 10 分`}
+      >
+        {paper.analysis.relevance_score}<small>/10</small>
+      </span>
+      <time datetime={paper.published_at}>{publicationDate}</time>
+      <span>v{paper.version}</span>
+    </div>
+    <p class="paper-card__id">arXiv:{paper.arxiv_id}</p>
+  </header>
+
+  <h2 id={titleId}>
+    <a href={`${base}papers/${paper.arxiv_id}/`}>{paper.title_zh}</a>
+  </h2>
+  <p class="original-title" lang="en">{paper.title}</p>
+  <p class="authors">{paper.authors.join(" · ")}</p>
+
+  <p class="summary">{paper.analysis.one_sentence_summary}</p>
+
+  {
+    !compact && (
+      <details class="analysis">
+        <summary>展开结构化研究笔记</summary>
+        <dl>
+          <div>
+            <dt>核心贡献</dt>
+            <dd>{paper.analysis.main_contribution}</dd>
+          </div>
+          <div>
+            <dt>方法</dt>
+            <dd>{paper.analysis.method}</dd>
+          </div>
+          <div>
+            <dt>实验结果</dt>
+            <dd>{paper.analysis.key_results}</dd>
+          </div>
+          <div>
+            <dt>局限</dt>
+            <dd>{paper.analysis.limitations}</dd>
+          </div>
+          <div>
+            <dt>与 VLA/WAM 的关系</dt>
+            <dd>{paper.analysis.relation_to_vla_wam}</dd>
+          </div>
+        </dl>
+      </details>
+    )
+  }
+
+  <div class="paper-card__footer">
+    <ul class="tags" aria-label="研究标签">
+      {paper.analysis.tags.map((tag) => <li>{tag}</li>)}
+    </ul>
+    <nav class="paper-links" aria-label={`${paper.title_zh} 的外部资源`}>
+      {
+        links.map(([label, href]) => (
+          <a href={href} target="_blank" rel="noopener noreferrer">
+            {label}
+            <span aria-hidden="true">↗</span>
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+  <p class="ai-scope">
+    AI 仅分析标题与摘要 · {paper.provenance.model} · Prompt {
+      paper.provenance.prompt_version
+    }
+  </p>
+</article>
