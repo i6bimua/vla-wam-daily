@@ -92,6 +92,8 @@ def test_rejects_urls_with_credentials() -> None:
         "hep-th/9901001",
         "260.12345",
         "2607.123456",
+        "2600.12345",
+        "2613.12345",
     ],
 )
 def test_rejects_invalid_new_style_arxiv_ids(arxiv_id: str) -> None:
@@ -135,10 +137,65 @@ def test_normalizes_host_case_default_port_and_trailing_dot_for_classification()
     assert resources.project_url is None
 
 
+def test_rejects_hosts_with_multiple_dns_root_dots() -> None:
+    value = "https://github.com.../Example/Repo"
+    resources = extract_resources("2607.12345", f"Code {value}", None)
+
+    assert validated_urls(value) == []
+    assert resources.code_url is None
+    assert resources.project_url is None
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "https://github.com:444/Example/Repo",
+        "http://gitlab.com:443/Example/Repo",
+    ],
+)
+def test_nondefault_code_host_ports_are_not_published(value: str) -> None:
+    resources = extract_resources("2607.12345", f"Code {value}", None)
+
+    assert resources.code_url is None
+    assert resources.project_url is None
+
+
 def test_preserves_legal_parentheses_query_and_fragment() -> None:
     urls = validated_urls("See (https://example.com/docs/model(v2)?mode=full&view=1#figure-2).")
 
     assert urls == ["https://example.com/docs/model(v2)?mode=full&view=1#figure-2"]
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "https://example.com/#why?",
+        "https://example.com/?flags=fast;",
+        "https://example.com/#important!",
+        "https://example.com/#section:",
+    ],
+)
+def test_preserves_semantic_query_and_fragment_punctuation(value: str) -> None:
+    assert validated_urls(value) == [value]
+
+
+def test_stops_at_latex_and_markdown_markup_delimiters() -> None:
+    urls = validated_urls(
+        r"\href{https://example.com/paper}{website} "
+        "`https://github.com/example/repository`"
+    )
+
+    assert urls == [
+        "https://example.com/paper",
+        "https://github.com/example/repository",
+    ]
+
+
+@pytest.mark.parametrize("punctuation", ["。", "，", "；", "：", "！", "？"])
+def test_cleans_common_unicode_sentence_punctuation(punctuation: str) -> None:
+    assert validated_urls(f"论文 https://example.com/paper{punctuation}") == [
+        "https://example.com/paper"
+    ]
 
 
 def test_skips_local_and_non_public_project_hosts() -> None:

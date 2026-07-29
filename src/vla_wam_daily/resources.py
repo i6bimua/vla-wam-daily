@@ -6,8 +6,8 @@ from pydantic import HttpUrl, TypeAdapter, ValidationError
 
 from vla_wam_daily.models import Resources
 
-URL_PATTERN = re.compile(r"""https?://[^\s<>"']+""", re.IGNORECASE)
-ARXIV_ID_PATTERN = re.compile(r"^\d{4}\.\d{4,5}$")
+URL_PATTERN = re.compile(r"""https?://[^\s<>"'`{}\[\]]+""", re.IGNORECASE)
+ARXIV_ID_PATTERN = re.compile(r"^\d{2}(?:0[1-9]|1[0-2])\.\d{4,5}$")
 HTTP_URL: TypeAdapter[HttpUrl] = TypeAdapter(HttpUrl)
 CODE_HOSTS = frozenset(
     {
@@ -26,7 +26,8 @@ EXCLUDED_PROJECT_HOSTS = frozenset(
         "openreview.net",
     }
 )
-TRAILING_PUNCTUATION = ".,;:!?"
+UNAMBIGUOUS_TRAILING_PUNCTUATION = ".,。，；：！？"
+PATH_TRAILING_PUNCTUATION = ";:!?"
 BRACKETS = (("(", ")"), ("[", "]"), ("{", "}"))
 
 
@@ -34,7 +35,12 @@ def clean_url(value: str) -> str:
     candidate = value
     while True:
         previous = candidate
-        candidate = candidate.rstrip(TRAILING_PUNCTUATION)
+        candidate = candidate.rstrip(UNAMBIGUOUS_TRAILING_PUNCTUATION)
+        resource_part = candidate.partition("://")[2]
+        query_index = resource_part.find("?")
+        has_query_data = 0 <= query_index < len(resource_part) - 1
+        if not has_query_data and "#" not in resource_part:
+            candidate = candidate.rstrip(PATH_TRAILING_PUNCTUATION)
         for opening, closing in BRACKETS:
             while candidate.endswith(closing) and candidate.count(closing) > candidate.count(
                 opening
@@ -57,11 +63,19 @@ def _validated_url(value: str) -> HttpUrl | None:
         return None
     if url.username is not None or url.password is not None:
         return None
+    if url.host is not None and url.host.endswith(".."):
+        return None
     return url
 
 
 def _normalized_host(url: HttpUrl) -> str:
-    return (url.host or "").lower().rstrip(".")
+    host = (url.host or "").lower()
+    return host[:-1] if host.endswith(".") else host
+
+
+def _uses_default_port(url: HttpUrl) -> bool:
+    default_ports = {"http": 80, "https": 443}
+    return url.port == default_ports[url.scheme.lower()]
 
 
 def _deduplication_key(url: HttpUrl) -> tuple[str, str, int | None, str, str, str]:
@@ -118,7 +132,7 @@ def extract_resources(
         url = HTTP_URL.validate_python(value)
         host = _normalized_host(url)
         if host in CODE_HOSTS:
-            if code_url is None:
+            if code_url is None and _uses_default_port(url):
                 code_url = url
             continue
         if (
