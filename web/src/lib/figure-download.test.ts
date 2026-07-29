@@ -10,6 +10,7 @@ import {
 const trustedImageUrl = "https://arxiv.org/html/2607.12345v2/x1.png";
 
 function streamedResponse(options: {
+  cancelError?: Error;
   chunks: number[][];
   contentLength?: number;
   contentType?: string;
@@ -30,6 +31,7 @@ function streamedResponse(options: {
       },
       cancel() {
         cancelled = true;
+        if (options.cancelError) throw options.cancelError;
       },
     },
     { highWaterMark: 0 },
@@ -92,7 +94,8 @@ describe("Figure download metadata", () => {
     "https://cdn.example.com/html/2607.12345v2/x1.png",
     "https://arxiv.org/html/2607.12345v3/x1.png",
   ])("rejects an untrusted final response URL: %s", async (url) => {
-    const { response } = streamedResponse({
+    const { response, readCount, wasCancelled } = streamedResponse({
+      cancelError: new Error("cleanup failed"),
       chunks: [[1]],
       contentLength: 1,
       url,
@@ -104,10 +107,12 @@ describe("Figure download metadata", () => {
         version: 2,
       }),
     ).rejects.toThrow(/trusted arXiv Figure URL/i);
+    expect(readCount()).toBe(0);
+    expect(wasCancelled()).toBe(true);
   });
 
   it("rejects an oversized declared Content-Length before reading", async () => {
-    const { response, readCount } = streamedResponse({
+    const { response, readCount, wasCancelled } = streamedResponse({
       chunks: [[1, 2, 3, 4, 5]],
       contentLength: 5,
     });
@@ -120,6 +125,7 @@ describe("Figure download metadata", () => {
       ),
     ).rejects.toThrow(/size limit/i);
     expect(readCount()).toBe(0);
+    expect(wasCancelled()).toBe(true);
   });
 
   it("cancels a stream that exceeds the limit without Content-Length", async () => {
@@ -141,7 +147,7 @@ describe("Figure download metadata", () => {
     ["an unsuccessful response", { status: 404 }],
     ["non-image response", { contentType: "text/html" }],
   ])("rejects %s", async (_description, overrides) => {
-    const { response, readCount } = streamedResponse({
+    const { response, readCount, wasCancelled } = streamedResponse({
       chunks: [[1]],
       contentLength: 1,
       ...overrides,
@@ -154,6 +160,21 @@ describe("Figure download metadata", () => {
       }),
     ).rejects.toThrow(/successful image/i);
     expect(readCount()).toBe(0);
+    expect(wasCancelled()).toBe(true);
+  });
+
+  it("rejects a missing response body without a cleanup failure", async () => {
+    const response = new Response(null, {
+      headers: { "content-type": "image/png" },
+    });
+    Object.defineProperty(response, "url", { value: trustedImageUrl });
+
+    await expect(
+      readTrustedArxivImageResponse(response, {
+        arxivId: "2607.12345",
+        version: 2,
+      }),
+    ).rejects.toThrow(/no readable body/i);
   });
 
   it.each([

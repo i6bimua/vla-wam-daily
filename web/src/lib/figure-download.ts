@@ -25,18 +25,36 @@ export interface FigureDownloadIdentity {
   imageUrl: string;
 }
 
+async function rejectImageResponse(
+  response: Response,
+  error: Error,
+): Promise<never> {
+  try {
+    await response.body?.cancel(error);
+  } catch {
+    // Cleanup must not replace the validation error that caused the rejection.
+  }
+  throw error;
+}
+
 export async function readTrustedArxivImageResponse(
   response: Response,
   identity: TrustedImageResponseIdentity,
   maxBytes = MAX_FIGURE_DOWNLOAD_BYTES,
 ): Promise<Blob> {
   if (!Number.isSafeInteger(maxBytes) || maxBytes < 1) {
-    throw new Error("Figure download size limit must be a positive integer");
+    return rejectImageResponse(
+      response,
+      new Error("Figure download size limit must be a positive integer"),
+    );
   }
   if (
     !isTrustedArxivImageUrl(response.url, identity.arxivId, identity.version)
   ) {
-    throw new Error("Figure response did not use a trusted arXiv Figure URL");
+    return rejectImageResponse(
+      response,
+      new Error("Figure response did not use a trusted arXiv Figure URL"),
+    );
   }
   const contentType =
     response.headers
@@ -45,7 +63,10 @@ export async function readTrustedArxivImageResponse(
       ?.trim()
       .toLowerCase() ?? "";
   if (!response.ok || !contentType.startsWith("image/")) {
-    throw new Error("Figure response is not a successful image");
+    return rejectImageResponse(
+      response,
+      new Error("Figure response is not a successful image"),
+    );
   }
   const contentLength = response.headers.get("content-length")?.trim();
   if (
@@ -53,9 +74,17 @@ export async function readTrustedArxivImageResponse(
     /^\d+$/.test(contentLength) &&
     BigInt(contentLength) > BigInt(maxBytes)
   ) {
-    throw new Error("Figure response exceeds the download size limit");
+    return rejectImageResponse(
+      response,
+      new Error("Figure response exceeds the download size limit"),
+    );
   }
-  if (!response.body) throw new Error("Figure response has no readable body");
+  if (!response.body) {
+    return rejectImageResponse(
+      response,
+      new Error("Figure response has no readable body"),
+    );
+  }
 
   const reader = response.body.getReader();
   const chunks: ArrayBuffer[] = [];
