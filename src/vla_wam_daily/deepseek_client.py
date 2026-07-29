@@ -2,6 +2,8 @@ import json
 import math
 import time
 from collections.abc import Callable
+from datetime import UTC, datetime
+from email.utils import parsedate_to_datetime
 from types import TracebackType
 from typing import Self, cast
 
@@ -13,7 +15,10 @@ from vla_wam_daily.models import TokenUsage
 DEEPSEEK_CHAT_COMPLETIONS_URL = "https://api.deepseek.com/chat/completions"
 DEFAULT_TIMEOUT = 90.0
 DEFAULT_RETRY_WAIT = 1.0
+DEFAULT_MAX_RETRY_DELAY = 300.0
 DEFAULT_MAX_RESPONSE_BYTES = 2_000_000
+CORE_USAGE_FIELDS = ("prompt_tokens", "completion_tokens", "total_tokens")
+MAX_RETRY_AFTER_DIGITS = 10
 
 
 class DeepSeekResponseError(RuntimeError):
@@ -22,6 +27,13 @@ class DeepSeekResponseError(RuntimeError):
 
 class RetryableDeepSeekError(RuntimeError):
     pass
+
+
+class _RetryableStatusError(RuntimeError):
+    def __init__(self, status_code: int, retry_after: str | None) -> None:
+        super().__init__(f"HTTP {status_code}")
+        self.status_code = status_code
+        self.retry_after = retry_after
 
 
 def _require_nonempty_string(value: object, *, name: str, safe_header: bool = False) -> str:
@@ -58,6 +70,10 @@ def _require_finite_number(
     return float(value)
 
 
+def _utc_now() -> datetime:
+    return datetime.now(UTC)
+
+
 class DeepSeekClient:
     def __init__(
         self,
@@ -68,9 +84,11 @@ class DeepSeekClient:
         retries: int = 3,
         timeout: float = DEFAULT_TIMEOUT,
         retry_wait: float = DEFAULT_RETRY_WAIT,
+        max_retry_delay: float = DEFAULT_MAX_RETRY_DELAY,
         max_response_bytes: int = DEFAULT_MAX_RESPONSE_BYTES,
         http_client: httpx.Client | None = None,
         sleep: Callable[[float], None] = time.sleep,
+        wall_clock: Callable[[], datetime] = _utc_now,
     ) -> None:
         api_key = _require_nonempty_string(api_key, name="api_key", safe_header=True)
         self.model = _require_nonempty_string(model, name="model")
@@ -85,15 +103,23 @@ class DeepSeekClient:
             name="retry_wait",
             positive=False,
         )
+        self.max_retry_delay = _require_finite_number(
+            max_retry_delay,
+            name="max_retry_delay",
+            positive=True,
+        )
         self.max_response_bytes = _require_positive_int(
             max_response_bytes,
             name="max_response_bytes",
         )
         if not callable(sleep):
             raise TypeError("sleep must be callable")
+        if not callable(wall_clock):
+            raise TypeError("wall_clock must be callable")
         if http_client is not None and not isinstance(http_client, httpx.Client):
             raise TypeError("http_client must be an httpx.Client or None")
         self._sleep = sleep
+        self._wall_clock = wall_clock
         self.http = http_client or httpx.Client(
             timeout=self.timeout,
             follow_redirects=False,
@@ -128,7 +154,14 @@ class DeepSeekClient:
             timeout=self.timeout,
             follow_redirects=False,
         ) as response:
-            response.raise_for_status()
+            status_code = response.status_code
+            if status_code == 429 or 500 <= status_code < 600:
+                raise _RetryableStatusError(
+                    status_code,
+                    response.headers.get("retry-after"),
+                )
+            if not response.is_success:
+                raise DeepSeekResponseError(f"DeepSeek returned HTTP {status_code}")
 
             content_length = response.headers.get("content-length")
             if content_length is not None:
@@ -156,46 +189,62 @@ class DeepSeekClient:
                 content.extend(chunk)
             return bytes(content)
 
-    @staticmethod
-    def _retry_after(response: httpx.Response) -> float | None:
-        value = response.headers.get("retry-after")
+    def _retry_after(self, value: str | None) -> float | None:
         if value is None:
             return None
-        try:
-            delay = float(value)
-        except ValueError:
-            return None
+
+        if value.isascii() and value.isdecimal():
+            if len(value) > MAX_RETRY_AFTER_DIGITS:
+                return None
+            delay = float(int(value))
+        else:
+            try:
+                retry_at = parsedate_to_datetime(value)
+            except (TypeError, ValueError, OverflowError):
+                return None
+            now = self._wall_clock()
+            if (
+                not isinstance(now, datetime)
+                or now.tzinfo is None
+                or retry_at.tzinfo is None
+            ):
+                return None
+            delay = (retry_at.astimezone(UTC) - now.astimezone(UTC)).total_seconds()
+            if not math.isfinite(delay) or delay <= 0:
+                return None
+
         if not math.isfinite(delay) or delay < 0:
             return None
-        return delay
+        return min(delay, self.max_retry_delay)
 
     def _request(self, body: dict[str, object]) -> bytes:
-        last_error: httpx.HTTPStatusError | httpx.TransportError | None = None
+        last_detail: str | None = None
         for attempt in range(1, self.retries + 1):
+            retry_after_value: str | None = None
             try:
                 return self._request_once(body)
-            except httpx.HTTPStatusError as exc:
-                status_code = exc.response.status_code
-                if status_code != 429 and not 500 <= status_code < 600:
-                    raise
-                last_error = exc
+            except _RetryableStatusError as exc:
+                last_detail = f"HTTP {exc.status_code}"
+                retry_after_value = exc.retry_after
             except httpx.TransportError as exc:
-                last_error = exc
+                last_detail = type(exc).__name__
 
             if attempt == self.retries:
-                if isinstance(last_error, httpx.HTTPStatusError):
-                    detail = f"HTTP {last_error.response.status_code}"
-                else:
-                    detail = type(last_error).__name__
                 raise RetryableDeepSeekError(
-                    f"DeepSeek request failed after {self.retries} attempts: {detail}"
+                    f"DeepSeek request failed after {self.retries} attempts: {last_detail}"
                 ) from None
 
-            delay = self.retry_wait * 2 ** (attempt - 1)
-            if isinstance(last_error, httpx.HTTPStatusError):
-                retry_after = self._retry_after(last_error.response)
-                if retry_after is not None:
-                    delay = max(delay, retry_after)
+            try:
+                delay = self.retry_wait * 2.0 ** (attempt - 1)
+            except OverflowError:
+                delay = self.max_retry_delay
+            if not math.isfinite(delay):
+                delay = self.max_retry_delay
+            delay = min(delay, self.max_retry_delay)
+            retry_after = self._retry_after(retry_after_value)
+            if retry_after is not None:
+                delay = max(delay, retry_after)
+            delay = min(delay, self.max_retry_delay)
             if delay > 0:
                 self._sleep(delay)
 
@@ -236,13 +285,34 @@ class DeepSeekClient:
         if not isinstance(decoded, dict):
             raise DeepSeekResponseError("DeepSeek JSON root must be an object")
 
-        raw_usage = payload.get("usage", {})
+        if "usage" not in payload:
+            raise DeepSeekResponseError("DeepSeek response usage is missing")
+        raw_usage = payload["usage"]
         if not isinstance(raw_usage, dict):
             raise DeepSeekResponseError("DeepSeek response usage must be an object")
+        if any(field not in raw_usage for field in CORE_USAGE_FIELDS):
+            raise DeepSeekResponseError("DeepSeek response usage is missing core fields")
+        core_usage = {field: raw_usage[field] for field in CORE_USAGE_FIELDS}
         try:
-            usage = TokenUsage.model_validate(raw_usage, strict=True)
+            usage = TokenUsage.model_validate(core_usage, strict=True)
         except ValidationError:
             raise DeepSeekResponseError("DeepSeek response usage is invalid") from None
+        if usage.total_tokens != usage.prompt_tokens + usage.completion_tokens:
+            raise DeepSeekResponseError("DeepSeek response usage totals are inconsistent")
+
+        cache_fields = ("prompt_cache_hit_tokens", "prompt_cache_miss_tokens")
+        if all(field in raw_usage for field in cache_fields):
+            cache_hit, cache_miss = (raw_usage[field] for field in cache_fields)
+            if (
+                isinstance(cache_hit, bool)
+                or not isinstance(cache_hit, int)
+                or cache_hit < 0
+                or isinstance(cache_miss, bool)
+                or not isinstance(cache_miss, int)
+                or cache_miss < 0
+                or cache_hit + cache_miss != usage.prompt_tokens
+            ):
+                raise DeepSeekResponseError("DeepSeek response usage cache totals are invalid")
 
         return cast(dict[str, object], decoded), usage
 
