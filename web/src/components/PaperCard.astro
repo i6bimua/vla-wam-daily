@@ -1,12 +1,14 @@
 ---
+import FigureGallery from "./FigureGallery.astro";
 import type { Paper } from "../lib/schema";
 
 interface Props {
   paper: Paper;
   compact?: boolean;
+  expanded?: boolean;
 }
 
-const { paper, compact = false } = Astro.props;
+const { paper, compact = false, expanded = false } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const titleId = `paper-${paper.arxiv_id.replace(".", "-")}`;
 const publicationDate = new Intl.DateTimeFormat("zh-CN", {
@@ -56,8 +58,8 @@ const links = [
 
   {
     !compact && (
-      <details class="analysis">
-        <summary>展开结构化研究笔记</summary>
+      <details class="analysis" open={expanded}>
+        <summary>查看结构化研究笔记与 Fig. 1 / Fig. 2</summary>
         <dl>
           <div>
             <dt>核心贡献</dt>
@@ -80,6 +82,12 @@ const links = [
             <dd>{paper.analysis.relation_to_vla_wam}</dd>
           </div>
         </dl>
+        <FigureGallery
+          gallery={paper.figure_gallery}
+          arxivId={paper.arxiv_id}
+          version={paper.version}
+          pdfUrl={paper.resources.pdf_url}
+        />
       </details>
     )
   }

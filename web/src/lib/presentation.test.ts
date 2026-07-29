@@ -65,3 +65,50 @@ describe("site presentation contracts", () => {
     },
   );
 });
+
+describe("remote Figure component contracts", () => {
+  it("uses privacy-preserving lazy images and safe external links", async () => {
+    const component = await readFile(
+      resolve(sourceRoot, "components/FigureGallery.astro"),
+      "utf8",
+    );
+
+    expect(component).toMatch(
+      /<img[\s\S]*loading="lazy"[\s\S]*decoding="async"[\s\S]*referrerpolicy="no-referrer"[\s\S]*data-figure-image/,
+    );
+    expect(component).toContain('target="_blank"');
+    expect(component).toContain('rel="noopener noreferrer"');
+    expect(component).toContain("查看原图");
+    expect(component).toContain("下载原图");
+  });
+
+  it("validates fetched image responses and always restores download state", async () => {
+    const component = await readFile(
+      resolve(sourceRoot, "components/FigureGallery.astro"),
+      "utf8",
+    );
+
+    expect(component).toContain('credentials: "omit"');
+    expect(component).toContain('referrerPolicy: "no-referrer"');
+    expect(component).toMatch(/response\.ok/);
+    expect(component).toMatch(/content-type/i);
+    expect(component).toMatch(/startsWith\("image\/"\)/);
+    expect(component).toMatch(/finally\s*\{/);
+    expect(component).toContain("window.open");
+    expect(component).toContain("window.location.assign");
+  });
+
+  it("defines all isolated Figure failure states and PDF fallbacks", async () => {
+    const component = await readFile(
+      resolve(sourceRoot, "components/FigureGallery.astro"),
+      "utf8",
+    );
+
+    for (const status of ["html_unavailable", "not_found", "fetch_failed"]) {
+      expect(component).toContain(status);
+    }
+    expect(component).toContain("data-figure-error");
+    expect(component).toContain("查看 PDF");
+    expect(component).toMatch(/图片由浏览器直接从 arXiv\s+加载/);
+  });
+});

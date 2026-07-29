@@ -1,0 +1,266 @@
+---
+import { figureDownloadFilename } from "../lib/figure-download";
+import type { Paper } from "../lib/schema";
+
+interface Props {
+  gallery: Paper["figure_gallery"];
+  arxivId: string;
+  version: number;
+  pdfUrl: string;
+}
+
+const { gallery, arxivId, version, pdfUrl } = Astro.props;
+const headingId = `figures-${arxivId.replace(".", "-")}`;
+
+function statusMessage(status: Paper["figure_gallery"]["status"]): string {
+  switch (status) {
+    case "html_unavailable":
+      return "arXiv 暂未提供 HTML 版本，无法提取 Fig. 1 / Fig. 2。";
+    case "not_found":
+      return "在 arXiv HTML 中未找到 Fig. 1 / Fig. 2。";
+    case "fetch_failed":
+      return "本次获取 Fig. 1 / Fig. 2 失败，论文其它内容仍可正常阅读。";
+    case "available":
+      return "";
+  }
+}
+---
+
+<section class="figure-gallery" aria-labelledby={headingId}>
+  <header class="figure-gallery__heading">
+    <div>
+      <p class="figure-gallery__kicker">REMOTE FIGURES</p>
+      <h3 id={headingId}>Fig. 1 &amp; Fig. 2</h3>
+    </div>
+    <a
+      href={gallery.html_url}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="figure-gallery__html-link"
+      >arXiv HTML <span aria-hidden="true">↗</span></a
+    >
+  </header>
+
+  {
+    gallery.status === "available" ? (
+      <div class="figure-gallery__grid">
+        {gallery.figures.map((figure) => (
+          <article class="remote-figure">
+            <header class="remote-figure__heading">
+              <p>{figure.label}</p>
+              <a
+                href={figure.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                定位原文 <span aria-hidden="true">↗</span>
+              </a>
+            </header>
+            <div
+              class:list={[
+                "remote-figure__panels",
+                {
+                  "remote-figure__panels--multiple":
+                    figure.image_urls.length > 1,
+                },
+              ]}
+            >
+              {figure.image_urls.map((imageUrl, index) => {
+                const panel = index + 1;
+                const panelAlt =
+                  figure.image_urls.length > 1
+                    ? `${figure.label}，面板 ${panel}/${figure.image_urls.length}：${figure.caption}`
+                    : `${figure.label}：${figure.caption}`;
+                const filename = figureDownloadFilename({
+                  arxivId,
+                  version,
+                  figure: figure.number,
+                  panel,
+                  imageUrl,
+                });
+                return (
+                  <div class="remote-figure__panel" data-figure-panel>
+                    <div class="remote-figure__media">
+                      <img
+                        src={imageUrl}
+                        alt={panelAlt}
+                        loading="lazy"
+                        decoding="async"
+                        referrerpolicy="no-referrer"
+                        data-figure-image
+                      />
+                      <div
+                        class="figure-load-error"
+                        data-figure-error
+                        role="status"
+                        hidden
+                      >
+                        <p>该面板暂时无法从 arXiv 加载。</p>
+                        <a
+                          href={pdfUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          查看 PDF <span aria-hidden="true">↗</span>
+                        </a>
+                      </div>
+                    </div>
+                    <div class="remote-figure__actions">
+                      <span>
+                        {figure.image_urls.length > 1
+                          ? `面板 ${panel}/${figure.image_urls.length}`
+                          : "原始图像"}
+                      </span>
+                      <a
+                        href={imageUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        查看原图 <span aria-hidden="true">↗</span>
+                      </a>
+                      <button
+                        type="button"
+                        data-figure-download
+                        data-download-url={imageUrl}
+                        data-download-name={filename}
+                        data-arxiv-id={arxivId}
+                        data-version={version}
+                        data-figure-number={figure.number}
+                        data-panel-number={panel}
+                      >
+                        下载原图
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <p class="remote-figure__caption">
+              <strong>{figure.label}.</strong> {figure.caption}
+            </p>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <div
+        class="figure-gallery__fallback"
+        data-figure-status={gallery.status}
+        role="status"
+      >
+        <p>{statusMessage(gallery.status)}</p>
+        <a href={pdfUrl} target="_blank" rel="noopener noreferrer">
+          查看 PDF <span aria-hidden="true">↗</span>
+        </a>
+      </div>
+    )
+  }
+
+  <p class="figure-gallery__notice">
+    图片由浏览器直接从 arXiv
+    加载，本站不保存图像；版权归论文作者或相应权利人所有。
+  </p>
+</section>
+
+<script>
+  import {
+    figureDownloadFilename,
+    isTrustedArxivImageUrl,
+  } from "../lib/figure-download";
+
+  function openOriginal(url: string): void {
+    const opened = window.open(url, "_blank", "noopener,noreferrer");
+    if (opened) opened.opener = null;
+    else window.location.assign(url);
+  }
+
+  document
+    .querySelectorAll<HTMLImageElement>("[data-figure-image]")
+    .forEach((image) => {
+      image.addEventListener("error", () => {
+        image.hidden = true;
+        const panel = image.closest<HTMLElement>("[data-figure-panel]");
+        panel?.classList.add("remote-figure__panel--error");
+        panel
+          ?.querySelector<HTMLElement>("[data-figure-error]")
+          ?.removeAttribute("hidden");
+      });
+    });
+
+  document
+    .querySelectorAll<HTMLButtonElement>("[data-figure-download]")
+    .forEach((button) => {
+      button.addEventListener("click", async () => {
+        if (button.dataset.downloadBusy === "true") return;
+        const url = button.dataset.downloadUrl;
+        const arxivId = button.dataset.arxivId;
+        const version = Number(button.dataset.version);
+        const figure = Number(button.dataset.figureNumber);
+        const panel = Number(button.dataset.panelNumber);
+        if (
+          !url ||
+          !arxivId ||
+          !isTrustedArxivImageUrl(url, arxivId, version)
+        ) {
+          return;
+        }
+
+        let filename: string;
+        try {
+          filename = figureDownloadFilename({
+            arxivId,
+            version,
+            figure,
+            panel,
+            imageUrl: url,
+          });
+        } catch {
+          return;
+        }
+
+        const originalLabel = button.textContent;
+        button.dataset.downloadBusy = "true";
+        button.disabled = true;
+        button.setAttribute("aria-busy", "true");
+        button.textContent = "正在下载…";
+        try {
+          const response = await fetch(url, {
+            mode: "cors",
+            credentials: "omit",
+            referrerPolicy: "no-referrer",
+          });
+          const contentType = response.headers
+            .get("content-type")
+            ?.split(";", 1)[0]
+            ?.trim()
+            .toLowerCase();
+          if (!response.ok || !contentType?.startsWith("image/")) {
+            throw new Error("Figure response is not a successful image");
+          }
+
+          const blob = await response.blob();
+          if (blob.type && !blob.type.toLowerCase().startsWith("image/")) {
+            throw new Error("Figure body is not an image");
+          }
+          const objectUrl = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = objectUrl;
+          link.download = filename;
+          link.hidden = true;
+          document.body.append(link);
+          try {
+            link.click();
+          } finally {
+            link.remove();
+            window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1_000);
+          }
+        } catch {
+          openOriginal(url);
+        } finally {
+          delete button.dataset.downloadBusy;
+          button.disabled = false;
+          button.removeAttribute("aria-busy");
+          button.textContent = originalLabel ?? "下载原图";
+        }
+      });
+    });
+</script>
