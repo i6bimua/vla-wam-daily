@@ -6,7 +6,7 @@ from pydantic import HttpUrl, TypeAdapter, ValidationError
 
 from vla_wam_daily.models import Resources
 
-URL_PATTERN = re.compile(r"""https?://[^\s<>"'`{}\[\]]+""", re.IGNORECASE)
+URL_PATTERN = re.compile(r"""https?://[^\s<>"'`{}]+""", re.IGNORECASE)
 ARXIV_ID_PATTERN = re.compile(r"^\d{2}(?:0[1-9]|1[0-2])\.\d{4,5}$")
 HTTP_URL: TypeAdapter[HttpUrl] = TypeAdapter(HttpUrl)
 CODE_HOSTS = frozenset(
@@ -121,7 +121,7 @@ def extract_resources(
     abstract: str,
     comment: str | None,
 ) -> Resources:
-    if ARXIV_ID_PATTERN.fullmatch(arxiv_id) is None:
+    if ARXIV_ID_PATTERN.fullmatch(arxiv_id) is None or int(arxiv_id[:4]) < 704:
         raise ValueError(f"invalid new-style arXiv ID: {arxiv_id!r}")
 
     urls = validated_urls(f"{abstract}\n{comment or ''}")

@@ -94,11 +94,20 @@ def test_rejects_urls_with_credentials() -> None:
         "2607.123456",
         "2600.12345",
         "2613.12345",
+        "0001.1234",
+        "0703.1234",
     ],
 )
 def test_rejects_invalid_new_style_arxiv_ids(arxiv_id: str) -> None:
     with pytest.raises(ValueError, match="arXiv ID"):
         extract_resources(arxiv_id, "No links.", None)
+
+
+def test_accepts_first_new_style_arxiv_month() -> None:
+    resources = extract_resources("0704.1234", "No links.", None)
+
+    assert str(resources.arxiv_url) == "https://arxiv.org/abs/0704.1234"
+    assert str(resources.pdf_url) == "https://arxiv.org/pdf/0704.1234"
 
 
 def test_excludes_scholarly_hosts_from_project_selection() -> None:
@@ -214,6 +223,29 @@ def test_skips_local_and_non_public_project_hosts() -> None:
     )
 
     assert str(resources.project_url) == "https://project.example/paper"
+
+
+def test_extracts_public_ipv6_literal_as_project_url() -> None:
+    value = "https://[2606:4700:4700::1111]/paper"
+    resources = extract_resources("2607.12345", f"Project {value}", None)
+
+    assert validated_urls(value) == [value]
+    assert str(resources.project_url) == value
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "https://[::1]/paper",
+        "https://[fc00::1]/paper",
+        "https://[fe80::1]/paper",
+    ],
+)
+def test_tokenizes_but_rejects_nonpublic_ipv6_project_urls(value: str) -> None:
+    resources = extract_resources("2607.12345", f"Project {value}", None)
+
+    assert validated_urls(value) == [value]
+    assert resources.project_url is None
 
 
 def test_code_host_is_never_reused_as_project_url() -> None:
