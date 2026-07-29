@@ -14,6 +14,19 @@ MAIN_DESIGN = (
 FIGURE_DESIGN = (
     ROOT / "docs/superpowers/specs/2026-07-29-paper-figure-display-design.md"
 ).read_text(encoding="utf-8")
+PAPER_IMAGE_EXTENSIONS = {
+    ".avif",
+    ".bmp",
+    ".gif",
+    ".ico",
+    ".jpeg",
+    ".jpg",
+    ".png",
+    ".svg",
+    ".tif",
+    ".tiff",
+    ".webp",
+}
 
 
 def tracked_files() -> tuple[Path, ...]:
@@ -227,10 +240,10 @@ def test_repository_tracked_files_contain_no_secret_like_bytes() -> None:
 
 
 def test_repository_contains_no_tracked_paper_image_assets() -> None:
-    extensions = {".avif", ".jpeg", ".jpg", ".png", ".svg", ".webp"}
+    assert {".gif", ".bmp", ".tif", ".tiff"}.issubset(PAPER_IMAGE_EXTENSIONS)
     hosted = [
         path.relative_to(ROOT).as_posix()
         for path in tracked_files()
-        if path.suffix.lower() in extensions
+        if path.suffix.lower() in PAPER_IMAGE_EXTENSIONS
     ]
     assert hosted == []
