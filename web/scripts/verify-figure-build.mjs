@@ -13,8 +13,10 @@ function requireBuild(condition, message) {
     throw new Error(`Figure build verification failed: ${message}`);
 }
 
-function countMarkup(source, pattern) {
-  return source.match(pattern)?.length ?? 0;
+function countElementsWithAttribute(source, tagName, attribute) {
+  const elements = source.match(new RegExp(`<${tagName}\\b[^>]*>`, "gi")) ?? [];
+  const attributePattern = new RegExp(`\\s${attribute}(?:\\s|=|\\/?>)`, "i");
+  return elements.filter((element) => attributePattern.test(element)).length;
 }
 
 const home = await html("index.html");
@@ -24,12 +26,14 @@ const fallbackCases = [
     "2607.20001",
     "html_unavailable",
     "arXiv 暂未提供 HTML 版本，无法提取 Fig. 1 / Fig. 2。",
+    false,
   ],
-  ["2607.20002", "not_found", "在 arXiv HTML 中未找到 Fig. 1 / Fig. 2。"],
+  ["2607.20002", "not_found", "在 arXiv HTML 中未找到 Fig. 1 / Fig. 2。", true],
   [
     "2607.20003",
     "fetch_failed",
     "本次获取 Fig. 1 / Fig. 2 失败，论文其它内容仍可正常阅读。",
+    true,
   ],
 ];
 
@@ -50,12 +54,21 @@ requireBuild(
   "available paper must show the Figure heading",
 );
 requireBuild(
-  countMarkup(available, /<img\b/g) === 2,
+  countElementsWithAttribute(available, "img", "data-figure-image") === 2,
   "available fixture must render Fig. 1 and Fig. 2 images",
 );
 requireBuild(
-  countMarkup(available, /<button\b/g) === 2,
+  countElementsWithAttribute(available, "button", "data-figure-download") === 2,
   "available fixture must render a download button for each panel",
+);
+requireBuild(
+  countElementsWithAttribute(available, "div", "data-figure-panel") === 2,
+  "available fixture must render exactly two Figure panels",
+);
+requireBuild(
+  (available.match(/<figure\b[^>]*class="remote-figure"/g)?.length ?? 0) ===
+    2 && (available.match(/<figcaption\b/g)?.length ?? 0) === 2,
+  "available fixture must use figure and figcaption semantics",
 );
 requireBuild(
   available.includes("data-download-name=") &&
@@ -63,8 +76,15 @@ requireBuild(
     available.includes("下载原图"),
   "available fixture must expose original-image and download actions",
 );
+requireBuild(
+  (available.match(/aria-label="查看 Figure [12] 面板 1\/1 原图"/g)?.length ??
+    0) === 2 &&
+    (available.match(/aria-label="下载 Figure [12] 面板 1\/1 原图"/g)?.length ??
+      0) === 2,
+  "available fixture actions must name their Figure and panel",
+);
 
-for (const [arxivId, status, message] of fallbackCases) {
+for (const [arxivId, status, message, showsHtmlLink] of fallbackCases) {
   const page = await html(`papers/${arxivId}/index.html`);
   requireBuild(
     page.includes(`data-figure-status="${status}"`),
@@ -76,8 +96,15 @@ for (const [arxivId, status, message] of fallbackCases) {
   );
   requireBuild(page.includes("查看 PDF"), `${arxivId} must link to the PDF`);
   requireBuild(
-    countMarkup(page, /<img\b/g) === 0 && countMarkup(page, /<button\b/g) === 0,
-    `${arxivId} must not render image or download controls`,
+    countElementsWithAttribute(page, "img", "data-figure-image") === 0 &&
+      countElementsWithAttribute(page, "button", "data-figure-download") ===
+        0 &&
+      countElementsWithAttribute(page, "div", "data-figure-panel") === 0,
+    `${arxivId} must not render Figure images, panels, or download controls`,
+  );
+  requireBuild(
+    page.includes('class="figure-gallery__html-link"') === showsHtmlLink,
+    `${arxivId} HTML link visibility must match Figure status`,
   );
 }
 

@@ -82,7 +82,7 @@ describe("remote Figure component contracts", () => {
     expect(component).toContain("下载原图");
   });
 
-  it("validates fetched image responses and always restores download state", async () => {
+  it("follows redirects then validates and streams the final response", async () => {
     const component = await readFile(
       resolve(sourceRoot, "components/FigureGallery.astro"),
       "utf8",
@@ -90,12 +90,71 @@ describe("remote Figure component contracts", () => {
 
     expect(component).toContain('credentials: "omit"');
     expect(component).toContain('referrerPolicy: "no-referrer"');
-    expect(component).toMatch(/response\.ok/);
-    expect(component).toMatch(/content-type/i);
-    expect(component).toMatch(/startsWith\("image\/"\)/);
+    expect(component).toContain('redirect: "follow"');
+    expect(component).toContain("readTrustedArxivImageResponse");
     expect(component).toMatch(/finally\s*\{/);
     expect(component).toContain("window.open");
     expect(component).toContain("window.location.assign");
+  });
+
+  it("handles cached broken images after binding the error listener", async () => {
+    const component = await readFile(
+      resolve(sourceRoot, "components/FigureGallery.astro"),
+      "utf8",
+    );
+
+    expect(component).toContain("function markFigureImageFailed");
+    expect(component).toMatch(
+      /image\.addEventListener\("error",\s*\(\)\s*=>\s*markFigureImageFailed\(image\)\)/,
+    );
+    expect(component).toMatch(
+      /image\.complete\s*&&\s*image\.naturalWidth\s*===\s*0[\s\S]*markFigureImageFailed\(image\)/,
+    );
+  });
+
+  it("reserves stable media space and explicitly hides failed images", async () => {
+    const css = await readFile(
+      resolve(sourceRoot, "styles/global.css"),
+      "utf8",
+    );
+
+    expect(css).toMatch(
+      /\.remote-figure__media\s*\{[^}]*aspect-ratio:\s*4\s*\/\s*3/s,
+    );
+    expect(css).toMatch(
+      /\.remote-figure__media img\s*\{[^}]*width:\s*100%[^}]*height:\s*100%[^}]*object-fit:\s*contain/s,
+    );
+    expect(css).toMatch(
+      /\.remote-figure__media img\[hidden\]\s*\{[^}]*display:\s*none/s,
+    );
+  });
+
+  it("uses Figure semantics and panel-specific accessible action names", async () => {
+    const component = await readFile(
+      resolve(sourceRoot, "components/FigureGallery.astro"),
+      "utf8",
+    );
+
+    expect(component).toContain('<figure class="remote-figure">');
+    expect(component).toContain('<figcaption class="remote-figure__caption">');
+    expect(component).toMatch(
+      /aria-label=\{`查看 \$\{figure\.label\} \$\{panelName\} 原图`\}/,
+    );
+    expect(component).toMatch(
+      /aria-label=\{`下载 \$\{figure\.label\} \$\{panelName\} 原图`\}/,
+    );
+  });
+
+  it("omits the known-unavailable HTML link without adding CORS image mode", async () => {
+    const component = await readFile(
+      resolve(sourceRoot, "components/FigureGallery.astro"),
+      "utf8",
+    );
+
+    expect(component).toMatch(
+      /gallery\.status\s*!==\s*"html_unavailable"[\s\S]*figure-gallery__html-link/,
+    );
+    expect(component).not.toMatch(/crossorigin/i);
   });
 
   it("defines all isolated Figure failure states and PDF fallbacks", async () => {

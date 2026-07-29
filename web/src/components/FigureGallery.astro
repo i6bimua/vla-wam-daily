@@ -32,26 +32,32 @@ function statusMessage(status: Paper["figure_gallery"]["status"]): string {
       <p class="figure-gallery__kicker">REMOTE FIGURES</p>
       <h3 id={headingId}>Fig. 1 &amp; Fig. 2</h3>
     </div>
-    <a
-      href={gallery.html_url}
-      target="_blank"
-      rel="noopener noreferrer"
-      class="figure-gallery__html-link"
-      >arXiv HTML <span aria-hidden="true">↗</span></a
-    >
+    {
+      gallery.status !== "html_unavailable" && (
+        <a
+          href={gallery.html_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="figure-gallery__html-link"
+        >
+          arXiv HTML <span aria-hidden="true">↗</span>
+        </a>
+      )
+    }
   </header>
 
   {
     gallery.status === "available" ? (
       <div class="figure-gallery__grid">
         {gallery.figures.map((figure) => (
-          <article class="remote-figure">
+          <figure class="remote-figure">
             <header class="remote-figure__heading">
               <p>{figure.label}</p>
               <a
                 href={figure.source_url}
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label={`在 arXiv HTML 中定位 ${figure.label}`}
               >
                 定位原文 <span aria-hidden="true">↗</span>
               </a>
@@ -67,10 +73,8 @@ function statusMessage(status: Paper["figure_gallery"]["status"]): string {
             >
               {figure.image_urls.map((imageUrl, index) => {
                 const panel = index + 1;
-                const panelAlt =
-                  figure.image_urls.length > 1
-                    ? `${figure.label}，面板 ${panel}/${figure.image_urls.length}：${figure.caption}`
-                    : `${figure.label}：${figure.caption}`;
+                const panelName = `面板 ${panel}/${figure.image_urls.length}`;
+                const panelAlt = `${figure.label}，${panelName}：${figure.caption}`;
                 const filename = figureDownloadFilename({
                   arxivId,
                   version,
@@ -107,19 +111,19 @@ function statusMessage(status: Paper["figure_gallery"]["status"]): string {
                     </div>
                     <div class="remote-figure__actions">
                       <span>
-                        {figure.image_urls.length > 1
-                          ? `面板 ${panel}/${figure.image_urls.length}`
-                          : "原始图像"}
+                        {figure.image_urls.length > 1 ? panelName : "原始图像"}
                       </span>
                       <a
                         href={imageUrl}
                         target="_blank"
                         rel="noopener noreferrer"
+                        aria-label={`查看 ${figure.label} ${panelName} 原图`}
                       >
                         查看原图 <span aria-hidden="true">↗</span>
                       </a>
                       <button
                         type="button"
+                        aria-label={`下载 ${figure.label} ${panelName} 原图`}
                         data-figure-download
                         data-download-url={imageUrl}
                         data-download-name={filename}
@@ -135,10 +139,10 @@ function statusMessage(status: Paper["figure_gallery"]["status"]): string {
                 );
               })}
             </div>
-            <p class="remote-figure__caption">
+            <figcaption class="remote-figure__caption">
               <strong>{figure.label}.</strong> {figure.caption}
-            </p>
-          </article>
+            </figcaption>
+          </figure>
         ))}
       </div>
     ) : (
@@ -165,6 +169,7 @@ function statusMessage(status: Paper["figure_gallery"]["status"]): string {
   import {
     figureDownloadFilename,
     isTrustedArxivImageUrl,
+    readTrustedArxivImageResponse,
   } from "../lib/figure-download";
 
   function openOriginal(url: string): void {
@@ -173,17 +178,22 @@ function statusMessage(status: Paper["figure_gallery"]["status"]): string {
     else window.location.assign(url);
   }
 
+  function markFigureImageFailed(image: HTMLImageElement): void {
+    image.hidden = true;
+    const panel = image.closest<HTMLElement>("[data-figure-panel]");
+    panel?.classList.add("remote-figure__panel--error");
+    panel
+      ?.querySelector<HTMLElement>("[data-figure-error]")
+      ?.removeAttribute("hidden");
+  }
+
   document
     .querySelectorAll<HTMLImageElement>("[data-figure-image]")
     .forEach((image) => {
-      image.addEventListener("error", () => {
-        image.hidden = true;
-        const panel = image.closest<HTMLElement>("[data-figure-panel]");
-        panel?.classList.add("remote-figure__panel--error");
-        panel
-          ?.querySelector<HTMLElement>("[data-figure-error]")
-          ?.removeAttribute("hidden");
-      });
+      image.addEventListener("error", () => markFigureImageFailed(image));
+      if (image.complete && image.naturalWidth === 0) {
+        markFigureImageFailed(image);
+      }
     });
 
   document
@@ -227,20 +237,12 @@ function statusMessage(status: Paper["figure_gallery"]["status"]): string {
             mode: "cors",
             credentials: "omit",
             referrerPolicy: "no-referrer",
+            redirect: "follow",
           });
-          const contentType = response.headers
-            .get("content-type")
-            ?.split(";", 1)[0]
-            ?.trim()
-            .toLowerCase();
-          if (!response.ok || !contentType?.startsWith("image/")) {
-            throw new Error("Figure response is not a successful image");
-          }
-
-          const blob = await response.blob();
-          if (blob.type && !blob.type.toLowerCase().startsWith("image/")) {
-            throw new Error("Figure body is not an image");
-          }
+          const blob = await readTrustedArxivImageResponse(response, {
+            arxivId,
+            version,
+          });
           const objectUrl = URL.createObjectURL(blob);
           const link = document.createElement("a");
           link.href = objectUrl;
