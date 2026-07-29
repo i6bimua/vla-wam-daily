@@ -36,6 +36,7 @@ concurrency:
 
 jobs:
   update:
+    if: github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -46,6 +47,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           fetch-depth: 0
+          ref: ${{ github.event.repository.default_branch }}
       - name: Set up uv
         uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9  # v9.0.0
         with:
@@ -178,8 +180,11 @@ jobs:
       - name: Commit and push generated data
         if: steps.options.outputs.dry_run == 'false'
         shell: bash
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           set -euo pipefail
+          git check-ref-format "refs/heads/${DEFAULT_BRANCH}"
           git config user.name "vla-wam-daily-bot"
           git config user.email "vla-wam-daily-bot@users.noreply.github.com"
           git add -- data
@@ -194,9 +199,10 @@ jobs:
             echo "No generated data changes"
           else
             git commit -m "data: update daily papers"
-            git fetch origin main
-            git rebase origin/main
-            git push origin HEAD:main
+            git fetch origin \
+              "refs/heads/${DEFAULT_BRANCH}:refs/remotes/origin/${DEFAULT_BRANCH}"
+            git rebase "refs/remotes/origin/${DEFAULT_BRANCH}"
+            git push origin "HEAD:refs/heads/${DEFAULT_BRANCH}"
           fi
 
   build:
@@ -206,10 +212,10 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Checkout latest main
+      - name: Checkout latest default branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
-          ref: main
+          ref: ${{ github.event.repository.default_branch }}
       - name: Build and upload Pages artifact
         uses: withastro/action@e84f40bd8d2caa9e768ec82ad30dd81f0b280853  # v6.1.2
         with:

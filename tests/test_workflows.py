@@ -109,6 +109,13 @@ def test_ci_runs_frozen_python_and_complete_fixture_web_gates() -> None:
         "BASE_PATH": "/",
         "VLA_WAM_DATA_DIR": "../tests/fixtures/data",
     }
+    for name in (
+        "Verify Figure build",
+        "Verify information build",
+        "Verify search build",
+        "Test browser flows",
+    ):
+        assert step_named(payload, "web", name)["env"] == {"BASE_PATH": "/"}
 
 
 def test_pages_builds_existing_data_only_and_deploys_with_minimal_permissions() -> None:
@@ -126,6 +133,7 @@ def test_pages_builds_existing_data_only_and_deploys_with_minimal_permissions() 
 
     build = payload["jobs"]["build"]
     deploy = payload["jobs"]["deploy"]
+    assert build["if"] == "github.ref_name == github.event.repository.default_branch"
     assert build["permissions"] == {"contents": "read"}
     assert deploy["permissions"] == {"pages": "write", "id-token": "write"}
     assert deploy["environment"]["name"] == "github-pages"
@@ -140,6 +148,12 @@ def test_pages_builds_existing_data_only_and_deploys_with_minimal_permissions() 
         "node-version": "24",
         "package-manager": WEB_PACKAGE["packageManager"],
     }
+    checkout = next(
+        step
+        for step in build["steps"]
+        if str(step.get("uses", "")).startswith("actions/checkout")
+    )
+    assert checkout["with"]["ref"] == "${{ github.event.repository.default_branch }}"
 
 
 def test_daily_schedule_dispatch_defaults_and_permissions_are_bounded() -> None:
@@ -153,6 +167,9 @@ def test_daily_schedule_dispatch_defaults_and_permissions_are_bounded() -> None:
     assert dispatch["dry_run"]["default"] == "false"
     assert dispatch["force_arxiv_id"]["required"] == "false"
     assert payload["permissions"] == {}
+    assert payload["jobs"]["update"]["if"] == (
+        "github.ref_name == github.event.repository.default_branch"
+    )
     assert payload["jobs"]["update"]["permissions"] == {"contents": "write"}
     assert payload["jobs"]["build"]["permissions"] == {"contents": "read"}
     assert payload["jobs"]["deploy"]["permissions"] == {
@@ -199,18 +216,29 @@ def test_daily_dry_run_cannot_commit_or_deploy_and_non_dry_run_is_data_only() ->
     source = workflow_source("daily.yml")
     update = payload["jobs"]["update"]
     assert update["outputs"]["dry_run"] == "${{ steps.options.outputs.dry_run }}"
+    checkout = next(
+        step
+        for step in update["steps"]
+        if str(step.get("uses", "")).startswith("actions/checkout")
+    )
+    assert checkout["with"]["ref"] == "${{ github.event.repository.default_branch }}"
     for name in ("Validate persisted data", "Commit and push generated data"):
         assert step_named(payload, "update", name)["if"] == (
             "steps.options.outputs.dry_run == 'false'"
         )
+    commit_step = step_named(payload, "update", "Commit and push generated data")
+    assert commit_step["env"]["DEFAULT_BRANCH"] == (
+        "${{ github.event.repository.default_branch }}"
+    )
+    assert 'git check-ref-format "refs/heads/${DEFAULT_BRANCH}"' in commit_step["run"]
     assert payload["jobs"]["build"]["if"] == "needs.update.outputs.dry_run == 'false'"
     assert payload["jobs"]["deploy"]["if"] == "needs.update.outputs.dry_run == 'false'"
     assert "git add -- data" in source
     assert "git diff --cached --name-only" in source
     assert "git add ." not in source
     assert "git add -A" not in source
-    assert "git rebase origin/main" in source
-    assert "git push origin HEAD:main" in source
+    assert 'git rebase "refs/remotes/origin/${DEFAULT_BRANCH}"' in source
+    assert 'git push origin "HEAD:refs/heads/${DEFAULT_BRANCH}"' in source
 
 
 def test_daily_non_dry_run_builds_and_deploys_latest_main_in_the_same_run() -> None:
@@ -223,7 +251,7 @@ def test_daily_non_dry_run_builds_and_deploys_latest_main_in_the_same_run() -> N
         for step in build["steps"]
         if str(step.get("uses", "")).startswith("actions/checkout")
     )
-    assert checkout["with"]["ref"] == "main"
+    assert checkout["with"]["ref"] == "${{ github.event.repository.default_branch }}"
     assert any(
         str(step.get("uses", "")).startswith("withastro/action")
         for step in build["steps"]
