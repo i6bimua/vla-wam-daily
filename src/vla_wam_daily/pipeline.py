@@ -1,10 +1,12 @@
 import json
 import logging
+import re
 from collections.abc import Iterable, Mapping, Sequence
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from types import MappingProxyType
 from typing import Protocol
 
 from pydantic import HttpUrl
@@ -36,6 +38,10 @@ from vla_wam_daily.storage import (
 )
 
 LOGGER = logging.getLogger(__name__)
+ARXIV_SELECTOR_RE = re.compile(
+    r"(?P<year>\d{2})(?P<month>0[1-9]|1[0-2])"
+    r"\.(?P<number>\d{4,5})(?:v(?P<version>[1-9]\d*))?"
+)
 
 
 class CandidateLimitError(RuntimeError):
@@ -69,21 +75,120 @@ class FigureFetcher(Protocol):
 
 
 @dataclass(frozen=True)
+class _ForceSelector:
+    raw: str
+    arxiv_id: str
+    version: int | None
+
+    def matches(self, identity: tuple[str, int]) -> bool:
+        arxiv_id, version = identity
+        return arxiv_id == self.arxiv_id and (self.version is None or version == self.version)
+
+
+@dataclass(frozen=True)
 class RunReport:
     stats: RunStats
-    published: list[PaperRecord]
+    published: tuple[PaperRecord, ...]
     dry_run: bool
 
 
 @dataclass(frozen=True)
 class FigureEnrichment:
-    records: list[PaperRecord]
-    cache: dict[str, FigureCacheEntry]
+    records: tuple[PaperRecord, ...]
+    cache: Mapping[str, FigureCacheEntry]
     cache_hits: int
     requests: int
     available: int
     unavailable: int
     failed: int
+
+
+def _require_bounded_integer(
+    value: object,
+    *,
+    name: str,
+    minimum: int,
+    maximum: int,
+) -> int:
+    if type(value) is not int or not minimum <= value <= maximum:
+        raise ValueError(f"{name} must be an integer from {minimum} through {maximum}")
+    return value
+
+
+def _parse_force_selector(value: object) -> _ForceSelector:
+    if type(value) is not str:
+        raise TypeError("force_ids members must be strings")
+    if value != value.strip():
+        raise ValueError("force_ids members must be trimmed")
+    match = ARXIV_SELECTOR_RE.fullmatch(value)
+    if match is None or int(match.group("year") + match.group("month")) < 704:
+        raise ValueError(f"invalid modern arXiv selector: {value!r}")
+    arxiv_id = f"{match.group('year')}{match.group('month')}.{match.group('number')}"
+    version_text = match.group("version")
+    return _ForceSelector(
+        raw=value,
+        arxiv_id=arxiv_id,
+        version=int(version_text) if version_text is not None else None,
+    )
+
+
+def _validate_run_inputs(
+    *,
+    data_dir: object,
+    prompt: object,
+    lookback_days: object,
+    threshold: object,
+    force_ids: object,
+    dry_run: object,
+    now: object,
+) -> tuple[Path, str, int, int, list[str], tuple[_ForceSelector, ...], bool, datetime]:
+    if not isinstance(data_dir, Path):
+        raise TypeError("data_dir must be a Path")
+    if not isinstance(now, datetime):
+        raise TypeError("now must be a datetime")
+    if now.utcoffset() is None:
+        raise ValueError("now must be timezone-aware")
+    normalized_now = now.astimezone(UTC)
+    normalized_lookback = _require_bounded_integer(
+        lookback_days,
+        name="lookback_days",
+        minimum=1,
+        maximum=31,
+    )
+    normalized_threshold = _require_bounded_integer(
+        threshold,
+        name="threshold",
+        minimum=1,
+        maximum=10,
+    )
+    if type(dry_run) is not bool:
+        raise TypeError("dry_run must be a bool")
+    if not isinstance(prompt, str):
+        raise TypeError("prompt must be a string")
+    if not prompt.strip():
+        raise ValueError("prompt must not be blank")
+    if type(force_ids) is not list:
+        raise TypeError("force_ids must be a list")
+
+    selectors: list[_ForceSelector] = []
+    normalized_force_ids: list[str] = []
+    seen: set[str] = set()
+    for value in force_ids:
+        selector = _parse_force_selector(value)
+        if selector.raw not in seen:
+            seen.add(selector.raw)
+            selectors.append(selector)
+            normalized_force_ids.append(selector.raw)
+    return (
+        data_dir,
+        prompt,
+        normalized_lookback,
+        normalized_threshold,
+        normalized_force_ids,
+        tuple(selectors),
+        dry_run,
+        normalized_now,
+    )
 
 
 def _paper_preference_key(paper: RawPaper) -> str:
@@ -212,8 +317,8 @@ def enrich_figures(
         enriched.append(public_record)
 
     return FigureEnrichment(
-        records=enriched,
-        cache=updated_cache,
+        records=tuple(enriched),
+        cache=MappingProxyType(dict(updated_cache)),
         cache_hits=cache_hits,
         requests=requests,
         available=available,
@@ -236,8 +341,24 @@ def run_daily(
     dry_run: bool,
     now: datetime,
 ) -> RunReport:
-    normalized_force_ids = list(dict.fromkeys(force_ids))
-    forced_id_set = set(normalized_force_ids)
+    (
+        data_dir,
+        prompt,
+        lookback_days,
+        threshold,
+        normalized_force_ids,
+        force_selectors,
+        dry_run,
+        now,
+    ) = _validate_run_inputs(
+        data_dir=data_dir,
+        prompt=prompt,
+        lookback_days=lookback_days,
+        threshold=threshold,
+        force_ids=force_ids,
+        dry_run=dry_run,
+        now=now,
+    )
     recent = fetcher.fetch_recent(
         categories=list(config.arxiv.categories),
         since=now - timedelta(days=lookback_days),
@@ -245,15 +366,31 @@ def run_daily(
         max_results_per_category=config.arxiv.max_results_per_category,
     )
     forced = fetcher.fetch_by_ids(normalized_force_ids)
-    papers = _collect_papers(recent, forced)
+    forced_by_identity = _deduplicate_papers(forced)
+    forced_rules_by_identity: dict[tuple[str, int], list[str]] = {}
+    for identity in sorted(forced_by_identity):
+        matching_selectors = [
+            selector for selector in force_selectors if selector.matches(identity)
+        ]
+        if not matching_selectors:
+            arxiv_id, version = identity
+            raise ValueError(
+                f"forced arXiv result {arxiv_id}v{version} does not match any requested selector"
+            )
+        forced_rules_by_identity[identity] = [
+            f"forced:{selector.raw}" for selector in matching_selectors
+        ]
+    forced_identities = frozenset(forced_by_identity)
+    papers = _collect_papers(recent, list(forced_by_identity.values()))
 
     candidates: list[tuple[RawPaper, list[str]]] = []
     for paper in papers:
+        identity = paper.arxiv_id, paper.version
         rules = match_paper(paper, config.prefilter)
         if rules:
             candidates.append((paper, rules))
-        elif paper.arxiv_id in forced_id_set:
-            candidates.append((paper, [f"forced:{paper.arxiv_id}"]))
+        elif identity in forced_identities:
+            candidates.append((paper, forced_rules_by_identity[identity]))
 
     if len(candidates) > config.analysis.max_candidates:
         raise CandidateLimitError(
@@ -272,7 +409,7 @@ def run_daily(
             config.analysis.prompt_version,
         )
         entry = analysis_cache.get(key)
-        if entry is not None and paper.arxiv_id not in forced_id_set:
+        if entry is not None and (paper.arxiv_id, paper.version) not in forced_identities:
             records.append(entry.record)
             cache_hits += 1
         else:

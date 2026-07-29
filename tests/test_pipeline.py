@@ -3,8 +3,9 @@ import threading
 import time
 from collections.abc import Iterable
 from copy import deepcopy
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 from pathlib import Path
+from types import MappingProxyType
 from typing import Any
 
 import pytest
@@ -25,7 +26,12 @@ from vla_wam_daily.models import (
     RunStats,
     TokenUsage,
 )
-from vla_wam_daily.pipeline import CandidateLimitError, QualityGateError, run_daily
+from vla_wam_daily.pipeline import (
+    CandidateLimitError,
+    QualityGateError,
+    enrich_figures,
+    run_daily,
+)
 from vla_wam_daily.storage import cache_key, load_cache, load_data_file, load_figure_cache
 
 NOW = datetime(2026, 7, 30, 2, 30, tzinfo=UTC)
@@ -119,7 +125,25 @@ class FakeFetcher:
     def fetch_by_ids(self, arxiv_ids: Iterable[str]) -> list[RawPaper]:
         ids = tuple(arxiv_ids)
         self.forced_calls.append(ids)
-        return [paper for paper in self.forced if paper.arxiv_id in ids]
+        selected: list[RawPaper] = []
+        for paper in self.forced:
+            for selector in ids:
+                if "v" in selector:
+                    arxiv_id, version_text = selector.rsplit("v", maxsplit=1)
+                    if paper.arxiv_id == arxiv_id and paper.version == int(version_text):
+                        selected.append(paper)
+                        break
+                elif paper.arxiv_id == selector:
+                    selected.append(paper)
+                    break
+        return selected
+
+
+class NoncompliantForcedFetcher(FakeFetcher):
+    def fetch_by_ids(self, arxiv_ids: Iterable[str]) -> list[RawPaper]:
+        ids = tuple(arxiv_ids)
+        self.forced_calls.append(ids)
+        return list(self.forced)
 
 
 class ProgrammableAnalysisClient:
@@ -142,6 +166,7 @@ class ProgrammableAnalysisClient:
             total_tokens=15,
         )
         self.calls: list[dict[str, object]] = []
+        self.system_prompts: list[str] = []
         self._lock = threading.Lock()
 
     def analyze(
@@ -154,6 +179,7 @@ class ProgrammableAnalysisClient:
         arxiv_id = paper["arxiv_id"]
         with self._lock:
             self.calls.append(paper)
+            self.system_prompts.append(system_prompt)
         time.sleep(self.delays.get(arxiv_id, 0))
         failure = self.failures.get(arxiv_id)
         if failure is not None:
@@ -201,9 +227,12 @@ def run(
     analysis_client: ProgrammableAnalysisClient | None = None,
     figure_fetcher: FakeFigureFetcher | None = None,
     config: AppConfig | None = None,
-    threshold: int = 6,
-    force_ids: list[str] | None = None,
-    dry_run: bool = True,
+    lookback_days: Any = 3,
+    threshold: Any = 6,
+    force_ids: Any = None,
+    dry_run: Any = True,
+    now: Any = NOW,
+    prompt: Any = PROMPT,
 ):
     return run_daily(
         config=config or configured(),
@@ -211,12 +240,12 @@ def run(
         fetcher=fetcher,
         analysis_client=analysis_client or ProgrammableAnalysisClient(),
         figure_fetcher=figure_fetcher or FakeFigureFetcher(),
-        prompt=PROMPT,
-        lookback_days=3,
+        prompt=prompt,
+        lookback_days=lookback_days,
         threshold=threshold,
-        force_ids=force_ids or [],
+        force_ids=[] if force_ids is None else force_ids,
         dry_run=dry_run,
-        now=NOW,
+        now=now,
     )
 
 
@@ -277,6 +306,103 @@ def test_candidate_limit_is_checked_before_any_model_or_figure_request(
     assert not any(tmp_path.iterdir())
 
 
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("now", datetime(2026, 7, 30, 2, 30)),
+        ("now", "2026-07-30T02:30:00Z"),
+        ("lookback_days", 0),
+        ("lookback_days", -3),
+        ("lookback_days", 32),
+        ("lookback_days", True),
+        ("lookback_days", 3.0),
+        ("threshold", 0),
+        ("threshold", 11),
+        ("threshold", True),
+        ("threshold", 6.0),
+        ("dry_run", "true"),
+        ("dry_run", 1),
+        ("prompt", ""),
+        ("prompt", " \n\t"),
+        ("prompt", 123),
+        ("force_ids", ("2607.12345",)),
+        ("force_ids", [" 2607.12345"]),
+        ("force_ids", ["2607.12345 "]),
+        ("force_ids", ["2607.12345v0"]),
+        ("force_ids", ["2607.123"]),
+        ("force_ids", ["0601.12345"]),
+        ("force_ids", [123]),
+    ],
+)
+def test_invalid_runtime_input_is_rejected_before_fetch_or_cache_access(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    field: str,
+    value: object,
+) -> None:
+    fetcher = FakeFetcher()
+    storage_calls: list[str] = []
+
+    def load_analysis_spy(_data_dir: Path) -> dict[str, CacheEntry]:
+        storage_calls.append("analysis")
+        return {}
+
+    def load_figure_spy(_data_dir: Path) -> dict[str, FigureCacheEntry]:
+        storage_calls.append("figure")
+        return {}
+
+    monkeypatch.setattr(pipeline_module, "load_cache", load_analysis_spy)
+    monkeypatch.setattr(pipeline_module, "load_figure_cache", load_figure_spy)
+    kwargs: dict[str, object] = {field: value}
+
+    with pytest.raises((TypeError, ValueError)):
+        run(tmp_path, fetcher=fetcher, **kwargs)
+
+    assert fetcher.recent_calls == []
+    assert fetcher.forced_calls == []
+    assert storage_calls == []
+    assert not any(tmp_path.iterdir())
+
+
+def test_runtime_normalizes_now_preserves_prompt_and_stably_deduplicates_force_ids(
+    tmp_path: Path,
+) -> None:
+    local_now = datetime(
+        2026,
+        7,
+        30,
+        10,
+        30,
+        tzinfo=timezone(timedelta(hours=8)),
+    )
+    fetcher = FakeFetcher(forced=[raw_paper(version=2)])
+    client = ProgrammableAnalysisClient()
+    figure_fetcher = FakeFigureFetcher()
+    prompt = "  Keep exact prompt whitespace.  "
+
+    report = run(
+        tmp_path,
+        fetcher=fetcher,
+        analysis_client=client,
+        figure_fetcher=figure_fetcher,
+        force_ids=[
+            "2607.12345v2",
+            "2607.12345v2",
+            "2607.12345",
+            "2607.12345",
+        ],
+        prompt=prompt,
+        now=local_now,
+    )
+
+    assert fetcher.forced_calls == [("2607.12345v2", "2607.12345")]
+    assert fetcher.recent_calls[0]["until"] == NOW
+    assert fetcher.recent_calls[0]["since"] == NOW - timedelta(days=3)
+    assert client.system_prompts == [prompt]
+    assert figure_fetcher.calls == [("2607.12345", 2, NOW)]
+    assert report.published[0].provenance.analyzed_at == NOW
+
+
 def test_analysis_cache_is_reused_but_forced_id_bypasses_it(tmp_path: Path) -> None:
     cached = analyzed_record()
     key, entry = analysis_entry(cached)
@@ -309,6 +435,124 @@ def test_analysis_cache_is_reused_but_forced_id_bypasses_it(tmp_path: Path) -> N
     assert forced_report.stats.cache_hits == 0
     assert forced_report.stats.model_calls == 1
     assert len(client.calls) == 1
+
+
+def test_versioned_force_bypasses_only_the_returned_cached_version(
+    tmp_path: Path,
+) -> None:
+    cached_records = [
+        analyzed_record(version=1),
+        analyzed_record(version=2),
+    ]
+    analysis_cache = dict(analysis_entry(record) for record in cached_records)
+    figure_cache = dict(
+        figure_entry(make_gallery(version=record.version)) for record in cached_records
+    )
+    pipeline_module.save_successful_run(
+        tmp_path,
+        [],
+        analysis_cache,
+        RunStats(),
+        NOW - timedelta(hours=1),
+        figure_cache=figure_cache,
+    )
+    client = ProgrammableAnalysisClient()
+    fetcher = FakeFetcher(
+        recent=[raw_paper(version=1), raw_paper(version=2)],
+        forced=[raw_paper(version=2)],
+    )
+
+    report = run(
+        tmp_path,
+        fetcher=fetcher,
+        analysis_client=client,
+        force_ids=["2607.12345v2"],
+    )
+
+    assert fetcher.forced_calls == [("2607.12345v2",)]
+    assert report.stats.cache_hits == 1
+    assert report.stats.model_calls == 1
+    assert [paper.version for paper in report.published] == [2, 1]
+    assert len(client.calls) == 1
+
+
+def test_versioned_force_includes_unmatched_returned_version(tmp_path: Path) -> None:
+    client = ProgrammableAnalysisClient()
+
+    report = run(
+        tmp_path,
+        fetcher=FakeFetcher(forced=[raw_paper(version=2, matched=False)]),
+        analysis_client=client,
+        force_ids=["2607.12345v2"],
+    )
+
+    assert report.stats.prefiltered == 1
+    assert report.stats.model_calls == 1
+    assert report.published[0].version == 2
+    assert report.published[0].matched_rules == ("forced:2607.12345v2",)
+
+
+def test_unversioned_force_affects_only_identity_actually_returned_by_fetcher(
+    tmp_path: Path,
+) -> None:
+    cached_records = [
+        analyzed_record(version=1),
+        analyzed_record(version=2),
+    ]
+    pipeline_module.save_successful_run(
+        tmp_path,
+        [],
+        dict(analysis_entry(record) for record in cached_records),
+        RunStats(),
+        NOW - timedelta(hours=1),
+        figure_cache=dict(
+            figure_entry(make_gallery(version=record.version)) for record in cached_records
+        ),
+    )
+    client = ProgrammableAnalysisClient()
+
+    report = run(
+        tmp_path,
+        fetcher=FakeFetcher(
+            recent=[raw_paper(version=1), raw_paper(version=2)],
+            forced=[raw_paper(version=2)],
+        ),
+        analysis_client=client,
+        force_ids=["2607.12345"],
+    )
+
+    assert report.stats.cache_hits == 1
+    assert report.stats.model_calls == 1
+    assert len(client.calls) == 1
+
+
+@pytest.mark.parametrize(
+    ("selector", "returned"),
+    [
+        ("2607.12345", raw_paper("2607.99999")),
+        ("2607.12345v2", raw_paper(version=1)),
+    ],
+    ids=["wrong-id", "wrong-version"],
+)
+def test_forced_fetcher_entry_must_match_at_least_one_selector(
+    tmp_path: Path,
+    selector: str,
+    returned: RawPaper,
+) -> None:
+    fetcher = NoncompliantForcedFetcher(forced=[returned])
+    client = ProgrammableAnalysisClient()
+
+    with pytest.raises(ValueError, match="forced arXiv result"):
+        run(
+            tmp_path,
+            fetcher=fetcher,
+            analysis_client=client,
+            force_ids=[selector],
+            dry_run=False,
+        )
+
+    assert client.calls == []
+    assert not any(tmp_path.iterdir())
 
 
 def test_unmatched_forced_paper_gets_a_traceable_synthetic_rule(tmp_path: Path) -> None:
@@ -428,7 +672,7 @@ def test_zero_candidates_and_all_cached_candidates_make_no_model_calls(
         fetcher=FakeFetcher([raw_paper(matched=False)]),
         analysis_client=empty_client,
     )
-    assert empty.published == []
+    assert empty.published == ()
     assert empty.stats.prefiltered == 0
     assert empty.stats.model_calls == 0
 
@@ -690,5 +934,32 @@ def test_persisted_success_contains_both_caches_and_only_checked_public_records(
     assert len(load_figure_cache(tmp_path)) == 1
     latest = load_data_file(tmp_path / "latest.json")
     assert latest is not None
-    assert latest.papers == tuple(report.published)
+    assert latest.papers == report.published
     assert all(isinstance(paper.figure_gallery, FigureGallery) for paper in latest.papers)
+
+
+def test_report_and_figure_enrichment_expose_immutable_snapshots(
+    tmp_path: Path,
+) -> None:
+    mutable_cache: dict[str, FigureCacheEntry] = {}
+    enrichment = enrich_figures(
+        [analyzed_record()],
+        figure_fetcher=FakeFigureFetcher(),
+        cache=mutable_cache,
+        now=NOW,
+    )
+
+    assert isinstance(enrichment.records, tuple)
+    assert isinstance(enrichment.cache, MappingProxyType)
+    assert mutable_cache == {}
+    with pytest.raises(TypeError):
+        enrichment.cache["2607.99999:v1"] = next(iter(enrichment.cache.values()))  # type: ignore[index]
+
+    report = run(
+        tmp_path,
+        fetcher=FakeFetcher([raw_paper()]),
+    )
+    assert isinstance(report.published, tuple)
+    with pytest.raises(TypeError):
+        report.published[0] = report.published[0]  # type: ignore[index]
+    assert report.stats.published == len(report.published)
