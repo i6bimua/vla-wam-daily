@@ -139,10 +139,32 @@ def _unsafe_storage_path(name: str) -> ValueError:
     return ValueError(f"storage path resolves outside data directory: {name}")
 
 
+def _create_trusted_parent_chain(parent: Path) -> None:
+    missing: list[Path] = []
+    current = parent
+    while not current.exists():
+        if current == current.parent:
+            raise FileNotFoundError(f"no existing ancestor for data directory: {parent}")
+        missing.append(current)
+        current = current.parent
+    for directory in reversed(missing):
+        with suppress(FileExistsError):
+            os.mkdir(directory, 0o755)
+        parent_descriptor = os.open(
+            directory.parent,
+            _directory_open_flags(nofollow=False),
+        )
+        try:
+            os.fsync(parent_descriptor)
+        finally:
+            os.close(parent_descriptor)
+
+
 def _open_data_root(data_dir: Path, *, create: bool) -> int | None:
     _require_secure_directory_storage()
     created = False
     if create:
+        _create_trusted_parent_chain(data_dir.parent)
         try:
             os.mkdir(data_dir, 0o755)
             created = True
@@ -194,18 +216,41 @@ def _open_relative_directory(
         raise
 
 
+def _close_storage_descriptors(
+    descriptors: Sequence[int],
+    primary_error: BaseException | None,
+) -> None:
+    close_errors: list[OSError] = []
+    for descriptor in reversed(descriptors):
+        try:
+            os.close(descriptor)
+        except OSError as close_error:
+            close_errors.append(close_error)
+    if not close_errors:
+        return
+    if primary_error is not None:
+        for recorded_error in close_errors:
+            primary_error.add_note(f"storage descriptor close failed: {recorded_error}")
+        return
+    first_error, *remaining_errors = close_errors
+    for additional_error in remaining_errors:
+        first_error.add_note(f"additional storage descriptor close failure: {additional_error}")
+    raise first_error
+
+
 @contextmanager
 def _open_save_directories(
     data_dir: Path,
     *,
     need_archive: bool,
 ) -> Iterator[tuple[int, int, int | None]]:
-    root_descriptor = _open_data_root(data_dir, create=True)
-    if root_descriptor is None:  # pragma: no cover - create=True cannot return None
-        raise RuntimeError("data directory was not created")
-    cache_descriptor: int | None = None
-    archive_descriptor: int | None = None
+    descriptors: list[int] = []
+    primary_error: BaseException | None = None
     try:
+        root_descriptor = _open_data_root(data_dir, create=True)
+        if root_descriptor is None:  # pragma: no cover - create=True cannot return None
+            raise RuntimeError("data directory was not created")
+        descriptors.append(root_descriptor)
         cache_descriptor = _open_relative_directory(
             root_descriptor,
             "cache",
@@ -213,6 +258,8 @@ def _open_save_directories(
         )
         if cache_descriptor is None:  # pragma: no cover - create=True cannot return None
             raise RuntimeError("cache directory was not created")
+        descriptors.append(cache_descriptor)
+        archive_descriptor: int | None = None
         if need_archive:
             archive_descriptor = _open_relative_directory(
                 root_descriptor,
@@ -221,13 +268,13 @@ def _open_save_directories(
             )
             if archive_descriptor is None:  # pragma: no cover - create=True cannot return None
                 raise RuntimeError("archive directory was not created")
+            descriptors.append(archive_descriptor)
         yield root_descriptor, cache_descriptor, archive_descriptor
+    except BaseException as error:
+        primary_error = error
+        raise
     finally:
-        if archive_descriptor is not None:
-            os.close(archive_descriptor)
-        if cache_descriptor is not None:
-            os.close(cache_descriptor)
-        os.close(root_descriptor)
+        _close_storage_descriptors(descriptors, primary_error)
 
 
 def _open_temporary_at(directory_descriptor: int, target_name: str) -> tuple[int, str]:

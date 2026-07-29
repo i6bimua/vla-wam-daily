@@ -586,6 +586,52 @@ def test_save_allows_a_normal_not_yet_created_nested_data_directory(
     assert load_cache(data_dir) == {}
 
 
+def test_save_creates_a_missing_trusted_parent_chain(tmp_path: Path) -> None:
+    data_dir = tmp_path / "a/b/data"
+
+    save_successful_run(
+        data_dir,
+        [],
+        {},
+        RunStats(),
+        datetime(2026, 7, 27, 2, tzinfo=UTC),
+    )
+
+    assert load_data_file(data_dir / "latest.json") is not None
+    assert load_cache(data_dir) == {}
+
+
+def test_save_directory_cleanup_closes_every_fd_without_masking_business_error(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    data_dir = tmp_path / "data"
+    (data_dir / "cache").mkdir(parents=True)
+    (data_dir / "archive").mkdir()
+    real_close = os.close
+    close_attempts: list[int] = []
+
+    def fail_first_close(descriptor: int) -> None:
+        close_attempts.append(descriptor)
+        real_close(descriptor)
+        if len(close_attempts) == 1:
+            raise OSError("injected close failure")
+
+    monkeypatch.setattr(storage_module.os, "close", fail_first_close)
+
+    with (
+        pytest.raises(RuntimeError, match="business failure") as error,
+        storage_module._open_save_directories(
+            data_dir,
+            need_archive=True,
+        ),
+    ):
+        raise RuntimeError("business failure")
+
+    assert len(close_attempts) == 3
+    assert any("injected close failure" in note for note in getattr(error.value, "__notes__", ()))
+
+
 def test_save_fails_closed_without_nofollow_directory_capability(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
