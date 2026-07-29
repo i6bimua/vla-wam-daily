@@ -150,7 +150,7 @@ try {
   );
   requireBuild(
     result.url === `${base}papers/2607.12345/` &&
-      !result.url.startsWith(`${base}${base.slice(1)}`),
+      (base === "/" || !result.url.startsWith(`${base}${base.slice(1)}`)),
     "Pagefind result must map to the project-base paper URL",
   );
 } finally {

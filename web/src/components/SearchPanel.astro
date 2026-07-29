@@ -72,6 +72,12 @@ const base = import.meta.env.BASE_URL;
     </div>
   </form>
 
+  <noscript>
+    <p class="noscript-notice">
+      全文搜索需要启用 JavaScript；请启用后重新加载此页面。
+    </p>
+  </noscript>
+
   <p
     class="search-status"
     data-search-status
@@ -81,6 +87,9 @@ const base = import.meta.env.BASE_URL;
     输入关键词开始搜索。
   </p>
   <ol class="search-results" data-search-results></ol>
+  <p class="search-load-more">
+    <button data-load-more type="button" hidden disabled>加载更多</button>
+  </p>
 </section>
 
 <script>
@@ -92,6 +101,8 @@ const base = import.meta.env.BASE_URL;
   import type { Topic } from "../lib/schema";
   import {
     buildPagefindFilters,
+    createRetryableLoader,
+    loadPagefindResultBatch,
     resolvePagefindResultHref,
     type PagefindFilterValue,
   } from "../lib/search";
@@ -113,9 +124,6 @@ const base = import.meta.env.BASE_URL;
     ) => Promise<{ results: PagefindResult[] }>;
   }
 
-  let requestGeneration = 0;
-  let pagefindPromise: Promise<PagefindModule> | null = null;
-
   function stateFromSearchForm(form: HTMLFormElement): FilterState {
     const params = new URLSearchParams();
     for (const [key, value] of new FormData(form)) {
@@ -136,13 +144,6 @@ const base = import.meta.env.BASE_URL;
       .forEach((input) => {
         input.checked = state.topics.includes(input.value as Topic);
       });
-  }
-
-  function loadPagefind(base: string): Promise<PagefindModule> {
-    pagefindPromise ??= import(
-      /* @vite-ignore */ `${base}pagefind/pagefind.js`
-    ) as Promise<PagefindModule>;
-    return pagefindPromise;
   }
 
   function appendSearchResult(
@@ -174,7 +175,7 @@ const base = import.meta.env.BASE_URL;
     history.replaceState(
       null,
       "",
-      `${location.pathname}${query ? `?${query}` : ""}`,
+      `${location.pathname}${query ? `?${query}` : ""}${location.hash}`,
     );
   }
 
@@ -186,13 +187,84 @@ const base = import.meta.env.BASE_URL;
       const list = panel.querySelector<HTMLOListElement>(
         "[data-search-results]",
       );
+      const loadMore =
+        panel.querySelector<HTMLButtonElement>("[data-load-more]");
       const base = panel.dataset.base;
-      if (!form || !status || !list || !base) return;
+      if (!form || !status || !list || !loadMore || !base) return;
+
+      let requestGeneration = 0;
+      let activeResults: PagefindResult[] = [];
+      let nextOffset = 0;
+      let renderedCount = 0;
+      let failedCount = 0;
+      let loadingBatch = false;
+      const loadPagefind = createRetryableLoader(
+        () =>
+          import(
+            /* @vite-ignore */ `${base}pagefind/pagefind.js`
+          ) as Promise<PagefindModule>,
+      );
+
+      const resetResults = (): void => {
+        activeResults = [];
+        nextOffset = 0;
+        renderedCount = 0;
+        failedCount = 0;
+        loadingBatch = false;
+        list.replaceChildren();
+        loadMore.hidden = true;
+        loadMore.disabled = true;
+        loadMore.textContent = "加载更多";
+      };
+
+      const updateProgress = (): void => {
+        status.textContent = `已展示 ${renderedCount} / ${activeResults.length} 篇论文，失败 ${failedCount} 篇。`;
+        const hasMore = nextOffset < activeResults.length;
+        loadMore.hidden = !hasMore;
+        loadMore.disabled = !hasMore;
+        loadMore.textContent = "加载更多";
+      };
+
+      const loadNextBatch = async (generation: number): Promise<void> => {
+        if (loadingBatch || nextOffset >= activeResults.length) return;
+        loadingBatch = true;
+        loadMore.hidden = false;
+        loadMore.disabled = true;
+        loadMore.textContent = "正在加载…";
+        status.textContent =
+          nextOffset === 0
+            ? `正在加载首批结果（共 ${activeResults.length} 篇）…`
+            : `正在加载更多结果（已展示 ${renderedCount} / ${activeResults.length} 篇）…`;
+
+        try {
+          const batch = await loadPagefindResultBatch(
+            activeResults,
+            nextOffset,
+          );
+          if (generation !== requestGeneration) return;
+
+          nextOffset = batch.nextOffset;
+          failedCount += batch.failedCount;
+          for (const result of batch.values) {
+            if (appendSearchResult(list, result, base)) renderedCount += 1;
+            else failedCount += 1;
+          }
+          loadingBatch = false;
+          updateProgress();
+        } catch {
+          if (generation !== requestGeneration) return;
+          loadingBatch = false;
+          loadMore.hidden = false;
+          loadMore.disabled = false;
+          loadMore.textContent = "重试加载";
+          status.textContent = "搜索暂时不可用，请稍后再试。";
+        }
+      };
 
       const runSearch = async (state: FilterState): Promise<void> => {
         const generation = ++requestGeneration;
         replaceSearchUrl(state);
-        list.replaceChildren();
+        resetResults();
         if (!state.query) {
           status.textContent = "输入关键词开始搜索。";
           return;
@@ -200,27 +272,22 @@ const base = import.meta.env.BASE_URL;
 
         status.textContent = "正在加载搜索索引…";
         try {
-          const pagefind = await loadPagefind(base);
+          const pagefind = await loadPagefind();
           if (generation !== requestGeneration) return;
           const response = await pagefind.search(state.query, {
             filters: buildPagefindFilters(state),
           });
           if (generation !== requestGeneration) return;
-          const results = await Promise.all(
-            response.results.map((result) => result.data()),
-          );
-          if (generation !== requestGeneration) return;
-
-          let rendered = 0;
-          for (const result of results) {
-            if (appendSearchResult(list, result, base)) rendered += 1;
+          activeResults = response.results;
+          if (!activeResults.length) {
+            status.textContent = "没有找到符合条件的论文。";
+            return;
           }
-          status.textContent = rendered
-            ? `找到 ${rendered} 篇论文。`
-            : "没有找到符合条件的论文。";
+
+          await loadNextBatch(generation);
         } catch {
           if (generation !== requestGeneration) return;
-          list.replaceChildren();
+          resetResults();
           status.textContent = "搜索暂时不可用，请稍后再试。";
         }
       };
@@ -231,13 +298,16 @@ const base = import.meta.env.BASE_URL;
         event.preventDefault();
         void runSearch(stateFromSearchForm(form));
       });
+      loadMore.addEventListener("click", () => {
+        void loadNextBatch(requestGeneration);
+      });
       form.addEventListener("reset", () => {
         requestGeneration += 1;
         queueMicrotask(() => {
           const clean = parseFilterState("");
           syncSearchForm(form, clean);
           replaceSearchUrl(clean);
-          list.replaceChildren();
+          resetResults();
           status.textContent = "输入关键词开始搜索。";
         });
       });
