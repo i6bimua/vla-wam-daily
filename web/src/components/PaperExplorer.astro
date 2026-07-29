@@ -1,0 +1,189 @@
+---
+import { createFilterPaper, serializeJsonForHtml, TOPICS } from "../lib/filter";
+import type { Paper } from "../lib/schema";
+import PaperCard from "./PaperCard.astro";
+
+interface Props {
+  papers: Paper[];
+}
+
+const { papers } = Astro.props;
+const filterRecords = papers.map(createFilterPaper);
+const serializedRecords = serializeJsonForHtml(filterRecords);
+---
+
+<section class="paper-explorer" data-explorer>
+  <form
+    class="explorer-controls"
+    data-filter-form
+    method="get"
+    aria-label="筛选今日论文"
+  >
+    <label class="explorer-controls__query" for="paper-filter-query">
+      <span>关键词</span>
+      <input
+        id="paper-filter-query"
+        type="search"
+        name="q"
+        maxlength="200"
+        autocomplete="off"
+        placeholder="标题、作者、方法…"
+      />
+    </label>
+
+    <fieldset class="explorer-controls__topics">
+      <legend>主题</legend>
+      <div class="explorer-topic-options">
+        {
+          TOPICS.map((topic) => (
+            <label>
+              <input type="checkbox" name="topic" value={topic} />
+              <span>{topic}</span>
+            </label>
+          ))
+        }
+      </div>
+    </fieldset>
+
+    <label for="paper-filter-score">
+      <span>最低相关性</span>
+      <select id="paper-filter-score" name="score">
+        {
+          Array.from({ length: 10 }, (_, index) => index + 1).map((score) => (
+            <option value={score} selected={score === 6}>
+              {score} 分
+            </option>
+          ))
+        }
+      </select>
+    </label>
+
+    <label for="paper-filter-code">
+      <span>代码</span>
+      <select id="paper-filter-code" name="code">
+        <option value="">全部</option>
+        <option value="yes">有代码</option>
+        <option value="no">未发现代码</option>
+      </select>
+    </label>
+
+    <label for="paper-filter-date">
+      <span>发布日期</span>
+      <input id="paper-filter-date" type="date" name="date" />
+    </label>
+
+    <div class="explorer-actions">
+      <button type="submit">应用筛选</button>
+      <button type="reset">重置</button>
+    </div>
+  </form>
+
+  <p class="explorer-count">
+    当前显示
+    <strong data-result-count aria-live="polite" aria-atomic="true">
+      {papers.length}
+    </strong>
+    篇论文
+  </p>
+
+  <div class="paper-grid">
+    {papers.map((paper) => <PaperCard paper={paper} />)}
+  </div>
+  <p class="empty-state" data-no-results hidden>
+    没有符合当前条件的论文，请调整筛选条件。
+  </p>
+
+  <script
+    type="application/json"
+    data-paper-json
+    set:html={serializedRecords}
+    is:inline
+  />
+</section>
+
+<script>
+  import {
+    filterPapers,
+    parseFilterState,
+    serializeFilterState,
+    type FilterPaper,
+    type FilterState,
+  } from "../lib/filter";
+  import type { Topic } from "../lib/schema";
+
+  function stateFromForm(form: HTMLFormElement): FilterState {
+    const params = new URLSearchParams();
+    for (const [key, value] of new FormData(form)) {
+      if (typeof value === "string") params.append(key, value);
+    }
+    return parseFilterState(params.toString());
+  }
+
+  function syncFilterForm(form: HTMLFormElement, state: FilterState): void {
+    const query = form.elements.namedItem("q") as HTMLInputElement;
+    const score = form.elements.namedItem("score") as HTMLSelectElement;
+    const code = form.elements.namedItem("code") as HTMLSelectElement;
+    const date = form.elements.namedItem("date") as HTMLInputElement;
+    query.value = state.query;
+    score.value = String(state.minimumScore);
+    code.value = state.code;
+    date.value = state.date;
+    form
+      .querySelectorAll<HTMLInputElement>('input[name="topic"]')
+      .forEach((input) => {
+        input.checked = state.topics.includes(input.value as Topic);
+      });
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-explorer]").forEach((root) => {
+    const form = root.querySelector<HTMLFormElement>("[data-filter-form]");
+    const source = root.querySelector<HTMLScriptElement>("[data-paper-json]");
+    if (!form || !source) return;
+
+    let papers: FilterPaper[];
+    try {
+      papers = JSON.parse(source.textContent ?? "[]") as FilterPaper[];
+    } catch {
+      return;
+    }
+
+    const render = (state: FilterState): void => {
+      const visible = new Set(
+        filterPapers(papers, state).map((paper) => paper.arxivId),
+      );
+      root
+        .querySelectorAll<HTMLElement>("[data-paper-card]")
+        .forEach((card) => {
+          card.hidden = !visible.has(card.dataset.id ?? "");
+        });
+      const count = root.querySelector<HTMLElement>("[data-result-count]");
+      const empty = root.querySelector<HTMLElement>("[data-no-results]");
+      if (count) count.textContent = String(visible.size);
+      if (empty) empty.hidden = visible.size !== 0;
+
+      const query = serializeFilterState(state);
+      history.replaceState(
+        null,
+        "",
+        `${location.pathname}${query ? `?${query}` : ""}`,
+      );
+    };
+
+    const initial = parseFilterState(location.search);
+    syncFilterForm(form, initial);
+    render(initial);
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      render(stateFromForm(form));
+    });
+    form.addEventListener("input", () => render(stateFromForm(form)));
+    form.addEventListener("reset", () => {
+      queueMicrotask(() => {
+        const clean = parseFilterState("");
+        syncFilterForm(form, clean);
+        render(clean);
+      });
+    });
+  });
+</script>

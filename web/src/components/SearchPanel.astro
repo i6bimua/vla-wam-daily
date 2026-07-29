@@ -1,0 +1,246 @@
+---
+import { TOPICS } from "../lib/filter";
+
+const base = import.meta.env.BASE_URL;
+---
+
+<section class="search-panel" data-search-panel data-base={base}>
+  <form
+    class="explorer-controls search-controls"
+    data-search-form
+    method="get"
+    action={`${base}search/`}
+    aria-label="全文搜索论文"
+  >
+    <label class="explorer-controls__query" for="pagefind-query">
+      <span>全文搜索</span>
+      <input
+        id="pagefind-query"
+        type="search"
+        name="q"
+        maxlength="200"
+        autocomplete="off"
+        required
+        placeholder="中文或英文关键词"
+      />
+    </label>
+
+    <fieldset class="explorer-controls__topics">
+      <legend>主题</legend>
+      <div class="explorer-topic-options">
+        {
+          TOPICS.map((topic) => (
+            <label>
+              <input type="checkbox" name="topic" value={topic} />
+              <span>{topic}</span>
+            </label>
+          ))
+        }
+      </div>
+    </fieldset>
+
+    <label for="pagefind-score">
+      <span>最低相关性</span>
+      <select id="pagefind-score" name="score">
+        {
+          Array.from({ length: 10 }, (_, index) => index + 1).map((score) => (
+            <option value={score} selected={score === 6}>
+              {score} 分
+            </option>
+          ))
+        }
+      </select>
+    </label>
+
+    <label for="pagefind-code">
+      <span>代码</span>
+      <select id="pagefind-code" name="code">
+        <option value="">全部</option>
+        <option value="yes">有代码</option>
+        <option value="no">未发现代码</option>
+      </select>
+    </label>
+
+    <label for="pagefind-date">
+      <span>发布日期</span>
+      <input id="pagefind-date" type="date" name="date" />
+    </label>
+
+    <div class="explorer-actions">
+      <button type="submit">搜索</button>
+      <button type="reset">重置</button>
+    </div>
+  </form>
+
+  <p
+    class="search-status"
+    data-search-status
+    aria-live="polite"
+    aria-atomic="true"
+  >
+    输入关键词开始搜索。
+  </p>
+  <ol class="search-results" data-search-results></ol>
+</section>
+
+<script>
+  import {
+    parseFilterState,
+    serializeFilterState,
+    type FilterState,
+  } from "../lib/filter";
+  import type { Topic } from "../lib/schema";
+  import {
+    buildPagefindFilters,
+    resolvePagefindResultHref,
+    type PagefindFilterValue,
+  } from "../lib/search";
+
+  interface PagefindResultData {
+    url: string;
+    meta: Record<string, string>;
+    plain_excerpt?: string;
+  }
+  interface PagefindResult {
+    data: () => Promise<PagefindResultData>;
+  }
+  interface PagefindModule {
+    search: (
+      query: string,
+      options: {
+        filters: Record<string, PagefindFilterValue>;
+      },
+    ) => Promise<{ results: PagefindResult[] }>;
+  }
+
+  let requestGeneration = 0;
+  let pagefindPromise: Promise<PagefindModule> | null = null;
+
+  function stateFromSearchForm(form: HTMLFormElement): FilterState {
+    const params = new URLSearchParams();
+    for (const [key, value] of new FormData(form)) {
+      if (typeof value === "string") params.append(key, value);
+    }
+    return parseFilterState(params.toString());
+  }
+
+  function syncSearchForm(form: HTMLFormElement, state: FilterState): void {
+    (form.elements.namedItem("q") as HTMLInputElement).value = state.query;
+    (form.elements.namedItem("score") as HTMLSelectElement).value = String(
+      state.minimumScore,
+    );
+    (form.elements.namedItem("code") as HTMLSelectElement).value = state.code;
+    (form.elements.namedItem("date") as HTMLInputElement).value = state.date;
+    form
+      .querySelectorAll<HTMLInputElement>('input[name="topic"]')
+      .forEach((input) => {
+        input.checked = state.topics.includes(input.value as Topic);
+      });
+  }
+
+  function loadPagefind(base: string): Promise<PagefindModule> {
+    pagefindPromise ??= import(
+      /* @vite-ignore */ `${base}pagefind/pagefind.js`
+    ) as Promise<PagefindModule>;
+    return pagefindPromise;
+  }
+
+  function appendSearchResult(
+    list: HTMLOListElement,
+    result: PagefindResultData,
+    base: string,
+  ): boolean {
+    const href = resolvePagefindResultHref(result.url, location.origin, base);
+    if (!href) return false;
+
+    const item = document.createElement("li");
+    const link = document.createElement("a");
+    const originalTitle = document.createElement("p");
+    const summary = document.createElement("p");
+    link.href = href;
+    link.textContent =
+      result.meta.title_zh ?? result.meta.title ?? "未命名论文";
+    originalTitle.className = "search-results__original";
+    originalTitle.textContent = result.meta.title ?? "";
+    summary.textContent =
+      result.meta.summary ?? result.plain_excerpt ?? "暂无摘要。";
+    item.append(link, originalTitle, summary);
+    list.append(item);
+    return true;
+  }
+
+  function replaceSearchUrl(state: FilterState): void {
+    const query = serializeFilterState(state);
+    history.replaceState(
+      null,
+      "",
+      `${location.pathname}${query ? `?${query}` : ""}`,
+    );
+  }
+
+  document
+    .querySelectorAll<HTMLElement>("[data-search-panel]")
+    .forEach((panel) => {
+      const form = panel.querySelector<HTMLFormElement>("[data-search-form]");
+      const status = panel.querySelector<HTMLElement>("[data-search-status]");
+      const list = panel.querySelector<HTMLOListElement>(
+        "[data-search-results]",
+      );
+      const base = panel.dataset.base;
+      if (!form || !status || !list || !base) return;
+
+      const runSearch = async (state: FilterState): Promise<void> => {
+        const generation = ++requestGeneration;
+        replaceSearchUrl(state);
+        list.replaceChildren();
+        if (!state.query) {
+          status.textContent = "输入关键词开始搜索。";
+          return;
+        }
+
+        status.textContent = "正在加载搜索索引…";
+        try {
+          const pagefind = await loadPagefind(base);
+          if (generation !== requestGeneration) return;
+          const response = await pagefind.search(state.query, {
+            filters: buildPagefindFilters(state),
+          });
+          if (generation !== requestGeneration) return;
+          const results = await Promise.all(
+            response.results.map((result) => result.data()),
+          );
+          if (generation !== requestGeneration) return;
+
+          let rendered = 0;
+          for (const result of results) {
+            if (appendSearchResult(list, result, base)) rendered += 1;
+          }
+          status.textContent = rendered
+            ? `找到 ${rendered} 篇论文。`
+            : "没有找到符合条件的论文。";
+        } catch {
+          if (generation !== requestGeneration) return;
+          list.replaceChildren();
+          status.textContent = "搜索暂时不可用，请稍后再试。";
+        }
+      };
+
+      const initial = parseFilterState(location.search);
+      syncSearchForm(form, initial);
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        void runSearch(stateFromSearchForm(form));
+      });
+      form.addEventListener("reset", () => {
+        requestGeneration += 1;
+        queueMicrotask(() => {
+          const clean = parseFilterState("");
+          syncSearchForm(form, clean);
+          replaceSearchUrl(clean);
+          list.replaceChildren();
+          status.textContent = "输入关键词开始搜索。";
+        });
+      });
+      if (initial.query) void runSearch(initial);
+    });
+</script>
