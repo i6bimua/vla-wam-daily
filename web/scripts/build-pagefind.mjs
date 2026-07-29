@@ -1,10 +1,13 @@
 import { mkdir, readdir, rm, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import { spawn } from "node:child_process";
+import { fileURLToPath } from "node:url";
 
 const dist = resolve("dist");
 const paperRoot = resolve(dist, "papers");
 const pagefindOutput = resolve(dist, "pagefind");
+const pagefindEntry = fileURLToPath(import.meta.resolve("pagefind"));
+const pagefindRunner = resolve(dirname(pagefindEntry), "runner", "bin.cjs");
 
 async function containsHtml(directory) {
   let entries;
@@ -26,8 +29,8 @@ async function containsHtml(directory) {
 async function runPagefind() {
   await new Promise((resolvePromise, reject) => {
     const child = spawn(
-      "pagefind",
-      ["--site", "dist", "--glob", "papers/**/*.html"],
+      process.execPath,
+      [pagefindRunner, "--site", "dist", "--glob", "papers/**/*.html"],
       { stdio: "inherit" },
     );
     child.once("error", reject);

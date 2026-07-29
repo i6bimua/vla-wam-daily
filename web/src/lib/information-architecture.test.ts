@@ -125,5 +125,8 @@ describe("global navigation contract", () => {
     expect(buildScript).toContain('"papers/**/*.html"');
     expect(buildScript).toContain("pagefind-entry.json");
     expect(buildScript).toContain("results: []");
+    expect(buildScript).toContain('import.meta.resolve("pagefind")');
+    expect(buildScript).toMatch(/spawn\(\s*process\.execPath/);
+    expect(buildScript).not.toContain('spawn("pagefind"');
   });
 });
