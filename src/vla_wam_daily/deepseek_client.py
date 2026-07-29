@@ -226,7 +226,7 @@ class DeepSeekClient:
             except _RetryableStatusError as exc:
                 last_detail = f"HTTP {exc.status_code}"
                 retry_after_value = exc.retry_after
-            except httpx.TransportError as exc:
+            except httpx.RequestError as exc:
                 last_detail = type(exc).__name__
 
             if attempt == self.retries:
@@ -301,7 +301,12 @@ class DeepSeekClient:
             raise DeepSeekResponseError("DeepSeek response usage totals are inconsistent")
 
         cache_fields = ("prompt_cache_hit_tokens", "prompt_cache_miss_tokens")
-        if all(field in raw_usage for field in cache_fields):
+        cache_fields_present = tuple(field in raw_usage for field in cache_fields)
+        if any(cache_fields_present) and not all(cache_fields_present):
+            raise DeepSeekResponseError(
+                "DeepSeek response usage cache fields must appear together"
+            )
+        if all(cache_fields_present):
             cache_hit, cache_miss = (raw_usage[field] for field in cache_fields)
             if (
                 isinstance(cache_hit, bool)

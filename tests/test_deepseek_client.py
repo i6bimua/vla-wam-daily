@@ -494,6 +494,37 @@ def test_usage_cache_counts_must_be_strict_nonnegative_and_sum_to_prompt(
             )
 
 
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("prompt_cache_hit_tokens", 100),
+        ("prompt_cache_miss_tokens", 100),
+    ],
+)
+def test_usage_cache_count_fields_must_appear_together(field: str, value: int) -> None:
+    usage = {
+        "prompt_tokens": 100,
+        "completion_tokens": 20,
+        "total_tokens": 120,
+        field: value,
+    }
+    transport = httpx.MockTransport(
+        lambda _request: completion_response(usage=usage)
+    )
+    with httpx.Client(transport=transport) as http_client:
+        client = DeepSeekClient(
+            api_key="test-key",
+            model="deepseek-v4-pro",
+            retries=1,
+            http_client=http_client,
+        )
+        with pytest.raises(DeepSeekResponseError, match="usage"):
+            client.analyze(
+                system_prompt="Return JSON.",
+                paper_json='{"title":"x"}',
+            )
+
+
 def test_official_usage_extensions_are_ignored() -> None:
     transport = httpx.MockTransport(
         lambda _request: completion_response(
@@ -908,6 +939,73 @@ def test_transport_exhaustion_has_no_secret_bearing_exception_chain() -> None:
         exc_info.value,
         secrets=(api_key, transport_detail),
     )
+
+
+def test_decoding_error_is_retried_without_secret_bearing_exception_chain() -> None:
+    api_key = "super-secret-decoding-key"
+    response_body = "private-corrupt-gzip-body"
+    attempts = 0
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        nonlocal attempts
+        attempts += 1
+        return httpx.Response(
+            200,
+            headers={
+                "content-type": "application/json",
+                "content-encoding": "gzip",
+            },
+            content=response_body.encode(),
+        )
+
+    with httpx.Client(transport=httpx.MockTransport(handler)) as http_client:
+        client = DeepSeekClient(
+            api_key=api_key,
+            model="deepseek-v4-pro",
+            retries=2,
+            retry_wait=0,
+            http_client=http_client,
+        )
+        with pytest.raises(RetryableDeepSeekError, match="DecodingError") as exc_info:
+            client.analyze(
+                system_prompt="Return JSON.",
+                paper_json='{"title":"x"}',
+            )
+
+    assert attempts == 2
+    assert_exception_graph_is_secret_safe(
+        exc_info.value,
+        secrets=(api_key, response_body),
+    )
+
+
+def test_response_validation_error_is_not_retried_as_request_error() -> None:
+    attempts = 0
+
+    def handler(_request: httpx.Request) -> httpx.Response:
+        nonlocal attempts
+        attempts += 1
+        return httpx.Response(
+            200,
+            headers={"content-type": "text/html"},
+            content=b"not-json",
+        )
+
+    with httpx.Client(transport=httpx.MockTransport(handler)) as http_client:
+        client = DeepSeekClient(
+            api_key="test-key",
+            model="deepseek-v4-pro",
+            retries=3,
+            retry_wait=0,
+            http_client=http_client,
+        )
+        with pytest.raises(DeepSeekResponseError, match="content type"):
+            client.analyze(
+                system_prompt="Return JSON.",
+                paper_json='{"title":"x"}',
+            )
+
+    assert attempts == 1
 
 
 @pytest.mark.parametrize("content_length", ["invalid", "-1"])
