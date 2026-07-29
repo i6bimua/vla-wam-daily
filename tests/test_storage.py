@@ -174,6 +174,79 @@ def test_load_cache_rejects_string_version_in_persisted_json(tmp_path: Path) -> 
         load_cache(tmp_path)
 
 
+@pytest.mark.parametrize("published", ["1", True])
+def test_data_file_loader_rejects_non_integer_published_stats(
+    tmp_path: Path,
+    published: object,
+) -> None:
+    payload = DataFile(
+        generated_at=datetime(2026, 7, 27, 2, tzinfo=UTC),
+        stats=RunStats(published=1),
+        papers=[make_record()],
+    ).model_dump(mode="json")
+    stats_payload = payload["stats"]
+    assert isinstance(stats_payload, dict)
+    stats_payload["published"] = published
+    path = tmp_path / "latest.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ValidationError):
+        load_data_file(path)
+
+
+@pytest.mark.parametrize("score", ["8", 8.0])
+def test_data_file_loader_rejects_non_integer_relevance_score(
+    tmp_path: Path,
+    score: object,
+) -> None:
+    payload = DataFile(
+        generated_at=datetime(2026, 7, 27, 2, tzinfo=UTC),
+        stats=RunStats(published=1),
+        papers=[make_record()],
+    ).model_dump(mode="json")
+    paper_payload = payload["papers"][0]
+    assert isinstance(paper_payload, dict)
+    analysis_payload = paper_payload["analysis"]
+    assert isinstance(analysis_payload, dict)
+    analysis_payload["relevance_score"] = score
+    path = tmp_path / "latest.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ValidationError):
+        load_data_file(path)
+
+
+@pytest.mark.parametrize("score", ["8", 8.0])
+def test_load_cache_rejects_non_integer_relevance_score(
+    tmp_path: Path,
+    score: object,
+) -> None:
+    key, entry = cache_entry()
+    payload = entry.model_dump(mode="json")
+    record_payload = payload["record"]
+    assert isinstance(record_payload, dict)
+    analysis_payload = record_payload["analysis"]
+    assert isinstance(analysis_payload, dict)
+    analysis_payload["relevance_score"] = score
+    path = tmp_path / "cache/analyses.json"
+    path.parent.mkdir(parents=True)
+    path.write_text(json.dumps({key: payload}), encoding="utf-8")
+
+    with pytest.raises(ValidationError):
+        load_cache(tmp_path)
+
+
+def test_normal_persisted_json_loads_datetime_urls_and_json_arrays() -> None:
+    data = load_data_file(Path("tests/fixtures/data/latest.json"))
+    cache = load_cache(Path("tests/fixtures/data"))
+
+    assert data is not None
+    assert isinstance(data.generated_at, datetime)
+    assert isinstance(data.papers[0].authors, tuple)
+    assert str(data.papers[0].resources.arxiv_url).startswith("https://arxiv.org/")
+    assert isinstance(next(iter(cache.values())).record.authors, tuple)
+
+
 def test_latest_is_replaced_by_each_successful_batch_including_an_empty_batch(
     tmp_path: Path,
 ) -> None:
@@ -407,10 +480,18 @@ def test_later_output_failure_keeps_latest_as_last_commit_marker_and_cleans_temp
     def fail_archive_replace(
         source: os.PathLike[str],
         target: os.PathLike[str],
+        *,
+        src_dir_fd: int | None = None,
+        dst_dir_fd: int | None = None,
     ) -> None:
-        if Path(target) == archive_path:
+        if Path(target).name == archive_path.name:
             raise OSError("archive replace failed")
-        real_replace(source, target)
+        real_replace(
+            source,
+            target,
+            src_dir_fd=src_dir_fd,
+            dst_dir_fd=dst_dir_fd,
+        )
 
     monkeypatch.setattr(storage_module.os, "replace", fail_archive_replace)
     with pytest.raises(OSError, match="archive replace failed"):
@@ -505,6 +586,48 @@ def test_save_allows_a_normal_not_yet_created_nested_data_directory(
     assert load_cache(data_dir) == {}
 
 
+def test_save_fails_closed_without_nofollow_directory_capability(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delattr(storage_module.os, "O_NOFOLLOW")
+
+    with pytest.raises(RuntimeError, match="secure directory-relative storage"):
+        save_successful_run(
+            tmp_path / "data",
+            [],
+            {},
+            RunStats(),
+            datetime(2026, 7, 27, 2, tzinfo=UTC),
+        )
+
+    assert not (tmp_path / "data").exists()
+
+
+def test_save_fails_closed_without_replace_dir_fd_capability(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def replace_without_dir_fds(
+        _source: os.PathLike[str],
+        _target: os.PathLike[str],
+    ) -> None:
+        raise AssertionError("path-based replace must not be attempted")
+
+    monkeypatch.setattr(storage_module.os, "replace", replace_without_dir_fds)
+
+    with pytest.raises(RuntimeError, match="secure directory-relative storage"):
+        save_successful_run(
+            tmp_path / "data",
+            [],
+            {},
+            RunStats(),
+            datetime(2026, 7, 27, 2, tzinfo=UTC),
+        )
+
+    assert not (tmp_path / "data").exists()
+
+
 def test_save_rejects_cache_directory_symlink_escape_before_any_write(
     tmp_path: Path,
 ) -> None:
@@ -550,6 +673,66 @@ def test_save_rejects_archive_directory_symlink_escape_before_any_write(
     assert not (data_dir / "latest.json").exists()
 
 
+def test_save_rejects_symlinked_archive_file_before_reading_or_writing(
+    tmp_path: Path,
+) -> None:
+    data_dir = tmp_path / "data"
+    archive_dir = data_dir / "archive"
+    outside_archive = tmp_path / "outside-archive.json"
+    archive_dir.mkdir(parents=True)
+    outside_archive.write_bytes(Path("tests/fixtures/data/archive/2026-07.json").read_bytes())
+    outside_before = outside_archive.read_bytes()
+    (archive_dir / "2026-07.json").symlink_to(outside_archive)
+
+    with pytest.raises(ValueError, match="outside data directory"):
+        save_successful_run(
+            data_dir,
+            [make_record()],
+            {},
+            RunStats(published=1),
+            datetime(2026, 7, 27, 2, tzinfo=UTC),
+        )
+
+    assert outside_archive.read_bytes() == outside_before
+    assert not (data_dir / "cache/analyses.json").exists()
+    assert not (data_dir / "latest.json").exists()
+
+
+def test_save_holds_cache_directory_fd_across_symlink_swap(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    data_dir = tmp_path / "data"
+    cache_dir = data_dir / "cache"
+    held_cache_dir = data_dir / "held-cache"
+    outside = tmp_path / "outside"
+    cache_dir.mkdir(parents=True)
+    outside.mkdir()
+    real_serialize = storage_module._serialize_json
+    swapped = False
+
+    def swap_cache_then_serialize(payload: object) -> str:
+        nonlocal swapped
+        if not swapped:
+            swapped = True
+            cache_dir.rename(held_cache_dir)
+            cache_dir.symlink_to(outside, target_is_directory=True)
+        return real_serialize(payload)
+
+    monkeypatch.setattr(storage_module, "_serialize_json", swap_cache_then_serialize)
+    save_successful_run(
+        data_dir,
+        [],
+        {},
+        RunStats(),
+        datetime(2026, 7, 27, 2, tzinfo=UTC),
+    )
+
+    assert not (outside / "analyses.json").exists()
+    assert (held_cache_dir / "analyses.json").exists()
+    assert load_data_file(data_dir / "latest.json") is not None
+
+
 def test_load_cache_rejects_cache_directory_symlink_escape(tmp_path: Path) -> None:
     data_dir = tmp_path / "data"
     outside = tmp_path / "outside"
@@ -564,6 +747,33 @@ def test_load_cache_rejects_cache_directory_symlink_escape(tmp_path: Path) -> No
 
     with pytest.raises(ValueError, match="outside data directory"):
         load_cache(data_dir)
+
+
+def test_first_data_directory_creation_fsyncs_its_parent(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    data_dir = tmp_path / "data"
+    parent_identity = (tmp_path.stat().st_dev, tmp_path.stat().st_ino)
+    fsynced_directories: list[tuple[int, int]] = []
+    real_fsync = os.fsync
+
+    def track_fsync(descriptor: int) -> None:
+        metadata = os.fstat(descriptor)
+        if stat.S_ISDIR(metadata.st_mode):
+            fsynced_directories.append((metadata.st_dev, metadata.st_ino))
+        real_fsync(descriptor)
+
+    monkeypatch.setattr(storage_module.os, "fsync", track_fsync)
+    save_successful_run(
+        data_dir,
+        [],
+        {},
+        RunStats(),
+        datetime(2026, 7, 27, 2, tzinfo=UTC),
+    )
+
+    assert parent_identity in fsynced_directories
 
 
 def test_data_file_loader_rejects_invalid_public_records(tmp_path: Path) -> None:

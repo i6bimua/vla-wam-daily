@@ -1,9 +1,13 @@
+import errno
 import hashlib
+import inspect
 import json
 import os
 import re
+import secrets
 import tempfile
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterator, Mapping, Sequence
+from contextlib import contextmanager, suppress
 from pathlib import Path
 from typing import Annotated
 
@@ -19,8 +23,9 @@ from vla_wam_daily.models import (
 
 ARXIV_ID_PATTERN = re.compile(r"^\d{4}\.\d{4,5}$")
 CACHE_KEY_PREFIX = "analysis:v1:"
-StrictPersistedVersion = Annotated[int, Field(strict=True, ge=1)]
-STRICT_PERSISTED_VERSION = TypeAdapter(StrictPersistedVersion)
+StrictPersistedInteger = Annotated[int, Field(strict=True)]
+STRICT_PERSISTED_INTEGER = TypeAdapter(StrictPersistedInteger)
+RUN_STATS_INTEGER_FIELDS = frozenset(RunStats.model_fields) - {"error_categories"}
 
 
 def _canonical_nonblank(name: str, value: str) -> str:
@@ -104,28 +109,260 @@ def atomic_write_json(path: Path, payload: object) -> None:
     _atomic_write_text(path, content)
 
 
-def load_data_file(path: Path) -> DataFile | None:
-    if not path.exists():
+def _require_secure_directory_storage() -> None:
+    required_flags = ("O_DIRECTORY", "O_NOFOLLOW")
+    required_dir_fd_functions = (os.open, os.mkdir, os.unlink)
+    try:
+        replace_supports_dir_fds = {
+            "src_dir_fd",
+            "dst_dir_fd",
+        }.issubset(inspect.signature(os.replace).parameters)
+    except (TypeError, ValueError):
+        replace_supports_dir_fds = False
+    if (
+        os.name != "posix"
+        or any(not hasattr(os, flag) for flag in required_flags)
+        or any(function not in os.supports_dir_fd for function in required_dir_fd_functions)
+        or not replace_supports_dir_fds
+    ):
+        raise RuntimeError("secure directory-relative storage is unavailable on this platform")
+
+
+def _directory_open_flags(*, nofollow: bool) -> int:
+    flags = os.O_RDONLY | os.O_DIRECTORY | getattr(os, "O_CLOEXEC", 0)
+    if nofollow:
+        flags |= os.O_NOFOLLOW
+    return flags
+
+
+def _unsafe_storage_path(name: str) -> ValueError:
+    return ValueError(f"storage path resolves outside data directory: {name}")
+
+
+def _open_data_root(data_dir: Path, *, create: bool) -> int | None:
+    _require_secure_directory_storage()
+    created = False
+    if create:
+        try:
+            os.mkdir(data_dir, 0o755)
+            created = True
+        except FileExistsError:
+            pass
+    if created:
+        parent_descriptor = os.open(
+            data_dir.parent,
+            _directory_open_flags(nofollow=False),
+        )
+        try:
+            os.fsync(parent_descriptor)
+        finally:
+            os.close(parent_descriptor)
+    try:
+        return os.open(data_dir, _directory_open_flags(nofollow=False))
+    except FileNotFoundError:
+        if create:
+            raise
         return None
-    raw = json.loads(path.read_text(encoding="utf-8"))
+
+
+def _open_relative_directory(
+    parent_descriptor: int,
+    name: str,
+    *,
+    create: bool,
+) -> int | None:
+    flags = _directory_open_flags(nofollow=True)
+    try:
+        return os.open(name, flags, dir_fd=parent_descriptor)
+    except FileNotFoundError:
+        if not create:
+            return None
+    except OSError as error:
+        if error.errno in {errno.ELOOP, errno.ENOTDIR}:
+            raise _unsafe_storage_path(name) from error
+        raise
+    try:
+        os.mkdir(name, 0o755, dir_fd=parent_descriptor)
+        os.fsync(parent_descriptor)
+    except FileExistsError:
+        pass
+    try:
+        return os.open(name, flags, dir_fd=parent_descriptor)
+    except OSError as error:
+        if error.errno in {errno.ELOOP, errno.ENOTDIR}:
+            raise _unsafe_storage_path(name) from error
+        raise
+
+
+@contextmanager
+def _open_save_directories(
+    data_dir: Path,
+    *,
+    need_archive: bool,
+) -> Iterator[tuple[int, int, int | None]]:
+    root_descriptor = _open_data_root(data_dir, create=True)
+    if root_descriptor is None:  # pragma: no cover - create=True cannot return None
+        raise RuntimeError("data directory was not created")
+    cache_descriptor: int | None = None
+    archive_descriptor: int | None = None
+    try:
+        cache_descriptor = _open_relative_directory(
+            root_descriptor,
+            "cache",
+            create=True,
+        )
+        if cache_descriptor is None:  # pragma: no cover - create=True cannot return None
+            raise RuntimeError("cache directory was not created")
+        if need_archive:
+            archive_descriptor = _open_relative_directory(
+                root_descriptor,
+                "archive",
+                create=True,
+            )
+            if archive_descriptor is None:  # pragma: no cover - create=True cannot return None
+                raise RuntimeError("archive directory was not created")
+        yield root_descriptor, cache_descriptor, archive_descriptor
+    finally:
+        if archive_descriptor is not None:
+            os.close(archive_descriptor)
+        if cache_descriptor is not None:
+            os.close(cache_descriptor)
+        os.close(root_descriptor)
+
+
+def _open_temporary_at(directory_descriptor: int, target_name: str) -> tuple[int, str]:
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW | getattr(os, "O_CLOEXEC", 0)
+    for _ in range(128):
+        temporary_name = f".{target_name}.{secrets.token_hex(12)}.tmp"
+        try:
+            descriptor = os.open(
+                temporary_name,
+                flags,
+                0o600,
+                dir_fd=directory_descriptor,
+            )
+        except FileExistsError:
+            continue
+        return descriptor, temporary_name
+    raise FileExistsError(f"could not allocate temporary file for {target_name}")
+
+
+def _atomic_write_text_at(
+    directory_descriptor: int,
+    target_name: str,
+    content: str,
+) -> None:
+    descriptor, temporary_name = _open_temporary_at(
+        directory_descriptor,
+        target_name,
+    )
+    try:
+        try:
+            handle = os.fdopen(descriptor, "w", encoding="utf-8", newline="\n")
+        except BaseException:
+            os.close(descriptor)
+            raise
+        with handle:
+            handle.write(content)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(
+            temporary_name,
+            target_name,
+            src_dir_fd=directory_descriptor,
+            dst_dir_fd=directory_descriptor,
+        )
+        os.fsync(directory_descriptor)
+    finally:
+        with suppress(FileNotFoundError):
+            os.unlink(temporary_name, dir_fd=directory_descriptor)
+
+
+def _read_text_at(directory_descriptor: int, name: str) -> str | None:
+    flags = os.O_RDONLY | os.O_NOFOLLOW | getattr(os, "O_CLOEXEC", 0)
+    try:
+        descriptor = os.open(name, flags, dir_fd=directory_descriptor)
+    except FileNotFoundError:
+        return None
+    except OSError as error:
+        if error.errno in {errno.ELOOP, errno.ENOTDIR}:
+            raise _unsafe_storage_path(name) from error
+        raise
+    try:
+        handle = os.fdopen(descriptor, "r", encoding="utf-8")
+    except BaseException:
+        os.close(descriptor)
+        raise
+    with handle:
+        return handle.read()
+
+
+def _validate_strict_integer(value: object) -> None:
+    STRICT_PERSISTED_INTEGER.validate_python(value, strict=True)
+
+
+def _validate_persisted_analysis(value: object) -> None:
+    if not isinstance(value, Mapping):
+        return
+    if "relevance_score" in value:
+        _validate_strict_integer(value["relevance_score"])
+
+
+def _validate_persisted_run_stats(value: object) -> None:
+    if not isinstance(value, Mapping):
+        return
+    for field in RUN_STATS_INTEGER_FIELDS:
+        if field in value:
+            _validate_strict_integer(value[field])
+    error_categories = value.get("error_categories")
+    if isinstance(error_categories, Mapping):
+        for count in error_categories.values():
+            _validate_strict_integer(count)
+
+
+def _validate_persisted_record(value: object) -> None:
+    if not isinstance(value, Mapping):
+        return
+    if "version" in value:
+        _validate_strict_integer(value["version"])
+    _validate_persisted_analysis(value.get("analysis"))
+    gallery = value.get("figure_gallery")
+    if not isinstance(gallery, Mapping):
+        return
+    figures = gallery.get("figures")
+    if not isinstance(figures, list):
+        return
+    for figure in figures:
+        if isinstance(figure, Mapping) and "number" in figure:
+            _validate_strict_integer(figure["number"])
+
+
+def _validate_data_file_payload(raw: object) -> None:
     if isinstance(raw, dict):
+        _validate_persisted_run_stats(raw.get("stats"))
         papers = raw.get("papers")
         if isinstance(papers, list):
             for paper in papers:
-                _validate_persisted_record_version(paper)
+                _validate_persisted_record(paper)
+
+
+def _load_data_file_text(content: str) -> DataFile:
+    raw = json.loads(content)
+    _validate_data_file_payload(raw)
     return DataFile.model_validate(raw)
 
 
-def _validate_persisted_record_version(value: object) -> None:
-    if isinstance(value, Mapping) and "version" in value:
-        STRICT_PERSISTED_VERSION.validate_python(value["version"], strict=True)
+def load_data_file(path: Path) -> DataFile | None:
+    if not path.exists():
+        return None
+    return _load_data_file_text(path.read_text(encoding="utf-8"))
 
 
 def _validated_cache_entry(top_level_key: str, value: object) -> CacheEntry:
     if isinstance(value, CacheEntry):
         value = value.model_dump(mode="json")
     if isinstance(value, Mapping):
-        _validate_persisted_record_version(value.get("record"))
+        _validate_persisted_record(value.get("record"))
     entry = CacheEntry.model_validate(value)
     if top_level_key != entry.key:
         raise ValueError("top-level cache key must match CacheEntry.key")
@@ -149,20 +386,39 @@ def _validated_cache(cache: Mapping[str, object]) -> dict[str, CacheEntry]:
     return validated
 
 
-def load_cache(data_dir: Path) -> dict[str, CacheEntry]:
-    path = data_dir / "cache/analyses.json"
-    _ensure_data_path_is_contained(data_dir, path)
-    if not path.exists():
-        return {}
-    raw = json.loads(path.read_text(encoding="utf-8"))
+def _load_cache_text(content: str) -> dict[str, CacheEntry]:
+    raw = json.loads(content)
     if not isinstance(raw, dict):
         raise ValueError("analysis cache root must be a JSON object")
     return _validated_cache(raw)
 
 
+def load_cache(data_dir: Path) -> dict[str, CacheEntry]:
+    root_descriptor = _open_data_root(data_dir, create=False)
+    if root_descriptor is None:
+        return {}
+    cache_descriptor: int | None = None
+    try:
+        cache_descriptor = _open_relative_directory(
+            root_descriptor,
+            "cache",
+            create=False,
+        )
+        if cache_descriptor is None:
+            return {}
+        content = _read_text_at(cache_descriptor, "analyses.json")
+        if content is None:
+            return {}
+        return _load_cache_text(content)
+    finally:
+        if cache_descriptor is not None:
+            os.close(cache_descriptor)
+        os.close(root_descriptor)
+
+
 def _validated_paper(record: PaperRecord) -> PaperRecord:
     payload = record.model_dump(mode="python")
-    _validate_persisted_record_version(payload)
+    _validate_persisted_record(payload)
     return PaperRecord.model_validate(payload, strict=True)
 
 
@@ -206,14 +462,6 @@ def _data_file(
     )
 
 
-def _ensure_data_path_is_contained(data_dir: Path, path: Path) -> None:
-    root = data_dir.resolve(strict=False)
-    resolved_parent = path.parent.resolve(strict=False)
-    resolved_path = path.resolve(strict=False)
-    if not resolved_parent.is_relative_to(root) or not resolved_path.is_relative_to(root):
-        raise ValueError(f"storage path resolves outside data directory: {path}")
-
-
 def _reject_duplicate_published_identities(published: Sequence[PaperRecord]) -> None:
     seen: set[tuple[str, int]] = set()
     for paper in published:
@@ -242,35 +490,43 @@ def save_successful_run(
         papers=validated_published,
     )
 
-    archive_files: dict[Path, DataFile] = {}
     by_month: dict[str, list[PaperRecord]] = {}
     for paper in validated_published:
         by_month.setdefault(paper.published_at.strftime("%Y-%m"), []).append(paper)
-    cache_path = data_dir / "cache" / "analyses.json"
-    latest_path = data_dir / "latest.json"
-    archive_paths = {month: data_dir / "archive" / f"{month}.json" for month in by_month}
-    for path in (cache_path, latest_path, *archive_paths.values()):
-        _ensure_data_path_is_contained(data_dir, path)
-    for month, records in sorted(by_month.items()):
-        path = archive_paths[month]
-        current = load_data_file(path)
-        merged = merge_records(current.papers if current is not None else (), records)
-        archive_files[path] = _data_file(
-            generated_at=generated_at,
-            stats=validated_stats,
-            papers=merged,
-        )
 
-    # Keep latest last: it is the public commit marker for a fully persisted run.
-    payloads: dict[Path, object] = {
-        cache_path: {
-            key: entry.model_dump(mode="json") for key, entry in sorted(validated_cache.items())
-        },
-        **{
-            path: archive.model_dump(mode="json") for path, archive in sorted(archive_files.items())
-        },
-        latest_path: latest.model_dump(mode="json"),
-    }
-    serialized = {path: _serialize_json(payload) for path, payload in payloads.items()}
-    for path, content in serialized.items():
-        _atomic_write_text(path, content)
+    with _open_save_directories(
+        data_dir,
+        need_archive=bool(by_month),
+    ) as (root_descriptor, cache_descriptor, archive_descriptor):
+        archive_files: dict[str, DataFile] = {}
+        for month, records in sorted(by_month.items()):
+            if archive_descriptor is None:  # pragma: no cover - guarded by need_archive
+                raise RuntimeError("archive directory is unavailable")
+            filename = f"{month}.json"
+            current_content = _read_text_at(archive_descriptor, filename)
+            current = _load_data_file_text(current_content) if current_content is not None else None
+            merged = merge_records(
+                current.papers if current is not None else (),
+                records,
+            )
+            archive_files[filename] = _data_file(
+                generated_at=generated_at,
+                stats=validated_stats,
+                papers=merged,
+            )
+
+        cache_content = _serialize_json(
+            {key: entry.model_dump(mode="json") for key, entry in sorted(validated_cache.items())}
+        )
+        archive_contents = {
+            filename: _serialize_json(archive.model_dump(mode="json"))
+            for filename, archive in sorted(archive_files.items())
+        }
+        latest_content = _serialize_json(latest.model_dump(mode="json"))
+
+        # Keep latest last: it is the public commit marker for a fully persisted run.
+        _atomic_write_text_at(cache_descriptor, "analyses.json", cache_content)
+        if archive_descriptor is not None:
+            for filename, content in archive_contents.items():
+                _atomic_write_text_at(archive_descriptor, filename, content)
+        _atomic_write_text_at(root_descriptor, "latest.json", latest_content)
