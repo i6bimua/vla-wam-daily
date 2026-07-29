@@ -1,21 +1,17 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { loadLatestDataFile } from "../lib/data";
+import { formatBeijingTimestamp } from "../lib/time";
 
 const latest = await loadLatestDataFile();
-const generatedDate = latest.generated_at.slice(0, 10);
+const generatedAtLabel = formatBeijingTimestamp(latest.generated_at);
+const hasPublishedPapers = latest.papers.length > 0;
 const models = [
   ...new Set(latest.papers.map((paper) => paper.provenance.model)),
 ].sort();
 const promptVersions = [
   ...new Set(latest.papers.map((paper) => paper.provenance.prompt_version)),
 ].sort();
-const modelDescription = models.length
-  ? models.join("、")
-  : "deepseek-v4-pro（quality profile 默认回退）";
-const promptDescription = promptVersions.length
-  ? promptVersions.join("、")
-  : "当前 quality profile 配置";
 const repository = import.meta.env.GITHUB_REPOSITORY;
 const issuesUrl = repository ? `https://github.com/${repository}/issues` : null;
 ---
@@ -28,10 +24,24 @@ const issuesUrl = repository ? `https://github.com/${repository}/issues` : null;
     <p class="eyebrow">METHODOLOGY</p>
     <h1>方法与透明度</h1>
     <p>
-      当前数据生成于
-      <time datetime={latest.generated_at}>{generatedDate}</time
-      >；当前论文记录的分析模型为
-      <strong>{modelDescription}</strong>，Prompt 版本为 {promptDescription}。
+      当前数据生成于 <time datetime={latest.generated_at}
+        >{generatedAtLabel}</time
+      >。
+    </p>
+    {
+      hasPublishedPapers ? (
+        <p>
+          当前已发布论文记录的分析模型为
+          <strong>{models.join("、")}</strong>，Prompt 版本为{" "}
+          {promptVersions.join("、")}。
+        </p>
+      ) : (
+        <p>暂无已发布论文，无法从当前数据确认模型或 Prompt。</p>
+      )
+    }
+    <p>
+      仓库 quality profile 的默认模型为
+      deepseek-v4-pro；运行时配置可以覆盖该默认值。
     </p>
   </header>
 
@@ -39,9 +49,10 @@ const issuesUrl = repository ? `https://github.com/${repository}/issues` : null;
     <section>
       <h2>数据来源与更新</h2>
       <p>
-        论文元数据来自 arXiv，当前关注 cs.RO、cs.CV、cs.AI 和
-        cs.LG。站点默认按北京时间每日更新，但具体执行时间和频率可在 GitHub
-        Actions 工作流中配置。
+        论文元数据来自 arXiv。默认配置关注 cs.RO、cs.CV、cs.AI 和
+        cs.LG；运行时可通过 --config-path 使用其他配置，因此当前 DataFile
+        不证明本次实际分类范围。站点默认按北京时间每日更新，但具体执行时间和频率可在
+        GitHub Actions 工作流中配置。
       </p>
     </section>
 
@@ -59,8 +70,13 @@ const issuesUrl = repository ? `https://github.com/${repository}/issues` : null;
         <li>9–10：VLA、WAM 或机器人动作世界模型是论文核心。</li>
         <li>7–8：强相关的方法、数据集、评测或通用机器人策略。</li>
         <li>6：对该方向有直接价值的相邻研究。</li>
-        <li>1–5：低于当前发布阈值 6，不出现在公开页面。</li>
+        <li>1–5：相关性较低；是否发布取决于本次运行配置。</li>
       </ul>
+      <p>
+        仓库默认/示例发布阈值为 6，运行时可通过 CLI --threshold 覆盖。当前
+        DataFile schema
+        不持久化实际阈值，因此当前构建数据不携带实际运行阈值，页面不能据此确认本次阈值。
+      </p>
       <p>
         AI
         分析范围严格限于标题与摘要；摘要没有提供的实验结果、局限或机构信息会明确标注为未说明。

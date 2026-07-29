@@ -38,16 +38,33 @@ describe("weekly, methodology, RSS, and 404 route contracts", () => {
 
     expect(page).toContain("loadLatestDataFile");
     expect(page).toContain("new Date(latest.generated_at)");
+    expect(page).toContain("formatBeijingTimestamp");
     expect(page).toContain("selectWeeklyTop");
     expect(page).toMatch(/<PaperCard[^>]*compact/s);
+    expect(page).not.toContain(".slice(0, 10)");
     expect(page).not.toContain("selectWeeklyTop(await loadArchive())");
   });
 
-  it("discloses dynamic provenance and the non-guessing pipeline methodology", async () => {
+  it("distinguishes observed provenance from configurable defaults", async () => {
     const page = await source("pages/methodology.astro");
 
     expect(page).toContain("latest.generated_at");
+    expect(page).toContain("formatBeijingTimestamp");
     expect(page).toContain("paper.provenance.model");
+    expect(page).toContain("暂无已发布论文，无法从当前数据确认模型或 Prompt");
+    expect(page).toContain("quality profile 的默认模型为");
+    expect(page).toContain("deepseek-v4-pro");
+    expect(page).toContain("CLI --threshold");
+    expect(page).toContain("当前构建数据不携带实际运行阈值");
+    expect(page).toContain("--config-path");
+    expect(page).not.toContain("当前发布阈值 6");
+    expect(page).not.toContain("1–5：低于当前发布阈值");
+    expect(page).not.toContain(".slice(0, 10)");
+  });
+
+  it("discloses the non-guessing pipeline methodology", async () => {
+    const page = await source("pages/methodology.astro");
+
     expect(page).toContain("deepseek-v4-pro");
     expect(page).toContain("cs.RO");
     expect(page).toContain("两级筛选");
@@ -96,5 +113,17 @@ describe("global navigation contract", () => {
     }
     expect(layout).toContain('type="application/rss+xml"');
     expect(css).toMatch(/\.site-header nav\s*\{[\s\S]*flex-wrap:\s*wrap/s);
+  });
+
+  it("configures Pagefind to index paper detail HTML only", async () => {
+    const packageJson = JSON.parse(await source("../package.json"));
+    const buildScript = await source("../scripts/build-pagefind.mjs");
+
+    expect(packageJson.scripts.build).toContain(
+      "node scripts/build-pagefind.mjs",
+    );
+    expect(buildScript).toContain('"papers/**/*.html"');
+    expect(buildScript).toContain("pagefind-entry.json");
+    expect(buildScript).toContain("results: []");
   });
 });

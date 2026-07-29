@@ -1,5 +1,6 @@
 import { readFile, stat } from "node:fs/promises";
-import { resolve } from "node:path";
+import { extname, resolve } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { XMLParser } from "fast-xml-parser";
 import { SyntaxValidator } from "fast-xml-validator";
 import astroConfig from "../astro.config.mjs";
@@ -26,6 +27,46 @@ function countPaperCards(source) {
 function itemArray(value) {
   if (value === undefined) return [];
   return Array.isArray(value) ? value : [value];
+}
+
+async function searchBuiltPagefind(query) {
+  const modulePath = resolve(dist, "pagefind/pagefind.js");
+  const nativeFetch = globalThis.fetch.bind(globalThis);
+  let pagefind;
+  globalThis.fetch = async (input, init) => {
+    const target =
+      input instanceof Request
+        ? input.url
+        : input instanceof URL
+          ? input.href
+          : String(input);
+    const url = new URL(target);
+    if (url.protocol !== "file:") return nativeFetch(input, init);
+
+    const bytes = await readFile(fileURLToPath(url));
+    const extension = extname(url.pathname);
+    const contentType =
+      extension === ".json"
+        ? "application/json"
+        : extension === ".pagefind"
+          ? "application/wasm"
+          : "application/octet-stream";
+    return new Response(bytes, {
+      status: 200,
+      headers: { "content-type": contentType },
+    });
+  };
+
+  try {
+    pagefind = await import(
+      `${pathToFileURL(modulePath).href}?information=${Date.now()}`
+    );
+    await pagefind.options({ baseUrl: base });
+    return (await pagefind.search(query)).results.length;
+  } finally {
+    if (pagefind?.destroy) await pagefind.destroy();
+    globalThis.fetch = nativeFetch;
+  }
 }
 
 const home = await text("index.html");
@@ -55,12 +96,23 @@ for (const [slug, title, expectedCount] of topicExpectations) {
 }
 
 if (expectEmptyArchive) {
+  const entry = JSON.parse(await text("pagefind/pagefind-entry.json"));
+  const indexedPages = Object.values(entry.languages ?? {}).reduce(
+    (count, language) => count + (language.page_count ?? 0),
+    0,
+  );
   requireBuild(
     archiveIndex.includes("归档尚为空") &&
       countPaperCards(weekly) === 0 &&
       weekly.includes("过去七天尚无符合发布条件的论文") &&
-      methodology.includes("quality profile 默认回退"),
+      methodology.includes("暂无已发布论文，无法从当前数据确认模型或 Prompt") &&
+      methodology.includes("quality profile 的默认模型为") &&
+      methodology.includes("deepseek-v4-pro"),
     "empty data must still build archive, weekly, and fallback methodology pages",
+  );
+  requireBuild(
+    indexedPages === 0 && (await searchBuiltPagefind("methodology")) === 0,
+    "empty data must index zero paper pages and return zero search results",
   );
 } else {
   const archiveMonth = await text("archive/2026-07/index.html");
@@ -80,14 +132,26 @@ if (expectEmptyArchive) {
       weekly.includes("2607.12345") &&
       weekly.includes("2607.20001") &&
       weekly.includes(`href="${base}papers/2607.12345/"`) &&
-      weekly.includes("2026-07-29"),
+      weekly.includes("2026-07-29 10:30:00 北京时间"),
     "weekly page must use generated_at and topic-balanced compact detail links",
+  );
+  requireBuild(
+    methodology.includes("当前已发布论文记录的分析模型为") &&
+      methodology.includes("Prompt 版本为"),
+    "methodology must derive current model and prompt provenance from published papers",
   );
 }
 requireBuild(
-  methodology.includes(expectEmptyArchive ? "2026-07-27" : "2026-07-29") &&
+  methodology.includes(
+    expectEmptyArchive
+      ? "2026-07-27 08:00:00 北京时间"
+      : "2026-07-29 10:30:00 北京时间",
+  ) &&
     methodology.includes("deepseek-v4-pro") &&
     methodology.includes("两级筛选") &&
+    methodology.includes("--config-path") &&
+    methodology.includes("CLI --threshold") &&
+    methodology.includes("当前构建数据不携带实际运行阈值") &&
     methodology.includes("不会猜测") &&
     methodology.includes("Fig. 1 / Fig. 2") &&
     methodology.includes("工作流"),

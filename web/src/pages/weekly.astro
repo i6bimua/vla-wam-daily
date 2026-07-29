@@ -2,12 +2,13 @@
 import PaperCard from "../components/PaperCard.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { loadArchive, loadLatestDataFile } from "../lib/data";
+import { formatBeijingTimestamp } from "../lib/time";
 import { selectWeeklyTop } from "../lib/weekly";
 
 const latest = await loadLatestDataFile();
 const generatedAt = new Date(latest.generated_at);
 const papers = selectWeeklyTop(await loadArchive(), generatedAt);
-const generatedDate = latest.generated_at.slice(0, 10);
+const generatedAtLabel = formatBeijingTimestamp(latest.generated_at);
 ---
 
 <BaseLayout
@@ -18,7 +19,7 @@ const generatedDate = latest.generated_at.slice(0, 10);
     <p class="eyebrow">WEEKLY TOP 5</p>
     <h1>本周值得读</h1>
     <p>
-      以 <time datetime={latest.generated_at}>{generatedDate}</time>
+      以 <time datetime={latest.generated_at}>{generatedAtLabel}</time>
       数据版本为截止时刻，选取过去七天的高相关论文；同一主题最多两篇。
     </p>
   </header>
