@@ -1,0 +1,35 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { groupArchiveMonths } from "../../lib/archive";
+import { loadArchive } from "../../lib/data";
+
+const base = import.meta.env.BASE_URL;
+const months = groupArchiveMonths(await loadArchive());
+const total = months.reduce((count, month) => count + month.papers.length, 0);
+---
+
+<BaseLayout
+  title="论文归档 · VLA/WAM Daily"
+  description="按发表月份浏览 VLA、WAM 与机器人世界模型论文。"
+>
+  <header class="route-hero">
+    <p class="eyebrow">ARCHIVE</p>
+    <h1>论文归档</h1>
+    <p>按 arXiv 首次发表月份整理，共收录 {total} 篇当前版本论文。</p>
+  </header>
+
+  {
+    months.length ? (
+      <ol class="archive-list">
+        {months.map((month) => (
+          <li>
+            <a href={`${base}archive/${month.month}/`}>{month.month}</a>
+            <span>{month.papers.length} 篇论文</span>
+          </li>
+        ))}
+      </ol>
+    ) : (
+      <p class="empty-state">归档尚为空；每日任务发布首批论文后会自动出现。</p>
+    )
+  }
+</BaseLayout>

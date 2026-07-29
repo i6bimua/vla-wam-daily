@@ -1,0 +1,51 @@
+---
+import PaperCard from "../../components/PaperCard.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import {
+  groupArchiveDays,
+  groupArchiveMonths,
+  type ArchiveMonth,
+} from "../../lib/archive";
+import { loadArchive } from "../../lib/data";
+
+export async function getStaticPaths() {
+  const months = groupArchiveMonths(await loadArchive());
+  return months.map((month) => ({
+    params: { month: month.month },
+    props: { month },
+  }));
+}
+
+interface Props {
+  month: ArchiveMonth;
+}
+
+const { month } = Astro.props;
+const days = groupArchiveDays(month.papers);
+---
+
+<BaseLayout
+  title={`${month.month} 论文归档 · VLA/WAM Daily`}
+  description={`${month.month} 发表的 VLA、WAM 与机器人世界模型论文归档。`}
+>
+  <header class="route-hero">
+    <p class="eyebrow">MONTHLY ARCHIVE</p>
+    <h1>{month.month} 论文归档</h1>
+    <p>共 {month.papers.length} 篇当前版本论文，按发表日期倒序排列。</p>
+  </header>
+
+  <div class="archive-days">
+    {
+      days.map((day) => (
+        <section class="archive-day" aria-labelledby={`day-${day.day}`}>
+          <h2 id={`day-${day.day}`}>{day.day}</h2>
+          <div class="paper-grid">
+            {day.papers.map((paper) => (
+              <PaperCard paper={paper} compact />
+            ))}
+          </div>
+        </section>
+      ))
+    }
+  </div>
+</BaseLayout>

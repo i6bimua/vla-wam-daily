@@ -1,0 +1,37 @@
+---
+import PaperCard from "../components/PaperCard.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { loadArchive, loadLatestDataFile } from "../lib/data";
+import { selectWeeklyTop } from "../lib/weekly";
+
+const latest = await loadLatestDataFile();
+const generatedAt = new Date(latest.generated_at);
+const papers = selectWeeklyTop(await loadArchive(), generatedAt);
+const generatedDate = latest.generated_at.slice(0, 10);
+---
+
+<BaseLayout
+  title="本周精选 Top 5 · VLA/WAM Daily"
+  description="按相关性与主题多样性确定性选出的七日 VLA/WAM 研究 Top 5。"
+>
+  <header class="route-hero">
+    <p class="eyebrow">WEEKLY TOP 5</p>
+    <h1>本周值得读</h1>
+    <p>
+      以 <time datetime={latest.generated_at}>{generatedDate}</time>
+      数据版本为截止时刻，选取过去七天的高相关论文；同一主题最多两篇。
+    </p>
+  </header>
+
+  {
+    papers.length ? (
+      <div class="paper-grid">
+        {papers.map((paper) => (
+          <PaperCard paper={paper} compact />
+        ))}
+      </div>
+    ) : (
+      <p class="empty-state">过去七天尚无符合发布条件的论文。</p>
+    )
+  }
+</BaseLayout>

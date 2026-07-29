@@ -1,7 +1,20 @@
 ---
+import { TOPIC_ROUTES } from "../lib/topics";
+
 const base = import.meta.env.BASE_URL;
 const repository = import.meta.env.GITHUB_REPOSITORY;
 const repositoryUrl = repository ? `https://github.com/${repository}` : null;
+const links = [
+  ...TOPIC_ROUTES.map((route) => ({
+    label: route.navLabel,
+    path: `topics/${route.slug}/`,
+  })),
+  { label: "本周精选", path: "weekly/" },
+  { label: "归档", path: "archive/" },
+  { label: "搜索", path: "search/" },
+  { label: "RSS", path: "rss.xml" },
+  { label: "方法", path: "methodology/" },
+];
 ---
 
 <header class="site-header">
@@ -14,9 +27,8 @@ const repositoryUrl = repository ? `https://github.com/${repository}` : null;
       </span>
     </a>
     <nav aria-label="主导航">
-      <a href={base}>今日论文</a>
-      <a href={`${base}#latest`}>最新研究</a>
-      <a href={`${base}search/`}>全文搜索</a>
+      <a href={base}>今日</a>
+      {links.map((link) => <a href={`${base}${link.path}`}>{link.label}</a>)}
       {
         repositoryUrl && (
           <a href={repositoryUrl} target="_blank" rel="noopener noreferrer">

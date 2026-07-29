@@ -1,0 +1,95 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { loadLatestDataFile } from "../lib/data";
+
+const latest = await loadLatestDataFile();
+const generatedDate = latest.generated_at.slice(0, 10);
+const models = [
+  ...new Set(latest.papers.map((paper) => paper.provenance.model)),
+].sort();
+const promptVersions = [
+  ...new Set(latest.papers.map((paper) => paper.provenance.prompt_version)),
+].sort();
+const modelDescription = models.length
+  ? models.join("、")
+  : "deepseek-v4-pro（quality profile 默认回退）";
+const promptDescription = promptVersions.length
+  ? promptVersions.join("、")
+  : "当前 quality profile 配置";
+const repository = import.meta.env.GITHUB_REPOSITORY;
+const issuesUrl = repository ? `https://github.com/${repository}/issues` : null;
+---
+
+<BaseLayout
+  title="方法与透明度 · VLA/WAM Daily"
+  description="了解 VLA/WAM Daily 的数据来源、筛选、AI 分析、图片提取与发布标准。"
+>
+  <header class="route-hero">
+    <p class="eyebrow">METHODOLOGY</p>
+    <h1>方法与透明度</h1>
+    <p>
+      当前数据生成于
+      <time datetime={latest.generated_at}>{generatedDate}</time
+      >；当前论文记录的分析模型为
+      <strong>{modelDescription}</strong>，Prompt 版本为 {promptDescription}。
+    </p>
+  </header>
+
+  <article class="prose">
+    <section>
+      <h2>数据来源与更新</h2>
+      <p>
+        论文元数据来自 arXiv，当前关注 cs.RO、cs.CV、cs.AI 和
+        cs.LG。站点默认按北京时间每日更新，但具体执行时间和频率可在 GitHub
+        Actions 工作流中配置。
+      </p>
+    </section>
+
+    <section>
+      <h2>两级筛选</h2>
+      <p>
+        第一层用完整概念词和“模型概念 +
+        机器人动作”组合做确定性预筛，避免把整个大分类送入模型。第二层由当前分析模型根据论文标题与摘要给出相关性评分、主题和结构化研究笔记。
+      </p>
+    </section>
+
+    <section>
+      <h2>评分与发布阈值</h2>
+      <ul>
+        <li>9–10：VLA、WAM 或机器人动作世界模型是论文核心。</li>
+        <li>7–8：强相关的方法、数据集、评测或通用机器人策略。</li>
+        <li>6：对该方向有直接价值的相邻研究。</li>
+        <li>1–5：低于当前发布阈值 6，不出现在公开页面。</li>
+      </ul>
+      <p>
+        AI
+        分析范围严格限于标题与摘要；摘要没有提供的实验结果、局限或机构信息会明确标注为未说明。
+      </p>
+    </section>
+
+    <section>
+      <h2>资源与 Fig. 1 / Fig. 2</h2>
+      <p>
+        项目主页和代码链接只在来源数据明确提供时展示，不会猜测资源地址。Fig. 1 /
+        Fig. 2 从 arXiv HTML
+        提取并以远程图片展示，提取结果写入缓存以减少重复请求；HTML、图片或网络不可用时，页面会保留明确的降级状态，并提供
+        arXiv HTML 或 PDF 入口。
+      </p>
+    </section>
+
+    <section>
+      <h2>局限与反馈</h2>
+      <p>
+        关键词与摘要级判断都可能产生误报或漏报，新术语也可能暂时未被覆盖。{
+          issuesUrl ? (
+            <a href={issuesUrl} target="_blank" rel="noopener noreferrer">
+              请通过 GitHub Issues 提交反馈
+            </a>
+          ) : (
+            "请通过项目仓库的 GitHub Issues 提交反馈"
+          )
+        }。
+      </p>
+    </section>
+  </article>
+</BaseLayout>

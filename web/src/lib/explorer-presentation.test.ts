@@ -74,7 +74,8 @@ describe("Pagefind search presentation contract", () => {
       'import SearchPanel from "../components/SearchPanel.astro"',
     );
     expect(page).toContain("<SearchPanel />");
-    expect(header).toContain("href={`${base}search/`}");
+    expect(header).toContain('{ label: "搜索", path: "search/" }');
+    expect(header).toContain("href={`${base}${link.path}`}");
   });
 });
 

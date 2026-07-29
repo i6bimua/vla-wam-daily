@@ -1,0 +1,40 @@
+---
+import PaperExplorer from "../../components/PaperExplorer.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { loadArchive } from "../../lib/data";
+import type { Paper } from "../../lib/schema";
+import { TOPIC_ROUTES, type TopicRoute } from "../../lib/topics";
+
+export async function getStaticPaths() {
+  const archive = await loadArchive();
+  return TOPIC_ROUTES.map((route) => ({
+    params: { topic: route.slug },
+    props: {
+      route,
+      papers: archive.filter(
+        (paper) => paper.analysis.primary_topic === route.topic,
+      ),
+    },
+  }));
+}
+
+interface Props {
+  route: TopicRoute;
+  papers: Paper[];
+}
+
+const { route, papers } = Astro.props;
+---
+
+<BaseLayout
+  title={`${route.title} · VLA/WAM Daily`}
+  description={route.description}
+>
+  <header class="route-hero">
+    <p class="eyebrow">TOPIC ARCHIVE</p>
+    <h1>{route.title}</h1>
+    <p>{route.description}</p>
+    <p class="route-hero__count">当前归档 {papers.length} 篇论文</p>
+  </header>
+  <PaperExplorer papers={papers} />
+</BaseLayout>
