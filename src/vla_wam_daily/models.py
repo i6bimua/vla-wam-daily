@@ -271,8 +271,8 @@ class FigureGallery(FrozenStrictModel):
 
 class Provenance(FrozenStrictModel):
     analysis_scope: Literal["title_and_abstract"]
-    model: str = Field(min_length=1)
-    prompt_version: str = Field(min_length=1)
+    model: NormalizedNonBlankStr
+    prompt_version: NormalizedNonBlankStr
     analyzed_at: UtcDatetime
 
 
@@ -282,7 +282,7 @@ class AnalyzedPaperRecord(FrozenStrictModel):
     published_at: UtcDatetime
     updated_at: UtcDatetime
     title: NonEmptyStr
-    title_zh: NonEmptyStr
+    title_zh: NormalizedNonBlankStr
     authors: NonEmptyStrTuple
     arxiv_categories: NonEmptyStrTuple
     abstract: NonEmptyStr

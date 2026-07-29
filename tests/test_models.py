@@ -1,3 +1,5 @@
+import json
+from copy import deepcopy
 from datetime import UTC, datetime, timedelta, timezone
 
 import pytest
@@ -38,6 +40,87 @@ def valid_ai_output_payload() -> dict[str, object]:
             "relation_to_vla_wam": "与 VLA 直接相关",
         },
     }
+
+
+def load_persisted_record(
+    boundary: str,
+    record_payload: dict[str, object],
+) -> models.AnalyzedPaperRecord:
+    payload = deepcopy(record_payload)
+    if boundary in {"analyzed-record", "cache-entry"}:
+        payload.pop("figure_gallery")
+    if boundary == "analyzed-record":
+        return models.AnalyzedPaperRecord.model_validate_json(json.dumps(payload))
+    if boundary == "paper-record":
+        return PaperRecord.model_validate_json(json.dumps(payload))
+    if boundary == "cache-entry":
+        entry = CacheEntry.model_validate_json(
+            json.dumps({"key": "analysis-key", "record": payload})
+        )
+        return entry.record
+    if boundary == "data-file":
+        data_file = DataFile.model_validate_json(
+            json.dumps(
+                {
+                    "generated_at": "2026-07-27T00:00:00Z",
+                    "stats": {},
+                    "papers": [payload],
+                }
+            )
+        )
+        return data_file.papers[0]
+    raise AssertionError(f"unsupported test boundary: {boundary}")
+
+
+PERSISTED_RECORD_BOUNDARIES = [
+    "analyzed-record",
+    "paper-record",
+    "cache-entry",
+    "data-file",
+]
+
+
+@pytest.mark.parametrize("boundary", PERSISTED_RECORD_BOUNDARIES)
+@pytest.mark.parametrize(
+    "field",
+    [
+        "title_zh",
+        "provenance.model",
+        "provenance.prompt_version",
+    ],
+)
+def test_persisted_record_boundaries_reject_blank_normalized_fields(
+    boundary: str,
+    field: str,
+) -> None:
+    payload = make_record().model_dump(mode="json")
+    if field == "title_zh":
+        payload["title_zh"] = " \n\t "
+    else:
+        provenance = payload["provenance"]
+        assert isinstance(provenance, dict)
+        provenance[field.rsplit(".", maxsplit=1)[1]] = " \n\t "
+
+    with pytest.raises(ValidationError):
+        load_persisted_record(boundary, payload)
+
+
+@pytest.mark.parametrize("boundary", PERSISTED_RECORD_BOUNDARIES)
+def test_persisted_record_boundaries_normalize_text_and_provenance(
+    boundary: str,
+) -> None:
+    payload = make_record().model_dump(mode="json")
+    payload["title_zh"] = " \n 中文标题 \t"
+    provenance = payload["provenance"]
+    assert isinstance(provenance, dict)
+    provenance["model"] = " deepseek-v4-pro "
+    provenance["prompt_version"] = "\n prompt-v1 \t"
+
+    record = load_persisted_record(boundary, payload)
+
+    assert record.title_zh == "中文标题"
+    assert record.provenance.model == "deepseek-v4-pro"
+    assert record.provenance.prompt_version == "prompt-v1"
 
 
 @pytest.mark.parametrize(
