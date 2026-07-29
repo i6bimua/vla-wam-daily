@@ -16,6 +16,7 @@ Vision-Language-Action（VLA）和 World Action Model（WAM）相关的论文，
   以及直接相关的数据集和评测。
 - 保留英文原始信息，同时提供中文标题、中文一句话总结和结构化分析。
 - 提供主题筛选、日期归档、中英文搜索、RSS 和 Weekly Top 5。
+- 对通过发布阈值的论文解析 arXiv HTML，远程展示可用的 Fig. 1 / Fig. 2 和 caption。
 - 不使用数据库、常驻服务器或上游作者的第三方代理服务。
 - 单篇失败不产生伪造内容；整批失败不覆盖已经部署的正常网站。
 - DeepSeek API 密钥只存放在 GitHub Actions Secrets 中。
@@ -50,6 +51,7 @@ vla-wam-daily/
 │   ├── prefilter.py
 │   ├── deepseek_client.py
 │   ├── analyzer.py
+│   ├── figures.py
 │   ├── resources.py
 │   ├── schema.py
 │   ├── storage.py
@@ -73,6 +75,8 @@ vla-wam-daily/
 - `prefilter` 只执行确定性规则，不调用模型，也不决定最终发布。
 - `deepseek_client` 只负责认证、请求、重试和 JSON 响应。
 - `analyzer` 负责构造分析输入、验证评分语义和生成分析记录。
+- `figures` 只解析通过发布阈值论文的 arXiv HTML，返回 Figure URL、caption 和状态，
+  不下载或保存图片字节。
 - `resources` 只提取论文元数据中可以验证的项目或代码 URL。
 - `schema` 定义数据契约和枚举。
 - `storage` 负责缓存、版本更新、月度归档和原子写入。
@@ -85,10 +89,12 @@ vla-wam-daily/
 3. 执行本地关键词与组合规则预筛。
 4. 检查缓存；版本、模型和 Prompt 均相同的记录不再调用 DeepSeek。
 5. 使用 DeepSeek 对候选论文做结构化分析。
-6. 发布相关性评分不低于 6 的论文。
-7. 验证完整数据集后，原子更新 `latest.json` 和月度归档。
-8. 生成 Astro 网站、Pagefind 索引和 RSS。
-9. 所有检查成功后，提交数据并部署 GitHub Pages。
+6. 相关性评分通过仓库默认或本次配置的发布阈值后，才请求 arXiv HTML 并解析
+   Fig. 1 / Fig. 2；Figure 失败只生成降级状态，不阻塞论文发布。
+7. 发布达到本次阈值的论文。
+8. 验证完整数据集后，原子更新 `latest.json`、Figure 元数据缓存和月度归档。
+9. 生成 Astro 网站、Pagefind 索引和 RSS。
+10. 所有检查成功后，提交数据并部署 GitHub Pages。
 
 每日任务是幂等的。相同论文和相同版本重复运行不会创建重复记录，也不会产生重复
 AI 费用。
@@ -169,7 +175,10 @@ DeepSeek 输出字段：
 | 6 | 对该方向有直接价值的相邻研究 |
 | 1–5 | 主题过远，不在公开页面展示 |
 
-发布阈值默认是 6，可通过配置和手动工作流输入修改。
+仓库默认/示例发布阈值是 6，可通过配置、CLI 和手动工作流输入修改。
+DataFile 不持久化本次实际运行阈值，因此已构建页面不能据此宣称当前运行阈值；
+页面只应展示每篇论文 provenance 中实际记录的模型和 Prompt 版本，并把 6 描述为
+仓库默认/示例值。
 
 ## 7. 数据契约
 
@@ -204,6 +213,23 @@ DeepSeek 输出字段：
     "project_url": null,
     "code_url": null
   },
+  "figure_gallery": {
+    "status": "available",
+    "html_url": "https://arxiv.org/html/2607.xxxxxv1",
+    "figures": [
+      {
+        "number": 1,
+        "label": "Figure 1",
+        "caption": "Original English caption.",
+        "image_urls": [
+          "https://arxiv.org/html/2607.xxxxxv1/x1.png"
+        ],
+        "source_url": "https://arxiv.org/html/2607.xxxxxv1#S1.F1",
+        "source": "arxiv_html"
+      }
+    ],
+    "checked_at": "2026-07-27T00:00:00Z"
+  },
   "provenance": {
     "analysis_scope": "title_and_abstract",
     "model": "deepseek-v4-pro",
@@ -219,6 +245,10 @@ DeepSeek 输出字段：
 
 `code_url` 和 `project_url` 只接受从 arXiv 元数据中的明确 URL 提取并完成基本 URL
 校验的结果，不能由模型生成或猜测。
+
+`figure_gallery` 只保存 arXiv HTML URL、图片 URL、caption、状态和检查时间，不保存
+图片字节。Figure 缓存键是 `arxiv_id + version`；正缓存长期复用，三种负状态
+`html_unavailable`、`not_found`、`fetch_failed` 在 24 小时后可重试。
 
 ## 8. 网站信息架构
 
@@ -249,6 +279,8 @@ DeepSeek 输出字段：
 - “AI 分析仅基于标题与摘要”标识
 
 可展开区域展示核心贡献、方法、实验结果、局限和与 VLA/WAM 的关系。
+若 arXiv HTML 可用，可展开区域还以远程方式展示 Fig. 1 / Fig. 2、多面板原图和
+英文 caption；图片或 HTML 不可用时提供 HTML/PDF 降级链接。
 
 搜索覆盖中英文标题、英文摘要、作者、标签和中文分析。筛选支持日期、主分类、
 相关性分数和代码状态。筛选状态写入 URL 查询参数，刷新或分享链接后保持不变。
@@ -265,8 +297,10 @@ About/Methodology 页面公开：
 
 - 数据来源和更新时间。
 - 预筛规则和评分解释。
-- 当前模型、Prompt 版本和发布阈值。
+- 数据中实际记录的模型与 Prompt 版本，以及仓库默认/示例发布阈值；由于
+  `DataFile` 不持久化本次实际运行阈值，不能从静态数据证明某次运行的阈值。
 - 摘要级 AI 分析的局限。
+- Figure 来自 arXiv 远程资源、不保存图片字节，以及版权和论文许可证提示。
 - 问题反馈和项目仓库链接。
 
 ## 9. GitHub Actions 与部署
@@ -319,6 +353,9 @@ GitHub Actions 权限按 job 最小化。只有更新数据的 job 获得 `conte
 - 测试、数据校验或 Astro 构建失败时不部署，线上站点保持上一版。
 - 运行摘要记录抓取数、预筛数、缓存命中数、模型调用数、发布数、失败数、
   Token 用量和错误类别。
+- Figure 可观测性使用稳定字段 `figure_cache_hits`、`figure_requests`、
+  `figure_available`、`figure_unavailable`、`figure_failed`；Figure 失败不计入
+  DeepSeek 的 30% 分析失败阈值。
 - “arXiv 正常返回零篇新论文”和“arXiv 请求失败”必须是不同状态。
 
 ## 11. 测试策略
@@ -331,6 +368,8 @@ Python 单元测试覆盖：
 - DeepSeek 正常 JSON、空响应、截断 JSON、429、超时和重试。
 - 评分范围、分类枚举和未知字段处理。
 - URL 提取和校验。
+- Figure 真实节点解析、图号/caption 绑定、多面板、远程 URL allowlist、缓存和
+  三种降级状态。
 - 月度归档、原子写入和 Schema 迁移。
 
 离线集成测试使用固定 arXiv Feed 和 DeepSeek 响应 fixture，完整运行
@@ -346,12 +385,15 @@ Python 单元测试覆盖：
 - 归档、Weekly Top 5 和 RSS。
 - 桌面与移动端浏览器冒烟测试。
 - Astro 生产构建。
+- Fig. 1 / Fig. 2 展开、远程图片加载、Blob 下载、CORS 失败后打开原图、PDF
+  降级和移动端可访问性。
 
 ## 12. 非目标
 
 首版不包含：
 
 - PDF 全文下载和全文级总结。
+- PDF Figure 截图、论文图片字节托管或绕过论文许可证的再分发。
 - 邮件、微信或 Slack 推送。
 - 用户登录、云端收藏或个性化推荐账户。
 - 作者机构推断。
@@ -372,3 +414,7 @@ Python 单元测试覆盖：
 5. GitHub Pages 可访问，并能完成搜索、筛选、归档、RSS 和移动端浏览。
 6. 页面明确披露分析范围、模型、更新时间和数据限制。
 7. README 包含本地运行、Secrets、Pages 设置、手动触发和故障排查说明。
+8. 通过发布阈值的论文会得到严格校验的 Figure Gallery；有图时能看到正确的
+   Fig. 1 / Fig. 2、caption 和多面板，无图或抓取失败时不阻塞论文发布。
+9. Figure 下载优先使用浏览器 Blob，CORS 或网络失败时打开 arXiv 原图；仓库、
+   Pages artifact 和数据文件均不保存论文图片字节，页面披露来源、版权和许可证限制。

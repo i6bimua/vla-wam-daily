@@ -1,0 +1,173 @@
+import re
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+ROOT = Path(__file__).resolve().parents[1]
+README = (ROOT / "README.md").read_text(encoding="utf-8")
+MAIN_DESIGN = (
+    ROOT / "docs/superpowers/specs/2026-07-27-vla-wam-daily-design.md"
+).read_text(encoding="utf-8")
+FIGURE_DESIGN = (
+    ROOT / "docs/superpowers/specs/2026-07-29-paper-figure-display-design.md"
+).read_text(encoding="utf-8")
+
+
+def test_readme_documents_supported_models_limits_and_information_features() -> None:
+    for heading in (
+        "## 功能",
+        "## 模型与分析边界",
+        "## 本地开发",
+        "## 配置",
+        "## GitHub Pages 与每日更新",
+        "## 故障排查",
+        "## 局限",
+    ):
+        assert heading in README
+    for text in (
+        "deepseek-v4-pro",
+        "deepseek-v4-flash",
+        "quality",
+        "economy",
+        "60",
+        "30%",
+        "Pagefind",
+        "RSS",
+        "Weekly Top 5",
+    ):
+        assert text in README
+    assert "DataFile" in README
+    assert "不保存本次实际运行阈值" in README
+
+
+def test_readme_has_reproducible_python_web_and_dry_run_commands() -> None:
+    for command in (
+        "uv python install 3.13",
+        "uv sync --frozen",
+        "uv run pytest",
+        "uv run ruff check src tests",
+        "uv run mypy",
+        "uv run vla-wam-daily daily --dry-run",
+        "npm install --global pnpm@11.9.0",
+        "pnpm install --frozen-lockfile",
+        "pnpm test",
+        "pnpm format:check",
+        "pnpm build",
+        "pnpm preview --host 127.0.0.1",
+        "pnpm exec playwright install chromium",
+        "pnpm test:e2e",
+    ):
+        assert command in README
+    assert "Python 3.13" in README
+    assert "Node.js 24" in README
+    assert "read -rsp" in README
+    assert "unset DEEPSEEK_API_KEY" in README
+    assert re.search(r"DEEPSEEK_API_KEY\s*=\s*\S+", README) is None
+    assert re.search(r"\bsk-[A-Za-z0-9_-]{8,}", README) is None
+
+
+def test_readme_explains_pages_schedule_secrets_sources_and_troubleshooting() -> None:
+    for text in (
+        "DEEPSEEK_API_KEY",
+        "DEEPSEEK_MODEL",
+        "GitHub Actions",
+        "github-pages",
+        "北京时间 10:30",
+        "workflow_dispatch",
+        "dry-run",
+        "arXiv API",
+        "独立实现",
+        "monologg/nlp-arxiv-daily",
+        "dw-dengwei/daily-arXiv-ai-enhanced",
+        "Vincentqyw/cv-arxiv-daily",
+    ):
+        assert text in README
+    assert "Secret" in README
+    assert "论文许可证" in README
+
+
+def test_readme_fully_documents_remote_figures_and_fallbacks() -> None:
+    assert "## Fig. 1 / Fig. 2" in README
+    for text in (
+        "arXiv HTML",
+        "figure",
+        "figcaption",
+        "caption",
+        "多 panel",
+        "URL 和元数据",
+        "不保存图片字节",
+        "Blob",
+        "CORS",
+        "html_unavailable",
+        "not_found",
+        "fetch_failed",
+        "PDF",
+        "版权",
+        "论文许可证",
+    ):
+        assert text in README
+
+
+def test_license_is_complete_mit_text() -> None:
+    license_text = (ROOT / "LICENSE").read_text(encoding="utf-8")
+    assert license_text.startswith("MIT License\n")
+    assert "Copyright (c) 2026 VLA/WAM Daily contributors" in license_text
+    assert "Permission is hereby granted, free of charge" in license_text
+    assert 'THE SOFTWARE IS PROVIDED "AS IS"' in license_text
+
+
+def test_dependabot_checks_uv_web_and_actions_monthly() -> None:
+    payload = yaml.load(
+        (ROOT / ".github/dependabot.yml").read_text(encoding="utf-8"),
+        Loader=yaml.BaseLoader,
+    )
+    assert isinstance(payload, dict)
+    updates: list[dict[str, Any]] = payload["updates"]
+    assert {
+        (update["package-ecosystem"], update["directory"], update["schedule"]["interval"])
+        for update in updates
+    } == {
+        ("uv", "/", "monthly"),
+        ("npm", "/web", "monthly"),
+        ("github-actions", "/", "monthly"),
+    }
+
+
+def test_designs_keep_reviewed_status_and_document_figure_pipeline_metrics() -> None:
+    for design in (MAIN_DESIGN, FIGURE_DESIGN):
+        assert "状态：已复核通过" in design
+        assert "状态：已实现" not in design
+        assert "状态：已验收" not in design
+    for metric in (
+        "figure_cache_hits",
+        "figure_requests",
+        "figure_available",
+        "figure_unavailable",
+        "figure_failed",
+    ):
+        assert metric in MAIN_DESIGN
+    assert "DataFile 不持久化本次实际运行阈值" in MAIN_DESIGN
+    assert "不能据此宣称当前运行阈值" in MAIN_DESIGN
+    for text in (
+        "相关性评分通过发布阈值后",
+        "URL、caption、状态和时间",
+        "不保存图片字节",
+        "多面板",
+        "CORS",
+        "论文页面标注的许可证",
+    ):
+        assert text in FIGURE_DESIGN
+
+
+def test_repository_contains_no_hosted_paper_image_assets() -> None:
+    extensions = {".avif", ".jpeg", ".jpg", ".png", ".svg", ".webp"}
+    roots = [ROOT / "data", ROOT / "web" / "public", ROOT / "web" / "src"]
+    hosted = [
+        path
+        for root in roots
+        if root.exists()
+        for path in root.rglob("*")
+        if path.is_file() and path.suffix.lower() in extensions
+    ]
+    assert hosted == []

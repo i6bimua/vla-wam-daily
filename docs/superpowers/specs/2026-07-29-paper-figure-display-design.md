@@ -32,7 +32,7 @@ arXiv 官方说明图片复用权限取决于论文许可证。本网站不重�
 优点：
 
 - 图号与 caption 关联准确，不依赖图片文件名。
-- 支持 Figure 内的多子图。
+- 支持 Figure 内的多面板/子图。
 - 不增加仓库和 Pages 体积。
 - 能提供原始图注、HTML 锚点和图片地址。
 
@@ -105,8 +105,9 @@ FigureCacheEntry
 
 ## 流水线与缓存
 
-图像解析发生在 LLM 相关性评分之后，只为最终发布的论文请求 HTML，避免扩大 arXiv
-流量和工作流耗时。
+相关性评分通过发布阈值后才解析图像，只为最终发布的论文请求 HTML，避免扩大 arXiv
+流量和工作流耗时。仓库默认阈值可被本次运行配置覆盖；Figure 管线接收筛选结果，不从
+`DataFile` 反推阈值。
 
 缓存键为 `arxiv_id + version`：
 
@@ -117,7 +118,8 @@ FigureCacheEntry
 - 缓存只保存 URL、caption、状态和时间，不保存图片字节。
 
 每篇论文的图像失败只记录为运行统计和日志，不计入 LLM 失败比例，也不取消本次成功
-发布。运行统计增加 Figure 请求、缓存命中、可用、不可用和失败计数。
+发布。运行统计的稳定字段为 `figure_cache_hits`、`figure_requests`、
+`figure_available`、`figure_unavailable`、`figure_failed`。
 
 ## 页面体验
 
@@ -133,7 +135,7 @@ FigureCacheEntry
   当前图片响应允许跨域读取。若 CORS、网络或浏览器策略阻止下载，自动退化为新标签
   打开原图，用户仍可保存。
 - 多子图分别提供下载按钮，并使用
-  `{arxiv_id}-figure-{number}-panel-{index}.{ext}` 作为建议文件名。
+  `{arxiv_id}-v{version}-fig{number}-panel{index}.{ext}` 作为建议文件名。
 - 图片加载失败时隐藏破损图标，显示“图片暂时无法加载”和 PDF 链接。
 - `alt` 文本由 `Figure {number}: {caption}` 生成；过长 caption 在可视区域折叠，
   但辅助技术和详情区域仍能访问完整文本。
@@ -192,3 +194,5 @@ Astro/浏览器测试覆盖：
 - 缺失 HTML、缺图或网络错误不会阻塞每日发布。
 - 桌面端、移动端和键盘操作均通过浏览器测试。
 - 页面展示来源与版权提示。
+- 验收文案明确说明图片由 arXiv 远程提供、不保存图片字节，下载与复用必须遵循
+  论文页面标注的许可证。
