@@ -53,12 +53,19 @@ def validate_arxiv_url_authority(url: HttpUrl) -> HttpUrl:
     return url
 
 
+def parse_arxiv_html_identity(url: HttpUrl) -> tuple[str, int]:
+    path = url.path
+    match = ARXIV_HTML_PATH_PATTERN.fullmatch(path) if path is not None else None
+    if match is None:
+        raise ValueError("arXiv HTML URL must identify a versioned paper")
+    return match.group("arxiv_id"), int(match.group("version"))
+
+
 def validate_arxiv_html_url(url: HttpUrl) -> HttpUrl:
     validate_arxiv_url_authority(url)
     if url.fragment is not None:
         raise ValueError("arXiv HTML URL must not contain a fragment")
-    if url.path is None or ARXIV_HTML_PATH_PATTERN.fullmatch(url.path) is None:
-        raise ValueError("arXiv HTML URL must identify a versioned paper")
+    parse_arxiv_html_identity(url)
     return url
 
 
@@ -75,8 +82,7 @@ def validate_arxiv_source_url(url: HttpUrl) -> HttpUrl:
     validate_arxiv_url_authority(url)
     if not url.fragment:
         raise ValueError("arXiv figure source URL must contain a nonempty fragment")
-    if url.path is None or ARXIV_HTML_PATH_PATTERN.fullmatch(url.path) is None:
-        raise ValueError("arXiv figure source URL must identify a versioned paper")
+    parse_arxiv_html_identity(url)
     return url
 
 
@@ -283,6 +289,13 @@ class PaperRecord(AnalyzedPaperRecord):
             raise ValueError(f"paper {arxiv_id} requires a checked figure gallery")
         return value
 
+    @model_validator(mode="after")
+    def validate_figure_gallery_identity(self) -> Self:
+        gallery_identity = parse_arxiv_html_identity(self.figure_gallery.html_url)
+        if gallery_identity != (self.arxiv_id, self.version):
+            raise ValueError("paper record and figure gallery identities must match")
+        return self
+
 
 class TokenUsage(StrictModel):
     prompt_tokens: int = Field(default=0, ge=0)
@@ -337,3 +350,11 @@ class CacheEntry(FrozenStrictModel):
 class FigureCacheEntry(FrozenStrictModel):
     key: FigureCacheKey
     gallery: FigureGallery
+
+    @model_validator(mode="after")
+    def validate_gallery_identity(self) -> Self:
+        arxiv_id, version_text = self.key.rsplit(":v", maxsplit=1)
+        gallery_identity = parse_arxiv_html_identity(self.gallery.html_url)
+        if gallery_identity != (arxiv_id, int(version_text)):
+            raise ValueError("figure cache key and gallery identities must match")
+        return self

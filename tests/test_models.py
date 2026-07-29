@@ -168,6 +168,33 @@ def test_public_record_requires_gallery_while_analyzed_record_does_not() -> None
     assert CacheEntry(key="analysis-key", record=analyzed_record).record == analyzed_record
 
 
+@pytest.mark.parametrize(
+    ("gallery_arxiv_id", "gallery_version"),
+    [
+        ("2607.99999", 1),
+        ("2607.12345", 2),
+    ],
+)
+def test_paper_record_rejects_mismatched_gallery_identity(
+    gallery_arxiv_id: str, gallery_version: int
+) -> None:
+    record_data = make_record().model_dump()
+    record_data["figure_gallery"] = make_gallery(
+        arxiv_id=gallery_arxiv_id,
+        version=gallery_version,
+    )
+
+    with pytest.raises(ValidationError):
+        PaperRecord(**record_data)
+
+
+def test_paper_record_copy_revalidates_gallery_identity() -> None:
+    with pytest.raises(ValidationError):
+        make_record().model_copy(
+            update={"figure_gallery": make_gallery(version=2)}
+        )
+
+
 def test_public_data_file_schema_requires_non_nullable_figure_gallery() -> None:
     schema = DataFile.model_json_schema()
     paper_schema = schema["$defs"]["PaperRecord"]
@@ -318,11 +345,23 @@ def test_figure_gallery_rejects_cross_paper_or_version_urls(
     ],
 )
 def test_figure_cache_entry_requires_arxiv_version_key(invalid_key: str) -> None:
-    entry = FigureCacheEntry(key="2606.30552:v2", gallery=make_gallery())
+    entry = FigureCacheEntry(key="2607.12345:v1", gallery=make_gallery())
 
-    assert entry.key == "2606.30552:v2"
+    assert entry.key == "2607.12345:v1"
     with pytest.raises(ValidationError):
         FigureCacheEntry(key=invalid_key, gallery=make_gallery())
+
+
+@pytest.mark.parametrize(
+    "key",
+    [
+        "2607.99999:v1",
+        "2607.12345:v2",
+    ],
+)
+def test_figure_cache_entry_rejects_mismatched_gallery_identity(key: str) -> None:
+    with pytest.raises(ValidationError):
+        FigureCacheEntry(key=key, gallery=make_gallery())
 
 
 @pytest.mark.parametrize(
