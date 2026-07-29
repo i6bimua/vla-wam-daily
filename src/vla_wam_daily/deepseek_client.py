@@ -217,7 +217,7 @@ class DeepSeekClient:
         if not isinstance(choice, dict):
             raise DeepSeekResponseError("DeepSeek response choice must be an object")
 
-        if choice.get("finish_reason") != "stop":
+        if "finish_reason" in choice and choice["finish_reason"] != "stop":
             raise DeepSeekResponseError("DeepSeek response finish_reason must be stop")
 
         message = choice.get("message")

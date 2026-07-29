@@ -205,7 +205,7 @@ def completion_response(
         ({"choices": "wrong"}, "choices"),
         ({"choices": []}, "choices"),
         ({"choices": [None]}, "choice"),
-        ({"choices": [{}]}, "finish_reason"),
+        ({"choices": [{}]}, "message"),
         (
             {"choices": [{"finish_reason": "stop", "message": None}]},
             "message",
@@ -265,7 +265,48 @@ def test_invalid_message_content_is_rejected(content: object, match: str) -> Non
             )
 
 
-@pytest.mark.parametrize("finish_reason", ["length", "content_filter", None])
+def test_missing_finish_reason_is_accepted() -> None:
+    transport = httpx.MockTransport(
+        lambda _request: httpx.Response(
+            200,
+            headers={"content-type": "application/json"},
+            json={
+                "choices": [
+                    {
+                        "message": {
+                            "content": '{"title_zh":"中文标题"}',
+                        }
+                    }
+                ]
+            },
+        )
+    )
+    with httpx.Client(transport=transport) as http_client:
+        client = DeepSeekClient(
+            api_key="test-key",
+            model="deepseek-v4-pro",
+            retries=1,
+            http_client=http_client,
+        )
+        payload, usage = client.analyze(
+            system_prompt="Return JSON.",
+            paper_json='{"title":"x"}',
+        )
+
+    assert payload == {"title_zh": "中文标题"}
+    assert usage.total_tokens == 0
+
+
+@pytest.mark.parametrize(
+    "finish_reason",
+    [
+        "length",
+        "content_filter",
+        "tool_calls",
+        "insufficient_system_resource",
+        None,
+    ],
+)
 def test_non_stop_finish_reason_is_rejected(finish_reason: object) -> None:
     transport = httpx.MockTransport(
         lambda _request: completion_response(finish_reason=finish_reason)
