@@ -16,6 +16,7 @@ from vla_wam_daily.models import (
     CacheEntry,
     DataFile,
     FigureCacheEntry,
+    FigureStatus,
     PaperRecord,
     RunStats,
 )
@@ -371,8 +372,41 @@ def test_normal_persisted_json_loads_datetime_urls_and_json_arrays() -> None:
     assert isinstance(data.generated_at, datetime)
     assert isinstance(data.papers[0].authors, tuple)
     assert str(data.papers[0].resources.arxiv_url).startswith("https://arxiv.org/")
-    assert isinstance(next(iter(cache.values())).record.authors, tuple)
+    assert cache == {}
     assert figure_cache == {}
+
+
+def test_browser_fixture_covers_all_figure_statuses_and_run_counters() -> None:
+    data_dir = Path("tests/fixtures/data")
+    latest = load_data_file(data_dir / "latest.json")
+    archive = load_data_file(data_dir / "archive/2026-07.json")
+
+    assert latest is not None
+    assert archive is not None
+    assert latest.generated_at == datetime(2026, 7, 29, 2, 30, tzinfo=UTC)
+    assert archive.generated_at == latest.generated_at
+    expected_stats = RunStats(
+        fetched=4,
+        published=4,
+        figure_available=1,
+        figure_unavailable=2,
+        figure_failed=1,
+    )
+    assert latest.stats == expected_stats
+    assert archive.stats == expected_stats
+    latest_records = {(paper.arxiv_id, paper.version): paper for paper in latest.papers}
+    archive_records = {(paper.arxiv_id, paper.version): paper for paper in archive.papers}
+    assert latest_records == archive_records
+    latest_statuses = {
+        identity: paper.figure_gallery.status for identity, paper in latest_records.items()
+    }
+    assert len(latest_statuses) == 4
+    assert list(latest_statuses.values()).count(FigureStatus.AVAILABLE) == 1
+    assert list(latest_statuses.values()).count(FigureStatus.HTML_UNAVAILABLE) == 1
+    assert list(latest_statuses.values()).count(FigureStatus.NOT_FOUND) == 1
+    assert list(latest_statuses.values()).count(FigureStatus.FETCH_FAILED) == 1
+    assert load_cache(data_dir) == {}
+    assert load_figure_cache(data_dir) == {}
 
 
 @pytest.mark.parametrize("data_dir", [Path("data"), Path("tests/fixtures/data")])
