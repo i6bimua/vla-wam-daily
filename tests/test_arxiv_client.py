@@ -141,9 +141,7 @@ def test_fetch_recent_parses_normalized_versioned_paper() -> None:
 
 @respx.mock
 def test_fetch_by_ids_uses_stably_deduplicated_id_list() -> None:
-    route = respx.get(ARXIV_API_URL).mock(
-        return_value=httpx.Response(200, content=FIXTURE.read_bytes())
-    )
+    route = respx.get(ARXIV_API_URL).mock(return_value=atom_response(FIXTURE.read_bytes()))
 
     with ArxivClient(
         user_agent=USER_AGENT,
@@ -434,6 +432,34 @@ def test_fetch_recent_rejects_progress_beyond_total_results() -> None:
     )
 
     with client, pytest.raises(ValueError, match="totalResults"):
+        client.fetch_recent(
+            categories=["cs.RO"],
+            since=datetime(2026, 7, 25, tzinfo=UTC),
+            until=datetime(2026, 7, 28, tzinfo=UTC),
+            max_results_per_category=10,
+        )
+
+
+@respx.mock
+def test_fetch_recent_rejects_more_entries_than_requested() -> None:
+    without_metadata = frozenset({"total_results", "start_index", "items_per_page"})
+    respx.get(ARXIV_API_URL).mock(
+        return_value=atom_response(
+            atom_feed(
+                atom_entry("2607.00002"),
+                atom_entry("2607.00001"),
+                omit_opensearch=without_metadata,
+            )
+        )
+    )
+    client = ArxivClient(
+        user_agent=USER_AGENT,
+        request_delay_seconds=0,
+        retries=1,
+        page_size=1,
+    )
+
+    with client, pytest.raises(ValueError, match="requested"):
         client.fetch_recent(
             categories=["cs.RO"],
             since=datetime(2026, 7, 25, tzinfo=UTC),
@@ -799,6 +825,52 @@ def test_feed_rejects_entries_missing_critical_fields(missing: str) -> None:
         client.fetch_by_ids(["2607.12345"])
 
 
+@pytest.mark.parametrize(
+    "category",
+    ["all:*", "", "cs.RO\nbad"],
+)
+@respx.mock
+def test_feed_rejects_unsafe_entry_categories(category: str) -> None:
+    respx.get(ARXIV_API_URL).mock(
+        return_value=atom_response(atom_feed(atom_entry("2607.12345", categories=(category,))))
+    )
+    client = ArxivClient(user_agent=USER_AGENT, request_delay_seconds=0, retries=1)
+
+    with client, pytest.raises(ValueError, match="categor"):
+        client.fetch_by_ids(["2607.12345"])
+
+
+@respx.mock
+def test_feed_accepts_and_deduplicates_valid_cross_archive_categories() -> None:
+    respx.get(ARXIV_API_URL).mock(
+        return_value=atom_response(
+            atom_feed(
+                atom_entry(
+                    "2607.12345",
+                    categories=(
+                        "physics.optics",
+                        "math-ph",
+                        "q-bio.RO",
+                        "cs.RO",
+                        "physics.optics",
+                    ),
+                )
+            )
+        )
+    )
+    client = ArxivClient(user_agent=USER_AGENT, request_delay_seconds=0, retries=1)
+
+    with client:
+        papers = client.fetch_by_ids(["2607.12345"])
+
+    assert papers[0].arxiv_categories == [
+        "physics.optics",
+        "math-ph",
+        "q-bio.RO",
+        "cs.RO",
+    ]
+
+
 @respx.mock
 def test_empty_feed_that_claims_results_is_rejected() -> None:
     respx.get(ARXIV_API_URL).mock(
@@ -858,6 +930,95 @@ def test_retryable_status_is_retried(status_code: int) -> None:
 
     assert len(route.calls) == 2
     assert len(papers) == 1
+
+
+@pytest.mark.parametrize("status_code", [429, 503])
+@respx.mock
+def test_retry_after_delta_seconds_controls_retry_delay(
+    status_code: int,
+) -> None:
+    fake_time = FakeTime()
+    route = respx.get(ARXIV_API_URL).mock(
+        side_effect=[
+            httpx.Response(status_code, headers={"retry-after": "120"}),
+            atom_response(atom_feed(atom_entry("2607.12345"))),
+        ]
+    )
+    client = ArxivClient(
+        user_agent=USER_AGENT,
+        request_delay_seconds=0,
+        retry_wait_seconds=1,
+        retries=2,
+        sleep=fake_time.sleep,
+        clock=fake_time.clock,
+    )
+
+    with client:
+        papers = client.fetch_by_ids(["2607.12345"])
+
+    assert len(route.calls) == 2
+    assert len(papers) == 1
+    assert fake_time.sleeps == [120]
+
+
+@pytest.mark.parametrize(
+    "retry_after",
+    ["-5", "not-a-delay", "Wed, 21 Oct 2015 07:28:00 GMT"],
+)
+@respx.mock
+def test_invalid_retry_after_uses_exponential_backoff(
+    retry_after: str,
+) -> None:
+    fake_time = FakeTime()
+    route = respx.get(ARXIV_API_URL).mock(
+        side_effect=[
+            httpx.Response(503, headers={"retry-after": retry_after}),
+            atom_response(atom_feed(atom_entry("2607.12345"))),
+        ]
+    )
+    client = ArxivClient(
+        user_agent=USER_AGENT,
+        request_delay_seconds=0,
+        retry_wait_seconds=3,
+        retries=2,
+        sleep=fake_time.sleep,
+        clock=fake_time.clock,
+    )
+
+    with client:
+        papers = client.fetch_by_ids(["2607.12345"])
+
+    assert len(route.calls) == 2
+    assert len(papers) == 1
+    assert fake_time.sleeps == [3]
+
+
+@respx.mock
+def test_missing_or_invalid_retry_after_uses_exponential_backoff() -> None:
+    fake_time = FakeTime()
+    route = respx.get(ARXIV_API_URL).mock(
+        side_effect=[
+            httpx.Response(503),
+            httpx.Response(429, headers={"retry-after": "-5"}),
+            httpx.ConnectTimeout("simulated network timeout"),
+            atom_response(atom_feed(atom_entry("2607.12345"))),
+        ]
+    )
+    client = ArxivClient(
+        user_agent=USER_AGENT,
+        request_delay_seconds=0,
+        retry_wait_seconds=1,
+        retries=4,
+        sleep=fake_time.sleep,
+        clock=fake_time.clock,
+    )
+
+    with client:
+        papers = client.fetch_by_ids(["2607.12345"])
+
+    assert len(route.calls) == 4
+    assert len(papers) == 1
+    assert fake_time.sleeps == [1, 2, 4]
 
 
 @respx.mock
@@ -1033,6 +1194,94 @@ def test_non_xml_response_content_type_is_rejected() -> None:
 
     with client, pytest.raises(ValueError, match="content type"):
         client.fetch_by_ids(["2607.12345"])
+
+
+@respx.mock
+def test_missing_response_content_type_is_rejected() -> None:
+    respx.get(ARXIV_API_URL).mock(
+        return_value=httpx.Response(
+            200,
+            content=atom_feed(atom_entry("2607.12345")),
+        )
+    )
+    client = ArxivClient(user_agent=USER_AGENT, request_delay_seconds=0, retries=1)
+
+    with client, pytest.raises(ValueError, match="content type"):
+        client.fetch_by_ids(["2607.12345"])
+
+
+@pytest.mark.parametrize(
+    "content_type",
+    ["application/xhtml+xml", "image/svg+xml"],
+)
+@respx.mock
+def test_non_atom_xml_media_types_are_rejected(content_type: str) -> None:
+    respx.get(ARXIV_API_URL).mock(
+        return_value=httpx.Response(
+            200,
+            content=atom_feed(atom_entry("2607.12345")),
+            headers={"content-type": content_type},
+        )
+    )
+    client = ArxivClient(user_agent=USER_AGENT, request_delay_seconds=0, retries=1)
+
+    with client, pytest.raises(ValueError, match="content type"):
+        client.fetch_by_ids(["2607.12345"])
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        b'<html xmlns="http://www.w3.org/1999/xhtml"><body/></html>',
+        b'<svg xmlns="http://www.w3.org/2000/svg"/>',
+        (
+            b'<?xml version="1.0"?><rss version="2.0"><channel>'
+            b"<title>Not Atom</title><link>https://example.com</link>"
+            b"<description>RSS</description></channel></rss>"
+        ),
+        b'<?xml version="1.0"?><root/>',
+    ],
+)
+@respx.mock
+def test_non_atom_xml_documents_are_rejected(body: bytes) -> None:
+    respx.get(ARXIV_API_URL).mock(
+        return_value=httpx.Response(
+            200,
+            content=body,
+            headers={"content-type": "application/xml"},
+        )
+    )
+    client = ArxivClient(user_agent=USER_AGENT, request_delay_seconds=0, retries=1)
+
+    with client, pytest.raises(ValueError, match="Atom"):
+        client.fetch_by_ids(["2607.12345"])
+
+
+@pytest.mark.parametrize(
+    "content_type",
+    [
+        "application/atom+xml; charset=utf-8",
+        "application/xml; charset=utf-8",
+        "text/xml; charset=utf-8",
+    ],
+)
+@respx.mock
+def test_allowed_xml_media_types_accept_an_empty_atom_feed(
+    content_type: str,
+) -> None:
+    respx.get(ARXIV_API_URL).mock(
+        return_value=httpx.Response(
+            200,
+            content=atom_feed(),
+            headers={"content-type": content_type},
+        )
+    )
+    client = ArxivClient(user_agent=USER_AGENT, request_delay_seconds=0, retries=1)
+
+    with client:
+        papers = client.fetch_by_ids(["2607.12345"])
+
+    assert papers == []
 
 
 def test_request_uses_fixed_endpoint_user_agent_and_sorting() -> None:

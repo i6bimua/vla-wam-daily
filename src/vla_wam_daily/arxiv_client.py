@@ -16,6 +16,7 @@ from vla_wam_daily.models import RawPaper
 
 ARXIV_API_URL = "https://export.arxiv.org/api/query"
 CATEGORY_RE = re.compile(r"^[a-z][a-z0-9-]*(?:\.[A-Z]{2,3})?$")
+ENTRY_CATEGORY_RE = re.compile(r"^[a-z][a-z0-9]*(?:-[a-z0-9]+)*(?:\.[A-Za-z][A-Za-z0-9-]*)?$")
 ARXIV_ID_RE = re.compile(
     r"(?P<year>\d{2})(?P<month>0[1-9]|1[0-2])"
     r"\.(?P<number>\d{4,5})(?:v(?P<version>[1-9]\d*))?"
@@ -124,6 +125,16 @@ def _parse_feed_integer(
     if parsed < 0:
         raise ValueError(f"invalid arXiv feed {key}")
     return parsed
+
+
+def _retry_after_delta_seconds(response: httpx.Response) -> float | None:
+    value = response.headers.get("retry-after")
+    if value is None:
+        return None
+    value = value.strip()
+    if not value.isdecimal():
+        return None
+    return float(int(value))
 
 
 def _paper_preference_key(paper: RawPaper) -> tuple[datetime, str]:
@@ -247,11 +258,11 @@ class ArxivClient:
                 if declared_size > self.max_response_bytes:
                     raise ValueError("arXiv response is too large")
 
-            media_type = response.headers.get("content-type", "")
-            if media_type:
-                media_type = media_type.partition(";")[0].strip().casefold()
-                if media_type not in XML_CONTENT_TYPES and not media_type.endswith("+xml"):
-                    raise ValueError(f"arXiv response has unsupported content type {media_type!r}")
+            media_type = (
+                response.headers.get("content-type", "").partition(";")[0].strip().casefold()
+            )
+            if media_type not in XML_CONTENT_TYPES:
+                raise ValueError(f"arXiv response has unsupported content type {media_type!r}")
 
             content = bytearray()
             for chunk in response.iter_bytes():
@@ -281,8 +292,13 @@ class ArxivClient:
                 raise RetryableArxivError(
                     f"arXiv request failed after {self.retries} attempts: {detail}"
                 ) from last_error
-            if self.retry_wait_seconds > 0:
-                self._sleep(self.retry_wait_seconds)
+            delay = self.retry_wait_seconds * 2 ** (attempt - 1)
+            if isinstance(last_error, httpx.HTTPStatusError):
+                retry_after = _retry_after_delta_seconds(last_error.response)
+                if retry_after is not None:
+                    delay = max(delay, retry_after)
+            if delay > 0:
+                self._sleep(delay)
 
         raise AssertionError("retry loop ended without returning")
 
@@ -292,6 +308,8 @@ class ArxivClient:
         if getattr(parsed, "bozo", False):
             detail = getattr(parsed, "bozo_exception", "unknown parse error")
             raise ValueError(f"invalid arXiv feed: {detail}")
+        if getattr(parsed, "version", "") != "atom10":
+            raise ValueError("invalid arXiv Atom 1.0 feed")
 
         raw_entries: list[Mapping[str, Any]] = list(parsed.entries)
         raw_entry_count = len(raw_entries)
@@ -339,9 +357,14 @@ class ArxivClient:
                 authors = [
                     " ".join(str(author.get("name", "")).split()) for author in entry["authors"]
                 ]
-                categories = [str(tag.get("term", "")).strip() for tag in entry["tags"]]
+                categories = [tag.get("term") for tag in entry["tags"]]
+                if not categories or any(
+                    not isinstance(category, str) or ENTRY_CATEGORY_RE.fullmatch(category) is None
+                    for category in categories
+                ):
+                    raise ValueError("invalid arXiv entry category")
                 authors = list(dict.fromkeys(name for name in authors if name))
-                categories = list(dict.fromkeys(category for category in categories if category))
+                categories = list(dict.fromkeys(categories))
                 comment_value = entry.get("arxiv_comment")
                 comment = (
                     " ".join(str(comment_value).split()) if comment_value is not None else None
@@ -416,6 +439,8 @@ class ArxivClient:
                         }
                     )
                 )
+                if page.raw_entry_count > requested:
+                    raise ValueError("arXiv feed returned more entries than requested")
                 if page.start_index is not None and page.start_index != start:
                     raise ValueError(
                         f"arXiv feed startIndex {page.start_index} "
