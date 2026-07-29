@@ -28,11 +28,18 @@ class AnalysisClient(Protocol):
     ) -> tuple[dict[str, object], TokenUsage]: ...
 
 
-def _require_nonblank_string(value: object, *, name: str) -> str:
+def _require_nonblank_string(
+    value: object,
+    *,
+    name: str,
+    require_trimmed: bool = False,
+) -> str:
     if not isinstance(value, str):
         raise TypeError(f"{name} must be a string")
     if not value.strip():
         raise ValueError(f"{name} must be non-empty")
+    if require_trimmed and value != value.strip():
+        raise ValueError(f"{name} must be trimmed")
     return value
 
 
@@ -82,10 +89,19 @@ def analyze_paper(
     prompt_version: str,
     analyzed_at: datetime,
 ) -> tuple[AnalyzedPaperRecord, TokenUsage]:
+    paper_snapshot = RawPaper.model_validate(paper.model_dump(mode="python", round_trip=True))
     normalized_rules = _normalize_matched_rules(matched_rules)
     system_prompt = _require_nonblank_string(prompt, name="prompt")
-    model = _require_nonblank_string(client.model, name="client.model")
-    version = _require_nonblank_string(prompt_version, name="prompt_version")
+    model = _require_nonblank_string(
+        client.model,
+        name="client.model",
+        require_trimmed=True,
+    )
+    version = _require_nonblank_string(
+        prompt_version,
+        name="prompt_version",
+        require_trimmed=True,
+    )
     provenance = Provenance(
         analysis_scope="title_and_abstract",
         model=model,
@@ -94,10 +110,10 @@ def analyze_paper(
     )
 
     input_payload = {
-        "arxiv_id": paper.arxiv_id,
-        "title": paper.title,
-        "abstract": paper.abstract,
-        "arxiv_categories": paper.arxiv_categories,
+        "arxiv_id": paper_snapshot.arxiv_id,
+        "title": paper_snapshot.title,
+        "abstract": paper_snapshot.abstract,
+        "arxiv_categories": paper_snapshot.arxiv_categories,
         "matched_rules": normalized_rules,
     }
     payload, raw_usage = client.analyze(
@@ -108,18 +124,22 @@ def analyze_paper(
     usage = _validate_usage(raw_usage)
 
     record = AnalyzedPaperRecord(
-        arxiv_id=paper.arxiv_id,
-        version=paper.version,
-        published_at=paper.published_at,
-        updated_at=paper.updated_at,
-        title=paper.title,
+        arxiv_id=paper_snapshot.arxiv_id,
+        version=paper_snapshot.version,
+        published_at=paper_snapshot.published_at,
+        updated_at=paper_snapshot.updated_at,
+        title=paper_snapshot.title,
         title_zh=output.title_zh,
-        authors=tuple(paper.authors),
-        arxiv_categories=tuple(paper.arxiv_categories),
-        abstract=paper.abstract,
+        authors=tuple(paper_snapshot.authors),
+        arxiv_categories=tuple(paper_snapshot.arxiv_categories),
+        abstract=paper_snapshot.abstract,
         matched_rules=normalized_rules,
         analysis=output.analysis,
-        resources=extract_resources(paper.arxiv_id, paper.abstract, paper.comment),
+        resources=extract_resources(
+            paper_snapshot.arxiv_id,
+            paper_snapshot.abstract,
+            paper_snapshot.comment,
+        ),
         provenance=provenance,
     )
     return record, usage

@@ -43,6 +43,20 @@ def normalize_utc(value: datetime) -> datetime:
 UtcDatetime = Annotated[AwareDatetime, AfterValidator(normalize_utc)]
 
 
+def normalize_nonblank_text(value: str) -> str:
+    normalized = value.strip()
+    if not normalized:
+        raise ValueError("text must contain non-whitespace characters")
+    return normalized
+
+
+NormalizedNonBlankStr = Annotated[
+    str,
+    Field(min_length=1),
+    AfterValidator(normalize_nonblank_text),
+]
+
+
 def validate_arxiv_url_authority(url: HttpUrl) -> HttpUrl:
     if url.scheme != "https" or url.host not in ARXIV_FIGURE_HOSTS:
         raise ValueError("URL must use https and an allowed arXiv host")
@@ -147,12 +161,12 @@ class Analysis(FrozenStrictModel):
     relevance_score: int = Field(ge=1, le=10)
     primary_topic: Topic
     tags: tuple[str, ...]
-    one_sentence_summary: str = Field(min_length=1)
-    main_contribution: str = Field(min_length=1)
-    method: str = Field(min_length=1)
-    key_results: str = Field(min_length=1)
-    limitations: str = Field(min_length=1)
-    relation_to_vla_wam: str = Field(min_length=1)
+    one_sentence_summary: NormalizedNonBlankStr
+    main_contribution: NormalizedNonBlankStr
+    method: NormalizedNonBlankStr
+    key_results: NormalizedNonBlankStr
+    limitations: NormalizedNonBlankStr
+    relation_to_vla_wam: NormalizedNonBlankStr
 
     @field_validator("tags")
     @classmethod
@@ -164,7 +178,7 @@ class Analysis(FrozenStrictModel):
 
 
 class AIOutput(StrictModel):
-    title_zh: str = Field(min_length=1)
+    title_zh: NormalizedNonBlankStr
     analysis: Analysis
 
 

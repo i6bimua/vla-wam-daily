@@ -6,6 +6,7 @@ from pydantic import ValidationError
 import vla_wam_daily.models as models
 from tests.factories import make_gallery, make_record
 from vla_wam_daily.models import (
+    AIOutput,
     Analysis,
     CacheEntry,
     DataFile,
@@ -20,6 +21,48 @@ from vla_wam_daily.models import (
     RunStats,
     Topic,
 )
+
+
+def valid_ai_output_payload() -> dict[str, object]:
+    return {
+        "title_zh": "中文标题",
+        "analysis": {
+            "relevance_score": 8,
+            "primary_topic": "VLA",
+            "tags": ["Vision-Language"],
+            "one_sentence_summary": "一句话总结",
+            "main_contribution": "核心贡献",
+            "method": "方法",
+            "key_results": "实验结果",
+            "limitations": "局限性",
+            "relation_to_vla_wam": "与 VLA 直接相关",
+        },
+    }
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "title_zh",
+        "one_sentence_summary",
+        "main_contribution",
+        "method",
+        "key_results",
+        "limitations",
+        "relation_to_vla_wam",
+    ],
+)
+def test_ai_output_rejects_whitespace_only_text_fields(field: str) -> None:
+    payload = valid_ai_output_payload()
+    if field == "title_zh":
+        payload[field] = " \n\t "
+    else:
+        analysis = payload["analysis"]
+        assert isinstance(analysis, dict)
+        analysis[field] = " \n\t "
+
+    with pytest.raises(ValidationError):
+        AIOutput.model_validate(payload)
 
 
 def test_analysis_rejects_out_of_range_score() -> None:

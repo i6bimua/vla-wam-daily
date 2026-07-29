@@ -59,6 +59,27 @@ class FakeClient:
         return self.payload, self.usage
 
 
+class MutatingClient(FakeClient):
+    def __init__(self, paper: RawPaper) -> None:
+        super().__init__()
+        self.paper = paper
+
+    def analyze(
+        self,
+        *,
+        system_prompt: str,
+        paper_json: str,
+    ) -> tuple[Any, Any]:
+        self.calls.append((system_prompt, paper_json))
+        self.paper.version = 9
+        self.paper.title = "Mutated title"
+        self.paper.abstract = "Mutated abstract. Code: https://github.com/attacker/mutated."
+        self.paper.authors[:] = ["Mutated Author"]
+        self.paper.arxiv_categories[:] = ["cs.AI"]
+        self.paper.comment = "Mutated project https://attacker.example/project"
+        return self.payload, self.usage
+
+
 def raw_paper(
     *,
     abstract: str = (
@@ -187,6 +208,52 @@ def test_analyzer_extracts_resources_only_from_original_metadata() -> None:
     assert str(record.resources.pdf_url) == "https://arxiv.org/pdf/2607.12345"
 
 
+def test_analyzer_uses_one_pre_call_snapshot_when_client_mutates_raw_paper() -> None:
+    paper = raw_paper()
+    original = RawPaper.model_validate(paper.model_dump(mode="python", round_trip=True))
+    client = MutatingClient(paper)
+
+    record, _ = analyze_with(client, paper=paper)
+
+    request_payload = json.loads(client.calls[0][1])
+    assert request_payload["title"] == original.title
+    assert request_payload["abstract"] == original.abstract
+    assert request_payload["arxiv_categories"] == original.arxiv_categories
+    assert record.version == original.version
+    assert record.title == original.title
+    assert record.abstract == original.abstract
+    assert record.authors == tuple(original.authors)
+    assert record.arxiv_categories == tuple(original.arxiv_categories)
+    assert str(record.resources.code_url) == "https://github.com/example/vla-policy"
+    assert str(record.resources.project_url) == "https://example.github.io/vla-policy/"
+    assert paper.version == 9
+    assert paper.title == "Mutated title"
+
+
+def test_analyzer_normalizes_ai_text_without_mutating_client_payload() -> None:
+    payload = deepcopy(VALID_AI_PAYLOAD)
+    payload["title_zh"] = " \n 中文标题 \t"
+    analysis = payload["analysis"]
+    assert isinstance(analysis, dict)
+    text_fields = {
+        "one_sentence_summary": " 一句话总结 ",
+        "main_contribution": "\n 核心贡献\t",
+        "method": " 方法 ",
+        "key_results": " 实验结果 ",
+        "limitations": " 局限性 ",
+        "relation_to_vla_wam": " 与 VLA 直接相关 ",
+    }
+    analysis.update(text_fields)
+    original_payload = deepcopy(payload)
+
+    record, _ = analyze_with(FakeClient(payload=payload))
+
+    assert record.title_zh == "中文标题"
+    for field, value in text_fields.items():
+        assert getattr(record.analysis, field) == value.strip()
+    assert payload == original_payload
+
+
 @pytest.mark.parametrize(
     "mutate",
     [
@@ -270,6 +337,34 @@ def test_analyzer_rejects_blank_prompt_metadata(field: str, value: str) -> None:
 
     with pytest.raises(ValueError):
         analyze_with(FakeClient(), **arguments)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(
+    ("client", "prompt_version"),
+    [
+        (FakeClient(model=" deepseek-v4-pro"), "1"),
+        (FakeClient(model="deepseek-v4-pro "), "1"),
+        (FakeClient(), " 1"),
+        (FakeClient(), "1 "),
+    ],
+)
+def test_analyzer_rejects_untrimmed_cache_identity_metadata(
+    client: FakeClient,
+    prompt_version: str,
+) -> None:
+    with pytest.raises(ValueError, match="trimmed"):
+        analyze_with(client, prompt_version=prompt_version)
+
+    assert client.calls == []
+
+
+def test_analyzer_preserves_nonblank_prompt_whitespace() -> None:
+    client = FakeClient()
+    prompt = "\n  Return one valid JSON object.  \t"
+
+    analyze_with(client, prompt=prompt)
+
+    assert client.calls[0][0] == prompt
 
 
 @pytest.mark.parametrize("model", ["", "  ", None, 123])
