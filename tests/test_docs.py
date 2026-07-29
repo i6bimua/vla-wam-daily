@@ -67,6 +67,36 @@ def test_readme_has_reproducible_python_web_and_dry_run_commands() -> None:
     assert re.search(r"\bsk-[A-Za-z0-9_-]{8,}", README) is None
 
 
+def test_readme_orders_e2e_setup_and_keeps_manual_preview_separate() -> None:
+    install_browser = README.index("pnpm exec playwright install chromium")
+    fixture_build = README.index(
+        "BASE_PATH=/ VLA_WAM_DATA_DIR=../tests/fixtures/data pnpm build"
+    )
+    strict_e2e = README.index("pnpm test:e2e")
+    manual_preview = README.index("pnpm preview --host 127.0.0.1")
+
+    assert install_browser < fixture_build < strict_e2e < manual_preview
+    assert "另一个终端" in README
+    assert "前台进程" in README
+    assert "Ctrl-C" in README
+    assert "strict E2E 会独占默认端口 `4321`" in README
+    assert "不要同时运行手动 preview" in README
+
+
+def test_readme_documents_actual_cache_paths() -> None:
+    assert "`data/cache/analyses.json`" in README
+    assert "`data/cache/figures.json`" in README
+    assert "`data/cache.json`" not in README
+    assert "`data/figures.json`" not in README
+
+
+def test_readme_documents_retry_and_invalid_ai_output_behavior() -> None:
+    assert "arXiv 和 DeepSeek 对超时、429 和瞬态错误执行有限指数退避" in README
+    assert "无效或不符合 Schema 的 AI 输出绝不发布" in README
+    assert "计入失败" in README
+    assert "下次运行重试" in README
+
+
 def test_readme_explains_pages_schedule_secrets_sources_and_troubleshooting() -> None:
     for text in (
         "DEEPSEEK_API_KEY",

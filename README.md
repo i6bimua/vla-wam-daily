@@ -37,6 +37,10 @@ GitHub Pages；不需要数据库或常驻服务器。
 每次最多分析 60 篇新候选；超过上限会停止更新，而不是截断后发布不完整结果。新论文
 分析失败比例超过 30% 时，整次数据更新失败并保留线上上一版。
 
+失败处理是显式且有上限的：arXiv 和 DeepSeek 对超时、429 和瞬态错误执行有限指数退避；
+重试耗尽后记录错误，不会用占位内容覆盖正常数据。无效或不符合 Schema 的 AI 输出绝不发布，
+会计入失败且不写入分析缓存，以便下次运行重试。
+
 ## 本地开发
 
 ### 数据管线
@@ -75,11 +79,21 @@ npm install --global pnpm@11.9.0
 pnpm install --frozen-lockfile
 pnpm test
 pnpm format:check
-BASE_PATH=/ VLA_WAM_DATA_DIR=../tests/fixtures/data pnpm build
-pnpm preview --host 127.0.0.1
 pnpm exec playwright install chromium
+BASE_PATH=/ VLA_WAM_DATA_DIR=../tests/fixtures/data pnpm build
 pnpm test:e2e
 ```
+
+Playwright strict E2E 会独占默认端口 `4321`，自动启动并关闭自己的 Vite preview；
+不要同时运行手动 preview，否则 strict port 检查会失败。
+
+如需人工查看构建结果，请等 E2E 结束后，在另一个终端单独运行最后一条预览命令：
+
+```bash
+pnpm preview --host 127.0.0.1
+```
+
+preview 是前台进程，查看结束后按 `Ctrl-C` 停止。
 
 正常构建时可省略 fixture 环境变量，直接运行 `pnpm build`，网站会读取仓库的
 `data/`。`BASE_PATH` 用于本地根路径或 GitHub Pages 项目子路径；生产构建由工作流
@@ -92,7 +106,7 @@ pnpm test:e2e
 - `prompts/analysis-v1.md`：DeepSeek 的结构化 JSON Prompt。修改时应同步增加
   `prompt_version`，使缓存和结果 provenance 可追溯。
 - `data/latest.json`：最新数据；`data/archive/YYYY-MM.json`：月度归档；
-  `data/cache.json` 与 `data/figures.json`：分析和 Figure 元数据缓存。
+  `data/cache/analyses.json` 与 `data/cache/figures.json`：分析和 Figure 元数据缓存。
 - CLI 的 `--lookback-days`、`--profile`、`--threshold`、`--force-arxiv-id` 和
   `--dry-run` 可覆盖本次运行选项。查看完整参数可运行
   `uv run vla-wam-daily daily --help`。
