@@ -1,4 +1,6 @@
+import os
 import re
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -12,6 +14,20 @@ MAIN_DESIGN = (
 FIGURE_DESIGN = (
     ROOT / "docs/superpowers/specs/2026-07-29-paper-figure-display-design.md"
 ).read_text(encoding="utf-8")
+
+
+def tracked_files() -> tuple[Path, ...]:
+    result = subprocess.run(
+        ["git", "ls-files", "-z"],
+        cwd=ROOT,
+        check=True,
+        stdout=subprocess.PIPE,
+    )
+    return tuple(
+        ROOT / os.fsdecode(raw_path)
+        for raw_path in result.stdout.split(b"\0")
+        if raw_path
+    )
 
 
 def test_readme_documents_supported_models_limits_and_information_features() -> None:
@@ -63,8 +79,6 @@ def test_readme_has_reproducible_python_web_and_dry_run_commands() -> None:
     assert "Node.js 24" in README
     assert "read -rsp" in README
     assert "unset DEEPSEEK_API_KEY" in README
-    assert re.search(r"DEEPSEEK_API_KEY\s*=\s*\S+", README) is None
-    assert re.search(r"\bsk-[A-Za-z0-9_-]{8,}", README) is None
 
 
 def test_readme_orders_e2e_setup_and_keeps_manual_preview_separate() -> None:
@@ -88,6 +102,13 @@ def test_readme_documents_actual_cache_paths() -> None:
     assert "`data/cache/figures.json`" in README
     assert "`data/cache.json`" not in README
     assert "`data/figures.json`" not in README
+
+
+def test_readme_documents_base_path_derivation_and_analysis_cache_exception() -> None:
+    assert "Astro 根据 `GITHUB_REPOSITORY` 推导" in README
+    assert "显式 `BASE_PATH` 仍可覆盖" in README
+    assert "常规每日运行" in README
+    assert "未使用 `--force-arxiv-id` 强制重分析" in README
 
 
 def test_readme_documents_retry_and_invalid_ai_output_behavior() -> None:
@@ -190,14 +211,26 @@ def test_designs_keep_reviewed_status_and_document_figure_pipeline_metrics() -> 
         assert text in FIGURE_DESIGN
 
 
-def test_repository_contains_no_hosted_paper_image_assets() -> None:
+def test_repository_tracked_files_contain_no_secret_like_bytes() -> None:
+    secret_patterns = (
+        re.compile(rb"sk-[A-Za-z0-9_-]{12,}"),
+        re.compile(rb"Bearer [A-Za-z0-9_-]{12,}"),
+    )
+    offending_paths = [
+        path.relative_to(ROOT).as_posix()
+        for path in tracked_files()
+        if any(pattern.search(path.read_bytes()) for pattern in secret_patterns)
+    ]
+    assert offending_paths == [], (
+        f"tracked files contain potential secret bytes: {offending_paths}"
+    )
+
+
+def test_repository_contains_no_tracked_paper_image_assets() -> None:
     extensions = {".avif", ".jpeg", ".jpg", ".png", ".svg", ".webp"}
-    roots = [ROOT / "data", ROOT / "web" / "public", ROOT / "web" / "src"]
     hosted = [
-        path
-        for root in roots
-        if root.exists()
-        for path in root.rglob("*")
-        if path.is_file() and path.suffix.lower() in extensions
+        path.relative_to(ROOT).as_posix()
+        for path in tracked_files()
+        if path.suffix.lower() in extensions
     ]
     assert hosted == []

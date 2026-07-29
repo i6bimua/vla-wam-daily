@@ -15,7 +15,8 @@ GitHub Pages；不需要数据库或常驻服务器。
   月度归档和 RSS。
 - Pagefind 支持中英文全文搜索；页面支持主题、日期、分数、代码状态筛选和移动端布局。
 - 从 arXiv HTML 识别并远程展示 Fig. 1 / Fig. 2、英文 caption 和多 panel 原图。
-- 缓存论文分析与 Figure 元数据；相同论文版本、模型和 Prompt 不重复产生分析费用。
+- 在常规每日运行、未使用 `--force-arxiv-id` 强制重分析时，缓存论文分析与 Figure
+  元数据；相同论文版本、模型和 Prompt 不重复产生分析费用。
 - 每日任务、测试、静态构建和 GitHub Pages 发布均由 GitHub Actions 完成。
 
 ## 模型与分析边界
@@ -96,8 +97,8 @@ pnpm preview --host 127.0.0.1
 preview 是前台进程，查看结束后按 `Ctrl-C` 停止。
 
 正常构建时可省略 fixture 环境变量，直接运行 `pnpm build`，网站会读取仓库的
-`data/`。`BASE_PATH` 用于本地根路径或 GitHub Pages 项目子路径；生产构建由工作流
-注入正确值。
+`data/`。`BASE_PATH` 用于本地根路径或 GitHub Pages 项目子路径。GitHub Actions 中
+Astro 根据 `GITHUB_REPOSITORY` 推导项目子路径，显式 `BASE_PATH` 仍可覆盖自动推导值。
 
 ## 配置
 
