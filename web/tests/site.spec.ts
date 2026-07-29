@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { readFile } from "node:fs/promises";
 
 const onePixelPng = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
@@ -81,7 +82,7 @@ test("mobile navigation and paper detail remain usable", async ({ page }) => {
   await expect(navigation).toBeVisible();
   await expect(navigation.getByRole("link", { name: "搜索" })).toBeVisible();
 
-  await page.locator("[data-paper-card] h2 a").first().click();
+  await page.locator('[data-paper-card][data-id="2607.12345"] h2 a').click();
 
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "用于机器人操作的视觉语言动作策略",
@@ -117,6 +118,14 @@ test("download button saves a routed arXiv image with a stable name", async ({
   const download = await downloadPromise;
 
   expect(download.suggestedFilename()).toBe("2607.12345-v1-fig1-panel1.png");
+  expect(await download.failure()).toBeNull();
+  const downloadPath = await download.path();
+  expect(downloadPath).not.toBeNull();
+  const downloadedBytes = await readFile(downloadPath!);
+  expect(downloadedBytes.subarray(0, 8)).toEqual(
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+  );
+  expect(downloadedBytes).toEqual(onePixelPng);
 });
 
 test("broken remote images expose the PDF fallback", async ({ page }) => {
