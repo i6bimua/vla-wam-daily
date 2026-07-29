@@ -444,7 +444,8 @@ def load_cache(data_dir: Path) -> dict[str, CacheEntry]:
     root_descriptor = _open_data_root(data_dir, create=False)
     if root_descriptor is None:
         return {}
-    cache_descriptor: int | None = None
+    descriptors = [root_descriptor]
+    primary_error: BaseException | None = None
     try:
         cache_descriptor = _open_relative_directory(
             root_descriptor,
@@ -453,14 +454,16 @@ def load_cache(data_dir: Path) -> dict[str, CacheEntry]:
         )
         if cache_descriptor is None:
             return {}
+        descriptors.append(cache_descriptor)
         content = _read_text_at(cache_descriptor, "analyses.json")
         if content is None:
             return {}
         return _load_cache_text(content)
+    except BaseException as error:
+        primary_error = error
+        raise
     finally:
-        if cache_descriptor is not None:
-            os.close(cache_descriptor)
-        os.close(root_descriptor)
+        _close_storage_descriptors(descriptors, primary_error)
 
 
 def _validated_paper(record: PaperRecord) -> PaperRecord:

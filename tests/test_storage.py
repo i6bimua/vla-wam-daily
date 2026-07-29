@@ -795,6 +795,61 @@ def test_load_cache_rejects_cache_directory_symlink_escape(tmp_path: Path) -> No
         load_cache(data_dir)
 
 
+def test_load_cache_attempts_every_close_before_raising_close_error(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    data_dir = tmp_path / "data"
+    cache_path = data_dir / "cache/analyses.json"
+    cache_path.parent.mkdir(parents=True)
+    cache_path.write_bytes(Path("tests/fixtures/data/cache/analyses.json").read_bytes())
+    real_close = os.close
+    close_attempts: list[int] = []
+
+    def fail_first_close(descriptor: int) -> None:
+        close_attempts.append(descriptor)
+        real_close(descriptor)
+        if len(close_attempts) == 1:
+            raise OSError("injected load close failure")
+
+    monkeypatch.setattr(storage_module.os, "close", fail_first_close)
+
+    with pytest.raises(OSError, match="injected load close failure"):
+        load_cache(data_dir)
+
+    assert len(close_attempts) == 2
+
+
+def test_load_cache_close_error_does_not_mask_read_error(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    data_dir = tmp_path / "data"
+    (data_dir / "cache").mkdir(parents=True)
+    real_close = os.close
+    close_attempts: list[int] = []
+
+    def fail_first_close(descriptor: int) -> None:
+        close_attempts.append(descriptor)
+        real_close(descriptor)
+        if len(close_attempts) == 1:
+            raise OSError("injected load close failure")
+
+    def fail_read(_directory_descriptor: int, _name: str) -> str | None:
+        raise RuntimeError("injected cache read failure")
+
+    monkeypatch.setattr(storage_module.os, "close", fail_first_close)
+    monkeypatch.setattr(storage_module, "_read_text_at", fail_read)
+
+    with pytest.raises(RuntimeError, match="injected cache read failure") as error:
+        load_cache(data_dir)
+
+    assert len(close_attempts) == 2
+    assert any(
+        "injected load close failure" in note for note in getattr(error.value, "__notes__", ())
+    )
+
+
 def test_first_data_directory_creation_fsyncs_its_parent(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
