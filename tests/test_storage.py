@@ -586,19 +586,21 @@ def test_save_allows_a_normal_not_yet_created_nested_data_directory(
     assert load_cache(data_dir) == {}
 
 
-def test_save_creates_a_missing_trusted_parent_chain(tmp_path: Path) -> None:
+def test_save_rejects_a_missing_parent_chain_before_creating_output(
+    tmp_path: Path,
+) -> None:
     data_dir = tmp_path / "a/b/data"
 
-    save_successful_run(
-        data_dir,
-        [],
-        {},
-        RunStats(),
-        datetime(2026, 7, 27, 2, tzinfo=UTC),
-    )
+    with pytest.raises(FileNotFoundError, match="data_dir parent must already exist"):
+        save_successful_run(
+            data_dir,
+            [],
+            {},
+            RunStats(),
+            datetime(2026, 7, 27, 2, tzinfo=UTC),
+        )
 
-    assert load_data_file(data_dir / "latest.json") is not None
-    assert load_cache(data_dir) == {}
+    assert not (tmp_path / "a").exists()
 
 
 def test_save_directory_cleanup_closes_every_fd_without_masking_business_error(

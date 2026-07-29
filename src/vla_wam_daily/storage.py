@@ -139,32 +139,14 @@ def _unsafe_storage_path(name: str) -> ValueError:
     return ValueError(f"storage path resolves outside data directory: {name}")
 
 
-def _create_trusted_parent_chain(parent: Path) -> None:
-    missing: list[Path] = []
-    current = parent
-    while not current.exists():
-        if current == current.parent:
-            raise FileNotFoundError(f"no existing ancestor for data directory: {parent}")
-        missing.append(current)
-        current = current.parent
-    for directory in reversed(missing):
-        with suppress(FileExistsError):
-            os.mkdir(directory, 0o755)
-        parent_descriptor = os.open(
-            directory.parent,
-            _directory_open_flags(nofollow=False),
-        )
-        try:
-            os.fsync(parent_descriptor)
-        finally:
-            os.close(parent_descriptor)
-
-
 def _open_data_root(data_dir: Path, *, create: bool) -> int | None:
     _require_secure_directory_storage()
     created = False
     if create:
-        _create_trusted_parent_chain(data_dir.parent)
+        if not data_dir.parent.is_dir():
+            raise FileNotFoundError(
+                f"data_dir parent must already exist and be trusted: {data_dir.parent}"
+            )
         try:
             os.mkdir(data_dir, 0o755)
             created = True
@@ -530,6 +512,13 @@ def save_successful_run(
     stats: RunStats,
     generated_at: UtcDatetime,
 ) -> None:
+    """Persist a validated run beneath a trusted, pre-existing data_dir parent.
+
+    The final ``data_dir`` component may be created automatically. Its parent
+    directory must already exist; this function never creates missing parent
+    chains because they cannot be secured with the held directory descriptors
+    used for cache and archive access.
+    """
     validated_published = [_validated_paper(paper) for paper in published]
     _reject_duplicate_published_identities(validated_published)
     validated_cache = _validated_cache(cache)
