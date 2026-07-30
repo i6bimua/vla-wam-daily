@@ -2,6 +2,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from tests.factories import make_gallery, make_record
+from vla_wam_daily.figure_recovery import FIGURE_RECOVERY_VERSION
 from vla_wam_daily.figure_sync import synchronize_figure_assets
 from vla_wam_daily.figures import figure_cache_key
 from vla_wam_daily.models import (
@@ -516,3 +517,71 @@ def test_sync_processes_identity_present_only_in_figure_cache_once(
         .cached_image_paths[0]
         is not None
     )
+
+
+def test_sync_never_loses_real_figure_one_to_cached_figure_two_negative(
+    tmp_path: Path,
+) -> None:
+    complete_html = make_gallery()
+    figure_one = complete_html.figures[0]
+    figure_two_path = "/figures/2607.12345/v1/fig2-panel1.png"
+    cached_figure_two = complete_html.figures[1].model_copy(
+        update={"cached_image_paths": (figure_two_path,)}
+    )
+    record_gallery = complete_html.model_copy(
+        update={"figures": (figure_one,)}
+    )
+    stale_cache_gallery = FigureGallery(
+        status=FigureStatus.AVAILABLE,
+        html_url=complete_html.html_url,
+        figures=(cached_figure_two,),
+        checked_at=complete_html.checked_at,
+        recovery_status=FigureRecoveryStatus.NOT_FOUND,
+        recovery_checked_at=NOW,
+        recovery_version=FIGURE_RECOVERY_VERSION,
+    )
+    record = make_record().model_copy(
+        update={"figure_gallery": record_gallery}
+    )
+    key = figure_cache_key("2607.12345", 1)
+    save_successful_run(
+        tmp_path,
+        [record],
+        {},
+        RunStats(published=1, figure_available=1),
+        NOW,
+        figure_cache={
+            key: FigureCacheEntry(key=key, gallery=stale_cache_gallery)
+        },
+    )
+
+    class RecordingRecovery:
+        def __init__(self) -> None:
+            self.calls: list[FigureGallery] = []
+
+        def recover_gallery(
+            self,
+            gallery: FigureGallery,
+            *,
+            checked_at: datetime,
+        ) -> FigureGallery:
+            self.calls.append(gallery)
+            return gallery
+
+    recovery = RecordingRecovery()
+    synchronize(
+        data_dir=tmp_path,
+        store=RecordingStore(),
+        recovery=recovery,
+    )
+
+    assert len(recovery.calls) == 1
+    selected = recovery.calls[0]
+    assert [figure.number for figure in selected.figures] == [1, 2]
+    assert selected.recovery_status is FigureRecoveryStatus.AVAILABLE
+    assert selected.figures[1].cached_image_paths == (figure_two_path,)
+    latest = load_data_file(tmp_path / "latest.json")
+    assert latest is not None
+    cached = load_figure_cache(tmp_path)[key].gallery
+    assert latest.papers[0].figure_gallery == cached
+    assert any(figure.number == 1 for figure in cached.figures)

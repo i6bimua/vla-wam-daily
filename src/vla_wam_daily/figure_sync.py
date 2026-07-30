@@ -62,10 +62,81 @@ def _cached_path_count(gallery: FigureGallery) -> int:
 
 def _gallery_completeness(gallery: FigureGallery) -> tuple[int, int, int, int]:
     return (
-        _cached_path_count(gallery),
         int(any(figure.number == 1 for figure in gallery.figures)),
+        _cached_path_count(gallery),
         len(gallery.figures),
         sum(len(figure.image_urls) for figure in gallery.figures),
+    )
+
+
+def _figure_completeness(figure: FigureAsset) -> tuple[int, int]:
+    return (
+        sum(path is not None for path in figure.cached_image_paths),
+        len(figure.image_urls),
+    )
+
+
+def _merge_figure_candidates(
+    first: FigureAsset,
+    second: FigureAsset,
+) -> FigureAsset:
+    preferred, other = (
+        (second, first)
+        if _figure_completeness(second) > _figure_completeness(first)
+        else (first, second)
+    )
+    if (
+        preferred.source != other.source
+        or preferred.image_urls != other.image_urls
+    ):
+        return preferred
+    return preferred.model_copy(
+        update={
+            "cached_image_paths": tuple(
+                preferred_path or other_path
+                for preferred_path, other_path in zip(
+                    preferred.cached_image_paths,
+                    other.cached_image_paths,
+                    strict=True,
+                )
+            )
+        }
+    )
+
+
+def _merge_gallery_candidates(
+    first: FigureGallery,
+    second: FigureGallery,
+) -> FigureGallery:
+    preferred, other = (
+        (second, first)
+        if _gallery_completeness(second) > _gallery_completeness(first)
+        else (first, second)
+    )
+    figures = {figure.number: figure for figure in preferred.figures}
+    for figure in other.figures:
+        current = figures.get(figure.number)
+        figures[figure.number] = (
+            figure
+            if current is None
+            else _merge_figure_candidates(current, figure)
+        )
+    merged_figures = tuple(figures.values())
+    has_figure_one = 1 in figures
+    return preferred.model_copy(
+        update={
+            "status": (
+                FigureStatus.AVAILABLE
+                if merged_figures
+                else preferred.status
+            ),
+            "figures": merged_figures,
+            "recovery_status": (
+                FigureRecoveryStatus.AVAILABLE
+                if has_figure_one
+                else preferred.recovery_status
+            ),
+        }
     )
 
 
@@ -93,22 +164,23 @@ def _select_galleries(
         for paper in data_file.papers:
             identity = paper.arxiv_id, paper.version
             current = galleries.get(identity)
-            if (
-                current is None
-                or _gallery_completeness(paper.figure_gallery)
-                > _gallery_completeness(current)
-            ):
-                galleries[identity] = paper.figure_gallery
+            galleries[identity] = (
+                paper.figure_gallery
+                if current is None
+                else _merge_gallery_candidates(
+                    current,
+                    paper.figure_gallery,
+                )
+            )
     for entry in cache_entries:
         arxiv_id, version_text = entry.key.rsplit(":v", maxsplit=1)
         identity = arxiv_id, int(version_text)
         current = galleries.get(identity)
-        if (
-            current is None
-            or _gallery_completeness(entry.gallery)
-            > _gallery_completeness(current)
-        ):
-            galleries[identity] = entry.gallery
+        galleries[identity] = (
+            entry.gallery
+            if current is None
+            else _merge_gallery_candidates(current, entry.gallery)
+        )
     return galleries
 
 
