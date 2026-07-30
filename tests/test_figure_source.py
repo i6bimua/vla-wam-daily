@@ -1439,6 +1439,34 @@ def test_returns_none_when_local_class_aliases_figure_selection_control(
     )
 
 
+def test_returns_none_when_local_class_dynamically_advances_figure() -> None:
+    main = rb"""
+\documentclass{local}
+\begin{document}
+\advancefigure
+\begin{figure}
+\includegraphics{figure.png}
+\caption{This is rendered as Figure 2, never Figure 1.}
+\end{figure}
+\end{document}
+"""
+    local_class = (
+        rb"\newcommand{\advancefigure}"
+        rb"{\csname stepcounter\endcsname{figure}}"
+    )
+
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": main,
+                "local.cls": local_class,
+                "figure.png": PNG_BYTES,
+            }
+        )
+        is None
+    )
+
+
 @pytest.mark.parametrize(
     "main",
     [

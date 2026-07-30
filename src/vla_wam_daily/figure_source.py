@@ -785,6 +785,14 @@ def _has_unsafe_local_semantic_dependency(
             return True
         for index, token in enumerate(lexed.controls):
             word = token.word
+            if word in _DYNAMIC_SEMANTIC_CONTROLS:
+                expanded = next(iter(lexed.controls[index + 1 :]), None)
+                if (
+                    word != "expandafter"
+                    or expanded is not None
+                    and expanded.word in _PROTECTED_FIGURE_CONTROL_WORDS
+                ):
+                    return True
             if word in {"let", "futurelet"}:
                 alias_target = _alias_binding_target(lexed, index)
                 if (
