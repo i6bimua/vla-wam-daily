@@ -67,6 +67,26 @@ describe("site presentation contracts", () => {
 });
 
 describe("remote Figure component contracts", () => {
+  it("prefers cached panels while retaining canonical arXiv originals", async () => {
+    const component = await readFile(
+      resolve(sourceRoot, "components/FigureGallery.astro"),
+      "utf8",
+    );
+
+    expect(component).toContain(
+      'import { resolveFigurePanelSource } from "../lib/figures";',
+    );
+    expect(component).toContain("figure.cached_image_paths[index]");
+    expect(component).toContain("source.displayUrl");
+    expect(component).toContain("source.originalUrl");
+    expect(component).toContain("source.isLocal");
+    expect(component).toContain("下载本站缓存");
+    expect(component).toContain("查看 arXiv 原图");
+    expect(component).toMatch(
+      /href=\{source\.downloadUrl\}[\s\S]*download=\{filename\}/,
+    );
+  });
+
   it("uses privacy-preserving lazy images and safe external links", async () => {
     const component = await readFile(
       resolve(sourceRoot, "components/FigureGallery.astro"),
@@ -78,7 +98,7 @@ describe("remote Figure component contracts", () => {
     );
     expect(component).toContain('target="_blank"');
     expect(component).toContain('rel="noopener noreferrer"');
-    expect(component).toContain("查看原图");
+    expect(component).toContain("查看 arXiv 原图");
     expect(component).toContain("下载原图");
   });
 
@@ -168,6 +188,6 @@ describe("remote Figure component contracts", () => {
     }
     expect(component).toContain("data-figure-error");
     expect(component).toContain("查看 PDF");
-    expect(component).toMatch(/图片由浏览器直接从 arXiv\s+加载/);
+    expect(component).toMatch(/本地缓存[\s\S]*arXiv\s+原图/);
   });
 });

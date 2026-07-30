@@ -1,5 +1,6 @@
 ---
 import { figureDownloadFilename } from "../lib/figure-download";
+import { resolveFigurePanelSource } from "../lib/figures";
 import type { Paper } from "../lib/schema";
 
 interface Props {
@@ -10,6 +11,7 @@ interface Props {
 }
 
 const { gallery, arxivId, version, pdfUrl } = Astro.props;
+const basePath = import.meta.env.BASE_URL;
 const headingId = `figures-${arxivId.replace(".", "-")}`;
 
 function statusMessage(status: Paper["figure_gallery"]["status"]): string {
@@ -29,7 +31,7 @@ function statusMessage(status: Paper["figure_gallery"]["status"]): string {
 <section class="figure-gallery" aria-labelledby={headingId}>
   <header class="figure-gallery__heading">
     <div>
-      <p class="figure-gallery__kicker">REMOTE FIGURES</p>
+      <p class="figure-gallery__kicker">CACHED FIGURES</p>
       <h3 id={headingId}>Fig. 1 &amp; Fig. 2</h3>
     </div>
     {
@@ -82,11 +84,16 @@ function statusMessage(status: Paper["figure_gallery"]["status"]): string {
                   panel,
                   imageUrl,
                 });
+                const source = resolveFigurePanelSource({
+                  originalUrl: imageUrl,
+                  cachedPath: figure.cached_image_paths[index],
+                  basePath,
+                });
                 return (
                   <div class="remote-figure__panel" data-figure-panel>
                     <div class="remote-figure__media">
                       <img
-                        src={imageUrl}
+                        src={source.displayUrl}
                         alt={panelAlt}
                         loading="lazy"
                         decoding="async"
@@ -99,7 +106,14 @@ function statusMessage(status: Paper["figure_gallery"]["status"]): string {
                         role="status"
                         hidden
                       >
-                        <p>该面板暂时无法从 arXiv 加载。</p>
+                        <p>该面板暂时无法加载。</p>
+                        <a
+                          href={source.originalUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          查看 arXiv 原图 <span aria-hidden="true">↗</span>
+                        </a>
                         <a
                           href={pdfUrl}
                           target="_blank"
@@ -114,26 +128,36 @@ function statusMessage(status: Paper["figure_gallery"]["status"]): string {
                         {figure.image_urls.length > 1 ? panelName : "原始图像"}
                       </span>
                       <a
-                        href={imageUrl}
+                        href={source.originalUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={`查看 ${figure.label} ${panelName} 原图`}
                       >
-                        查看原图 <span aria-hidden="true">↗</span>
+                        查看 arXiv 原图 <span aria-hidden="true">↗</span>
                       </a>
-                      <button
-                        type="button"
-                        aria-label={`下载 ${figure.label} ${panelName} 原图`}
-                        data-figure-download
-                        data-download-url={imageUrl}
-                        data-download-name={filename}
-                        data-arxiv-id={arxivId}
-                        data-version={version}
-                        data-figure-number={figure.number}
-                        data-panel-number={panel}
-                      >
-                        下载原图
-                      </button>
+                      {source.isLocal ? (
+                        <a
+                          href={source.downloadUrl}
+                          download={filename}
+                          aria-label={`下载 ${figure.label} ${panelName} 原图`}
+                        >
+                          下载本站缓存
+                        </a>
+                      ) : (
+                        <button
+                          type="button"
+                          aria-label={`下载 ${figure.label} ${panelName} 原图`}
+                          data-figure-download
+                          data-download-url={source.originalUrl}
+                          data-download-name={filename}
+                          data-arxiv-id={arxivId}
+                          data-version={version}
+                          data-figure-number={figure.number}
+                          data-panel-number={panel}
+                        >
+                          下载原图
+                        </button>
+                      )}
                     </div>
                   </div>
                 );
@@ -160,8 +184,8 @@ function statusMessage(status: Paper["figure_gallery"]["status"]): string {
   }
 
   <p class="figure-gallery__notice">
-    图片由浏览器直接从 arXiv
-    加载，本站不保存图像；版权归论文作者或相应权利人所有。
+    Figure 面板优先从本站本地缓存加载；查看与复用时请以 arXiv
+    原图及论文许可为准，版权归论文作者或相应权利人所有。
   </p>
 </section>
 
