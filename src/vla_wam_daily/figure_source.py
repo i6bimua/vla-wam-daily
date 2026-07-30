@@ -12,6 +12,7 @@ from urllib.parse import urljoin, urlsplit
 import httpx
 from PIL import Image, UnidentifiedImageError
 
+from vla_wam_daily.figure_pdf_render import render_single_page_pdf
 from vla_wam_daily.figure_recovery_types import (
     DEFAULT_MAX_ASSET_BYTES,
     RecoveredExtension,
@@ -870,6 +871,17 @@ def _resolve_asset(
     asset_path = matches[0]
     extension = _SUPPORTED_ASSET_EXTENSIONS.get(asset_path.suffix.casefold())
     content = files[asset_path]
+    if asset_path.suffix.casefold() == ".pdf":
+        rendered = render_single_page_pdf(
+            content,
+            max_pdf_bytes=max_asset_bytes,
+            max_page_dimension_points=20_000,
+            resolution=300,
+            max_output_dimension=max_image_dimension,
+            max_output_pixels=max_image_pixels,
+            max_output_bytes=max_asset_bytes,
+        )
+        return None if rendered is None else ("png", rendered)
     if (
         extension is None
         or extension == "svg"

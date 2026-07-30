@@ -5,6 +5,7 @@ from collections.abc import Mapping, Sequence
 import httpx
 import pytest
 from PIL import Image
+from reportlab.pdfgen.canvas import Canvas
 
 from vla_wam_daily.figure_recovery_types import DEFAULT_MAX_ASSET_BYTES
 from vla_wam_daily.figure_source import (
@@ -42,6 +43,19 @@ PNG_BYTES = make_image("PNG")
 JPEG_BYTES = make_image("JPEG")
 WEBP_BYTES = make_image("WEBP")
 GIF_BYTES = make_image("GIF")
+
+
+def make_pdf_asset(*, pages: int = 1, page_size: tuple[int, int] = (120, 80)) -> bytes:
+    output = io.BytesIO()
+    pdf = Canvas(output, pagesize=page_size, invariant=1, pageCompression=0)
+    for page_number in range(pages):
+        pdf.setFillColorRGB(0.1, 0.3, 0.8)
+        pdf.rect(10, 10, 100, 60, stroke=0, fill=1)
+        pdf.setStrokeColorRGB(1, 1, 1)
+        pdf.line(15, 15 + page_number, 105, 65 - page_number)
+        pdf.showPage()
+    pdf.save()
+    return output.getvalue()
 
 
 def make_tar(
@@ -1439,14 +1453,78 @@ def test_normalizes_safe_caption_whitespace() -> None:
     assert candidate.caption == "Line one. Line two."
 
 
-def test_source_embedded_pdf_asset_is_deferred_to_later_task() -> None:
+def test_renders_single_page_source_pdf_asset_to_png() -> None:
+    candidate = extract_from_tar(
+        {
+            "main.tex": make_figure_tex(image_target="figure.pdf"),
+            "figure.pdf": make_pdf_asset(),
+            "figures/later.png": b"later",
+        }
+    )
+
+    assert candidate is not None
+    assert candidate.caption == "The model architecture."
+    assert candidate.extension == "png"
+    assert candidate.source == "arxiv_source"
+    assert candidate.source_url == SOURCE_URL
+    with Image.open(io.BytesIO(candidate.content)) as image:
+        image.load()
+        assert image.format == "PNG"
+        assert image.width == 501
+        assert image.height == 334
+
+
+@pytest.mark.parametrize(
+    "content",
+    [
+        b"%PDF-malformed",
+        make_pdf_asset(pages=2),
+    ],
+)
+def test_rejects_invalid_or_multi_page_source_pdf_asset(content: bytes) -> None:
     assert (
         extract_from_tar(
             {
                 "main.tex": make_figure_tex(image_target="figure.pdf"),
-                "figure.pdf": b"%PDF-1.7",
+                "figure.pdf": content,
                 "figures/later.png": b"later",
             }
+        )
+        is None
+    )
+
+
+def test_rejects_source_pdf_asset_over_byte_limit() -> None:
+    content = make_pdf_asset()
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": make_figure_tex(image_target="figure.pdf"),
+                "figure.pdf": content,
+                "figures/later.png": b"later",
+            },
+            max_asset_bytes=len(content) - 1,
+        )
+        is None
+    )
+
+
+@pytest.mark.parametrize(
+    ("name", "value"),
+    [
+        ("max_image_dimension", 499),
+        ("max_image_pixels", 166_999),
+    ],
+)
+def test_rejects_source_pdf_render_over_pixel_bounds(name: str, value: int) -> None:
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": make_figure_tex(image_target="figure.pdf"),
+                "figure.pdf": make_pdf_asset(),
+                "figures/later.png": b"later",
+            },
+            **{name: value},
         )
         is None
     )
