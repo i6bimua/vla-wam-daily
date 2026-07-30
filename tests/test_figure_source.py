@@ -1335,6 +1335,32 @@ def test_returns_none_when_archive_contains_local_tex_semantic_dependency(
 
 
 @pytest.mark.parametrize(
+    "semantic_control",
+    [
+        rb"\setcounter{figure}{5}",
+        rb"\captionof{figure}{This consumes Figure 1.}",
+        rb"\renewcommand{\thefigure}{A}",
+        rb"\newcommand{\figure}{changed}",
+        rb"\newenvironment{figure}{}{}",
+    ],
+)
+def test_returns_none_when_local_class_changes_figure_selection(
+    semantic_control: bytes,
+) -> None:
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": make_figure_tex(),
+                "local.cls": semantic_control,
+                "figures/model.png": PNG_BYTES,
+                "figures/later.png": PNG_BYTES,
+            }
+        )
+        is None
+    )
+
+
+@pytest.mark.parametrize(
     "main",
     [
         rb"""

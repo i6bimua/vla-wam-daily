@@ -720,7 +720,11 @@ def _has_unsafe_local_semantic_dependency(
         ("begin", None),
         ("caption", None),
         ("end", None),
+        ("endfigure", None),
+        ("figure", None),
+        ("fnum@figure", None),
         ("includegraphics", None),
+        ("thefigure", None),
     }
     for path, content in files.items():
         if path.suffix.casefold() not in {".sty", ".cls"}:
@@ -732,8 +736,28 @@ def _has_unsafe_local_semantic_dependency(
         if lexed is None:
             return True
         for index, token in enumerate(lexed.controls):
+            word = token.word
+            if word in (
+                _COUNTER_MUTATION_CONTROLS
+                | _AMBIGUOUS_FIGURE_SELECTION_CONTROLS
+            ):
+                argument = _literal_command_argument_at(
+                    lexed.text,
+                    token.end,
+                    allow_options=False,
+                )
+                if argument is not None and argument[0].strip() == "figure":
+                    return True
             if token.word not in _MACRO_DEFINITION_CONTROLS:
                 continue
+            if word in {"newenvironment", "renewenvironment"}:
+                argument = _literal_command_argument_at(
+                    lexed.text,
+                    token.end,
+                    allow_options=False,
+                )
+                if argument is not None and argument[0].strip() == "figure":
+                    return True
             target = next(iter(lexed.controls[index + 1 :]), None)
             if (
                 target is not None
