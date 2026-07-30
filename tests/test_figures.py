@@ -132,6 +132,15 @@ def test_parser_does_not_cross_unsafe_preceding_siblings(blocker: str) -> None:
     assert parse_figure_gallery(html, HTML_URL, CHECKED_AT).status is FigureStatus.NOT_FOUND
 
 
+def test_parser_rejects_a_bare_preceding_image() -> None:
+    html = """
+    <img src="candidate.png">
+    <figure id="S1.F1"><figcaption>Figure 1: Caption.</figcaption></figure>
+    """
+
+    assert parse_figure_gallery(html, HTML_URL, CHECKED_AT).status is FigureStatus.NOT_FOUND
+
+
 def test_parser_does_not_cross_into_a_different_parent_container() -> None:
     html = """
     <div><div class="ltx_para"><img src="candidate.png"></div></div>

@@ -120,7 +120,7 @@ def _figure_images(node: LexborNode, html_url: str) -> tuple[HttpUrl, ...]:
 
     tag = (sibling.tag or "").casefold()
     if (
-        tag == "figure"
+        tag in {"figure", "img"}
         or re.fullmatch(r"h[1-6]", tag) is not None
         or _normalize_caption(sibling.text(separator=" ", strip=True))
     ):
