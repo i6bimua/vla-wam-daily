@@ -758,6 +758,162 @@ def test_requires_exactly_one_literal_documentclass_declaration(
 
 
 @pytest.mark.parametrize(
+    "declaration",
+    [
+        rb"\newcommand{\bogus}{\documentclass{article}}",
+        rb"{\documentclass{article}}",
+    ],
+)
+def test_requires_documentclass_declaration_at_top_level(
+    declaration: bytes,
+) -> None:
+    main = (
+        declaration
+        + rb"""
+\begin{document}
+\begin{figure}
+\includegraphics{figure.png}
+\caption{A non-top-level main declaration.}
+\end{figure}
+\end{document}
+"""
+    )
+
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": main,
+                "figure.png": PNG_BYTES,
+            }
+        )
+        is None
+    )
+
+
+def test_returns_none_when_preamble_redefines_includegraphics() -> None:
+    main = rb"""
+\documentclass{article}
+\renewcommand{\includegraphics}[2][]{}
+\begin{document}
+\begin{figure}
+\includegraphics{figure.png}
+\caption{The command no longer renders this image.}
+\end{figure}
+\end{document}
+"""
+
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": main,
+                "figure.png": PNG_BYTES,
+            }
+        )
+        is None
+    )
+
+
+def test_returns_none_when_conditional_hides_a_fake_first_figure() -> None:
+    main = rb"""
+\documentclass{article}
+\begin{document}
+\iffalse
+\begin{figure}
+\includegraphics{fake.png}
+\caption{Inactive fake Figure.}
+\end{figure}
+\fi
+\begin{figure}
+\includegraphics{real.png}
+\caption{The real Figure.}
+\end{figure}
+\end{document}
+"""
+
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": main,
+                "fake.png": b"fake",
+                "real.png": PNG_BYTES,
+            }
+        )
+        is None
+    )
+
+
+def test_returns_none_when_control_symbol_is_redefined_to_add_an_image() -> None:
+    main = rb"""
+\documentclass{article}
+\def\!{\includegraphics{other.png}}
+\begin{document}
+\begin{figure}
+\includegraphics{figure.png}
+\!
+\caption{An ambiguous control-symbol layout.}
+\end{figure}
+\end{document}
+"""
+
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": main,
+                "figure.png": PNG_BYTES,
+                "other.png": b"other",
+            }
+        )
+        is None
+    )
+
+
+def test_returns_none_for_unknown_control_symbol_in_figure() -> None:
+    main = rb"""
+\documentclass{article}
+\begin{document}
+\begin{figure}
+\includegraphics{figure.png}
+\?
+\caption{An unknown control-symbol layout.}
+\end{figure}
+\end{document}
+"""
+
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": main,
+                "figure.png": PNG_BYTES,
+            }
+        )
+        is None
+    )
+
+
+def test_macro_definition_after_first_figure_does_not_change_candidate() -> None:
+    main = rb"""
+\documentclass{article}
+\begin{document}
+\begin{figure}
+\includegraphics{figure.png}
+\caption{The direct first Figure.}
+\end{figure}
+\newcommand{\later}{not relevant to the first Figure}
+\end{document}
+"""
+
+    candidate = extract_from_tar(
+        {
+            "main.tex": main,
+            "figure.png": PNG_BYTES,
+        }
+    )
+
+    assert candidate is not None
+    assert candidate.caption == "The direct first Figure."
+
+
+@pytest.mark.parametrize(
     "caption",
     [
         "NUL \x00 control.",

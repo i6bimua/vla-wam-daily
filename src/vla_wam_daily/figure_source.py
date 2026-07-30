@@ -27,7 +27,10 @@ _FIGURE_TOKEN_RE = re.compile(
 )
 _INCLUDE_GRAPHICS_RE = re.compile(r"\\includegraphics(?![A-Za-z@])")
 _CAPTION_RE = re.compile(r"\\caption(?![A-Za-z@])")
-_CONTROL_SEQUENCE_RE = re.compile(r"\\(?P<name>[A-Za-z@]+)")
+_CONTROL_SEQUENCE_RE = re.compile(
+    r"\\(?:(?P<word>[A-Za-z@]+)|(?P<symbol>[^A-Za-z@]))",
+    re.DOTALL,
+)
 _SCHEME_PREFIX_RE = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
 _VERBATIM_ENVIRONMENT_RE = re.compile(
     r"\\begin\s*\{(?P<environment>"
@@ -112,6 +115,47 @@ _ALLOWED_FIGURE_CONTROLS = frozenset(
         *_SAFE_CAPTION_COMMANDS,
     }
 )
+_ALLOWED_FIGURE_CONTROL_SYMBOLS = frozenset(
+    {
+        "\\",
+        " ",
+        "\t",
+        "\r",
+        "\n",
+        ",",
+        ";",
+        ":",
+        "!",
+        "%",
+        "&",
+        "_",
+        "#",
+        "$",
+        "{",
+        "}",
+    }
+)
+_MACRO_DEFINITION_CONTROLS = frozenset(
+    {
+        "DeclareDocumentCommand",
+        "DeclareRobustCommand",
+        "NewDocumentCommand",
+        "ProvideDocumentCommand",
+        "RenewDocumentCommand",
+        "def",
+        "edef",
+        "gdef",
+        "let",
+        "futurelet",
+        "newcommand",
+        "newenvironment",
+        "providecommand",
+        "renewcommand",
+        "renewenvironment",
+        "xdef",
+    }
+)
+_CONDITIONAL_CONTROLS = frozenset({"else", "fi", "or", "unless"})
 
 
 @dataclass(frozen=True)
@@ -424,7 +468,7 @@ def _inline_tex(
     return "".join(parts)
 
 
-def _first_figure_body(text: str) -> str | None:
+def _first_figure_block(text: str) -> tuple[str, int, int] | None:
     first = next(iter(_literal_matches(_FIGURE_TOKEN_RE, text)), None)
     if (
         first is None
@@ -444,7 +488,11 @@ def _first_figure_body(text: str) -> str | None:
         or _brace_depth_at(text, following.start()) != 0
     ):
         return None
-    return text[first.end() : following.start()]
+    return (
+        text[first.end() : following.start()],
+        first.start(),
+        following.end(),
+    )
 
 
 def _brace_depth_at(text: str, end: int) -> int | None:
@@ -480,6 +528,20 @@ def _literal_matches(
         for match in pattern.finditer(text, position)
         if not _is_escaped(text, match.start())
     ]
+
+
+def _has_ambiguous_semantic_control(text: str) -> bool:
+    for match in _literal_matches(_CONTROL_SEQUENCE_RE, text):
+        word = match.group("word")
+        if word is None:
+            continue
+        if (
+            word in _MACRO_DEFINITION_CONTROLS
+            or word in _CONDITIONAL_CONTROLS
+            or word.startswith("if")
+        ):
+            return True
+    return False
 
 
 def _parse_delimited(
@@ -530,6 +592,8 @@ def _literal_command_argument(
 def _literal_documentclass_declarations(text: str) -> list[str] | None:
     declarations: list[str] = []
     for match in _literal_matches(_DOCUMENT_CLASS_RE, text):
+        if _brace_depth_at(text, match.start()) != 0:
+            return None
         argument = _literal_command_argument(
             text,
             match,
@@ -660,15 +724,24 @@ def _extract_figure(
     )
     if expanded is None:
         return None
-    body = _first_figure_body(expanded)
-    if body is None or _UNSAFE_FIGURE_RE.search(body):
+    block = _first_figure_block(expanded)
+    if block is None:
         return None
-
-    if any(
-        match.group("name") not in _ALLOWED_FIGURE_CONTROLS
-        for match in _literal_matches(_CONTROL_SEQUENCE_RE, body)
+    body, _block_start, block_end = block
+    if (
+        _has_ambiguous_semantic_control(expanded[:block_end])
+        or _UNSAFE_FIGURE_RE.search(body)
     ):
         return None
+
+    for match in _literal_matches(_CONTROL_SEQUENCE_RE, body):
+        word = match.group("word")
+        symbol = match.group("symbol")
+        if word is not None:
+            if word not in _ALLOWED_FIGURE_CONTROLS:
+                return None
+        elif symbol not in _ALLOWED_FIGURE_CONTROL_SYMBOLS:
+            return None
     graphics_matches = _literal_matches(_INCLUDE_GRAPHICS_RE, body)
     caption_matches = _literal_matches(_CAPTION_RE, body)
     if len(graphics_matches) != 1 or len(caption_matches) != 1:
