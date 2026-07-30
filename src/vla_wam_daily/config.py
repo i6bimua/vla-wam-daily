@@ -45,6 +45,9 @@ class ArxivConfig(StrictModel):
     lookback_days: int = Field(default=3, ge=1, le=31)
     max_results_per_category: int = Field(default=2000, ge=1, le=2000)
     request_delay_seconds: float = Field(default=3.0, ge=0)
+    timeout_seconds: float = Field(default=60.0, gt=0)
+    retries: int = Field(default=5, ge=1, le=10)
+    retry_wait_seconds: float = Field(default=5.0, ge=0)
 
 
 class CompositeRule(StrictModel):

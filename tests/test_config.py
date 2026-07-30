@@ -39,6 +39,9 @@ def test_arxiv_schema_default_supports_three_day_catchup_capacity() -> None:
     config = ArxivConfig(categories=["cs.RO"])
 
     assert config.max_results_per_category == 2000
+    assert config.timeout_seconds == 60.0
+    assert config.retries == 5
+    assert config.retry_wait_seconds == 5.0
 
 
 def test_standalone_vla_and_wam_are_not_exact_phrases() -> None:

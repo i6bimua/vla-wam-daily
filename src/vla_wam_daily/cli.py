@@ -158,6 +158,9 @@ def daily(
             ArxivClient(
                 user_agent=user_agent,
                 request_delay_seconds=config.arxiv.request_delay_seconds,
+                timeout_seconds=config.arxiv.timeout_seconds,
+                retries=config.arxiv.retries,
+                retry_wait_seconds=config.arxiv.retry_wait_seconds,
             )
         )
         analysis_client = stack.enter_context(
