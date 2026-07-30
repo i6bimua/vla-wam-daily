@@ -60,7 +60,7 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   webServer: {
-    command: `pnpm exec vite preview --host 127.0.0.1 --port ${port} --strictPort --outDir dist --base ${basePath}`,
+    command: `pnpm exec astro preview --host 127.0.0.1 --port ${port}`,
     url: baseURL,
     reuseExistingServer: false,
     timeout: 30_000,

@@ -73,7 +73,7 @@ describe("Playwright server isolation", () => {
     );
   });
 
-  it("uses one strict Vite preview URL for baseURL and webServer", async () => {
+  it("uses the declared Astro preview CLI for one isolated URL", async () => {
     const config = await loadConfig({
       BASE_PATH: "/vla-wam-daily/",
       PLAYWRIGHT_PORT: "4567",
@@ -81,11 +81,11 @@ describe("Playwright server isolation", () => {
 
     expect(config.use?.baseURL).toBe("http://127.0.0.1:4567/vla-wam-daily/");
     expect(config.webServer).toMatchObject({
-      command:
-        "pnpm exec vite preview --host 127.0.0.1 --port 4567 --strictPort --outDir dist --base /vla-wam-daily/",
+      command: "pnpm exec astro preview --host 127.0.0.1 --port 4567",
       reuseExistingServer: false,
       url: config.use?.baseURL,
     });
+    expect(config.webServer?.command).not.toContain("pnpm exec vite");
     expect(config.outputDir).toContain("4567");
     expect(config.outputDir).toContain("vla-wam-daily");
   });
