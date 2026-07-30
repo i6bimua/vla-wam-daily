@@ -2,6 +2,8 @@ import { z } from "zod";
 
 const arxivIdPattern = /^\d{4}\.\d{4,5}$/;
 const arxivHtmlPathPattern = /^\/html\/(\d{4}\.\d{4,5})v([1-9]\d*)$/;
+const cachedFigurePathPattern =
+  /^\/figures\/(\d{4}\.\d{4,5})\/v([1-9]\d*)\/fig([12])-panel([1-9]\d*)\.(png|jpg|webp|gif|svg)$/;
 const allowedArxivHosts = new Set(["arxiv.org", "www.arxiv.org"]);
 const persistedBoundaryWhitespacePattern =
   /^[\u0009-\u000D\u001C-\u001F\u0020\u0085\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]+|[\u0009-\u000D\u001C-\u001F\u0020\u0085\u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]+$/gu;
@@ -120,14 +122,63 @@ export const figureAssetSchema = z
     label: nonBlankString,
     caption: nonBlankString,
     image_urls: z.array(arxivImageUrlSchema).min(1),
+    cached_image_paths: z.array(z.string().nullable()).default([]),
     source_url: arxivSourceUrlSchema,
     source: z.literal("arxiv_html"),
   })
   .strict()
-  .transform((asset) => ({
-    ...asset,
-    image_urls: [...new Set(asset.image_urls)],
-  }));
+  .superRefine((asset, context) => {
+    if (
+      asset.cached_image_paths.length > 0 &&
+      asset.cached_image_paths.length !== asset.image_urls.length
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["cached_image_paths"],
+        message: "Cached Figure paths must align with remote image panels",
+      });
+      return;
+    }
+    const sourceIdentity = arxivHtmlPathPattern.exec(
+      new URL(asset.source_url).pathname,
+    );
+    for (const [index, path] of asset.cached_image_paths.entries()) {
+      if (path === null) continue;
+      const match = cachedFigurePathPattern.exec(path);
+      if (
+        !match ||
+        !sourceIdentity ||
+        match[1] !== sourceIdentity[1] ||
+        match[2] !== sourceIdentity[2] ||
+        Number.parseInt(match[3] ?? "", 10) !== asset.number ||
+        Number.parseInt(match[4] ?? "", 10) !== index + 1
+      ) {
+        context.addIssue({
+          code: "custom",
+          path: ["cached_image_paths", index],
+          message: "Cached Figure path must match its paper and panel",
+        });
+      }
+    }
+  })
+  .transform((asset) => {
+    const image_urls: string[] = [];
+    const cached_image_paths: Array<string | null> = [];
+    const seen = new Set<string>();
+    for (const [index, imageUrl] of asset.image_urls.entries()) {
+      if (seen.has(imageUrl)) continue;
+      seen.add(imageUrl);
+      image_urls.push(imageUrl);
+      if (asset.cached_image_paths.length > 0) {
+        cached_image_paths.push(asset.cached_image_paths[index] ?? null);
+      }
+    }
+    return {
+      ...asset,
+      image_urls,
+      cached_image_paths,
+    };
+  });
 
 export const figureGallerySchema = z
   .object({

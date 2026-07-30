@@ -25,6 +25,12 @@ ARXIV_HTML_PATH_PATTERN = re.compile(
 ARXIV_IMAGE_PATH_PATTERN = re.compile(
     r"^/html/\d{4}\.\d{4,5}v[1-9]\d*/.+$"
 )
+CACHED_FIGURE_PATH_PATTERN = re.compile(
+    r"^/figures/(?P<arxiv_id>\d{4}\.\d{4,5})/"
+    r"v(?P<version>[1-9]\d*)/"
+    r"fig(?P<figure>[12])-panel(?P<panel>[1-9]\d*)"
+    r"\.(?:png|jpg|webp|gif|svg)$"
+)
 FigureNumber = Literal[1, 2]
 FigureImageTuple = Annotated[tuple[HttpUrl, ...], Field(min_length=1)]
 FigureCacheKey = Annotated[
@@ -208,6 +214,7 @@ class FigureAsset(FrozenStrictModel):
     label: NonEmptyStr
     caption: NonEmptyStr
     image_urls: FigureImageTuple
+    cached_image_paths: tuple[str | None, ...] = Field(default_factory=tuple)
     source_url: HttpUrl
     source: Literal["arxiv_html"] = "arxiv_html"
 
@@ -229,6 +236,27 @@ class FigureAsset(FrozenStrictModel):
                 seen.add(str(url))
                 deduplicated.append(url)
         return tuple(deduplicated)
+
+    @model_validator(mode="after")
+    def validate_cached_image_paths(self) -> Self:
+        if not self.cached_image_paths:
+            return self
+        if len(self.cached_image_paths) != len(self.image_urls):
+            raise ValueError("cached Figure paths must align with image URLs")
+        arxiv_id, version = parse_arxiv_html_identity(self.source_url)
+        for panel, path in enumerate(self.cached_image_paths, start=1):
+            if path is None:
+                continue
+            match = CACHED_FIGURE_PATH_PATTERN.fullmatch(path)
+            if (
+                match is None
+                or match.group("arxiv_id") != arxiv_id
+                or int(match.group("version")) != version
+                or int(match.group("figure")) != self.number
+                or int(match.group("panel")) != panel
+            ):
+                raise ValueError("cached Figure path does not match its panel")
+        return self
 
 
 class FigureGallery(FrozenStrictModel):

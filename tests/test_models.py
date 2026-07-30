@@ -344,12 +344,86 @@ def test_available_figure_gallery_serializes_public_contract() -> None:
                     "https://arxiv.org/html/2607.12345v1/x1.png",
                     "https://arxiv.org/html/2607.12345v1/x2.png",
                 ],
+                "cached_image_paths": [],
                 "source_url": "https://arxiv.org/html/2607.12345v1#S1.F1",
                 "source": "arxiv_html",
             }
         ],
         "checked_at": "2026-07-27T00:00:00Z",
     }
+
+
+def test_figure_asset_serializes_aligned_cached_image_paths() -> None:
+    asset = FigureAsset(
+        number=1,
+        label="Figure 1",
+        caption="The model architecture.",
+        image_urls=[
+            "https://arxiv.org/html/2607.12345v1/x1.png",
+            "https://arxiv.org/html/2607.12345v1/x2.png",
+        ],
+        cached_image_paths=[
+            "/figures/2607.12345/v1/fig1-panel1.png",
+            None,
+        ],
+        source_url="https://arxiv.org/html/2607.12345v1#S1.F1",
+    )
+
+    assert asset.model_dump(mode="json")["cached_image_paths"] == [
+        "/figures/2607.12345/v1/fig1-panel1.png",
+        None,
+    ]
+
+
+def test_figure_asset_accepts_historical_payload_without_cached_paths() -> None:
+    payload = make_gallery().figures[0].model_dump(mode="json")
+    payload.pop("cached_image_paths", None)
+
+    asset = FigureAsset.model_validate(payload)
+
+    assert asset.cached_image_paths == ()
+
+
+@pytest.mark.parametrize(
+    "cached_path",
+    [
+        "/figures/2607.99999/v1/fig1-panel1.png",
+        "/figures/2607.12345/v2/fig1-panel1.png",
+        "/figures/2607.12345/v1/fig2-panel1.png",
+        "/figures/2607.12345/v1/fig1-panel2.png",
+        "/figures/../../secret.png",
+        "https://example.com/image.png",
+    ],
+)
+def test_figure_asset_rejects_cached_path_for_another_panel(
+    cached_path: str,
+) -> None:
+    with pytest.raises(ValidationError):
+        FigureAsset(
+            number=1,
+            label="Figure 1",
+            caption="The model architecture.",
+            image_urls=["https://arxiv.org/html/2607.12345v1/x1.png"],
+            cached_image_paths=[cached_path],
+            source_url="https://arxiv.org/html/2607.12345v1#S1.F1",
+        )
+
+
+def test_figure_asset_rejects_misaligned_cached_path_count() -> None:
+    with pytest.raises(ValidationError):
+        FigureAsset(
+            number=1,
+            label="Figure 1",
+            caption="The model architecture.",
+            image_urls=[
+                "https://arxiv.org/html/2607.12345v1/x1.png",
+                "https://arxiv.org/html/2607.12345v1/x2.png",
+            ],
+            cached_image_paths=[
+                "/figures/2607.12345/v1/fig1-panel1.png",
+            ],
+            source_url="https://arxiv.org/html/2607.12345v1#S1.F1",
+        )
 
 
 def test_figure_factory_uses_anchored_source_urls() -> None:

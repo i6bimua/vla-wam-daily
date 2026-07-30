@@ -327,6 +327,70 @@ describe("the Figure contract", () => {
     expect(() => figureGallerySchema.parse(gallery)).toThrow(/fragment/i);
   });
 
+  it("loads historical Figure assets without cached paths", () => {
+    const parsed = figureGallerySchema.parse(figureGallery());
+
+    expect(parsed.figures[0].cached_image_paths).toEqual([]);
+  });
+
+  it("preserves aligned local Figure panel paths", () => {
+    const gallery = figureGallery();
+    const parsed = figureGallerySchema.parse({
+      ...gallery,
+      figures: gallery.figures.map((figure, index) => ({
+        ...figure,
+        cached_image_paths:
+          index === 0 ? ["/figures/2607.12345/v1/fig1-panel1.png"] : [null],
+      })),
+    });
+
+    expect(parsed.figures[0].cached_image_paths).toEqual([
+      "/figures/2607.12345/v1/fig1-panel1.png",
+    ]);
+    expect(parsed.figures[1].cached_image_paths).toEqual([null]);
+  });
+
+  it.each([
+    "/figures/2607.99999/v1/fig1-panel1.png",
+    "/figures/2607.12345/v2/fig1-panel1.png",
+    "/figures/2607.12345/v1/fig2-panel1.png",
+    "/figures/2607.12345/v1/fig1-panel2.png",
+    "/figures/../../secret.png",
+    "https://example.com/image.png",
+  ])("rejects a cached path for another panel: %s", (cachedPath) => {
+    const gallery = figureGallery();
+    expect(() =>
+      figureGallerySchema.parse({
+        ...gallery,
+        figures: gallery.figures.map((figure, index) => ({
+          ...figure,
+          cached_image_paths: index === 0 ? [cachedPath] : [],
+        })),
+      }),
+    ).toThrow();
+  });
+
+  it("requires cached paths to align with remote image panels", () => {
+    const gallery = figureGallery();
+    expect(() =>
+      figureGallerySchema.parse({
+        ...gallery,
+        figures: gallery.figures.map((figure, index) => ({
+          ...figure,
+          image_urls:
+            index === 0
+              ? [
+                  "https://arxiv.org/html/2607.12345v1/x1.png",
+                  "https://arxiv.org/html/2607.12345v1/x2.png",
+                ]
+              : figure.image_urls,
+          cached_image_paths:
+            index === 0 ? ["/figures/2607.12345/v1/fig1-panel1.png"] : [],
+        })),
+      }),
+    ).toThrow(/align/i);
+  });
+
   it("deduplicates repeated remote image URLs", () => {
     const gallery = figureGallery();
     gallery.figures[0].image_urls.push(gallery.figures[0].image_urls[0]);
