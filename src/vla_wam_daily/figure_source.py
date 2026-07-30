@@ -1,5 +1,6 @@
 import gzip
 import io
+import logging
 import math
 import re
 import tarfile
@@ -22,6 +23,7 @@ from vla_wam_daily.figure_recovery_types import (
 from vla_wam_daily.figures import figure_cache_key
 from vla_wam_daily.models import ARXIV_FIGURE_HOSTS
 
+LOGGER = logging.getLogger(__name__)
 _DOCUMENT_CLASS_NAME_RE = re.compile(r"^[A-Za-z0-9_.-]+$")
 _SCHEME_PREFIX_RE = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
 _UNSAFE_FIGURE_RE = re.compile(
@@ -853,6 +855,9 @@ def _resolve_asset(
     max_image_dimension: int,
     max_image_pixels: int,
     max_image_frames: int,
+    max_pdf_page_dimension_points: int,
+    max_pdf_objects: int,
+    max_pdf_text_chars: int,
 ) -> tuple[RecoveredExtension, bytes] | None:
     candidate = _literal_local_target(root, target)
     if candidate is None:
@@ -875,7 +880,9 @@ def _resolve_asset(
         rendered = render_single_page_pdf(
             content,
             max_pdf_bytes=max_asset_bytes,
-            max_page_dimension_points=20_000,
+            max_page_dimension_points=max_pdf_page_dimension_points,
+            max_page_objects=max_pdf_objects,
+            max_text_chars=max_pdf_text_chars,
             resolution=300,
             max_output_dimension=max_image_dimension,
             max_output_pixels=max_image_pixels,
@@ -962,6 +969,9 @@ def _extract_figure(
     max_image_dimension: int,
     max_image_pixels: int,
     max_image_frames: int,
+    max_pdf_page_dimension_points: int,
+    max_pdf_objects: int,
+    max_pdf_text_chars: int,
     source_url: str,
 ) -> RecoveredFigure | None:
     root = main_path.parent
@@ -1045,6 +1055,9 @@ def _extract_figure(
         max_image_dimension=max_image_dimension,
         max_image_pixels=max_image_pixels,
         max_image_frames=max_image_frames,
+        max_pdf_page_dimension_points=max_pdf_page_dimension_points,
+        max_pdf_objects=max_pdf_objects,
+        max_pdf_text_chars=max_pdf_text_chars,
     )
     if caption is None or asset is None:
         return None
@@ -1104,6 +1117,9 @@ class ArxivSourceFigureExtractor:
         max_image_dimension: int = 20_000,
         max_image_pixels: int = 100_000_000,
         max_image_frames: int = 16,
+        max_pdf_page_dimension_points: int = 2_000,
+        max_pdf_objects: int = 20_000,
+        max_pdf_text_chars: int = 100_000,
         client: httpx.Client | None = None,
     ) -> None:
         if not isinstance(user_agent, str) or not user_agent.strip():
@@ -1125,6 +1141,9 @@ class ArxivSourceFigureExtractor:
             "max_image_dimension": max_image_dimension,
             "max_image_pixels": max_image_pixels,
             "max_image_frames": max_image_frames,
+            "max_pdf_page_dimension_points": max_pdf_page_dimension_points,
+            "max_pdf_objects": max_pdf_objects,
+            "max_pdf_text_chars": max_pdf_text_chars,
         }
         if any(
             type(value) is not int or value < 1
@@ -1150,6 +1169,9 @@ class ArxivSourceFigureExtractor:
         self.max_image_dimension = max_image_dimension
         self.max_image_pixels = max_image_pixels
         self.max_image_frames = max_image_frames
+        self.max_pdf_page_dimension_points = max_pdf_page_dimension_points
+        self.max_pdf_objects = max_pdf_objects
+        self.max_pdf_text_chars = max_pdf_text_chars
         self.client = client or httpx.Client()
         self._owns_client = client is None
 
@@ -1262,15 +1284,34 @@ class ArxivSourceFigureExtractor:
             declarations.extend((path, name) for name in names)
         if len(declarations) != 1:
             return None
-        return _extract_figure(
-            files,
-            tex_files,
-            main_path=declarations[0][0],
-            max_include_depth=self.max_include_depth,
-            max_tex_bytes=self.max_tex_bytes,
-            max_asset_bytes=self.max_asset_bytes,
-            max_image_dimension=self.max_image_dimension,
-            max_image_pixels=self.max_image_pixels,
-            max_image_frames=self.max_image_frames,
-            source_url=source_url,
-        )
+        try:
+            return _extract_figure(
+                files,
+                tex_files,
+                main_path=declarations[0][0],
+                max_include_depth=self.max_include_depth,
+                max_tex_bytes=self.max_tex_bytes,
+                max_asset_bytes=self.max_asset_bytes,
+                max_image_dimension=self.max_image_dimension,
+                max_image_pixels=self.max_image_pixels,
+                max_image_frames=self.max_image_frames,
+                max_pdf_page_dimension_points=self.max_pdf_page_dimension_points,
+                max_pdf_objects=self.max_pdf_objects,
+                max_pdf_text_chars=self.max_pdf_text_chars,
+                source_url=source_url,
+            )
+        except (
+            AssertionError,
+            AttributeError,
+            IndexError,
+            KeyError,
+            MemoryError,
+            NameError,
+            NotImplementedError,
+            RecursionError,
+            TypeError,
+        ):
+            raise
+        except Exception:
+            LOGGER.exception("Unexpected arXiv source figure extraction failure")
+            return None

@@ -53,6 +53,9 @@ def make_pdf_asset(*, pages: int = 1, page_size: tuple[int, int] = (120, 80)) ->
         pdf.rect(10, 10, 100, 60, stroke=0, fill=1)
         pdf.setStrokeColorRGB(1, 1, 1)
         pdf.line(15, 15 + page_number, 105, 65 - page_number)
+        pdf.setFillColorRGB(1, 1, 1)
+        pdf.setFont("Helvetica", 8)
+        pdf.drawString(45, 36, "panel")
         pdf.showPage()
     pdf.save()
     return output.getvalue()
@@ -1470,8 +1473,8 @@ def test_renders_single_page_source_pdf_asset_to_png() -> None:
     with Image.open(io.BytesIO(candidate.content)) as image:
         image.load()
         assert image.format == "PNG"
-        assert image.width == 501
-        assert image.height == 334
+        assert image.width == pytest.approx(120 * 300 / 72, abs=1)
+        assert image.height == pytest.approx(80 * 300 / 72, abs=1)
 
 
 @pytest.mark.parametrize(
@@ -1517,6 +1520,31 @@ def test_rejects_source_pdf_asset_over_byte_limit() -> None:
     ],
 )
 def test_rejects_source_pdf_render_over_pixel_bounds(name: str, value: int) -> None:
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": make_figure_tex(image_target="figure.pdf"),
+                "figure.pdf": make_pdf_asset(),
+                "figures/later.png": b"later",
+            },
+            **{name: value},
+        )
+        is None
+    )
+
+
+@pytest.mark.parametrize(
+    ("name", "value"),
+    [
+        ("max_pdf_page_dimension_points", 100),
+        ("max_pdf_objects", 1),
+        ("max_pdf_text_chars", 2),
+    ],
+)
+def test_rejects_source_pdf_over_page_or_object_preflight_cap(
+    name: str,
+    value: int,
+) -> None:
     assert (
         extract_from_tar(
             {
@@ -1780,6 +1808,9 @@ def test_invalid_empty_or_oversized_source_body_is_deterministic_failure(
         ("max_image_dimension", 0),
         ("max_image_pixels", 0),
         ("max_image_frames", 0),
+        ("max_pdf_page_dimension_points", 0),
+        ("max_pdf_objects", 0),
+        ("max_pdf_text_chars", 0),
     ],
 )
 def test_extractor_rejects_invalid_constructor_bounds(

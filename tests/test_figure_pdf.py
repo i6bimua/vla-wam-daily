@@ -1,7 +1,11 @@
 import io
+import logging
+import math
 from collections.abc import Callable
 
 import httpx
+import pdfplumber
+import pypdfium2 as pdfium
 import pytest
 from PIL import Image
 from reportlab.lib.utils import ImageReader
@@ -64,6 +68,22 @@ def make_target_pdf(
         draw_caption(canvas, caption)
 
     return make_pdf(page)
+
+
+def replace_page_boxes(
+    content: bytes,
+    *,
+    media_box: tuple[int, int, int, int] = (0, 0, 612, 792),
+    crop_box: tuple[int, int, int, int] | None = None,
+) -> bytes:
+    old = b"/MediaBox [ 0 0 612 792 ]"
+    media = f"/MediaBox [ {' '.join(str(value) for value in media_box)} ]".encode()
+    replacement = media
+    if crop_box is not None:
+        crop = f"/CropBox [ {' '.join(str(value) for value in crop_box)} ]".encode()
+        replacement = crop + b" " + media
+    assert content.count(old) == 1
+    return content.replace(old, replacement)
 
 
 def make_extractor(
@@ -173,6 +193,53 @@ def test_accepts_unique_plausible_visual_object_above_overlapping_caption(
     assert extract(make_target_pdf(visual=visual)) is not None
 
 
+def test_large_page_tiny_crop_uses_bounded_pdfium_render(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def page(canvas: Canvas) -> None:
+        draw_rect_visual(canvas, x=100, y=1_200, width=120, height=80)
+        draw_caption(canvas, "Figure 1: Tiny crop.", x=110, y=1_175)
+
+    body = make_pdf(page, page_size=(1_440, 1_440))
+    calls: list[tuple[int, int]] = []
+    original_render = pdfium.PdfPage.render
+
+    def bounded_render(
+        pdf_page,
+        *,
+        scale=1,
+        crop=(0, 0, 0, 0),
+        **kwargs,
+    ):
+        source_width = math.ceil(pdf_page.get_width() * scale)
+        source_height = math.ceil(pdf_page.get_height() * scale)
+        crop_pixels = [math.ceil(value * scale) for value in crop]
+        output_width = source_width - crop_pixels[0] - crop_pixels[2]
+        output_height = source_height - crop_pixels[1] - crop_pixels[3]
+        assert source_width > 5_000
+        assert source_height > 5_000
+        assert output_width < 1_000
+        assert output_height < 1_000
+        calls.append((output_width, output_height))
+        return original_render(
+            pdf_page,
+            scale=scale,
+            crop=crop,
+            **kwargs,
+        )
+
+    def reject_root_page_render(*_args, **_kwargs):
+        pytest.fail("pdfplumber attempted to rasterize the full root page")
+
+    monkeypatch.setattr(pdfium.PdfPage, "render", bounded_render)
+    monkeypatch.setattr(pdfplumber.page.Page, "to_image", reject_root_page_render)
+
+    candidate = extract(body, max_page_dimension_points=2_000)
+
+    assert candidate is not None
+    assert len(calls) == 1
+
+
 def test_crop_excludes_header_footer_content_below_and_neighboring_figure() -> None:
     def page(canvas: Canvas) -> None:
         canvas.setFillColorRGB(1, 0, 0)
@@ -218,6 +285,15 @@ def test_does_not_fall_back_to_largest_object_when_candidates_are_ambiguous() ->
             "Figure 1: Still ambiguous with two horizontally overlapping regions.",
             x=100,
         )
+
+    assert extract(make_pdf(page)) is None
+
+
+def test_short_caption_does_not_hide_disjoint_second_panel() -> None:
+    def page(canvas: Canvas) -> None:
+        draw_rect_visual(canvas, x=80, width=145)
+        draw_rect_visual(canvas, x=280, width=145)
+        draw_caption(canvas, "Figure 1: A.", x=100)
 
     assert extract(make_pdf(page)) is None
 
@@ -281,6 +357,36 @@ def test_near_full_page_visual_candidate_is_rejected_by_crop_coverage_bound() ->
     assert extract(make_pdf(page)) is None
 
 
+def test_nonzero_media_box_origin_uses_visible_page_coordinates() -> None:
+    def page(canvas: Canvas) -> None:
+        canvas.translate(100, 200)
+        draw_rect_visual(canvas)
+        draw_caption(canvas)
+
+    body = make_pdf(page)
+    body = replace_page_boxes(body, media_box=(100, 200, 712, 992))
+
+    candidate = extract(body)
+
+    assert candidate is not None
+    assert candidate.caption == "Model architecture."
+
+
+def test_crop_box_is_used_for_both_detection_and_rendering() -> None:
+    body = replace_page_boxes(
+        make_target_pdf(),
+        media_box=(0, 0, 612, 792),
+        crop_box=(50, 100, 562, 692),
+    )
+
+    candidate = extract(body)
+
+    assert candidate is not None
+    with Image.open(io.BytesIO(candidate.content)) as image:
+        assert image.width < 2_000
+        assert image.height < 1_200
+
+
 def test_rejects_pdf_over_byte_limit_before_parsing() -> None:
     body = make_target_pdf()
     assert extract(body, max_pdf_bytes=len(body) - 1) is None
@@ -296,7 +402,31 @@ def test_rejects_pdf_over_page_limit() -> None:
 
 def test_rejects_page_over_object_limit() -> None:
     body = make_target_pdf()
-    assert extract(body, max_objects_per_page=2) is None
+    assert extract(body, max_objects_per_page=1) is None
+
+
+def test_rejects_pdf_over_cumulative_object_limit() -> None:
+    body = make_pdf(
+        lambda canvas: (draw_rect_visual(canvas), draw_caption(canvas)),
+        lambda canvas: canvas.line(100, 100, 200, 200),
+    )
+
+    assert extract(
+        body,
+        max_objects_per_page=10,
+        max_total_objects=2,
+    ) is None
+
+
+@pytest.mark.parametrize(
+    ("name", "value"),
+    [
+        ("max_text_chars_per_page", 5),
+        ("max_total_text_chars", 5),
+    ],
+)
+def test_rejects_pdf_over_text_character_limit(name: str, value: int) -> None:
+    assert extract(make_target_pdf(), **{name: value}) is None
 
 
 @pytest.mark.parametrize(
@@ -486,6 +616,33 @@ def test_interrupted_pdf_stream_raises_transient_error() -> None:
         client.close()
 
 
+def test_memory_error_from_pdfium_render_propagates(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def fail_render(*_args, **_kwargs):
+        raise MemoryError("simulated allocation failure")
+
+    monkeypatch.setattr(pdfium.PdfPage, "render", fail_render)
+
+    with pytest.raises(MemoryError):
+        extract(make_target_pdf())
+
+
+def test_unexpected_pdfium_render_error_is_logged_at_public_boundary(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    def fail_render(*_args, **_kwargs):
+        raise RuntimeError("simulated unexpected renderer failure")
+
+    monkeypatch.setattr(pdfium.PdfPage, "render", fail_render)
+
+    with caplog.at_level(logging.ERROR):
+        assert extract(make_target_pdf()) is None
+    assert "unexpected" in caplog.text.casefold()
+    assert "simulated unexpected renderer failure" in caplog.text
+
+
 @pytest.mark.parametrize(
     ("name", "value"),
     [
@@ -494,6 +651,9 @@ def test_interrupted_pdf_stream_raises_transient_error() -> None:
         ("max_redirects", -1),
         ("max_pages", 0),
         ("max_objects_per_page", 0),
+        ("max_total_objects", 0),
+        ("max_text_chars_per_page", 0),
+        ("max_total_text_chars", 0),
         ("max_page_dimension_points", 0),
         ("max_vertical_distance", 0),
         ("min_visual_area", 0),
