@@ -1112,6 +1112,8 @@ def test_macro_definition_after_first_figure_does_not_change_candidate() -> None
         r"\addtocounter{figure}{2}",
         r"\counterwithin{figure}{section}",
         r"\counterwithout{figure}{section}",
+        r"\numberwithin{figure}{section}",
+        r"\numberwithout{figure}{section}",
         r"\stepcounter{figure}",
         r"\refstepcounter{figure}",
     ],
@@ -1141,6 +1143,134 @@ def test_returns_none_for_counter_mutation_before_candidate(
         )
         is None
     )
+
+
+def test_captionof_figure_before_candidate_cannot_publish_figure_two() -> None:
+    main = rb"""
+\documentclass{article}
+\usepackage{caption}
+\begin{document}
+\captionof{figure}{This consumes the Figure 1 counter.}
+\begin{figure}
+\includegraphics{figure-two.png}
+\caption{This is rendered as Figure 2, never Figure 1.}
+\end{figure}
+\end{document}
+"""
+
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": main,
+                "figure-two.png": PNG_BYTES,
+            }
+        )
+        is None
+    )
+
+
+def test_includeonly_cannot_make_excluded_include_supply_candidate() -> None:
+    main = rb"""
+\documentclass{article}
+\includeonly{sections/kept}
+\begin{document}
+\include{sections/excluded}
+\end{document}
+"""
+    excluded = rb"""
+\begin{figure}
+\includegraphics{figure.png}
+\caption{This file is excluded by includeonly.}
+\end{figure}
+"""
+
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": main,
+                "sections/excluded.tex": excluded,
+                "figure.png": PNG_BYTES,
+            }
+        )
+        is None
+    )
+
+
+@pytest.mark.parametrize(
+    "trailing",
+    [
+        rb"""
+\begin{figure}
+\includegraphics{figure.png}
+\caption{This Figure is after the hard input terminator.}
+\end{figure}
+""",
+        rb"\input{sections/figure}",
+    ],
+)
+def test_endinput_prevents_trailing_content_or_include_from_supplying_candidate(
+    trailing: bytes,
+) -> None:
+    main = (
+        rb"""
+\documentclass{article}
+\begin{document}
+\endinput
+"""
+        + trailing
+        + rb"""
+\end{document}
+"""
+    )
+    included = rb"""
+\begin{figure}
+\includegraphics{figure.png}
+\caption{This included Figure is after the hard input terminator.}
+\end{figure}
+"""
+
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": main,
+                "sections/figure.tex": included,
+                "figure.png": PNG_BYTES,
+            }
+        )
+        is None
+    )
+
+
+def test_endinput_is_file_local_when_inlining_tex() -> None:
+    main = rb"""
+\documentclass{article}
+\begin{document}
+\input{sections/intro}
+\begin{figure}
+\includegraphics{figure.png}
+\caption{The direct Figure from the main file.}
+\end{figure}
+\end{document}
+"""
+    included = rb"""
+\endinput
+\begin{figure}
+\includegraphics{../fake.png}
+\caption{Trailing included content must stay ignored.}
+\end{figure}
+"""
+
+    candidate = extract_from_tar(
+        {
+            "main.tex": main,
+            "sections/intro.tex": included,
+            "figure.png": PNG_BYTES,
+            "fake.png": PNG_BYTES,
+        }
+    )
+
+    assert candidate is not None
+    assert candidate.caption == "The direct Figure from the main file."
 
 
 @pytest.mark.parametrize("dependency", ["local.sty", "local.cls", "LOCAL.STY"])

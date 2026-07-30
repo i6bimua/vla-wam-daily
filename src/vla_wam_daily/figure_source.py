@@ -404,6 +404,10 @@ def _lex_tex(text: str) -> _LexedTex | None:
             environments and environments[0] == "document"
         )
 
+        if word == "endinput":
+            scan_steps += len(text) - start
+            _mask_range(characters, start, len(text))
+            break
         if word in _UNSUPPORTED_INLINE_VERBATIM:
             return None
         if word == "verb":
@@ -650,9 +654,17 @@ _COUNTER_MUTATION_CONTROLS = frozenset(
         "counterwithin",
         "counterwithout",
         "newcounter",
+        "numberwithin",
+        "numberwithout",
         "refstepcounter",
         "setcounter",
         "stepcounter",
+    }
+)
+_AMBIGUOUS_FIGURE_SELECTION_CONTROLS = frozenset(
+    {
+        "captionof",
+        "includeonly",
     }
 )
 
@@ -672,6 +684,7 @@ def _has_ambiguous_semantic_control(
             word in _MACRO_DEFINITION_CONTROLS
             or word in _CONDITIONAL_CONTROLS
             or word in _COUNTER_MUTATION_CONTROLS
+            or word in _AMBIGUOUS_FIGURE_SELECTION_CONTROLS
             or word.startswith("if")
         ):
             return True
