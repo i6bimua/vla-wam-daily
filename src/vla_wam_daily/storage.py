@@ -23,6 +23,7 @@ from vla_wam_daily.models import (
 )
 
 ARXIV_ID_PATTERN = re.compile(r"^\d{4}\.\d{4,5}$")
+ARCHIVE_FILENAME_PATTERN = re.compile(r"^\d{4}-(?:0[1-9]|1[0-2])\.json$")
 CACHE_KEY_PREFIX = "analysis:v1:"
 StrictPersistedInteger = Annotated[int, Field(strict=True)]
 STRICT_PERSISTED_INTEGER = TypeAdapter(StrictPersistedInteger)
@@ -402,6 +403,39 @@ def load_data_file(path: Path) -> DataFile | None:
     return _load_data_file_text(path.read_text(encoding="utf-8"))
 
 
+def load_archives(data_dir: Path) -> dict[str, DataFile]:
+    root_descriptor = _open_data_root(data_dir, create=False)
+    if root_descriptor is None:
+        return {}
+    descriptors = [root_descriptor]
+    primary_error: BaseException | None = None
+    try:
+        archive_descriptor = _open_relative_directory(
+            root_descriptor,
+            "archive",
+            create=False,
+        )
+        if archive_descriptor is None:
+            return {}
+        descriptors.append(archive_descriptor)
+        archives: dict[str, DataFile] = {}
+        for name in sorted(os.listdir(archive_descriptor)):
+            if name == ".gitkeep":
+                continue
+            if ARCHIVE_FILENAME_PATTERN.fullmatch(name) is None:
+                raise ValueError(f"invalid archive file name: {name}")
+            content = _read_text_at(archive_descriptor, name)
+            if content is None:  # pragma: no cover - listed entry disappeared
+                raise FileNotFoundError(name)
+            archives[name] = _load_data_file_text(content)
+        return archives
+    except BaseException as error:
+        primary_error = error
+        raise
+    finally:
+        _close_storage_descriptors(descriptors, primary_error)
+
+
 def _validated_cache_entry(top_level_key: str, value: object) -> CacheEntry:
     if isinstance(value, CacheEntry):
         value = value.model_dump(mode="json")
@@ -654,6 +688,65 @@ def save_successful_run(
         _atomic_write_text_at(cache_descriptor, "analyses.json", cache_content)
         if figure_cache_content is not None:
             _atomic_write_text_at(cache_descriptor, "figures.json", figure_cache_content)
+        if archive_descriptor is not None:
+            for filename, content in archive_contents.items():
+                _atomic_write_text_at(archive_descriptor, filename, content)
+        _atomic_write_text_at(root_descriptor, "latest.json", latest_content)
+
+
+def save_figure_sync(
+    data_dir: Path,
+    *,
+    latest: DataFile,
+    archives: Mapping[str, DataFile],
+    figure_cache: Mapping[str, FigureCacheEntry],
+) -> None:
+    validated_latest = DataFile.model_validate(
+        latest.model_dump(mode="python"),
+        strict=True,
+    )
+    validated_archives: dict[str, DataFile] = {}
+    for filename, archive in archives.items():
+        if not isinstance(filename, str) or ARCHIVE_FILENAME_PATTERN.fullmatch(
+            filename
+        ) is None:
+            raise ValueError(f"invalid archive file name: {filename}")
+        validated = DataFile.model_validate(
+            archive.model_dump(mode="python"),
+            strict=True,
+        )
+        expected_month = filename.removesuffix(".json")
+        if any(
+            paper.published_at.strftime("%Y-%m") != expected_month
+            for paper in validated.papers
+        ):
+            raise ValueError(
+                f"archive {filename} contains a paper from another publication month"
+            )
+        validated_archives[filename] = validated
+    validated_figure_cache = _validated_figure_cache(figure_cache)
+
+    latest_content = _serialize_json(validated_latest.model_dump(mode="json"))
+    archive_contents = {
+        filename: _serialize_json(archive.model_dump(mode="json"))
+        for filename, archive in sorted(validated_archives.items())
+    }
+    figure_cache_content = _serialize_json(
+        {
+            key: entry.model_dump(mode="json")
+            for key, entry in sorted(validated_figure_cache.items())
+        }
+    )
+
+    with _open_save_directories(
+        data_dir,
+        need_archive=bool(validated_archives),
+    ) as (root_descriptor, cache_descriptor, archive_descriptor):
+        _atomic_write_text_at(
+            cache_descriptor,
+            "figures.json",
+            figure_cache_content,
+        )
         if archive_descriptor is not None:
             for filename, content in archive_contents.items():
                 _atomic_write_text_at(archive_descriptor, filename, content)

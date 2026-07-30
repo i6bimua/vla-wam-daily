@@ -23,9 +23,11 @@ from vla_wam_daily.models import (
 from vla_wam_daily.storage import (
     atomic_write_json,
     cache_key,
+    load_archives,
     load_cache,
     load_data_file,
     load_figure_cache,
+    save_figure_sync,
     save_successful_run,
 )
 
@@ -95,6 +97,141 @@ def test_missing_data_and_cache_load_as_empty(tmp_path: Path) -> None:
     assert load_data_file(tmp_path / "latest.json") is None
     assert load_cache(tmp_path) == {}
     assert load_figure_cache(tmp_path) == {}
+
+
+def test_load_archives_reads_only_valid_monthly_data_files(
+    tmp_path: Path,
+) -> None:
+    july = make_record()
+    august_time = datetime(2026, 8, 1, tzinfo=UTC)
+    august = make_record(arxiv_id="2608.10001").model_copy(
+        update={"published_at": august_time, "updated_at": august_time}
+    )
+    save_successful_run(
+        tmp_path,
+        [july, august],
+        {},
+        RunStats(published=2),
+        august_time,
+    )
+
+    archives = load_archives(tmp_path)
+
+    assert list(archives) == ["2026-07.json", "2026-08.json"]
+    assert archives["2026-07.json"].papers == (july,)
+    assert archives["2026-08.json"].papers == (august,)
+
+
+def test_load_archives_rejects_an_invalid_json_filename(
+    tmp_path: Path,
+) -> None:
+    archive_dir = tmp_path / "archive"
+    archive_dir.mkdir()
+    (archive_dir / "papers.json").write_text("{}\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="archive file name"):
+        load_archives(tmp_path)
+
+
+def test_save_figure_sync_rewrites_public_records_and_figure_cache_only(
+    tmp_path: Path,
+) -> None:
+    now = datetime(2026, 7, 27, tzinfo=UTC)
+    figure_key, figure_entry = figure_cache_entry()
+    analysis_key, analysis_entry = cache_entry()
+    save_successful_run(
+        tmp_path,
+        [make_record()],
+        {analysis_key: analysis_entry},
+        RunStats(published=1, figure_available=1),
+        now,
+        figure_cache={figure_key: figure_entry},
+    )
+    analyses_before = (tmp_path / "cache/analyses.json").read_bytes()
+    latest = load_data_file(tmp_path / "latest.json")
+    assert latest is not None
+    archives = load_archives(tmp_path)
+    figure = latest.papers[0].figure_gallery.figures[0].model_copy(
+        update={
+            "cached_image_paths": (
+                "/figures/2607.12345/v1/fig1-panel1.png",
+            )
+        }
+    )
+    gallery = latest.papers[0].figure_gallery.model_copy(
+        update={
+            "figures": (
+                figure,
+                latest.papers[0].figure_gallery.figures[1],
+            )
+        }
+    )
+    updated_record = latest.papers[0].model_copy(
+        update={"figure_gallery": gallery}
+    )
+    updated_latest = latest.model_copy(update={"papers": (updated_record,)})
+    updated_archives = {
+        "2026-07.json": archives["2026-07.json"].model_copy(
+            update={"papers": (updated_record,)}
+        )
+    }
+    updated_cache = {
+        figure_key: FigureCacheEntry(key=figure_key, gallery=gallery)
+    }
+
+    save_figure_sync(
+        tmp_path,
+        latest=updated_latest,
+        archives=updated_archives,
+        figure_cache=updated_cache,
+    )
+
+    loaded_latest = load_data_file(tmp_path / "latest.json")
+    loaded_archive = load_data_file(tmp_path / "archive/2026-07.json")
+    assert loaded_latest is not None
+    assert loaded_archive is not None
+    assert loaded_latest.generated_at == now
+    assert loaded_latest.stats == RunStats(
+        published=1,
+        figure_available=1,
+    )
+    assert loaded_latest.papers[0].figure_gallery == gallery
+    assert loaded_archive.papers[0].figure_gallery == gallery
+    assert load_figure_cache(tmp_path)[figure_key].gallery == gallery
+    assert (tmp_path / "cache/analyses.json").read_bytes() == analyses_before
+
+
+def test_save_figure_sync_rejects_records_in_the_wrong_month_before_writing(
+    tmp_path: Path,
+) -> None:
+    now = datetime(2026, 7, 27, tzinfo=UTC)
+    figure_key, figure_entry = figure_cache_entry()
+    save_successful_run(
+        tmp_path,
+        [make_record()],
+        {},
+        RunStats(published=1),
+        now,
+        figure_cache={figure_key: figure_entry},
+    )
+    latest = load_data_file(tmp_path / "latest.json")
+    assert latest is not None
+    latest_before = (tmp_path / "latest.json").read_bytes()
+    archive_before = (tmp_path / "archive/2026-07.json").read_bytes()
+    figures_before = (tmp_path / "cache/figures.json").read_bytes()
+
+    with pytest.raises(ValueError, match="publication month"):
+        save_figure_sync(
+            tmp_path,
+            latest=latest,
+            archives={"2026-08.json": latest},
+            figure_cache={figure_key: figure_entry},
+        )
+
+    assert (tmp_path / "latest.json").read_bytes() == latest_before
+    assert (tmp_path / "archive/2026-07.json").read_bytes() == archive_before
+    assert (tmp_path / "cache/figures.json").read_bytes() == figures_before
+    assert not (tmp_path / "archive/2026-08.json").exists()
 
 
 def test_save_and_load_figure_metadata_without_image_bytes(tmp_path: Path) -> None:
