@@ -670,6 +670,14 @@ _AMBIGUOUS_FIGURE_SELECTION_CONTROLS = frozenset(
         "includeonly",
     }
 )
+_DYNAMIC_SEMANTIC_CONTROLS = frozenset(
+    {
+        "catcode",
+        "csname",
+        "endcsname",
+        "expandafter",
+    }
+)
 _PROTECTED_FIGURE_CONTROL_WORDS = frozenset(
     {
         "begin",
@@ -756,6 +764,7 @@ def _has_ambiguous_semantic_control(
             word in _CONDITIONAL_CONTROLS
             or word in _COUNTER_MUTATION_CONTROLS
             or word in _AMBIGUOUS_FIGURE_SELECTION_CONTROLS
+            or word in _DYNAMIC_SEMANTIC_CONTROLS
             or word.startswith("if")
         ):
             return True

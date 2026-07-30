@@ -1076,6 +1076,30 @@ def test_returns_none_when_preamble_redefines_implicit_figure_semantics() -> Non
     )
 
 
+def test_returns_none_when_dynamic_control_advances_figure_before_candidate() -> None:
+    main = rb"""
+\documentclass{article}
+\newcommand{\advancefigure}{\csname stepcounter\endcsname{figure}}
+\begin{document}
+\advancefigure
+\begin{figure}
+\includegraphics{figure.png}
+\caption{This is rendered as Figure 2, never Figure 1.}
+\end{figure}
+\end{document}
+"""
+
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": main,
+                "figure.png": PNG_BYTES,
+            }
+        )
+        is None
+    )
+
+
 def test_returns_none_when_conditional_hides_a_fake_first_figure() -> None:
     main = rb"""
 \documentclass{article}
