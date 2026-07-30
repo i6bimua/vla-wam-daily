@@ -3,10 +3,12 @@ import time
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from email.utils import parsedate_to_datetime
 from math import isfinite
 from types import TracebackType
 from typing import Any, Self
 from urllib.parse import urlsplit
+from xml.etree import ElementTree
 
 import feedparser
 import httpx
@@ -15,8 +17,10 @@ from pydantic import ValidationError
 from vla_wam_daily.models import RawPaper
 
 ARXIV_API_URL = "https://export.arxiv.org/api/query"
+ARXIV_OAI_URL = "https://oaipmh.arxiv.org/oai"
 CATEGORY_RE = re.compile(r"^[a-z][a-z0-9-]*(?:\.[A-Z]{2,3})?$")
 ENTRY_CATEGORY_RE = re.compile(r"^[a-z][a-z0-9]*(?:-[a-z0-9]+)*(?:\.[A-Za-z][A-Za-z0-9-]*)?$")
+AUTHOR_SEPARATOR_RE = re.compile(r"\s+\band\b\s+|,\s*", re.IGNORECASE)
 ARXIV_ID_RE = re.compile(
     r"(?P<year>\d{2})(?P<month>0[1-9]|1[0-2])"
     r"\.(?P<number>\d{4,5})(?:v(?P<version>[1-9]\d*))?"
@@ -25,6 +29,8 @@ DEFAULT_PAGE_SIZE = 100
 DEFAULT_MAX_IDS_PER_REQUEST = 100
 DEFAULT_MAX_RESPONSE_BYTES = 10 * 1024 * 1024
 XML_CONTENT_TYPES = frozenset({"application/atom+xml", "application/xml", "text/xml"})
+OAI_NAMESPACE = "http://www.openarchives.org/OAI/2.0/"
+ARXIV_RAW_NAMESPACE = "http://arxiv.org/OAI/arXivRaw/"
 
 
 @dataclass(frozen=True)
@@ -151,6 +157,23 @@ def _keep_preferred_paper(
         papers[key] = paper
 
 
+def _parse_oai_version_datetime(value: str) -> datetime:
+    try:
+        parsed = parsedate_to_datetime(value)
+    except (TypeError, ValueError) as error:
+        raise ValueError("invalid arXiv OAI version date") from error
+    if parsed.utcoffset() is None:
+        raise ValueError("arXiv OAI version date must be timezone-aware")
+    return parsed.astimezone(UTC)
+
+
+def _required_oai_text(parent: ElementTree.Element, name: str) -> str:
+    element = parent.find(f"{{{ARXIV_RAW_NAMESPACE}}}{name}")
+    if element is None or element.text is None or not element.text.strip():
+        raise ValueError(f"arXiv OAI record is missing {name}")
+    return " ".join(element.text.split())
+
+
 class ArxivClient:
     def __init__(
         self,
@@ -163,6 +186,7 @@ class ArxivClient:
         page_size: int = DEFAULT_PAGE_SIZE,
         max_ids_per_request: int = DEFAULT_MAX_IDS_PER_REQUEST,
         max_response_bytes: int = DEFAULT_MAX_RESPONSE_BYTES,
+        use_oai_for_recent: bool = False,
         http_client: httpx.Client | None = None,
         sleep: Callable[[float], None] = time.sleep,
         clock: Callable[[], float] = time.monotonic,
@@ -188,6 +212,8 @@ class ArxivClient:
         _require_positive_int(page_size, name="page_size")
         _require_positive_int(max_ids_per_request, name="max_ids_per_request")
         _require_positive_int(max_response_bytes, name="max_response_bytes")
+        if not isinstance(use_oai_for_recent, bool):
+            raise ValueError("use_oai_for_recent must be a boolean")
 
         self.user_agent = user_agent
         self.request_delay_seconds = float(request_delay_seconds)
@@ -197,6 +223,7 @@ class ArxivClient:
         self.page_size = page_size
         self.max_ids_per_request = max_ids_per_request
         self.max_response_bytes = max_response_bytes
+        self.use_oai_for_recent = use_oai_for_recent
         self._sleep = sleep
         self._clock = clock
         self._last_request_at: float | None = None
@@ -229,11 +256,16 @@ class ArxivClient:
                 self._sleep(remaining)
         self._last_request_at = self._clock()
 
-    def _request_once(self, params: dict[str, str | int]) -> bytes:
+    def _request_once(
+        self,
+        params: dict[str, str | int],
+        *,
+        url: str = ARXIV_API_URL,
+    ) -> bytes:
         self._throttle()
         with self.http.stream(
             "GET",
-            ARXIV_API_URL,
+            url,
             params=params,
             headers={"User-Agent": self.user_agent},
             timeout=self.timeout_seconds,
@@ -271,11 +303,16 @@ class ArxivClient:
                 content.extend(chunk)
             return bytes(content)
 
-    def _request(self, params: dict[str, str | int]) -> bytes:
+    def _request(
+        self,
+        params: dict[str, str | int],
+        *,
+        url: str = ARXIV_API_URL,
+    ) -> bytes:
         last_error: httpx.HTTPStatusError | httpx.TransportError | None = None
         for attempt in range(1, self.retries + 1):
             try:
-                return self._request_once(params)
+                return self._request_once(params, url=url)
             except httpx.HTTPStatusError as error:
                 status_code = error.response.status_code
                 if status_code != 429 and not 500 <= status_code < 600:
@@ -301,6 +338,187 @@ class ArxivClient:
                 self._sleep(delay)
 
         raise AssertionError("retry loop ended without returning")
+
+    @staticmethod
+    def _parse_oai_record(
+        raw: ElementTree.Element,
+        *,
+        target_categories: frozenset[str],
+        since: datetime,
+        until: datetime,
+    ) -> RawPaper | None:
+        categories = list(dict.fromkeys(_required_oai_text(raw, "categories").split()))
+        if not categories or any(
+            ENTRY_CATEGORY_RE.fullmatch(category) is None for category in categories
+        ):
+            raise ValueError("invalid arXiv OAI category")
+        if target_categories.isdisjoint(categories):
+            return None
+
+        arxiv_id = _required_oai_text(raw, "id")
+        try:
+            _validate_new_style_id(arxiv_id)
+        except ValueError:
+            return None
+
+        versions: dict[int, datetime] = {}
+        for element in raw.findall(f"{{{ARXIV_RAW_NAMESPACE}}}version"):
+            version_value = element.attrib.get("version", "")
+            if not re.fullmatch(r"v[1-9]\d*", version_value):
+                raise ValueError("invalid arXiv OAI version")
+            date_element = element.find(f"{{{ARXIV_RAW_NAMESPACE}}}date")
+            if date_element is None or date_element.text is None:
+                raise ValueError("arXiv OAI version is missing its date")
+            version = int(version_value[1:])
+            if version in versions:
+                raise ValueError("duplicate arXiv OAI version")
+            versions[version] = _parse_oai_version_datetime(date_element.text.strip())
+        if not versions or 1 not in versions:
+            raise ValueError("arXiv OAI record has no initial version")
+        latest_version = max(versions)
+        if set(versions) != set(range(1, latest_version + 1)):
+            raise ValueError("arXiv OAI versions are not contiguous")
+        updated_at = versions[latest_version]
+        if not since <= updated_at <= until:
+            return None
+
+        authors_value = _required_oai_text(raw, "authors")
+        authors = list(
+            dict.fromkeys(
+                author.strip()
+                for author in AUTHOR_SEPARATOR_RE.split(authors_value)
+                if author.strip()
+            )
+        )
+        if not authors:
+            raise ValueError("arXiv OAI record has no authors")
+        comment_element = raw.find(f"{{{ARXIV_RAW_NAMESPACE}}}comments")
+        comment = (
+            " ".join(comment_element.text.split())
+            if comment_element is not None and comment_element.text
+            else None
+        )
+        return RawPaper(
+            arxiv_id=arxiv_id,
+            version=latest_version,
+            published_at=versions[1],
+            updated_at=updated_at,
+            title=_required_oai_text(raw, "title"),
+            authors=authors,
+            arxiv_categories=categories,
+            abstract=_required_oai_text(raw, "abstract"),
+            comment=comment,
+        )
+
+    @classmethod
+    def _parse_oai_page(
+        cls,
+        xml: bytes,
+        *,
+        target_categories: frozenset[str],
+        since: datetime,
+        until: datetime,
+    ) -> tuple[list[RawPaper], str | None]:
+        if b"<!DOCTYPE" in xml.upper() or b"<!ENTITY" in xml.upper():
+            raise ValueError("arXiv OAI response contains a forbidden declaration")
+        try:
+            root = ElementTree.fromstring(xml)
+        except ElementTree.ParseError as error:
+            raise ValueError("invalid arXiv OAI XML") from error
+        if root.tag != f"{{{OAI_NAMESPACE}}}OAI-PMH":
+            raise ValueError("invalid arXiv OAI root element")
+
+        error_element = root.find(f"{{{OAI_NAMESPACE}}}error")
+        if error_element is not None:
+            code = error_element.attrib.get("code")
+            if code == "noRecordsMatch":
+                return [], None
+            raise ValueError(f"arXiv OAI returned error {code!r}")
+
+        list_records = root.find(f"{{{OAI_NAMESPACE}}}ListRecords")
+        if list_records is None:
+            raise ValueError("arXiv OAI response has no ListRecords element")
+        papers: list[RawPaper] = []
+        for record in list_records.findall(f"{{{OAI_NAMESPACE}}}record"):
+            header = record.find(f"{{{OAI_NAMESPACE}}}header")
+            if header is not None and header.attrib.get("status") == "deleted":
+                continue
+            metadata = record.find(f"{{{OAI_NAMESPACE}}}metadata")
+            raw = (
+                None
+                if metadata is None
+                else metadata.find(f"{{{ARXIV_RAW_NAMESPACE}}}arXivRaw")
+            )
+            if raw is None:
+                raise ValueError("arXiv OAI record has no arXivRaw metadata")
+            paper = cls._parse_oai_record(
+                raw,
+                target_categories=target_categories,
+                since=since,
+                until=until,
+            )
+            if paper is not None:
+                papers.append(paper)
+
+        token_element = list_records.find(f"{{{OAI_NAMESPACE}}}resumptionToken")
+        token = (
+            token_element.text.strip()
+            if token_element is not None and token_element.text
+            else None
+        )
+        return papers, token
+
+    def _fetch_recent_oai(
+        self,
+        *,
+        categories: list[str],
+        since: datetime,
+        until: datetime,
+        max_results_per_category: int,
+    ) -> list[RawPaper]:
+        target_categories = frozenset(categories)
+        archives = list(dict.fromkeys(category.partition(".")[0] for category in categories))
+        papers: dict[tuple[str, int], RawPaper] = {}
+        since_utc = since.astimezone(UTC)
+        until_utc = until.astimezone(UTC)
+        for archive in archives:
+            params: dict[str, str | int] = {
+                "verb": "ListRecords",
+                "metadataPrefix": "arXivRaw",
+                "from": since_utc.date().isoformat(),
+                "until": until_utc.date().isoformat(),
+                "set": archive,
+            }
+            seen_tokens: set[str] = set()
+            while True:
+                page, token = self._parse_oai_page(
+                    self._request(params, url=ARXIV_OAI_URL),
+                    target_categories=target_categories,
+                    since=since_utc,
+                    until=until_utc,
+                )
+                for paper in page:
+                    _keep_preferred_paper(papers, paper)
+                if token is None:
+                    break
+                if token in seen_tokens:
+                    raise ValueError("arXiv OAI repeated a resumption token")
+                seen_tokens.add(token)
+                params = {
+                    "verb": "ListRecords",
+                    "resumptionToken": token,
+                }
+
+        for category in categories:
+            count = sum(category in paper.arxiv_categories for paper in papers.values())
+            if count > max_results_per_category:
+                raise ArxivWindowTruncatedError(
+                    f"{category} exceeded {max_results_per_category} results in the time window"
+                )
+        return sorted(
+            papers.values(),
+            key=lambda paper: (-paper.updated_at.timestamp(), paper.arxiv_id, -paper.version),
+        )
 
     @staticmethod
     def _parse_feed(xml: bytes) -> _FeedPage:
@@ -417,6 +635,13 @@ class ArxivClient:
             max_results_per_category,
             name="max_results_per_category",
         )
+        if self.use_oai_for_recent:
+            return self._fetch_recent_oai(
+                categories=categories,
+                since=since,
+                until=until,
+                max_results_per_category=max_results_per_category,
+            )
 
         papers: dict[tuple[str, int], RawPaper] = {}
         since_utc = since.astimezone(UTC)

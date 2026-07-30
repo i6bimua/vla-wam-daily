@@ -528,6 +528,7 @@ def test_daily_passes_options_clients_utf8_prompt_and_utc_now(
         "timeout_seconds": config.arxiv.timeout_seconds,
         "retries": config.arxiv.retries,
         "retry_wait_seconds": config.arxiv.retry_wait_seconds,
+        "use_oai_for_recent": config.arxiv.use_oai_for_recent,
     }
     assert harness.constructor_kwargs["analysis"] == {
         "api_key": SECRET,

@@ -42,6 +42,7 @@ def test_arxiv_schema_default_supports_three_day_catchup_capacity() -> None:
     assert config.timeout_seconds == 60.0
     assert config.retries == 5
     assert config.retry_wait_seconds == 5.0
+    assert config.use_oai_for_recent is True
 
 
 def test_standalone_vla_and_wam_are_not_exact_phrases() -> None:

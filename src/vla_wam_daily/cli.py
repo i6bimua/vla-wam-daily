@@ -161,6 +161,7 @@ def daily(
                 timeout_seconds=config.arxiv.timeout_seconds,
                 retries=config.arxiv.retries,
                 retry_wait_seconds=config.arxiv.retry_wait_seconds,
+                use_oai_for_recent=config.arxiv.use_oai_for_recent,
             )
         )
         analysis_client = stack.enter_context(

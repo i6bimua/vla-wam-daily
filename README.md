@@ -7,8 +7,8 @@ GitHub Pages；不需要数据库或常驻服务器。
 
 ## 功能
 
-- 每天抓取 `cs.RO`、`cs.CV`、`cs.AI`、`cs.LG`，先做确定性关键词预筛，再做
-  DeepSeek 相关性评分。
+- 每天通过 arXiv OAI-PMH 抓取 `cs.RO`、`cs.CV`、`cs.AI`、`cs.LG` 元数据，先做
+  确定性关键词预筛，再做 DeepSeek 相关性评分；手动指定论文时仍使用 arXiv 查询 API。
 - 展示中英文标题、一句话总结、核心贡献、方法、摘要报告的实验结果与局限，以及与
   VLA/WAM 的关系。
 - 提供 Today、VLA、WAM、World Models、Datasets、Benchmarks、Weekly Top 5、
@@ -104,7 +104,8 @@ Astro 根据 `GITHUB_REPOSITORY` 推导项目子路径，显式 `BASE_PATH` 仍�
 
 - `config/topics.yaml`：arXiv 分类、回看天数、请求间隔、超时与重试策略、预筛短语与
   组合规则、发布阈值、60 篇候选上限、30% 失败阈值、并发数和模型档位。默认给
-  arXiv 请求 60 秒超时、最多 5 次指数退避重试，以容忍 GitHub Runner 上的短时抖动。
+  arXiv 请求 60 秒超时、最多 5 次指数退避重试；每日范围抓取默认使用更适合增量收割的
+  OAI-PMH，避免 GitHub 公共 Runner 共享出口触发查询 API 的系统级限流。
 - `prompts/analysis-v1.md`：DeepSeek 的结构化 JSON Prompt。修改时应同步增加
   `prompt_version`，使缓存和结果 provenance 可追溯。
 - `data/latest.json`：最新数据；`data/archive/YYYY-MM.json`：月度归档；

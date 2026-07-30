@@ -14,6 +14,7 @@ from vla_wam_daily.arxiv_client import (
 )
 
 ARXIV_API_URL = "https://export.arxiv.org/api/query"
+ARXIV_OAI_URL = "https://oaipmh.arxiv.org/oai"
 FIXTURE = Path(__file__).parent / "fixtures" / "arxiv_feed.xml"
 USER_AGENT = "VLA-WAM-Daily/0.1 (https://github.com/example/vla-wam-daily)"
 
@@ -88,6 +89,73 @@ def atom_response(content: bytes, status_code: int = 200) -> httpx.Response:
     )
 
 
+def oai_raw_record(
+    arxiv_id: str,
+    *,
+    versions: tuple[tuple[int, str], ...] = (
+        (1, "Wed, 29 Jul 2026 01:00:00 GMT"),
+        (2, "Thu, 30 Jul 2026 02:00:00 GMT"),
+    ),
+    title: str = "A Vision-Language-Action Policy",
+    authors: str = "Ada Robot and Wei Model",
+    categories: str = "cs.RO cs.CV",
+    abstract: str = "We introduce a robot policy.",
+    comment: str | None = "Code available",
+) -> str:
+    version_xml = "".join(
+        f'<version version="v{version}"><date>{date}</date><size>1kb</size></version>'
+        for version, date in versions
+    )
+    comment_xml = "" if comment is None else f"<comments>{escape(comment)}</comments>"
+    return (
+        "<record>"
+        "<header>"
+        f"<identifier>oai:arXiv.org:{escape(arxiv_id)}</identifier>"
+        "<datestamp>2026-07-30</datestamp>"
+        "<setSpec>cs</setSpec>"
+        "</header>"
+        "<metadata>"
+        '<arXivRaw xmlns="http://arxiv.org/OAI/arXivRaw/">'
+        f"<id>{escape(arxiv_id)}</id>"
+        f"{version_xml}"
+        f"<title>{escape(title)}</title>"
+        f"<authors>{escape(authors)}</authors>"
+        f"<categories>{escape(categories)}</categories>"
+        f"{comment_xml}"
+        f"<abstract>{escape(abstract)}</abstract>"
+        "</arXivRaw>"
+        "</metadata>"
+        "</record>"
+    )
+
+
+def oai_response(
+    *records: str,
+    resumption_token: str | None = None,
+    error_code: str | None = None,
+) -> httpx.Response:
+    if error_code is not None:
+        body = f'<error code="{escape(error_code)}">No records</error>'
+    else:
+        token_xml = (
+            ""
+            if resumption_token is None
+            else f"<resumptionToken>{escape(resumption_token)}</resumptionToken>"
+        )
+        body = f"<ListRecords>{''.join(records)}{token_xml}</ListRecords>"
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/">'
+        f"{body}"
+        "</OAI-PMH>"
+    ).encode()
+    return httpx.Response(
+        200,
+        content=xml,
+        headers={"content-type": "text/xml; charset=utf-8"},
+    )
+
+
 class FakeTime:
     def __init__(self) -> None:
         self.now = 0.0
@@ -99,6 +167,159 @@ class FakeTime:
     def sleep(self, seconds: float) -> None:
         self.sleeps.append(seconds)
         self.now += seconds
+
+
+@respx.mock
+def test_fetch_recent_uses_oai_raw_metadata_and_resumption_tokens() -> None:
+    route = respx.get(ARXIV_OAI_URL).mock(
+        side_effect=[
+            oai_response(
+                oai_raw_record("2607.12345"),
+                oai_raw_record("2607.99999", categories="cs.CL"),
+                resumption_token="next page",
+            ),
+            oai_response(
+                oai_raw_record(
+                    "2607.54321",
+                    versions=((1, "Thu, 30 Jul 2026 03:00:00 GMT"),),
+                    authors="Grace Vision, Lin Action",
+                )
+            ),
+        ]
+    )
+
+    with ArxivClient(
+        user_agent=USER_AGENT,
+        request_delay_seconds=0,
+        retries=1,
+        use_oai_for_recent=True,
+    ) as client:
+        papers = client.fetch_recent(
+            categories=["cs.RO"],
+            since=datetime(2026, 7, 29, tzinfo=UTC),
+            until=datetime(2026, 7, 30, 4, tzinfo=UTC),
+            max_results_per_category=10,
+        )
+
+    assert [paper.arxiv_id for paper in papers] == ["2607.54321", "2607.12345"]
+    assert papers[1].version == 2
+    assert papers[1].authors == ["Ada Robot", "Wei Model"]
+    assert papers[1].published_at == datetime(2026, 7, 29, 1, tzinfo=UTC)
+    assert papers[1].updated_at == datetime(2026, 7, 30, 2, tzinfo=UTC)
+    assert papers[1].comment == "Code available"
+    assert len(route.calls) == 2
+    assert dict(route.calls[0].request.url.params) == {
+        "verb": "ListRecords",
+        "metadataPrefix": "arXivRaw",
+        "from": "2026-07-29",
+        "until": "2026-07-30",
+        "set": "cs",
+    }
+    assert dict(route.calls[1].request.url.params) == {
+        "verb": "ListRecords",
+        "resumptionToken": "next page",
+    }
+
+
+@respx.mock
+def test_fetch_recent_oai_accepts_no_records_match() -> None:
+    respx.get(ARXIV_OAI_URL).mock(return_value=oai_response(error_code="noRecordsMatch"))
+    client = ArxivClient(
+        user_agent=USER_AGENT,
+        request_delay_seconds=0,
+        retries=1,
+        use_oai_for_recent=True,
+    )
+
+    with client:
+        papers = client.fetch_recent(
+            categories=["cs.RO"],
+            since=datetime(2026, 7, 29, tzinfo=UTC),
+            until=datetime(2026, 7, 30, tzinfo=UTC),
+            max_results_per_category=10,
+        )
+
+    assert papers == []
+
+
+@pytest.mark.parametrize(
+    ("xml", "message"),
+    [
+        (b"<!DOCTYPE x><x/>", "forbidden"),
+        (b"<broken", "invalid arXiv OAI XML"),
+        (b"<root/>", "root element"),
+        (oai_response(error_code="badArgument").content, "badArgument"),
+        (
+            b'<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"/>',
+            "no ListRecords",
+        ),
+        (
+            b'<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/">'
+            b"<ListRecords><record><header status=\"deleted\"/></record>"
+            b"<record><header/></record></ListRecords></OAI-PMH>",
+            "no arXivRaw metadata",
+        ),
+    ],
+)
+def test_parse_oai_page_rejects_untrusted_or_incomplete_xml(
+    xml: bytes,
+    message: str,
+) -> None:
+    with pytest.raises(ValueError, match=message):
+        ArxivClient._parse_oai_page(
+            xml,
+            target_categories=frozenset({"cs.RO"}),
+            since=datetime(2026, 7, 29, tzinfo=UTC),
+            until=datetime(2026, 7, 30, tzinfo=UTC),
+        )
+
+
+@respx.mock
+def test_fetch_recent_oai_enforces_per_category_capacity() -> None:
+    respx.get(ARXIV_OAI_URL).mock(
+        return_value=oai_response(
+            oai_raw_record("2607.12345"),
+            oai_raw_record("2607.54321"),
+        )
+    )
+    client = ArxivClient(
+        user_agent=USER_AGENT,
+        request_delay_seconds=0,
+        retries=1,
+        use_oai_for_recent=True,
+    )
+
+    with client, pytest.raises(ArxivWindowTruncatedError, match="cs.RO"):
+        client.fetch_recent(
+            categories=["cs.RO"],
+            since=datetime(2026, 7, 29, tzinfo=UTC),
+            until=datetime(2026, 7, 30, 4, tzinfo=UTC),
+            max_results_per_category=1,
+        )
+
+
+@respx.mock
+def test_fetch_recent_oai_rejects_repeated_resumption_token() -> None:
+    respx.get(ARXIV_OAI_URL).mock(
+        side_effect=[
+            oai_response(resumption_token="same"),
+            oai_response(resumption_token="same"),
+        ]
+    )
+    client = ArxivClient(
+        user_agent=USER_AGENT,
+        request_delay_seconds=0,
+        retries=1,
+        use_oai_for_recent=True,
+    )
+
+    with client, pytest.raises(ValueError, match="repeated"):
+        client.fetch_recent(
+            categories=["cs.RO"],
+            since=datetime(2026, 7, 29, tzinfo=UTC),
+            until=datetime(2026, 7, 30, tzinfo=UTC),
+            max_results_per_category=10,
+        )
 
 
 @respx.mock
@@ -666,6 +887,7 @@ def test_fetch_by_ids_rejects_an_entry_from_a_different_batch() -> None:
         ({"request_delay_seconds": -0.01}, "request_delay_seconds"),
         ({"timeout_seconds": 0}, "timeout_seconds"),
         ({"retries": 0}, "retries"),
+        ({"use_oai_for_recent": "yes"}, "use_oai_for_recent"),
     ],
 )
 def test_constructor_rejects_invalid_config(

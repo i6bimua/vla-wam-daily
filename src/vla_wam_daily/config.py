@@ -48,6 +48,7 @@ class ArxivConfig(StrictModel):
     timeout_seconds: float = Field(default=60.0, gt=0)
     retries: int = Field(default=5, ge=1, le=10)
     retry_wait_seconds: float = Field(default=5.0, ge=0)
+    use_oai_for_recent: bool = True
 
 
 class CompositeRule(StrictModel):
