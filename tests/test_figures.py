@@ -5,6 +5,7 @@ from pathlib import Path
 import httpx
 import pytest
 import respx
+from pydantic import HttpUrl
 
 import vla_wam_daily.figures as figures_module
 from vla_wam_daily.figures import (
@@ -14,7 +15,7 @@ from vla_wam_daily.figures import (
     is_figure_cache_fresh,
     parse_figure_gallery,
 )
-from vla_wam_daily.models import FigureCacheEntry, FigureStatus
+from vla_wam_daily.models import FigureAsset, FigureCacheEntry, FigureGallery, FigureStatus
 
 CHECKED_AT = datetime(2026, 7, 29, 2, 30, tzinfo=UTC)
 HTML_URL = "https://arxiv.org/html/2607.12345v1"
@@ -80,6 +81,21 @@ def test_parser_extracts_only_figures_one_and_two() -> None:
     ]
     assert str(gallery.figures[0].source_url) == f"{HTML_URL}#S1.F1"
     assert gallery.checked_at == CHECKED_AT
+
+
+def test_parser_resolves_arxiv_document_prefixed_image_paths_without_duplication() -> None:
+    html = """
+    <figure id="S1.F1">
+      <img src="2607.12345v1/x1.png">
+      <figcaption>Figure 1: The model architecture.</figcaption>
+    </figure>
+    """
+
+    gallery = parse_figure_gallery(html, HTML_URL, CHECKED_AT)
+
+    assert [str(url) for url in gallery.figures[0].image_urls] == [
+        "https://arxiv.org/html/2607.12345v1/x1.png"
+    ]
 
 
 def test_parser_returns_not_found_for_missing_target_figures() -> None:
@@ -603,3 +619,28 @@ def test_successful_cache_does_not_expire_for_same_version() -> None:
 
     assert is_figure_cache_fresh(entry, CHECKED_AT + timedelta(days=365))
     assert entry.key != figure_cache_key("2607.12345", 2)
+
+
+def test_successful_cache_with_duplicated_paper_path_is_stale() -> None:
+    gallery = FigureGallery(
+        status=FigureStatus.AVAILABLE,
+        html_url=HttpUrl(HTML_URL),
+        figures=(
+            FigureAsset(
+                number=1,
+                label="Figure 1",
+                caption="The model architecture.",
+                image_urls=(
+                    HttpUrl(
+                        "https://arxiv.org/html/2607.12345v1/"
+                        "2607.12345v1/x1.png"
+                    ),
+                ),
+                source_url=HttpUrl(f"{HTML_URL}#S1.F1"),
+            ),
+        ),
+        checked_at=CHECKED_AT,
+    )
+    entry = FigureCacheEntry(key=figure_cache_key("2607.12345", 1), gallery=gallery)
+
+    assert not is_figure_cache_fresh(entry, CHECKED_AT + timedelta(days=1))

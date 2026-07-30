@@ -78,6 +78,24 @@ def _is_current_paper_image(candidate: str, html_url: str) -> bool:
     )
 
 
+def _resolve_current_paper_image(source: str, html_url: str) -> str | None:
+    for base_url in (html_url, f"{html_url}/"):
+        candidate = urljoin(base_url, source)
+        if _is_current_paper_image(candidate, html_url):
+            return candidate
+    return None
+
+
+def _has_duplicated_paper_path(candidate: str, html_url: str) -> bool:
+    image_path = urlsplit(candidate).path
+    html_path = urlsplit(html_url).path.rstrip("/")
+    expected_prefix = f"{html_path}/"
+    if not image_path.startswith(expected_prefix):
+        return False
+    paper_directory = html_path.rsplit("/", 1)[-1]
+    return image_path.removeprefix(expected_prefix).startswith(f"{paper_directory}/")
+
+
 def _resolve_safe_redirect(
     current_url: str,
     location: str,
@@ -141,12 +159,11 @@ def parse_figure_gallery(
             if not source:
                 continue
             try:
-                candidate = urljoin(f"{html_url}/", source)
-                allowed = _is_current_paper_image(candidate, html_url)
+                candidate = _resolve_current_paper_image(source, html_url)
             except ValueError:
                 continue
             if (
-                allowed
+                candidate is not None
                 and candidate not in seen_image_urls
             ):
                 seen_image_urls.add(candidate)
@@ -188,7 +205,12 @@ def parse_figure_gallery(
 
 def is_figure_cache_fresh(entry: FigureCacheEntry, now: datetime) -> bool:
     if entry.gallery.status is FigureStatus.AVAILABLE:
-        return True
+        html_url = str(entry.gallery.html_url)
+        return all(
+            not _has_duplicated_paper_path(str(image_url), html_url)
+            for figure in entry.gallery.figures
+            for image_url in figure.image_urls
+        )
     age = now - entry.gallery.checked_at
     return -NEGATIVE_CACHE_CLOCK_SKEW <= age < NEGATIVE_CACHE_TTL
 
