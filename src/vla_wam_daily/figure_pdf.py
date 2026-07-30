@@ -24,7 +24,7 @@ from vla_wam_daily.models import ARXIV_FIGURE_HOSTS
 
 LOGGER = logging.getLogger(__name__)
 _TARGET_CAPTION_RE = re.compile(
-    r"^(?:(?:figure)\s+1|(?:fig\.)\s*1)(?!\d|\.\d)\s*[:.]\s*",
+    r"^(?:(?:figure)\s+1|(?:fig\.)\s*1)(?!\d|\.\d)(?:\s*[:.]\s*|\s+)",
     re.IGNORECASE,
 )
 _ANY_CAPTION_RE = re.compile(
@@ -146,6 +146,9 @@ def _page_lines(
             continue
         char_box = _box(text_page.get_charbox(index))
         if char_box is None:
+            if character.isspace():
+                characters.append(character)
+                continue
             return []
         if (
             char_box.left < visible.left

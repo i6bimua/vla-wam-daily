@@ -11,6 +11,7 @@ from PIL import Image
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen.canvas import Canvas
 
+from vla_wam_daily import figure_pdf
 from vla_wam_daily.figure_pdf import ArxivPdfFigureExtractor
 from vla_wam_daily.figure_recovery_types import TransientRecoveryError
 
@@ -21,6 +22,31 @@ PAGE_SIZE = (612, 792)
 USER_AGENT = "VLA-WAM-Daily-Test/0.1"
 
 DrawPage = Callable[[Canvas], None]
+
+
+class FakeTextPage:
+    def __init__(self, text: str, *, geometryless_indexes: set[int]) -> None:
+        self.text = text
+        self.geometryless_indexes = geometryless_indexes
+
+    def get_text_range(
+        self,
+        _index: int,
+        _count: int,
+        *,
+        errors: str,
+    ) -> str:
+        assert errors == "strict"
+        return self.text
+
+    def get_charbox(self, index: int) -> tuple[float, float, float, float]:
+        line_index = self.text.count("\n", 0, index)
+        line_start = self.text.rfind("\n", 0, index) + 1
+        left = 100.0 + (index - line_start) * 6
+        bottom = 450.0 - line_index * 60
+        if index in self.geometryless_indexes:
+            return (left, bottom, left, bottom)
+        return (left, bottom, left + 5, bottom + 12)
 
 
 def make_pdf(*pages: DrawPage, page_size: tuple[int, int] = PAGE_SIZE) -> bytes:
@@ -140,8 +166,59 @@ def test_extracts_supported_figure_one_caption_forms(
         assert 200 < image.height < 2_500
 
 
-def test_figure_ten_does_not_match_figure_one() -> None:
-    assert extract(make_target_pdf(caption="Figure 10: Wrong figure.")) is None
+def test_geometryless_whitespace_keeps_later_caption_but_non_whitespace_rejects() -> None:
+    text = "Body text\nFig. 1: See2Think architecture."
+    visible = figure_pdf._Box(0, 0, *PAGE_SIZE)
+    whitespace_index = text.index(" ")
+
+    lines = figure_pdf._page_lines(
+        FakeTextPage(text, geometryless_indexes={whitespace_index}),
+        char_count=len(text),
+        visible=visible,
+    )
+
+    assert [line.text for line in lines] == [
+        "Body text",
+        "Fig. 1: See2Think architecture.",
+    ]
+    crop = figure_pdf._crop_for_page(
+        lines,
+        [figure_pdf._Box(90, 430, 490, 610)],
+        visible=visible,
+        page_margin=6,
+        max_vertical_distance=72,
+        min_visual_area=900,
+        max_cluster_gap=12,
+        crop_padding=6,
+    )
+    assert crop is not None
+    assert crop[0] == "See2Think architecture."
+    assert (
+        figure_pdf._page_lines(
+            FakeTextPage(text, geometryless_indexes={0}),
+            char_count=len(text),
+            visible=visible,
+        )
+        == []
+    )
+
+
+def test_extracts_punctuation_free_figure_one_caption_with_unique_visual() -> None:
+    candidate = extract(make_target_pdf(caption="Figure 1 See2Think architecture"))
+
+    assert candidate is not None
+    assert candidate.caption == "See2Think architecture"
+
+
+@pytest.mark.parametrize(
+    "caption",
+    [
+        "Figure 10: Wrong figure.",
+        "Figure 1.1: Wrong subsection.",
+    ],
+)
+def test_numbered_variants_do_not_match_figure_one(caption: str) -> None:
+    assert extract(make_target_pdf(caption=caption)) is None
 
 
 def test_default_render_resolution_is_approximately_300_dpi() -> None:
