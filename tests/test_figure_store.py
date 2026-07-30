@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import httpx
@@ -396,4 +397,255 @@ def test_store_rejects_invalid_limits(
             client=client,
             **{name: value},
         )
+    client.close()
+
+
+def test_store_installs_recovered_figure_to_deterministic_versioned_path(
+    tmp_path: Path,
+) -> None:
+    public_dir = tmp_path / "public"
+    store, client = make_store(
+        public_dir,
+        httpx.MockTransport(lambda _request: httpx.Response(404)),
+    )
+
+    with store:
+        cached_path = store.install_recovered_figure(
+            arxiv_id="2607.12345",
+            version=1,
+            figure_number=1,
+            panel=1,
+            extension="png",
+            content=b"\x89PNG\r\n\x1a\nrecovered",
+        )
+
+    assert cached_path == "/figures/2607.12345/v1/fig1-panel1.png"
+    assert (
+        public_dir / cached_path.removeprefix("/")
+    ).read_bytes() == b"\x89PNG\r\n\x1a\nrecovered"
+    client.close()
+
+
+@pytest.mark.parametrize("extension", ["png", "jpg", "webp", "gif", "svg"])
+def test_store_installs_each_exact_supported_recovered_extension(
+    tmp_path: Path,
+    extension: str,
+) -> None:
+    store, client = make_store(
+        tmp_path / "public",
+        httpx.MockTransport(lambda _request: httpx.Response(404)),
+    )
+
+    with store:
+        cached_path = store.install_recovered_figure(
+            arxiv_id="2607.12345",
+            version=2,
+            figure_number=2,
+            panel=3,
+            extension=extension,
+            content=b"asset",
+        )
+
+    assert cached_path == (
+        f"/figures/2607.12345/v2/fig2-panel3.{extension}"
+    )
+    client.close()
+
+
+def test_store_reuses_valid_nonempty_recovered_target_without_overwrite(
+    tmp_path: Path,
+) -> None:
+    public_dir = tmp_path / "public"
+    store, client = make_store(
+        public_dir,
+        httpx.MockTransport(lambda _request: httpx.Response(404)),
+    )
+
+    with store:
+        first_path = store.install_recovered_figure(
+            arxiv_id="2607.12345",
+            version=1,
+            figure_number=1,
+            panel=1,
+            extension="png",
+            content=b"original",
+        )
+        second_path = store.install_recovered_figure(
+            arxiv_id="2607.12345",
+            version=1,
+            figure_number=1,
+            panel=1,
+            extension="png",
+            content=b"replacement",
+        )
+
+    assert second_path == first_path
+    assert (
+        public_dir / first_path.removeprefix("/")
+    ).read_bytes() == b"original"
+    client.close()
+
+
+def test_store_replaces_an_existing_empty_recovered_target(
+    tmp_path: Path,
+) -> None:
+    public_dir = tmp_path / "public"
+    target = (
+        public_dir / "figures/2607.12345/v1/fig1-panel1.png"
+    )
+    target.parent.mkdir(parents=True)
+    target.touch()
+    store, client = make_store(
+        public_dir,
+        httpx.MockTransport(lambda _request: httpx.Response(404)),
+    )
+
+    with store:
+        cached_path = store.install_recovered_figure(
+            arxiv_id="2607.12345",
+            version=1,
+            figure_number=1,
+            panel=1,
+            extension="png",
+            content=b"recovered",
+        )
+
+    assert cached_path == "/figures/2607.12345/v1/fig1-panel1.png"
+    assert target.read_bytes() == b"recovered"
+    client.close()
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"arxiv_id": "2607.123"},
+        {"arxiv_id": "../2607.12345"},
+        {"version": 0},
+        {"version": True},
+        {"figure_number": 0},
+        {"figure_number": 3},
+        {"figure_number": True},
+        {"panel": 0},
+        {"panel": True},
+        {"extension": "jpeg"},
+        {"extension": "PNG"},
+        {"extension": ".png"},
+        {"extension": "../png"},
+        {"content": b""},
+        {"content": b"x" * 11},
+        {"content": bytearray(b"image")},
+    ],
+)
+def test_store_rejects_invalid_recovered_figure_parameters(
+    tmp_path: Path,
+    overrides: dict[str, object],
+) -> None:
+    store, client = make_store(
+        tmp_path / "public",
+        httpx.MockTransport(lambda _request: httpx.Response(404)),
+        max_image_bytes=10,
+    )
+    arguments: dict[str, object] = {
+        "arxiv_id": "2607.12345",
+        "version": 1,
+        "figure_number": 1,
+        "panel": 1,
+        "extension": "png",
+        "content": b"image",
+    }
+    arguments.update(overrides)
+
+    with store, pytest.raises(ValueError):
+        store.install_recovered_figure(**arguments)
+
+    assert not (tmp_path / "public").exists()
+    client.close()
+
+
+def test_store_cleans_recovered_temp_file_after_atomic_replace_failure(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    public_dir = tmp_path / "public"
+    store, client = make_store(
+        public_dir,
+        httpx.MockTransport(lambda _request: httpx.Response(404)),
+    )
+
+    def fail_replace(_source: os.PathLike[str], _target: os.PathLike[str]) -> None:
+        raise OSError("simulated replace failure")
+
+    monkeypatch.setattr("vla_wam_daily.figure_store.os.replace", fail_replace)
+    with store, pytest.raises(OSError, match="simulated replace failure"):
+        store.install_recovered_figure(
+            arxiv_id="2607.12345",
+            version=1,
+            figure_number=1,
+            panel=1,
+            extension="png",
+            content=b"recovered",
+        )
+
+    assert list(public_dir.rglob("*.tmp")) == []
+    assert not (
+        public_dir / "figures/2607.12345/v1/fig1-panel1.png"
+    ).exists()
+    client.close()
+
+
+def test_store_does_not_install_recovered_bytes_through_directory_symlink(
+    tmp_path: Path,
+) -> None:
+    public_dir = tmp_path / "public"
+    outside = tmp_path / "outside"
+    public_dir.mkdir()
+    outside.mkdir()
+    (public_dir / "figures").symlink_to(outside, target_is_directory=True)
+    store, client = make_store(
+        public_dir,
+        httpx.MockTransport(lambda _request: httpx.Response(404)),
+    )
+
+    with store, pytest.raises(ValueError):
+        store.install_recovered_figure(
+            arxiv_id="2607.12345",
+            version=1,
+            figure_number=1,
+            panel=1,
+            extension="png",
+            content=b"recovered",
+        )
+
+    assert list(outside.rglob("*")) == []
+    client.close()
+
+
+def test_store_does_not_install_recovered_bytes_through_target_symlink(
+    tmp_path: Path,
+) -> None:
+    public_dir = tmp_path / "public"
+    outside = tmp_path / "outside.png"
+    outside.write_bytes(b"outside")
+    target = (
+        public_dir / "figures/2607.12345/v1/fig1-panel1.png"
+    )
+    target.parent.mkdir(parents=True)
+    target.symlink_to(outside)
+    store, client = make_store(
+        public_dir,
+        httpx.MockTransport(lambda _request: httpx.Response(404)),
+    )
+
+    with store, pytest.raises(ValueError):
+        store.install_recovered_figure(
+            arxiv_id="2607.12345",
+            version=1,
+            figure_number=1,
+            panel=1,
+            extension="png",
+            content=b"recovered",
+        )
+
+    assert outside.read_bytes() == b"outside"
+    assert target.is_symlink()
     client.close()
