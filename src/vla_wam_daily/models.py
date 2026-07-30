@@ -22,6 +22,12 @@ ARXIV_FIGURE_HOSTS = frozenset({"arxiv.org", "www.arxiv.org"})
 ARXIV_HTML_PATH_PATTERN = re.compile(
     r"^/html/(?P<arxiv_id>\d{4}\.\d{4,5})v(?P<version>[1-9]\d*)$"
 )
+ARXIV_SOURCE_PATH_PATTERN = re.compile(
+    r"^/e-print/(?P<arxiv_id>\d{4}\.\d{4,5})v(?P<version>[1-9]\d*)$"
+)
+ARXIV_PDF_PATH_PATTERN = re.compile(
+    r"^/pdf/(?P<arxiv_id>\d{4}\.\d{4,5})v(?P<version>[1-9]\d*)$"
+)
 ARXIV_IMAGE_PATH_PATTERN = re.compile(
     r"^/html/\d{4}\.\d{4,5}v[1-9]\d*/.+$"
 )
@@ -32,7 +38,12 @@ CACHED_FIGURE_PATH_PATTERN = re.compile(
     r"\.(?:png|jpg|webp|gif|svg)$"
 )
 FigureNumber = Literal[1, 2]
-FigureImageTuple = Annotated[tuple[HttpUrl, ...], Field(min_length=1)]
+FigureSource = Literal["arxiv_html", "arxiv_source", "arxiv_pdf"]
+FigureImageTuple = Annotated[tuple[HttpUrl | None, ...], Field(min_length=1)]
+FigureCachedImageTuple = Annotated[
+    tuple[str | None, ...],
+    Field(min_length=1),
+]
 FigureCacheKey = Annotated[
     str,
     Field(pattern=r"^\d{4}\.\d{4,5}:v[1-9]\d*$"),
@@ -105,11 +116,40 @@ def validate_arxiv_image_url(url: HttpUrl) -> HttpUrl:
     return url
 
 
-def validate_arxiv_source_url(url: HttpUrl) -> HttpUrl:
+def parse_arxiv_source_identity(
+    url: HttpUrl,
+    source: FigureSource,
+) -> tuple[str, int]:
     validate_arxiv_url_authority(url)
-    if not url.fragment:
-        raise ValueError("arXiv figure source URL must contain a nonempty fragment")
-    parse_arxiv_html_identity(url)
+    if url.query is not None:
+        raise ValueError("arXiv figure source URL must not contain a query")
+
+    if source == "arxiv_html":
+        if not url.fragment:
+            raise ValueError(
+                "arXiv HTML figure source URL must contain a nonempty fragment"
+            )
+        return parse_arxiv_html_identity(url)
+
+    if url.fragment is not None:
+        raise ValueError("arXiv recovered figure source URL must not contain a fragment")
+    pattern = (
+        ARXIV_SOURCE_PATH_PATTERN
+        if source == "arxiv_source"
+        else ARXIV_PDF_PATH_PATTERN
+    )
+    path = url.path
+    match = pattern.fullmatch(path) if path is not None else None
+    if match is None:
+        raise ValueError(f"{source} URL must identify a versioned paper")
+    return match.group("arxiv_id"), int(match.group("version"))
+
+
+def validate_arxiv_source_url(
+    url: HttpUrl,
+    source: FigureSource = "arxiv_html",
+) -> HttpUrl:
+    parse_arxiv_source_identity(url, source)
     return url
 
 
@@ -209,42 +249,92 @@ class FigureStatus(StrEnum):
     FETCH_FAILED = "fetch_failed"
 
 
+class FigureRecoveryStatus(StrEnum):
+    NOT_ATTEMPTED = "not_attempted"
+    AVAILABLE = "available"
+    NOT_FOUND = "not_found"
+    FETCH_FAILED = "fetch_failed"
+
+
 class FigureAsset(FrozenStrictModel):
     number: FigureNumber
     label: NonEmptyStr
     caption: NonEmptyStr
     image_urls: FigureImageTuple
-    cached_image_paths: tuple[str | None, ...] = Field(default_factory=tuple)
+    cached_image_paths: FigureCachedImageTuple = Field(default_factory=tuple)
     source_url: HttpUrl
-    source: Literal["arxiv_html"] = "arxiv_html"
+    source: FigureSource = "arxiv_html"
 
-    @field_validator("source_url")
+    @model_validator(mode="before")
     @classmethod
-    def validate_source_url(cls, url: HttpUrl) -> HttpUrl:
-        return validate_arxiv_source_url(url)
+    def normalize_historical_cached_paths(cls, value: object) -> object:
+        if not isinstance(value, Mapping):
+            return value
+        image_urls = value.get("image_urls")
+        cached_paths = value.get("cached_image_paths")
+        if (
+            isinstance(image_urls, (list, tuple))
+            and image_urls
+            and (
+                "cached_image_paths" not in value
+                or cached_paths == []
+                or cached_paths == ()
+            )
+        ):
+            normalized = dict(value)
+            normalized["cached_image_paths"] = (None,) * len(image_urls)
+            return normalized
+        return value
 
     @field_validator("image_urls")
     @classmethod
-    def validate_and_deduplicate_image_urls(
-        cls, urls: tuple[HttpUrl, ...]
-    ) -> tuple[HttpUrl, ...]:
-        deduplicated: list[HttpUrl] = []
-        seen: set[str] = set()
+    def validate_image_urls(
+        cls, urls: tuple[HttpUrl | None, ...]
+    ) -> tuple[HttpUrl | None, ...]:
         for url in urls:
+            if url is None:
+                continue
             validate_arxiv_image_url(url)
-            if str(url) not in seen:
-                seen.add(str(url))
-                deduplicated.append(url)
-        return tuple(deduplicated)
+        return urls
 
     @model_validator(mode="after")
-    def validate_cached_image_paths(self) -> Self:
-        if not self.cached_image_paths:
-            return self
+    def validate_panel_contract(self) -> Self:
+        arxiv_id, version = parse_arxiv_source_identity(
+            self.source_url,
+            self.source,
+        )
         if len(self.cached_image_paths) != len(self.image_urls):
             raise ValueError("cached Figure paths must align with image URLs")
-        arxiv_id, version = parse_arxiv_html_identity(self.source_url)
-        for panel, path in enumerate(self.cached_image_paths, start=1):
+
+        deduplicated_urls: list[HttpUrl | None] = []
+        deduplicated_paths: list[str | None] = []
+        seen: set[str] = set()
+        for image_url, path in zip(
+            self.image_urls,
+            self.cached_image_paths,
+            strict=True,
+        ):
+            if image_url is not None:
+                key = str(image_url)
+                if key in seen:
+                    continue
+                seen.add(key)
+            deduplicated_urls.append(image_url)
+            deduplicated_paths.append(path)
+
+        if self.source != "arxiv_html" and any(
+            image_url is not None for image_url in deduplicated_urls
+        ):
+            raise ValueError("recovered Figure panels must be local-only")
+
+        for panel, (image_url, path) in enumerate(
+            zip(deduplicated_urls, deduplicated_paths, strict=True),
+            start=1,
+        ):
+            if image_url is None and path is None:
+                raise ValueError(
+                    "each Figure panel requires a remote URL or cached path"
+                )
             if path is None:
                 continue
             match = CACHED_FIGURE_PATH_PATTERN.fullmatch(path)
@@ -256,6 +346,9 @@ class FigureAsset(FrozenStrictModel):
                 or int(match.group("panel")) != panel
             ):
                 raise ValueError("cached Figure path does not match its panel")
+
+        object.__setattr__(self, "image_urls", tuple(deduplicated_urls))
+        object.__setattr__(self, "cached_image_paths", tuple(deduplicated_paths))
         return self
 
 
@@ -266,6 +359,33 @@ class FigureGallery(FrozenStrictModel):
         default_factory=tuple
     )
     checked_at: UtcDatetime
+    recovery_status: FigureRecoveryStatus = FigureRecoveryStatus.NOT_ATTEMPTED
+    recovery_checked_at: UtcDatetime | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_historical_recovery_status(cls, value: object) -> object:
+        if not isinstance(value, Mapping) or "recovery_status" in value:
+            return value
+        figures = value.get("figures", ())
+        has_figure_one = isinstance(figures, (list, tuple)) and any(
+            (
+                figure.number
+                if isinstance(figure, FigureAsset)
+                else figure.get("number")
+                if isinstance(figure, Mapping)
+                else None
+            )
+            == 1
+            for figure in figures
+        )
+        normalized = dict(value)
+        normalized["recovery_status"] = (
+            FigureRecoveryStatus.AVAILABLE
+            if has_figure_one
+            else FigureRecoveryStatus.NOT_ATTEMPTED
+        )
+        return normalized
 
     @field_validator("html_url")
     @classmethod
@@ -288,16 +408,39 @@ class FigureGallery(FrozenStrictModel):
             raise ValueError("available figure gallery requires at least one figure")
         if self.status is not FigureStatus.AVAILABLE and self.figures:
             raise ValueError("unavailable figure gallery must not contain figures")
+        has_figure_one = any(figure.number == 1 for figure in self.figures)
+        if (
+            self.recovery_status is FigureRecoveryStatus.AVAILABLE
+            and not has_figure_one
+        ):
+            raise ValueError("available Figure recovery requires Figure 1")
+        if (
+            self.recovery_status
+            in {
+                FigureRecoveryStatus.NOT_FOUND,
+                FigureRecoveryStatus.FETCH_FAILED,
+            }
+            and self.recovery_checked_at is None
+        ):
+            raise ValueError("terminal Figure recovery requires a checked timestamp")
         html_path = self.html_url.path
         if html_path is None:
             raise ValueError("arXiv HTML URL must contain a path")
+        gallery_identity = parse_arxiv_html_identity(self.html_url)
         for figure in self.figures:
-            if figure.source_url.path != html_path:
+            source_identity = parse_arxiv_source_identity(
+                figure.source_url,
+                figure.source,
+            )
+            if source_identity != gallery_identity:
                 raise ValueError("figure source URL must match gallery paper and version")
             image_prefix = f"{html_path}/"
             if any(
-                image_url.path is None
-                or not image_url.path.startswith(image_prefix)
+                image_url is not None
+                and (
+                    image_url.path is None
+                    or not image_url.path.startswith(image_prefix)
+                )
                 for image_url in figure.image_urls
             ):
                 raise ValueError("figure image URL must match gallery paper and version")

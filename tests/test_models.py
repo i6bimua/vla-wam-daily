@@ -344,12 +344,14 @@ def test_available_figure_gallery_serializes_public_contract() -> None:
                     "https://arxiv.org/html/2607.12345v1/x1.png",
                     "https://arxiv.org/html/2607.12345v1/x2.png",
                 ],
-                "cached_image_paths": [],
+                "cached_image_paths": [None, None],
                 "source_url": "https://arxiv.org/html/2607.12345v1#S1.F1",
                 "source": "arxiv_html",
             }
         ],
         "checked_at": "2026-07-27T00:00:00Z",
+        "recovery_status": "available",
+        "recovery_checked_at": None,
     }
 
 
@@ -381,7 +383,235 @@ def test_figure_asset_accepts_historical_payload_without_cached_paths() -> None:
 
     asset = FigureAsset.model_validate(payload)
 
-    assert asset.cached_image_paths == ()
+    assert asset.cached_image_paths == (None,)
+
+
+def test_figure_asset_accepts_historical_payload_with_empty_cached_paths() -> None:
+    payload = make_gallery().figures[0].model_dump(mode="json")
+    payload["cached_image_paths"] = []
+
+    asset = FigureAsset.model_validate(payload)
+
+    assert asset.cached_image_paths == (None,)
+
+
+@pytest.mark.parametrize(
+    ("source", "source_url"),
+    [
+        ("arxiv_source", "https://arxiv.org/e-print/2607.12345v1"),
+        ("arxiv_pdf", "https://arxiv.org/pdf/2607.12345v1"),
+    ],
+)
+def test_figure_asset_accepts_local_only_recovered_panel(
+    source: str,
+    source_url: str,
+) -> None:
+    asset = FigureAsset(
+        number=1,
+        label="Figure 1",
+        caption="Recovered from the paper PDF.",
+        image_urls=(None,),
+        cached_image_paths=("/figures/2607.12345/v1/fig1-panel1.png",),
+        source_url=source_url,
+        source=source,
+    )
+
+    assert asset.image_urls == (None,)
+    assert asset.cached_image_paths == (
+        "/figures/2607.12345/v1/fig1-panel1.png",
+    )
+    assert asset.source == source
+
+
+@pytest.mark.parametrize(
+    ("source", "source_url"),
+    [
+        ("arxiv_source", "https://arxiv.org/e-print/2607.99999v1"),
+        ("arxiv_source", "https://arxiv.org/e-print/2607.12345v2"),
+        ("arxiv_pdf", "https://arxiv.org/pdf/2607.99999v1"),
+        ("arxiv_pdf", "https://arxiv.org/pdf/2607.12345v2"),
+    ],
+)
+def test_figure_gallery_rejects_mismatched_recovered_source_identity(
+    source: str,
+    source_url: str,
+) -> None:
+    figure = FigureAsset(
+        number=1,
+        label="Figure 1",
+        caption="Recovered Figure 1.",
+        image_urls=(None,),
+        cached_image_paths=("/figures/2607.99999/v1/fig1-panel1.png",)
+        if "2607.99999" in source_url
+        else ("/figures/2607.12345/v2/fig1-panel1.png",),
+        source_url=source_url,
+        source=source,
+    )
+
+    with pytest.raises(ValidationError):
+        FigureGallery(
+            status=FigureStatus.AVAILABLE,
+            html_url="https://arxiv.org/html/2607.12345v1",
+            figures=(figure,),
+            checked_at=datetime(2026, 7, 27, tzinfo=UTC),
+        )
+
+
+@pytest.mark.parametrize(
+    ("source", "source_url"),
+    [
+        ("arxiv_html", "https://arxiv.org/html/2607.12345v1#"),
+        ("arxiv_html", "https://arxiv.org/html/2607.12345v1?paper=other#S1.F1"),
+        ("arxiv_html", "https://arxiv.org/pdf/2607.12345v1#S1.F1"),
+        ("arxiv_source", "https://arxiv.org/e-print/2607.12345v1#S1.F1"),
+        ("arxiv_source", "https://arxiv.org/e-print/2607.12345v1?paper=other"),
+        ("arxiv_source", "https://arxiv.org/src/2607.12345v1"),
+        ("arxiv_pdf", "https://arxiv.org/pdf/2607.12345v1#S1.F1"),
+        ("arxiv_pdf", "https://arxiv.org/pdf/2607.12345v1?paper=other"),
+        ("arxiv_pdf", "https://arxiv.org/pdf/2607.12345v1.pdf"),
+        ("arxiv_pdf", "http://arxiv.org/pdf/2607.12345v1"),
+        ("arxiv_pdf", "https://example.com/pdf/2607.12345v1"),
+        ("arxiv_pdf", "https://reader@arxiv.org/pdf/2607.12345v1"),
+        ("arxiv_pdf", "https://arxiv.org:444/pdf/2607.12345v1"),
+    ],
+)
+def test_figure_asset_rejects_invalid_source_url_shape(
+    source: str,
+    source_url: str,
+) -> None:
+    image_urls: tuple[str | None, ...]
+    cached_paths: tuple[str | None, ...]
+    if source == "arxiv_html":
+        image_urls = ("https://arxiv.org/html/2607.12345v1/x1.png",)
+        cached_paths = (None,)
+    else:
+        image_urls = (None,)
+        cached_paths = ("/figures/2607.12345/v1/fig1-panel1.png",)
+
+    with pytest.raises(ValidationError):
+        FigureAsset(
+            number=1,
+            label="Figure 1",
+            caption="Figure caption.",
+            image_urls=image_urls,
+            cached_image_paths=cached_paths,
+            source_url=source_url,
+            source=source,
+        )
+
+
+def test_figure_asset_rejects_null_remote_url_without_cached_path() -> None:
+    with pytest.raises(ValidationError):
+        FigureAsset(
+            number=1,
+            label="Figure 1",
+            caption="Recovered Figure 1.",
+            image_urls=(None,),
+            cached_image_paths=(None,),
+            source_url="https://arxiv.org/pdf/2607.12345v1",
+            source="arxiv_pdf",
+        )
+
+
+def test_figure_asset_rejects_panel_with_neither_remote_nor_local_source() -> None:
+    with pytest.raises(ValidationError):
+        FigureAsset(
+            number=1,
+            label="Figure 1",
+            caption="Figure caption.",
+            image_urls=(
+                "https://arxiv.org/html/2607.12345v1/x1.png",
+                None,
+            ),
+            cached_image_paths=(None, None),
+            source_url="https://arxiv.org/html/2607.12345v1#S1.F1",
+        )
+
+
+def test_figure_asset_deduplicates_remote_urls_with_aligned_cached_paths() -> None:
+    asset = FigureAsset(
+        number=1,
+        label="Figure 1",
+        caption="Figure caption.",
+        image_urls=(
+            "https://arxiv.org/html/2607.12345v1/x1.png",
+            "https://arxiv.org:443/html/2607.12345v1/x1.png",
+            "https://arxiv.org/html/2607.12345v1/x2.png",
+        ),
+        cached_image_paths=(
+            "/figures/2607.12345/v1/fig1-panel1.png",
+            None,
+            "/figures/2607.12345/v1/fig1-panel2.png",
+        ),
+        source_url="https://arxiv.org/html/2607.12345v1#S1.F1",
+    )
+
+    assert tuple(map(str, asset.image_urls)) == (
+        "https://arxiv.org/html/2607.12345v1/x1.png",
+        "https://arxiv.org/html/2607.12345v1/x2.png",
+    )
+    assert asset.cached_image_paths == (
+        "/figures/2607.12345/v1/fig1-panel1.png",
+        "/figures/2607.12345/v1/fig1-panel2.png",
+    )
+
+
+def test_historical_gallery_with_figure_one_normalizes_recovery_available() -> None:
+    payload = make_gallery().model_dump(mode="json")
+    payload.pop("recovery_status", None)
+    payload.pop("recovery_checked_at", None)
+
+    gallery = FigureGallery.model_validate_json(json.dumps(payload))
+
+    assert gallery.recovery_status == "available"
+    assert gallery.recovery_checked_at is None
+
+
+def test_historical_gallery_without_figure_one_normalizes_not_attempted() -> None:
+    payload = make_gallery().model_dump(mode="json")
+    figures = payload["figures"]
+    assert isinstance(figures, list)
+    payload["figures"] = [figure for figure in figures if figure["number"] == 2]
+    payload.pop("recovery_status", None)
+    payload.pop("recovery_checked_at", None)
+
+    gallery = FigureGallery.model_validate_json(json.dumps(payload))
+
+    assert gallery.recovery_status == "not_attempted"
+    assert gallery.recovery_checked_at is None
+
+
+@pytest.mark.parametrize("recovery_status", ["fetch_failed", "not_found"])
+def test_terminal_recovery_failure_requires_checked_at(
+    recovery_status: str,
+) -> None:
+    payload = {
+        "status": FigureStatus.NOT_FOUND,
+        "html_url": "https://arxiv.org/html/2607.12345v1",
+        "figures": (),
+        "checked_at": datetime(2026, 7, 27, tzinfo=UTC),
+        "recovery_status": recovery_status,
+    }
+
+    with pytest.raises(ValidationError):
+        FigureGallery.model_validate(payload)
+
+    payload["recovery_checked_at"] = datetime(2026, 7, 28, tzinfo=UTC)
+    gallery = FigureGallery.model_validate(payload)
+    assert gallery.recovery_status == recovery_status
+
+
+def test_available_recovery_status_requires_real_figure_one() -> None:
+    figure_two = make_gallery().figures[1]
+
+    with pytest.raises(ValidationError):
+        FigureGallery(
+            status=FigureStatus.AVAILABLE,
+            html_url="https://arxiv.org/html/2607.12345v1",
+            figures=(figure_two,),
+            checked_at=datetime(2026, 7, 27, tzinfo=UTC),
+            recovery_status="available",
+        )
 
 
 @pytest.mark.parametrize(
@@ -538,6 +768,13 @@ def test_public_data_file_schema_requires_non_nullable_figure_gallery() -> None:
 
     assert "figure_gallery" in paper_schema["required"]
     assert "anyOf" not in paper_schema["properties"]["figure_gallery"]
+
+
+def test_public_schema_keeps_historical_cached_paths_optional() -> None:
+    schema = DataFile.model_json_schema()
+    figure_schema = schema["$defs"]["FigureAsset"]
+
+    assert "cached_image_paths" not in figure_schema["required"]
 
 
 @pytest.mark.parametrize(
