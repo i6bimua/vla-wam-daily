@@ -83,11 +83,12 @@ requireBuild(
   "available fixture must expose cached, original-image, and fallback download actions",
 );
 requireBuild(
-  (available.match(/aria-label="查看 Figure [12] 面板 1\/1 原图"/g)?.length ??
-    0) === 2 &&
-    (available.match(/aria-label="下载 Figure [12] 面板 1\/1 原图"/g)?.length ??
-      0) === 2,
-  "available fixture actions must name their Figure and panel",
+  !available.includes('aria-label="查看 Figure 1 面板 1/1 原图"') &&
+    available.includes('aria-label="下载 Figure 1 面板 1/1 原图"') &&
+    available.includes('aria-label="查看 Figure 1 面板 1/1 对应的论文 PDF"') &&
+    available.includes('aria-label="查看 Figure 2 面板 1/1 原图"') &&
+    available.includes('aria-label="下载 Figure 2 面板 1/1 原图"'),
+  "available fixture actions must distinguish local-only and remote panels",
 );
 requireBuild(
   available.includes('download="2607.12345-v1-fig1-panel1.svg"'),
