@@ -89,6 +89,7 @@ def test_ci_runs_frozen_python_and_complete_fixture_web_gates() -> None:
     assert "pnpm exec playwright install --with-deps chromium" in source
     assert "pnpm test:e2e" in source
     assert "VLA_WAM_DATA_DIR: ../tests/fixtures/data" in source
+    assert "VLA_WAM_PUBLIC_DIR: ../tests/fixtures/public" in source
     for verifier in ("figure", "information", "search"):
         assert f"pnpm verify:{verifier}-build" in source
 
@@ -108,6 +109,7 @@ def test_ci_runs_frozen_python_and_complete_fixture_web_gates() -> None:
     assert build_step["env"] == {
         "BASE_PATH": "/",
         "VLA_WAM_DATA_DIR": "../tests/fixtures/data",
+        "VLA_WAM_PUBLIC_DIR": "../tests/fixtures/public",
     }
     for name in (
         "Verify Figure build",

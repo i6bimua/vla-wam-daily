@@ -64,10 +64,12 @@ const base = normalizeBasePath(
   process.env.BASE_PATH ??
     (process.env.SITE_URL ? configuredSite.pathname : repositoryBase),
 );
+const publicDir = process.env.VLA_WAM_PUBLIC_DIR?.trim() || undefined;
 
 export default defineConfig({
   site: configuredSite.origin,
   base,
+  ...(publicDir ? { publicDir } : {}),
   output: "static",
   trailingSlash: "always",
 });

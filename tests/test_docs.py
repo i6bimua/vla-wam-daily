@@ -97,7 +97,8 @@ def test_readme_has_reproducible_python_web_and_dry_run_commands() -> None:
 def test_readme_orders_e2e_setup_and_keeps_manual_preview_separate() -> None:
     install_browser = README.index("pnpm exec playwright install chromium")
     fixture_build = README.index(
-        "BASE_PATH=/ VLA_WAM_DATA_DIR=../tests/fixtures/data pnpm build"
+        "BASE_PATH=/ VLA_WAM_DATA_DIR=../tests/fixtures/data "
+        "VLA_WAM_PUBLIC_DIR=../tests/fixtures/public pnpm build"
     )
     strict_e2e = README.index("pnpm test:e2e")
     manual_preview = README.index("pnpm preview --host 127.0.0.1")
@@ -151,16 +152,21 @@ def test_readme_explains_pages_schedule_secrets_sources_and_troubleshooting() ->
     assert "论文许可证" in README
 
 
-def test_readme_fully_documents_remote_figures_and_fallbacks() -> None:
+def test_readme_documents_permanent_records_local_figures_and_fallbacks() -> None:
     assert "## Fig. 1 / Fig. 2" in README
     for text in (
+        "默认回看 3 天",
+        "抓取窗口，不是保留期限",
+        "永久保留",
         "arXiv HTML",
         "figure",
         "figcaption",
         "caption",
         "多 panel",
-        "URL 和元数据",
-        "不保存图片字节",
+        "`web/public/figures/{arxiv_id}/v{version}/`",
+        "优先从本站缓存",
+        "arXiv 原图",
+        "后续每日运行重试",
         "Blob",
         "CORS",
         "html_unavailable",
@@ -239,11 +245,20 @@ def test_repository_tracked_files_contain_no_secret_like_bytes() -> None:
     )
 
 
-def test_repository_contains_no_tracked_paper_image_assets() -> None:
+def test_tracked_paper_images_stay_inside_mirrors_or_test_fixtures() -> None:
     assert {".gif", ".bmp", ".tif", ".tiff"}.issubset(PAPER_IMAGE_EXTENSIONS)
-    hosted = [
+    images = [
         path.relative_to(ROOT).as_posix()
         for path in tracked_files()
         if path.suffix.lower() in PAPER_IMAGE_EXTENSIONS
     ]
-    assert hosted == []
+    prefixes = ("web/public/figures/", "tests/fixtures/public/figures/")
+    assert any(path.startswith(prefixes[0]) for path in images)
+    assert any(path.startswith(prefixes[1]) for path in images)
+    assert all(path.startswith(prefixes) for path in images)
+    pattern = re.compile(
+        r"^(?:web/public|tests/fixtures/public)/figures/"
+        r"\d{4}\.\d{4,5}/v[1-9]\d*/"
+        r"fig[12]-panel[1-9]\d*\.(?:png|jpg|webp|gif|svg)$"
+    )
+    assert all(pattern.fullmatch(path) for path in images)

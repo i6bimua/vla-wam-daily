@@ -14,9 +14,12 @@ GitHub Pages；不需要数据库或常驻服务器。
 - 提供 Today、VLA、WAM、World Models、Datasets、Benchmarks、Weekly Top 5、
   月度归档和 RSS。
 - Pagefind 支持中英文全文搜索；页面支持主题、日期、分数、代码状态筛选和移动端布局。
-- 从 arXiv HTML 识别并远程展示 Fig. 1 / Fig. 2、英文 caption 和多 panel 原图。
+- 从 arXiv HTML 识别 Fig. 1 / Fig. 2、英文 caption 和多 panel 原图；把可用面板镜像到
+  本站静态资源，首页卡片直接展示 Fig. 1，详情页展示并下载 Fig. 1 / Fig. 2。
 - 在常规每日运行、未使用 `--force-arxiv-id` 强制重分析时，缓存论文分析与 Figure
   元数据；相同论文版本、模型和 Prompt 不重复产生分析费用。
+- 默认回看 3 天只是 arXiv 增量抓取窗口，不是保留期限；所有已发布论文记录和分析按月
+  永久保留，历史 Figure 镜像也不会因为离开回看窗口而删除。
 - 每日任务、测试、静态构建和 GitHub Pages 发布均由 GitHub Actions 完成。
 
 ## 模型与分析边界
@@ -81,7 +84,7 @@ pnpm install --frozen-lockfile
 pnpm test
 pnpm format:check
 pnpm exec playwright install chromium
-BASE_PATH=/ VLA_WAM_DATA_DIR=../tests/fixtures/data pnpm build
+BASE_PATH=/ VLA_WAM_DATA_DIR=../tests/fixtures/data VLA_WAM_PUBLIC_DIR=../tests/fixtures/public pnpm build
 pnpm test:e2e
 ```
 
@@ -108,8 +111,10 @@ Astro 根据 `GITHUB_REPOSITORY` 推导项目子路径，显式 `BASE_PATH` 仍�
   OAI-PMH，避免 GitHub 公共 Runner 共享出口触发查询 API 的系统级限流。
 - `prompts/analysis-v1.md`：DeepSeek 的结构化 JSON Prompt。修改时应同步增加
   `prompt_version`，使缓存和结果 provenance 可追溯。
-- `data/latest.json`：最新数据；`data/archive/YYYY-MM.json`：月度归档；
+- `data/latest.json`：最新数据；`data/archive/YYYY-MM.json`：永久月度归档；
   `data/cache/analyses.json` 与 `data/cache/figures.json`：分析和 Figure 元数据缓存。
+- `web/public/figures/{arxiv_id}/v{version}/`：已发布论文的本地 Figure 面板镜像；
+  文件名固定为 `fig{number}-panel{index}.{ext}`，论文新版本使用独立目录。
 - CLI 的 `--lookback-days`、`--profile`、`--threshold`、`--force-arxiv-id` 和
   `--dry-run` 可覆盖本次运行选项。查看完整参数可运行
   `uv run vla-wam-daily daily --help`。
@@ -133,9 +138,9 @@ Astro 根据 `GITHUB_REPOSITORY` 推导项目子路径，显式 `BASE_PATH` 仍�
 
 `.github/workflows/daily.yml` 的计划表达式是 `30 2 * * *`（UTC），即每天
 北京时间 10:30。GitHub 的定时任务可能因平台排队稍晚开始。非 dry-run 成功后，工作流
-只提交 `data/`，再构建并发布 Pages；任何测试、数据校验或构建失败都不会替换线上
-上一版。`.github/workflows/pages.yml` 在默认分支变化时使用现有数据重建页面，不调用
-DeepSeek。
+只提交 `data/` 和 `web/public/figures/`，再构建并发布 Pages；任何测试、数据校验或
+构建失败都不会替换线上上一版。`.github/workflows/pages.yml` 在默认分支变化时使用
+现有数据与 Figure 镜像重建页面，不调用 DeepSeek。
 
 ## Fig. 1 / Fig. 2
 
@@ -144,11 +149,16 @@ Figure 管线只在论文相关性评分通过发布阈值后访问带明确版�
 `Figure 2`、`Fig. 2` 等 caption 开头识别图号，并收集 Figure 内全部图片，因此支持
 一个 Figure 的多 panel。它不猜测 `x1.png` 等资源文件名，也不从 PDF 截图。
 
-仓库和 Pages 只保存 Figure 的 URL 和元数据（caption、状态、检查时间），
-不保存图片字节。访客展开论文卡片时，浏览器直接从 arXiv 加载图片。每个 panel
-都可打开原图；
-“下载原图”会先用 `fetch` 获取图片并创建临时 Blob。如果 CORS、网络或浏览器策略
-阻止 Blob 下载，页面会降级为新标签打开原图，用户仍可用浏览器保存。
+通过发布阈值的论文会永久写入月度归档；默认回看 3 天是抓取窗口，不是保留期限。
+同步器每次扫描全部月度归档、`latest.json` 和 Figure 元数据缓存，把可用面板写入
+`web/public/figures/{arxiv_id}/v{version}/`。镜像范围只包含已发布论文的 Fig. 1 /
+Fig. 2，每个响应最大 15 MB；固定的论文、版本、Figure 和 panel 路径既避免重名，也让
+已有文件在后续运行直接复用。这个有界策略会随已发布论文增长，但不会自动删除历史版本。
+
+首页与详情页优先从本站缓存加载，并提供“下载本站缓存”；每个 panel 同时保留规范的
+arXiv 原图链接与定位原文入口。某个面板镜像失败不会阻断论文发布：页面改用 arXiv
+原图，后续每日运行重试。远程降级的“下载原图”会用 `fetch` 获取图片并创建临时 Blob；
+如果 CORS、网络或浏览器策略阻止 Blob 下载，页面会降级为新标签打开 arXiv 原图。
 
 除了 `available`，Figure Gallery 有三种非阻塞降级状态：
 
@@ -156,9 +166,10 @@ Figure 管线只在论文相关性评分通过发布阈值后访问带明确版�
 - `not_found`：HTML 可用，但未识别到 Fig. 1 / Fig. 2，提供 HTML 和 PDF。
 - `fetch_failed`：网络、服务或解析暂时失败，提供 PDF，并在后续每日运行重试。
 
-Figure 图片的版权归论文作者或其他权利人所有，本站不托管图片文件。arXiv 的远程展示
-不等于授予新的转载权限；查看、下载或复用前，请遵循论文许可证及论文页面标注的
-许可证。详情见 [arXiv Permissions and Reuse](https://info.arxiv.org/help/license/reuse.html)
+本地镜像只改善页面可用性，不改变内容权利：Figure 图片版权仍归论文作者或其他
+权利人所有，本站源码的 MIT License 不覆盖这些图片。镜像或 arXiv 远程展示都不等于
+授予新的转载权限；查看、下载或复用前，请遵循论文许可证及论文页面标注的许可证。
+详情见 [arXiv Permissions and Reuse](https://info.arxiv.org/help/license/reuse.html)
 和 [arXiv License Information](https://info.arxiv.org/help/license/index.html)。
 
 ## 数据来源与项目来源
@@ -187,8 +198,10 @@ arXiv API 不稳定提供作者机构，因此本站不推断或展示机构。
   请求失败；必要时将 `lookback_days` 暂时调大。
 - **候选超过 60 或失败超过 30%**：这是防止不完整数据上线的质量门槛。检查关键词、
   arXiv/DeepSeek 状态后重跑，不要通过提交半成品 JSON 绕过。
-- **Figure 不显示或不能直接下载**：查看卡片中的三种状态提示。HTML 转换可能晚于
-  论文发布；CORS 下载失败会自动打开原图，图片仍可从 arXiv 或 PDF 查看。
+- **Figure 不显示或不能直接下载**：先检查相应
+  `web/public/figures/{arxiv_id}/v{version}/` 文件是否存在，再查看卡片中的三种状态
+  提示。HTML 转换可能晚于论文发布；缓存失败会使用 arXiv 原图并在后续每日运行重试，
+  CORS 下载失败会自动打开原图，图片仍可从 arXiv 或 PDF 查看。
 - **本地构建找不到数据**：从仓库根目录保留 `data/`，或为构建显式设置
   `VLA_WAM_DATA_DIR`；自定义数据目录的父目录必须预先存在。
 
@@ -196,9 +209,10 @@ arXiv API 不稳定提供作者机构，因此本站不推断或展示机构。
 
 - AI 分析仅基于标题和摘要，不是论文全文评审，可能遗漏细节或误判相关性。
 - arXiv 分类和关键词预筛存在漏报；模型评分也不能替代领域专家判断。
-- Figure 依赖 arXiv HTML 转换、远程图片可用性和浏览器 CORS 策略；不是每篇论文
-  都有可解析的 Fig. 1 / Fig. 2。
-- 站点不托管论文图片、不截图 PDF，也不保证图片永久可访问或可依法再分发。
+- Figure 依赖 arXiv HTML 转换和源图片可用性；不是每篇论文都有可解析的 Fig. 1 /
+  Fig. 2，远程下载降级仍可能受浏览器 CORS 策略影响。
+- 站点只镜像已发布论文中解析成功的 Fig. 1 / Fig. 2，不截图 PDF，也不保证第三方
+  内容可依法再分发；使用者仍需核对原论文许可证。
 - RSS、搜索和归档是静态构建产物；最近一次工作流失败时会继续展示上一版。
 - Weekly Top 5 是从当周高分论文中确定性选取的阅读入口，不是引用量或学术影响排名。
 

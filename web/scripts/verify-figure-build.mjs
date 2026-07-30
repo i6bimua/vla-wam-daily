@@ -46,6 +46,11 @@ requireBuild(
   "home Figure details must remain closed",
 );
 requireBuild(
+  home.includes("data-figure-preview") &&
+    home.includes("/figures/2607.12345/v1/fig1-panel1.svg"),
+  "home must render the cached Figure 1 preview",
+);
+requireBuild(
   available.includes('<details class="analysis" open>'),
   "paper detail Figure section must be open",
 );
@@ -58,8 +63,8 @@ requireBuild(
   "available fixture must render Fig. 1 and Fig. 2 images",
 );
 requireBuild(
-  countElementsWithAttribute(available, "button", "data-figure-download") === 2,
-  "available fixture must render a download button for each panel",
+  countElementsWithAttribute(available, "button", "data-figure-download") === 1,
+  "available fixture must retain one remote fallback download button",
 );
 requireBuild(
   countElementsWithAttribute(available, "div", "data-figure-panel") === 2,
@@ -72,9 +77,10 @@ requireBuild(
 );
 requireBuild(
   available.includes("data-download-name=") &&
-    available.includes("查看原图") &&
+    available.includes("查看 arXiv 原图") &&
+    available.includes("下载本站缓存") &&
     available.includes("下载原图"),
-  "available fixture must expose original-image and download actions",
+  "available fixture must expose cached, original-image, and fallback download actions",
 );
 requireBuild(
   (available.match(/aria-label="查看 Figure [12] 面板 1\/1 原图"/g)?.length ??
@@ -82,6 +88,10 @@ requireBuild(
     (available.match(/aria-label="下载 Figure [12] 面板 1\/1 原图"/g)?.length ??
       0) === 2,
   "available fixture actions must name their Figure and panel",
+);
+requireBuild(
+  available.includes('download="2607.12345-v1-fig1-panel1.svg"'),
+  "cached fixture must preserve its local download extension",
 );
 
 for (const [arxivId, status, message, showsHtmlLink] of fallbackCases) {
@@ -109,3 +119,4 @@ for (const [arxivId, status, message, showsHtmlLink] of fallbackCases) {
 }
 
 await stat(resolve(dist, "pagefind/pagefind.js"));
+await stat(resolve(dist, "figures/2607.12345/v1/fig1-panel1.svg"));

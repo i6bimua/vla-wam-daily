@@ -5,6 +5,7 @@ const originalEnvironment = {
   SITE_URL: process.env.SITE_URL,
   BASE_PATH: process.env.BASE_PATH,
   GITHUB_REPOSITORY: process.env.GITHUB_REPOSITORY,
+  VLA_WAM_PUBLIC_DIR: process.env.VLA_WAM_PUBLIC_DIR,
 };
 
 async function importConfig(siteUrl: string) {
@@ -42,5 +43,15 @@ describe("SITE_URL validation", () => {
 
     expect(config.site).toBe("https://papers.example");
     expect(config.base).toBe("/research/");
+  });
+
+  it("uses an isolated public directory for fixture builds", async () => {
+    process.env.VLA_WAM_PUBLIC_DIR = "../tests/fixtures/public";
+
+    const { default: config } = await importConfig(
+      "https://papers.example/research",
+    );
+
+    expect(config.publicDir).toBe("../tests/fixtures/public");
   });
 });
