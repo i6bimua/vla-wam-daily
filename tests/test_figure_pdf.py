@@ -210,6 +210,13 @@ def test_extracts_punctuation_free_figure_one_caption_with_unique_visual() -> No
     assert candidate.caption == "See2Think architecture"
 
 
+def test_prose_reference_without_punctuation_is_not_a_caption() -> None:
+    assert (
+        extract(make_target_pdf(caption="Figure 1 shows how the method works."))
+        is None
+    )
+
+
 @pytest.mark.parametrize(
     "caption",
     [
@@ -400,6 +407,15 @@ def test_neighboring_figure_caption_blocks_crossing_visual_region() -> None:
         draw_rect_visual(canvas, y=500)
         draw_caption(canvas, "Figure 2: This owns the visual.", y=455)
         draw_caption(canvas, "Figure 1: Must not cross Figure 2.", y=390)
+
+    assert extract(make_pdf(page), max_vertical_distance=160) is None
+
+
+def test_punctuation_free_neighboring_caption_blocks_crossing_visual_region() -> None:
+    def page(canvas: Canvas) -> None:
+        draw_rect_visual(canvas, y=500)
+        draw_caption(canvas, "Figure 2 Neighboring diagram", y=455)
+        draw_caption(canvas, "Figure 1 Target diagram", y=390)
 
     assert extract(make_pdf(page), max_vertical_distance=160) is None
 

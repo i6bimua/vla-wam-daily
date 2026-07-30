@@ -24,11 +24,13 @@ from vla_wam_daily.models import ARXIV_FIGURE_HOSTS
 
 LOGGER = logging.getLogger(__name__)
 _TARGET_CAPTION_RE = re.compile(
-    r"^(?:(?:figure)\s+1|(?:fig\.)\s*1)(?!\d|\.\d)(?:\s*[:.]\s*|\s+)",
+    r"^(?:(?:figure)\s+1|(?:fig\.)\s*1)"
+    r"(?!\d|\.\d)(?:\s*[:.]\s*|\s+(?=(?-i:[A-Z0-9])))",
     re.IGNORECASE,
 )
 _ANY_CAPTION_RE = re.compile(
-    r"^(?:figure|fig\.)\s*\d+(?!\d|\.\d)\s*[:.]",
+    r"^(?:figure|fig\.)\s*[1-9]\d*"
+    r"(?!\d|\.\d)(?:\s*[:.]|\s+(?=(?-i:[A-Z0-9])))",
     re.IGNORECASE,
 )
 _MAX_CAPTION_CONTINUATION_LINES = 2
