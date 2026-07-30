@@ -670,6 +670,54 @@ _AMBIGUOUS_FIGURE_SELECTION_CONTROLS = frozenset(
         "includeonly",
     }
 )
+_PROTECTED_FIGURE_CONTROL_WORDS = frozenset(
+    {
+        "begin",
+        "caption",
+        "end",
+        "endfigure",
+        "figure",
+        "fnum@figure",
+        "include",
+        "includegraphics",
+        "input",
+        "thefigure",
+        *_COUNTER_MUTATION_CONTROLS,
+        *_AMBIGUOUS_FIGURE_SELECTION_CONTROLS,
+    }
+)
+
+
+def _alias_binding_target(
+    lexed: _LexedTex,
+    index: int,
+) -> _ControlToken | None:
+    token = lexed.controls[index]
+    if token.word == "let":
+        offset = 2
+    elif token.word == "futurelet":
+        offset = 3
+    else:
+        return None
+    if index + offset >= len(lexed.controls):
+        return None
+
+    controls = lexed.controls[index : index + offset + 1]
+    if lexed.text[token.end : controls[1].start].strip():
+        return None
+    for previous, following in zip(
+        controls[1:-1],
+        controls[2:],
+        strict=True,
+    ):
+        separator = lexed.text[previous.end : following.start].strip()
+        if separator and not (
+            token.word == "let"
+            and previous is controls[1]
+            and separator == "="
+        ):
+            return None
+    return controls[-1]
 
 
 def _has_ambiguous_semantic_control(
@@ -700,6 +748,7 @@ def _has_ambiguous_semantic_control(
             )
             if (
                 target is None
+                or target.word in _PROTECTED_FIGURE_CONTROL_WORDS
                 or (target.word, target.symbol) in figure_controls
             ):
                 return True
@@ -716,16 +765,6 @@ def _has_ambiguous_semantic_control(
 def _has_unsafe_local_semantic_dependency(
     files: dict[PurePosixPath, bytes],
 ) -> bool:
-    protected_controls = {
-        ("begin", None),
-        ("caption", None),
-        ("end", None),
-        ("endfigure", None),
-        ("figure", None),
-        ("fnum@figure", None),
-        ("includegraphics", None),
-        ("thefigure", None),
-    }
     for path, content in files.items():
         if path.suffix.casefold() not in {".sty", ".cls"}:
             continue
@@ -737,6 +776,13 @@ def _has_unsafe_local_semantic_dependency(
             return True
         for index, token in enumerate(lexed.controls):
             word = token.word
+            if word in {"let", "futurelet"}:
+                alias_target = _alias_binding_target(lexed, index)
+                if (
+                    alias_target is not None
+                    and alias_target.word in _PROTECTED_FIGURE_CONTROL_WORDS
+                ):
+                    return True
             if word in (
                 _COUNTER_MUTATION_CONTROLS
                 | _AMBIGUOUS_FIGURE_SELECTION_CONTROLS
@@ -761,7 +807,7 @@ def _has_unsafe_local_semantic_dependency(
             target = next(iter(lexed.controls[index + 1 :]), None)
             if (
                 target is not None
-                and (target.word, target.symbol) in protected_controls
+                and target.word in _PROTECTED_FIGURE_CONTROL_WORDS
             ):
                 return True
     return False

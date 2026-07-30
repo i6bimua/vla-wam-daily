@@ -176,7 +176,11 @@ def test_best_effort_accepts_harmless_class_and_unrelated_preamble_macro() -> No
     candidate = extract_from_tar(
         {
             "main.tex": main,
-            "local.cls": rb"\NeedsTeXFormat{LaTeX2e}",
+            "local.cls": rb"""
+\NeedsTeXFormat{LaTeX2e}
+\let\projectalias\relax
+\newcommand{\projectlabel}{Thinking with Video}
+""",
             "figures/model.png": PNG_BYTES,
         }
     )
@@ -1049,6 +1053,29 @@ def test_returns_none_when_preamble_redefines_includegraphics() -> None:
     )
 
 
+def test_returns_none_when_preamble_redefines_implicit_figure_semantics() -> None:
+    main = rb"""
+\documentclass{article}
+\renewcommand{\thefigure}{A}
+\begin{document}
+\begin{figure}
+\includegraphics{figure.png}
+\caption{This is not numbered Figure 1.}
+\end{figure}
+\end{document}
+"""
+
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": main,
+                "figure.png": PNG_BYTES,
+            }
+        )
+        is None
+    )
+
+
 def test_returns_none_when_conditional_hides_a_fake_first_figure() -> None:
     main = rb"""
 \documentclass{article}
@@ -1352,6 +1379,34 @@ def test_returns_none_when_local_class_changes_figure_selection(
             {
                 "main.tex": make_figure_tex(),
                 "local.cls": semantic_control,
+                "figures/model.png": PNG_BYTES,
+                "figures/later.png": PNG_BYTES,
+            }
+        )
+        is None
+    )
+
+
+@pytest.mark.parametrize(
+    "alias_definition",
+    [
+        rb"\let\advancefigure\setcounter",
+        rb"\let \advancefigure = \setcounter",
+        rb"\futurelet\advancefigure\relax\setcounter",
+    ],
+)
+def test_returns_none_when_local_class_aliases_figure_selection_control(
+    alias_definition: bytes,
+) -> None:
+    semantic_dependency = (
+        alias_definition + rb"\advancefigure{figure}{5}"
+    )
+
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": make_figure_tex(),
+                "local.cls": semantic_dependency,
                 "figures/model.png": PNG_BYTES,
                 "figures/later.png": PNG_BYTES,
             }
