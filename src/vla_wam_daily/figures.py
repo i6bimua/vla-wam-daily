@@ -8,7 +8,7 @@ from urllib.parse import urljoin, urlsplit
 
 import httpx
 from pydantic import HttpUrl
-from selectolax.lexbor import LexborHTMLParser
+from selectolax.lexbor import LexborHTMLParser, LexborNode
 
 from vla_wam_daily.models import (
     ARXIV_FIGURE_HOSTS,
@@ -86,6 +86,52 @@ def _resolve_current_paper_image(source: str, html_url: str) -> str | None:
     return None
 
 
+def _resolved_image_urls(
+    images: list[LexborNode],
+    html_url: str,
+) -> tuple[HttpUrl, ...]:
+    image_urls: list[HttpUrl] = []
+    seen_image_urls: set[str] = set()
+    for image in images:
+        source = (image.attributes.get("src") or "").strip()
+        if not source:
+            continue
+        try:
+            candidate = _resolve_current_paper_image(source, html_url)
+        except ValueError:
+            continue
+        if candidate is not None and candidate not in seen_image_urls:
+            seen_image_urls.add(candidate)
+            image_urls.append(HttpUrl(candidate))
+    return tuple(image_urls)
+
+
+def _figure_images(node: LexborNode, html_url: str) -> tuple[HttpUrl, ...]:
+    """Return safe in-node images, or safe images from one adjacent empty wrapper."""
+    image_urls = _resolved_image_urls(node.css("img"), html_url)
+    if image_urls:
+        return image_urls
+
+    sibling = node.prev
+    while sibling is not None and (sibling.tag or "").startswith("-"):
+        sibling = sibling.prev
+    if sibling is None:
+        return ()
+
+    tag = (sibling.tag or "").casefold()
+    if (
+        tag == "figure"
+        or re.fullmatch(r"h[1-6]", tag) is not None
+        or _normalize_caption(sibling.text(separator=" ", strip=True))
+    ):
+        return ()
+
+    images = sibling.css("img")
+    if not images:
+        return ()
+    return _resolved_image_urls(images, html_url)
+
+
 def _has_duplicated_paper_path(candidate: str, html_url: str) -> bool:
     image_path = urlsplit(candidate).path
     html_path = urlsplit(html_url).path.rstrip("/")
@@ -152,22 +198,7 @@ def parse_figure_gallery(
         if not caption or not fragment:
             continue
 
-        image_urls: list[HttpUrl] = []
-        seen_image_urls: set[str] = set()
-        for image in node.css("img"):
-            source = (image.attributes.get("src") or "").strip()
-            if not source:
-                continue
-            try:
-                candidate = _resolve_current_paper_image(source, html_url)
-            except ValueError:
-                continue
-            if (
-                candidate is not None
-                and candidate not in seen_image_urls
-            ):
-                seen_image_urls.add(candidate)
-                image_urls.append(HttpUrl(candidate))
+        image_urls = _figure_images(node, html_url)
         if not image_urls:
             continue
 
@@ -178,7 +209,7 @@ def parse_figure_gallery(
                 number=number,
                 label=f"Figure {number}",
                 caption=caption,
-                image_urls=tuple(image_urls),
+                image_urls=image_urls,
                 source_url=HttpUrl(f"{html_url}#{fragment}"),
             )
             continue

@@ -25,6 +25,10 @@ def fixture_html() -> str:
     return Path("tests/fixtures/arxiv/figures.html").read_text(encoding="utf-8")
 
 
+def loose_fixture_html() -> str:
+    return Path("tests/fixtures/arxiv/figures-loose.html").read_text(encoding="utf-8")
+
+
 def make_client(**kwargs: object) -> ArxivFigureClient:
     options: dict[str, object] = {
         "user_agent": "VLA-WAM-Daily-Test/0.1",
@@ -95,6 +99,61 @@ def test_parser_resolves_arxiv_document_prefixed_image_paths_without_duplication
 
     assert [str(url) for url in gallery.figures[0].image_urls] == [
         "https://arxiv.org/html/2607.12345v1/x1.png"
+    ]
+
+
+def test_parser_recovers_image_from_adjacent_empty_wrapper() -> None:
+    gallery = parse_figure_gallery(loose_fixture_html(), HTML_URL, CHECKED_AT)
+
+    assert gallery.status is FigureStatus.AVAILABLE
+    assert [figure.number for figure in gallery.figures] == [1]
+    assert gallery.figures[0].caption == "The Real Scene Performance of RLMM-Flow."
+    assert [str(url) for url in gallery.figures[0].image_urls] == [
+        "https://arxiv.org/html/2607.12345v1/Figures/1.png"
+    ]
+    assert str(gallery.figures[0].source_url) == f"{HTML_URL}#Sx1.F1"
+
+
+@pytest.mark.parametrize(
+    "blocker",
+    [
+        '<h2><img src="wrong.png">Section heading</h2>',
+        '<div class="ltx_para">Explanatory text<img src="wrong.png"></div>',
+        '<figure><img src="wrong.png"></figure>',
+    ],
+)
+def test_parser_does_not_cross_unsafe_preceding_siblings(blocker: str) -> None:
+    html = f"""
+    <div class="ltx_para"><img src="candidate.png"></div>
+    {blocker}
+    <figure id="S1.F1"><figcaption>Figure 1: Caption.</figcaption></figure>
+    """
+
+    assert parse_figure_gallery(html, HTML_URL, CHECKED_AT).status is FigureStatus.NOT_FOUND
+
+
+def test_parser_does_not_cross_into_a_different_parent_container() -> None:
+    html = """
+    <div><div class="ltx_para"><img src="candidate.png"></div></div>
+    <div><figure id="S1.F1"><figcaption>Figure 1: Caption.</figcaption></figure></div>
+    """
+
+    assert parse_figure_gallery(html, HTML_URL, CHECKED_AT).status is FigureStatus.NOT_FOUND
+
+
+def test_parser_prefers_images_inside_target_figure() -> None:
+    html = """
+    <div class="ltx_para"><img src="preceding.png"></div>
+    <figure id="S1.F1">
+      <img src="inside.png">
+      <figcaption>Figure 1: Caption.</figcaption>
+    </figure>
+    """
+
+    gallery = parse_figure_gallery(html, HTML_URL, CHECKED_AT)
+
+    assert [str(url) for url in gallery.figures[0].image_urls] == [
+        "https://arxiv.org/html/2607.12345v1/inside.png"
     ]
 
 
