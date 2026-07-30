@@ -197,6 +197,8 @@ def unsafe_member(name: str, type_: bytes = tarfile.REGTYPE) -> tarfile.TarInfo:
         unsafe_member("../escape"),
         unsafe_member("/absolute"),
         unsafe_member("C:/absolute"),
+        unsafe_member("C:unsafe"),
+        unsafe_member("https:archive"),
         unsafe_member(r"..\escape"),
         unsafe_member(""),
         unsafe_member("link", tarfile.SYMTYPE),
@@ -424,6 +426,51 @@ def test_rejects_windows_drive_asset_target_even_if_archive_contains_it() -> Non
     )
 
 
+@pytest.mark.parametrize("target", ["C:section", "https:section"])
+def test_rejects_drive_relative_or_scheme_like_include_target(
+    target: str,
+) -> None:
+    main = rf"""
+\documentclass{{article}}
+\begin{{document}}
+\input{{{target}}}
+\end{{document}}
+""".encode()
+    included = rb"""
+\begin{figure}
+\includegraphics{figure.png}
+\caption{Unsafe include target.}
+\end{figure}
+"""
+
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": main,
+                f"{target}.tex": included,
+                "figure.png": PNG_BYTES,
+            }
+        )
+        is None
+    )
+
+
+@pytest.mark.parametrize("target", ["C:figure.png", "https:figure.png"])
+def test_rejects_drive_relative_or_scheme_like_asset_target(
+    target: str,
+) -> None:
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": make_figure_tex(image_target=target),
+                target: PNG_BYTES,
+                "figures/later.png": b"later",
+            }
+        )
+        is None
+    )
+
+
 @pytest.mark.parametrize(
     ("main", "extra_files", "max_depth"),
     [
@@ -587,6 +634,173 @@ def test_returns_none_for_macro_wrapped_figure_commands(
     )
 
 
+def test_returns_none_for_unknown_control_sequence_beside_direct_image() -> None:
+    main = rb"""
+\documentclass{article}
+\begin{document}
+\begin{figure}
+\centering
+\includegraphics{figure.png}
+\renderpanel{other.png}
+\caption{An ambiguous macro-driven layout.}
+\end{figure}
+\end{document}
+"""
+
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": main,
+                "figure.png": PNG_BYTES,
+                "other.png": b"other",
+            }
+        )
+        is None
+    )
+
+
+@pytest.mark.parametrize(
+    "main",
+    [
+        rb"""
+\documentclass{article}
+\begin{document}
+\begin{figure}
+\verb|\includegraphics{figure.png}|
+\caption{A fake verb image command.}
+\end{figure}
+\end{document}
+""",
+        rb"""
+\documentclass{article}
+\begin{document}
+\begin{figure}
+\\includegraphics{figure.png}
+\caption{An escaped image command.}
+\end{figure}
+\end{document}
+""",
+        rb"""
+\documentclass{article}
+\begin{document}
+\verb|\begin{figure}\includegraphics{figure.png}\caption{Fake.}\end{figure}|
+\end{document}
+""",
+        rb"""
+\documentclass{article}
+\begin{document}
+\begin{verbatim}
+\begin{figure}
+\includegraphics{figure.png}
+\caption{Fake environment.}
+\end{figure}
+\end{verbatim}
+\end{document}
+""",
+        rb"""
+\documentclass{article}
+\begin{document}
+\\begin{figure}
+\includegraphics{figure.png}
+\caption{Escaped environment.}
+\\end{figure}
+\end{document}
+""",
+    ],
+)
+def test_returns_none_for_commands_in_nonliteral_tex_contexts(
+    main: bytes,
+) -> None:
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": main,
+                "figure.png": PNG_BYTES,
+            }
+        )
+        is None
+    )
+
+
+@pytest.mark.parametrize(
+    "declarations",
+    [
+        rb"\documentclass\klass",
+        rb"\documentclass{article}\documentclass{report}",
+        rb"\documentclass{article}\documentclass\klass",
+        rb"\\documentclass{article}",
+    ],
+)
+def test_requires_exactly_one_literal_documentclass_declaration(
+    declarations: bytes,
+) -> None:
+    main = (
+        declarations
+        + rb"""
+\begin{document}
+\begin{figure}
+\includegraphics{figure.png}
+\caption{Invalid main document.}
+\end{figure}
+\end{document}
+"""
+    )
+
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": main,
+                "figure.png": PNG_BYTES,
+            }
+        )
+        is None
+    )
+
+
+@pytest.mark.parametrize(
+    "caption",
+    [
+        "NUL \x00 control.",
+        "ESC \x1b control.",
+        "BEL \x07 control.",
+        "DEL \x7f control.",
+        "C1 \u0085 control.",
+        "Bidi override \u202e control.",
+        "Bidi isolate \u2066 control.",
+        "Zero width \u200b control.",
+        "Byte order \ufeff mark.",
+    ],
+)
+def test_returns_none_for_unsafe_caption_control_or_format_characters(
+    caption: str,
+) -> None:
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": make_figure_tex(caption=caption),
+                "figures/model.png": PNG_BYTES,
+                "figures/later.png": b"later",
+            }
+        )
+        is None
+    )
+
+
+def test_normalizes_safe_caption_whitespace() -> None:
+    candidate = extract_from_tar(
+        {
+            "main.tex": make_figure_tex(
+                caption="Line one.\n\tLine two."
+            ),
+            "figures/model.png": PNG_BYTES,
+            "figures/later.png": b"later",
+        }
+    )
+
+    assert candidate is not None
+    assert candidate.caption == "Line one. Line two."
+
+
 def test_source_embedded_pdf_asset_is_deferred_to_later_task() -> None:
     assert (
         extract_from_tar(
@@ -746,6 +960,42 @@ class BrokenStream(httpx.SyncByteStream):
     def __iter__(self):
         yield b"partial"
         raise httpx.ReadError("simulated interrupted stream")
+
+
+class ReportedOversizedChunk(bytes):
+    def __len__(self) -> int:
+        return super().__len__() + 1
+
+
+class ReportedOversizedStream(httpx.SyncByteStream):
+    def __init__(self, content: bytes) -> None:
+        self.content = content
+
+    def __iter__(self):
+        yield ReportedOversizedChunk(self.content)
+
+
+def test_checks_stream_chunk_against_remaining_budget_before_extend() -> None:
+    body = make_tar(
+        {
+            "main.tex": make_figure_tex(),
+            "figures/model.png": PNG_BYTES,
+            "figures/later.png": b"later",
+        }
+    )
+    extractor, client = make_extractor(
+        handler=httpx.MockTransport(
+            lambda _request: httpx.Response(
+                200,
+                stream=ReportedOversizedStream(body),
+            )
+        ),
+        max_compressed_bytes=len(body),
+    )
+    try:
+        assert extractor.extract(ARXIV_ID, VERSION) is None
+    finally:
+        client.close()
 
 
 def test_source_interrupted_stream_raises_typed_transient_error() -> None:

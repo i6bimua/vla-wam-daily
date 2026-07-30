@@ -2,6 +2,7 @@ import io
 import math
 import re
 import tarfile
+import unicodedata
 from dataclasses import dataclass
 from pathlib import PurePosixPath
 from typing import Literal
@@ -16,6 +17,7 @@ RecoveredExtension = Literal["png", "jpg", "webp", "gif", "svg"]
 RecoveredSource = Literal["arxiv_source", "arxiv_pdf"]
 
 _DOCUMENT_CLASS_RE = re.compile(r"\\documentclass(?![A-Za-z@])")
+_DOCUMENT_CLASS_NAME_RE = re.compile(r"^[A-Za-z0-9_.-]+$")
 _INCLUDE_COMMAND_RE = re.compile(r"\\(?:input|include)(?![A-Za-z@])")
 _LITERAL_INCLUDE_RE = re.compile(
     r"\\(?:input|include)(?![A-Za-z@])\s*\{([^{}]*)\}"
@@ -25,7 +27,17 @@ _FIGURE_TOKEN_RE = re.compile(
 )
 _INCLUDE_GRAPHICS_RE = re.compile(r"\\includegraphics(?![A-Za-z@])")
 _CAPTION_RE = re.compile(r"\\caption(?![A-Za-z@])")
-_WINDOWS_DRIVE_RE = re.compile(r"^[A-Za-z]:($|/)")
+_CONTROL_SEQUENCE_RE = re.compile(r"\\(?P<name>[A-Za-z@]+)")
+_SCHEME_PREFIX_RE = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
+_VERBATIM_ENVIRONMENT_RE = re.compile(
+    r"\\begin\s*\{(?P<environment>"
+    r"verbatim\*?|Verbatim\*?|lstlisting|minted"
+    r")\}"
+)
+_VERB_COMMAND_RE = re.compile(r"\\verb\*?")
+_UNSUPPORTED_INLINE_VERBATIM_RE = re.compile(
+    r"\\(?:lstinline|mintinline|SaveVerb)(?![A-Za-z@])"
+)
 _UNSAFE_FIGURE_RE = re.compile(
     r"""
     \\begin\s*\{(?:tikzpicture|subfigure|subtable|minipage|tabular)\}
@@ -65,6 +77,41 @@ _SAFE_CAPTION_COMMANDS = frozenset(
     }
 )
 _ESCAPED_CAPTION_CHARACTERS = frozenset("%&_#$\\{}")
+_ALLOWED_FIGURE_CONTROLS = frozenset(
+    {
+        "caption",
+        "centering",
+        "columnwidth",
+        "enspace",
+        "hfill",
+        "hspace",
+        "includegraphics",
+        "label",
+        "linewidth",
+        "noindent",
+        "quad",
+        "qquad",
+        "raggedleft",
+        "raggedright",
+        "smallskip",
+        "medskip",
+        "bigskip",
+        "textwidth",
+        "vfill",
+        "vspace",
+        "tiny",
+        "scriptsize",
+        "footnotesize",
+        "small",
+        "normalsize",
+        "large",
+        "Large",
+        "LARGE",
+        "huge",
+        "Huge",
+        *_SAFE_CAPTION_COMMANDS,
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -112,13 +159,16 @@ def _safe_archive_path(name: str, *, directory: bool) -> PurePosixPath:
     normalized = name.rstrip("/") if directory else name
     if not normalized:
         raise _RejectedArchive
-    if _WINDOWS_DRIVE_RE.match(normalized):
-        raise _RejectedArchive
     raw_parts = normalized.split("/")
     if any(not part for part in raw_parts):
         raise _RejectedArchive
     path = PurePosixPath(normalized)
-    if path.is_absolute() or ".." in path.parts:
+    if (
+        path.is_absolute()
+        or ".." in path.parts
+        or not path.parts
+        or _SCHEME_PREFIX_RE.match(path.parts[0])
+    ):
         raise _RejectedArchive
     return path
 
@@ -187,12 +237,87 @@ def _decode_tex_files(
     try:
         for path, content in files.items():
             if path.suffix.casefold() == ".tex":
-                decoded[path] = _strip_tex_comments(
-                    content.decode("utf-8-sig")
-                )
+                text = _mask_verbatim_like(content.decode("utf-8-sig"))
+                if text is None:
+                    return None
+                decoded[path] = _strip_tex_comments(text)
     except UnicodeDecodeError:
         return None
     return decoded
+
+
+def _mask_range(characters: list[str], start: int, end: int) -> None:
+    for index in range(start, end):
+        if characters[index] not in "\r\n":
+            characters[index] = " "
+
+
+def _mask_verbatim_like(text: str) -> str | None:
+    characters = list(text)
+    current = text
+    cursor = 0
+    while True:
+        begin = next(
+            (
+                match
+                for match in _VERBATIM_ENVIRONMENT_RE.finditer(
+                    current,
+                    cursor,
+                )
+                if not _is_escaped(current, match.start())
+            ),
+            None,
+        )
+        if begin is None:
+            break
+        environment = re.escape(begin.group("environment"))
+        end_pattern = re.compile(rf"\\end\s*\{{{environment}\}}")
+        end = next(
+            (
+                match
+                for match in end_pattern.finditer(current, begin.end())
+                if not _is_escaped(current, match.start())
+            ),
+            None,
+        )
+        if end is None:
+            return None
+        _mask_range(characters, begin.start(), end.end())
+        current = "".join(characters)
+        cursor = end.end()
+
+    current = "".join(characters)
+    cursor = 0
+    while True:
+        command = next(
+            (
+                match
+                for match in _VERB_COMMAND_RE.finditer(current, cursor)
+                if not _is_escaped(current, match.start())
+            ),
+            None,
+        )
+        if command is None:
+            break
+        if command.end() >= len(current):
+            return None
+        delimiter = current[command.end()]
+        if delimiter.isspace():
+            return None
+        closing = current.find(delimiter, command.end() + 1)
+        newline = current.find("\n", command.end() + 1)
+        if closing < 0 or (newline >= 0 and newline < closing):
+            return None
+        _mask_range(characters, command.start(), closing + 1)
+        current = "".join(characters)
+        cursor = closing + 1
+
+    if any(
+        not _is_escaped(current, match.start())
+        for match in _UNSUPPORTED_INLINE_VERBATIM_RE.finditer(current)
+    ):
+        return None
+    return current
 
 
 def _is_within(path: PurePosixPath, root: PurePosixPath) -> bool:
@@ -214,11 +339,15 @@ def _literal_local_target(
         or "\\" in value
         or "{" in value
         or "}" in value
-        or _WINDOWS_DRIVE_RE.match(value)
     ):
         return None
     path = PurePosixPath(value)
-    if path.is_absolute() or ".." in path.parts:
+    if (
+        path.is_absolute()
+        or ".." in path.parts
+        or not path.parts
+        or _SCHEME_PREFIX_RE.match(path.parts[0])
+    ):
         return None
     candidate = root / path
     if not _is_within(candidate, root):
@@ -264,8 +393,8 @@ def _inline_tex(
     if consumed_bytes[0] > max_tex_bytes:
         return None
 
-    command_matches = list(_INCLUDE_COMMAND_RE.finditer(text))
-    literal_matches = list(_LITERAL_INCLUDE_RE.finditer(text))
+    command_matches = _literal_matches(_INCLUDE_COMMAND_RE, text)
+    literal_matches = _literal_matches(_LITERAL_INCLUDE_RE, text)
     if len(command_matches) != len(literal_matches):
         return None
     if literal_matches and depth >= max_include_depth:
@@ -296,7 +425,7 @@ def _inline_tex(
 
 
 def _first_figure_body(text: str) -> str | None:
-    first = _FIGURE_TOKEN_RE.search(text)
+    first = next(iter(_literal_matches(_FIGURE_TOKEN_RE, text)), None)
     if (
         first is None
         or first.group("action") != "begin"
@@ -304,7 +433,10 @@ def _first_figure_body(text: str) -> str | None:
     ):
         return None
     environment = first.group("environment")
-    following = _FIGURE_TOKEN_RE.search(text, first.end())
+    following = next(
+        iter(_literal_matches(_FIGURE_TOKEN_RE, text, first.end())),
+        None,
+    )
     if (
         following is None
         or following.group("action") != "end"
@@ -336,6 +468,18 @@ def _is_escaped(text: str, index: int) -> bool:
         backslashes += 1
         index -= 1
     return backslashes % 2 == 1
+
+
+def _literal_matches(
+    pattern: re.Pattern[str],
+    text: str,
+    position: int = 0,
+) -> list[re.Match[str]]:
+    return [
+        match
+        for match in pattern.finditer(text, position)
+        if not _is_escaped(text, match.start())
+    ]
 
 
 def _parse_delimited(
@@ -381,6 +525,23 @@ def _literal_command_argument(
         position = _skip_whitespace(text, option[1])
     argument = _parse_delimited(text, position, "{", "}")
     return None if argument is None else argument[0]
+
+
+def _literal_documentclass_declarations(text: str) -> list[str] | None:
+    declarations: list[str] = []
+    for match in _literal_matches(_DOCUMENT_CLASS_RE, text):
+        argument = _literal_command_argument(
+            text,
+            match,
+            allow_options=True,
+        )
+        if argument is None:
+            return None
+        name = argument.strip()
+        if _DOCUMENT_CLASS_NAME_RE.fullmatch(name) is None:
+            return None
+        declarations.append(name)
+    return declarations
 
 
 def _plain_caption_group(text: str, position: int = 0) -> tuple[str, int] | None:
@@ -441,7 +602,14 @@ def _normalize_caption(raw_caption: str) -> str | None:
     parsed = _plain_caption_group(raw_caption)
     if parsed is None or parsed[1] != len(raw_caption):
         return None
-    normalized = " ".join(parsed[0].split())
+    plain = parsed[0]
+    if any(
+        character not in "\t\n\r"
+        and unicodedata.category(character).startswith("C")
+        for character in plain
+    ):
+        return None
+    normalized = " ".join(plain.split())
     return normalized or None
 
 
@@ -496,8 +664,13 @@ def _extract_figure(
     if body is None or _UNSAFE_FIGURE_RE.search(body):
         return None
 
-    graphics_matches = list(_INCLUDE_GRAPHICS_RE.finditer(body))
-    caption_matches = list(_CAPTION_RE.finditer(body))
+    if any(
+        match.group("name") not in _ALLOWED_FIGURE_CONTROLS
+        for match in _literal_matches(_CONTROL_SEQUENCE_RE, body)
+    ):
+        return None
+    graphics_matches = _literal_matches(_INCLUDE_GRAPHICS_RE, body)
+    caption_matches = _literal_matches(_CAPTION_RE, body)
     if len(graphics_matches) != 1 or len(caption_matches) != 1:
         return None
     if (
@@ -675,9 +848,9 @@ class ArxivSourceFigureExtractor:
 
                     body = bytearray()
                     for chunk in response.iter_bytes():
-                        body.extend(chunk)
-                        if len(body) > self.max_compressed_bytes:
+                        if len(chunk) > self.max_compressed_bytes - len(body):
                             return None
+                        body.extend(chunk)
                     return bytes(body) or None
         except httpx.RequestError as error:
             raise TransientRecoveryError("arXiv source request failed") from error
@@ -704,17 +877,18 @@ class ArxivSourceFigureExtractor:
         tex_files = _decode_tex_files(files)
         if tex_files is None:
             return None
-        main_candidates = [
-            path
-            for path, text in tex_files.items()
-            if _DOCUMENT_CLASS_RE.search(text)
-        ]
-        if len(main_candidates) != 1:
+        declarations: list[tuple[PurePosixPath, str]] = []
+        for path, text in tex_files.items():
+            names = _literal_documentclass_declarations(text)
+            if names is None:
+                return None
+            declarations.extend((path, name) for name in names)
+        if len(declarations) != 1:
             return None
         return _extract_figure(
             files,
             tex_files,
-            main_path=main_candidates[0],
+            main_path=declarations[0][0],
             max_include_depth=self.max_include_depth,
             max_tex_bytes=self.max_tex_bytes,
             source_url=source_url,
