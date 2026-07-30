@@ -115,6 +115,14 @@ describe("global navigation contract", () => {
     expect(css).toMatch(/\.site-header nav\s*\{[\s\S]*flex-wrap:\s*wrap/s);
   });
 
+  it("describes the local Figure cache and original rights in the footer", async () => {
+    const layout = await source("layouts/BaseLayout.astro");
+
+    expect(layout).toContain("论文 Figure 优先从本站缓存加载");
+    expect(layout).toContain("版权与许可仍以原论文为准");
+    expect(layout).not.toContain("论文图片直接从 arXiv 加载");
+  });
+
   it("configures Pagefind to index paper detail HTML only", async () => {
     const packageJson = JSON.parse(await source("../package.json"));
     const buildScript = await source("../scripts/build-pagefind.mjs");
