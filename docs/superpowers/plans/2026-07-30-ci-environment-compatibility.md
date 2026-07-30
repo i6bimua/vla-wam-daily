@@ -4,7 +4,7 @@
 
 **Goal:** Make the Python CLI assertions and Playwright preview startup pass reliably on GitHub Actions without changing production behavior or adding dependencies.
 
-**Architecture:** Normalize only captured test text at the assertion boundary with Click's existing ANSI utility. Start Playwright's already-built static site through Astro's declared CLI instead of reaching through Astro to an undeclared Vite executable.
+**Architecture:** Normalize only captured test text at the assertion boundary with the ANSI utility in Typer's built-in Click compatibility layer. Start Playwright's already-built static site through Astro's declared CLI instead of reaching through Astro to an undeclared Vite executable.
 
 **Tech Stack:** Python 3.13, pytest, Click/Typer, TypeScript, Vitest, Playwright, Astro, pnpm, GitHub Actions
 
@@ -48,10 +48,10 @@ Expected: FAIL with `NameError: name 'plain_cli_text' is not defined`.
 
 - [ ] **Step 3: Implement the minimal normalization helper**
 
-Add the Click import:
+Add the Typer compatibility-layer import:
 
 ```python
-from click.utils import strip_ansi
+from typer._click.utils import strip_ansi
 ```
 
 Add this helper above the regression test:

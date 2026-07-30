@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from typer._click.utils import strip_ansi
 from typer.testing import CliRunner
 
 import vla_wam_daily.cli as cli_module
@@ -192,9 +193,19 @@ def install_client_sentries(
     )
 
 
+def plain_cli_text(value: str) -> str:
+    return strip_ansi(value)
+
+
+def test_plain_cli_text_removes_split_ansi_styles() -> None:
+    styled = "\x1b[36m--\x1b[0m\x1b[36mprofile\x1b[0m"
+
+    assert plain_cli_text(styled) == "--profile"
+
+
 def assert_parameter_error(result: Any, option: str) -> None:
     assert result.exit_code == 2
-    assert option in result.stderr
+    assert option in plain_cli_text(result.stderr)
     assert "Traceback" not in result.stdout
     assert "Traceback" not in result.stderr
     assert SECRET not in result.stdout
@@ -214,6 +225,7 @@ def test_daily_help_lists_all_options_without_environment_files_or_network(
     monkeypatch.setattr(cli_module, "run_daily", unexpected, raising=False)
 
     result = RUNNER.invoke(cli_module.app, ["daily", "--help"])
+    stdout = plain_cli_text(result.stdout)
 
     assert result.exit_code == 0
     for option in (
@@ -226,7 +238,7 @@ def test_daily_help_lists_all_options_without_environment_files_or_network(
         "--data-dir",
         "--prompt-path",
     ):
-        assert option in result.stdout
+        assert option in stdout
 
 
 def test_root_help_lists_daily_without_side_effects(monkeypatch: pytest.MonkeyPatch) -> None:

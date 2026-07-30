@@ -19,9 +19,10 @@ the failure.
 
 ### CLI output assertions
 
-Normalize captured CLI output with Click's ANSI-stripping utility before making
-text assertions. Keep the original output for the existing secret-leak and
-traceback checks so the tests continue to inspect what users would receive.
+Normalize captured CLI output with the ANSI-stripping utility in Typer's
+built-in Click compatibility layer before making text assertions. Keep the
+original output for the existing secret-leak and traceback checks so the tests
+continue to inspect what users would receive.
 
 This makes tests independent of terminal color policy without changing CLI
 runtime behavior or GitHub Actions environment variables.
