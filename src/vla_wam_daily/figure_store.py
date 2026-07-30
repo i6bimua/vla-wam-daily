@@ -148,6 +148,15 @@ class ArxivFigureStore:
             return None
         return None
 
+    def has_usable_cached_panel(self, cached_path: str) -> bool:
+        target = self._existing_cached_target(cached_path)
+        if target is None:
+            return False
+        try:
+            return target.is_file() and target.stat().st_size > 0
+        except OSError:
+            return False
+
     def _atomic_install(
         self,
         *,
