@@ -56,6 +56,40 @@ def step_named(payload: dict[str, Any], job_name: str, name: str) -> dict[str, A
     return next(step for step in steps_for(payload, job_name) if step.get("name") == name)
 
 
+def test_dependabot_groups_compatible_updates_and_limits_open_prs() -> None:
+    payload = yaml.load(
+        (ROOT / ".github/dependabot.yml").read_text(encoding="utf-8"),
+        Loader=yaml.BaseLoader,
+    )
+    expected = {
+        ("uv", "/"): ("python-compatible", True),
+        ("npm", "/web"): ("frontend-compatible", True),
+        ("github-actions", "/"): ("actions-compatible", False),
+    }
+    updates = {
+        (entry["package-ecosystem"], entry["directory"]): entry
+        for entry in payload["updates"]
+    }
+
+    assert set(updates) == set(expected)
+    for identity, (group_name, ignores_major) in expected.items():
+        entry = updates[identity]
+        assert entry["open-pull-requests-limit"] == "1"
+        assert entry["groups"] == {
+            group_name: {
+                "patterns": ["*"],
+                "update-types": ["minor", "patch"],
+            }
+        }
+        assert (
+            {
+                "dependency-name": "*",
+                "update-types": ["version-update:semver-major"],
+            }
+            in entry.get("ignore", [])
+        ) is ignores_major
+
+
 def test_all_workflow_actions_are_full_sha_pinned_with_release_comments() -> None:
     seen: set[str] = set()
     for path in sorted(WORKFLOW_DIR.glob("*.yml")):
