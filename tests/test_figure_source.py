@@ -160,6 +160,33 @@ def test_extracts_first_direct_literal_figure_asset_and_plain_caption() -> None:
     assert candidate.source == "arxiv_source"
 
 
+def test_best_effort_accepts_harmless_class_and_unrelated_preamble_macro() -> None:
+    main = rb"""
+\documentclass{local}
+\newcommand{\projectname}{See2Think}
+\begin{document}
+\begin{figure}
+\centering
+\includegraphics[width=\textwidth]{figures/model.png}
+\caption{The literal first Figure.}
+\end{figure}
+\end{document}
+"""
+
+    candidate = extract_from_tar(
+        {
+            "main.tex": main,
+            "local.cls": rb"\NeedsTeXFormat{LaTeX2e}",
+            "figures/model.png": PNG_BYTES,
+        }
+    )
+
+    assert candidate is not None
+    assert candidate.caption == "The literal first Figure."
+    assert candidate.extension == "png"
+    assert candidate.content == PNG_BYTES
+
+
 @pytest.mark.parametrize("command", ["input", "include"])
 def test_boundedly_inlines_one_literal_local_tex_file(command: str) -> None:
     main = rf"""
