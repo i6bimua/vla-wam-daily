@@ -40,10 +40,7 @@ CACHED_FIGURE_PATH_PATTERN = re.compile(
 FigureNumber = Literal[1, 2]
 FigureSource = Literal["arxiv_html", "arxiv_source", "arxiv_pdf"]
 FigureImageTuple = Annotated[tuple[HttpUrl | None, ...], Field(min_length=1)]
-FigureCachedImageTuple = Annotated[
-    tuple[str | None, ...],
-    Field(min_length=1),
-]
+FigureCachedImageTuple = tuple[str | None, ...]
 FigureCacheKey = Annotated[
     str,
     Field(pattern=r"^\d{4}\.\d{4,5}:v[1-9]\d*$"),
@@ -101,6 +98,8 @@ def parse_arxiv_html_identity(url: HttpUrl) -> tuple[str, int]:
 
 def validate_arxiv_html_url(url: HttpUrl) -> HttpUrl:
     validate_arxiv_url_authority(url)
+    if url.query is not None:
+        raise ValueError("arXiv HTML URL must not contain a query")
     if url.fragment is not None:
         raise ValueError("arXiv HTML URL must not contain a fragment")
     parse_arxiv_html_identity(url)
@@ -133,11 +132,12 @@ def parse_arxiv_source_identity(
 
     if url.fragment is not None:
         raise ValueError("arXiv recovered figure source URL must not contain a fragment")
-    pattern = (
-        ARXIV_SOURCE_PATH_PATTERN
-        if source == "arxiv_source"
-        else ARXIV_PDF_PATH_PATTERN
-    )
+    if source == "arxiv_source":
+        pattern = ARXIV_SOURCE_PATH_PATTERN
+    elif source == "arxiv_pdf":
+        pattern = ARXIV_PDF_PATH_PATTERN
+    else:
+        raise ValueError("unsupported Figure source")
     path = url.path
     match = pattern.fullmatch(path) if path is not None else None
     if match is None:
@@ -303,6 +303,8 @@ class FigureAsset(FrozenStrictModel):
             self.source_url,
             self.source,
         )
+        if not self.cached_image_paths:
+            raise ValueError("cached Figure paths must contain at least one panel")
         if len(self.cached_image_paths) != len(self.image_urls):
             raise ValueError("cached Figure paths must align with image URLs")
 
@@ -322,10 +324,17 @@ class FigureAsset(FrozenStrictModel):
             deduplicated_urls.append(image_url)
             deduplicated_paths.append(path)
 
-        if self.source != "arxiv_html" and any(
-            image_url is not None for image_url in deduplicated_urls
-        ):
-            raise ValueError("recovered Figure panels must be local-only")
+        match self.source:
+            case "arxiv_html":
+                if any(image_url is None for image_url in deduplicated_urls):
+                    raise ValueError(
+                        "arXiv HTML Figure panels require remote image URLs"
+                    )
+            case "arxiv_source" | "arxiv_pdf":
+                if any(image_url is not None for image_url in deduplicated_urls):
+                    raise ValueError("recovered Figure panels must be local-only")
+            case _:
+                raise ValueError("unsupported Figure source")
 
         for panel, (image_url, path) in enumerate(
             zip(deduplicated_urls, deduplicated_paths, strict=True),
@@ -347,6 +356,7 @@ class FigureAsset(FrozenStrictModel):
             ):
                 raise ValueError("cached Figure path does not match its panel")
 
+        # Frozen model: normalize both aligned tuples only after every contract check.
         object.__setattr__(self, "image_urls", tuple(deduplicated_urls))
         object.__setattr__(self, "cached_image_paths", tuple(deduplicated_paths))
         return self

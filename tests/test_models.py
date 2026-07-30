@@ -513,6 +513,21 @@ def test_figure_asset_rejects_null_remote_url_without_cached_path() -> None:
         )
 
 
+def test_figure_asset_rejects_local_only_html_panel() -> None:
+    with pytest.raises(ValidationError):
+        FigureAsset(
+            number=1,
+            label="Figure 1",
+            caption="Figure caption.",
+            image_urls=(None,),
+            cached_image_paths=(
+                "/figures/2607.12345/v1/fig1-panel1.png",
+            ),
+            source_url="https://arxiv.org/html/2607.12345v1#S1.F1",
+            source="arxiv_html",
+        )
+
+
 def test_figure_asset_rejects_panel_with_neither_remote_nor_local_source() -> None:
     with pytest.raises(ValidationError):
         FigureAsset(
@@ -773,8 +788,10 @@ def test_public_data_file_schema_requires_non_nullable_figure_gallery() -> None:
 def test_public_schema_keeps_historical_cached_paths_optional() -> None:
     schema = DataFile.model_json_schema()
     figure_schema = schema["$defs"]["FigureAsset"]
+    cached_paths_schema = figure_schema["properties"]["cached_image_paths"]
 
     assert "cached_image_paths" not in figure_schema["required"]
+    assert "minItems" not in cached_paths_schema
 
 
 @pytest.mark.parametrize(
@@ -840,6 +857,15 @@ def test_figure_urls_allow_explicit_https_default_port() -> None:
     )
 
     assert str(gallery.html_url) == "https://arxiv.org/html/2607.12345v1"
+
+
+def test_figure_gallery_rejects_query_in_html_url() -> None:
+    with pytest.raises(ValidationError):
+        FigureGallery(
+            status=FigureStatus.NOT_FOUND,
+            html_url="https://arxiv.org/html/2607.12345v1?paper=other",
+            checked_at=datetime(2026, 7, 27, tzinfo=UTC),
+        )
 
 
 def test_figure_urls_require_their_expected_fragment_shapes() -> None:
