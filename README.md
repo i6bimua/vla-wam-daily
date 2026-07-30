@@ -14,8 +14,9 @@ GitHub Pages；不需要数据库或常驻服务器。
 - 提供 Today、VLA、WAM、World Models、Datasets、Benchmarks、Weekly Top 5、
   月度归档和 RSS。
 - Pagefind 支持中英文全文搜索；页面支持主题、日期、分数、代码状态筛选和移动端布局。
-- 从 arXiv HTML 识别 Fig. 1 / Fig. 2、英文 caption 和多 panel 原图；把可用面板镜像到
-  本站静态资源，首页卡片直接展示 Fig. 1，详情页展示并下载 Fig. 1 / Fig. 2。
+- 按“arXiv HTML → arXiv 源码包 → arXiv PDF 自动裁剪”的顺序恢复 Fig. 1，
+  同时从 HTML 识别 Fig. 2、英文 caption 和多 panel 原图；把可用面板永久缓存到
+  本站静态资源，首页卡片直接展示 Fig. 1，详情页展示来源并下载 Fig. 1 / Fig. 2。
 - 在常规每日运行、未使用 `--force-arxiv-id` 强制重分析时，缓存论文分析与 Figure
   元数据；相同论文版本、模型和 Prompt 不重复产生分析费用。
 - 默认回看 3 天只是 arXiv 增量抓取窗口，不是保留期限；所有已发布论文记录和分析按月
@@ -144,10 +145,18 @@ Astro 根据 `GITHUB_REPOSITORY` 推导项目子路径，显式 `BASE_PATH` 仍�
 
 ## Fig. 1 / Fig. 2
 
-Figure 管线只在论文相关性评分通过发布阈值后访问带明确版本号的 arXiv HTML 页面。
-解析器读取真实的 `figure` / `figcaption` 结构，根据 `Figure 1`、`Fig. 1`、
-`Figure 2`、`Fig. 2` 等 caption 开头识别图号，并收集 Figure 内全部图片，因此支持
-一个 Figure 的多 panel。它不猜测 `x1.png` 等资源文件名，也不从 PDF 截图。
+Figure 管线只在论文相关性评分通过发布阈值后运行。获取 Fig. 1 的固定顺序是
+**arXiv HTML → arXiv 源码包 → arXiv PDF 自动裁剪**，每一层都只请求与论文 ID 和
+版本完全一致的 arXiv 官方资源。HTML 解析器读取真实的 `figure` / `figcaption`
+结构，也支持图片位于 caption Figure 紧邻前置容器的受控布局；源码层只接受关系明确的
+单一素材；最后才从 PDF 中识别唯一的 Figure 1 caption 与图像区域，以约 300 DPI
+生成本地 PNG。它不会猜测 `x1.png` 等资源文件名，也不会用整页 PDF 截图冒充 Figure。
+PDF 自动裁剪可能因置信不足而明确降级，宁可不显示，也不发布错图。
+
+源码与 PDF 的恢复面板没有虚构的远程原图 URL，只提供本站缓存下载和论文 PDF；详情页
+会分别标注“来源：arXiv 源码包”或“来源：PDF 自动裁剪”。HTML 来源仍提供定位原文和
+查看 arXiv 原图。Figure 2 永远不会冒充 Figure 1：首页缺少真实 Fig. 1 时会明确提示
+暂不可用，详情页则可继续按真实编号展示已有的 Fig. 2。
 
 通过发布阈值的论文会永久写入月度归档；默认回看 3 天是抓取窗口，不是保留期限。
 同步器每次扫描全部月度归档、`latest.json` 和 Figure 元数据缓存，把可用面板写入
@@ -155,16 +164,29 @@ Figure 管线只在论文相关性评分通过发布阈值后访问带明确版�
 Fig. 2，每个响应最大 15 MB；固定的论文、版本、Figure 和 panel 路径既避免重名，也让
 已有文件在后续运行直接复用。这个有界策略会随已发布论文增长，但不会自动删除历史版本。
 
+成功的同版本恢复结果和确认未找到的结果会永久复用；暂时网络或解析失败标记为
+`fetch_failed`，24 小时后重试。解析规则版本升级时，旧的未找到结果会重新检查。需要
+手动回填全部最新记录、月度归档和 Figure 缓存时，从仓库根目录运行：
+
+```bash
+uv run vla-wam-daily sync-figures
+```
+
+命令会统一更新 `data/latest.json`、`data/archive/*.json`、
+`data/cache/figures.json` 和 `web/public/figures/{arxiv_id}/v{version}/`；重复运行会
+直接复用永久缓存，不重写已恢复的非空面板。PDF 文本定位使用 MIT 许可的
+`pdfplumber`，裁剪渲染使用 BSD-3-Clause / Apache-2.0 许可的 `pypdfium2`，不引入
+AGPL 依赖。
+
 首页与详情页优先从本站缓存加载，并提供“下载本站缓存”；每个 panel 同时保留规范的
 arXiv 原图链接与定位原文入口。某个面板镜像失败不会阻断论文发布：页面改用 arXiv
 原图，后续每日运行重试。远程降级的“下载原图”会用 `fetch` 获取图片并创建临时 Blob；
 如果 CORS、网络或浏览器策略阻止 Blob 下载，页面会降级为新标签打开 arXiv 原图。
 
-除了 `available`，Figure Gallery 有三种非阻塞降级状态：
-
-- `html_unavailable`：arXiv 暂无 HTML 版本，提供 PDF 链接。
-- `not_found`：HTML 可用，但未识别到 Fig. 1 / Fig. 2，提供 HTML 和 PDF。
-- `fetch_failed`：网络、服务或解析暂时失败，提供 PDF，并在后续每日运行重试。
+Figure Gallery 的 Fig. 1 恢复状态包括 `not_attempted`、`available`、
+`not_found` 和 `fetch_failed`。`not_found` 表示三层官方来源均没有达到安全置信度；
+`fetch_failed` 表示网络、服务或解析暂时失败，页面仍提供 PDF，并在 24 小时后重试。
+底层 HTML 请求仍保留 `html_unavailable` 状态，用于区分 arXiv 尚未生成 HTML 的情况。
 
 本地镜像只改善页面可用性，不改变内容权利：Figure 图片版权仍归论文作者或其他
 权利人所有，本站源码的 MIT License 不覆盖这些图片。镜像或 arXiv 远程展示都不等于
@@ -175,9 +197,10 @@ arXiv 原图链接与定位原文入口。某个面板镜像失败不会阻断�
 ## 数据来源与项目来源
 
 论文标题、摘要、作者、分类和版本来自 [arXiv API](https://info.arxiv.org/help/api/)，
-Figure URL 与 caption 来自对应论文的 arXiv HTML，中文分析来自所配置的 DeepSeek
-模型。项目/代码链接只从来源元数据中明确存在且通过校验的 URL 提取，不由模型生成。
-arXiv API 不稳定提供作者机构，因此本站不推断或展示机构。
+Figure URL 与 caption 优先来自对应论文的 arXiv HTML；无法取得时，可从对应精确版本
+的官方源码包或 PDF 生成本站缓存。中文分析来自所配置的 DeepSeek 模型。项目/代码链接
+只从来源元数据中明确存在且通过校验的 URL 提取，不由模型生成。arXiv API 不稳定提供
+作者机构，因此本站不推断或展示机构。
 
 本项目是独立实现，没有 fork 或复制下列项目的源码；它们是需求调研和产品设计参考：
 
@@ -199,9 +222,10 @@ arXiv API 不稳定提供作者机构，因此本站不推断或展示机构。
 - **候选超过 60 或失败超过 30%**：这是防止不完整数据上线的质量门槛。检查关键词、
   arXiv/DeepSeek 状态后重跑，不要通过提交半成品 JSON 绕过。
 - **Figure 不显示或不能直接下载**：先检查相应
-  `web/public/figures/{arxiv_id}/v{version}/` 文件是否存在，再查看卡片中的三种状态
-  提示。HTML 转换可能晚于论文发布；缓存失败会使用 arXiv 原图并在后续每日运行重试，
-  CORS 下载失败会自动打开原图，图片仍可从 arXiv 或 PDF 查看。
+  `web/public/figures/{arxiv_id}/v{version}/` 文件是否存在，再查看卡片中的恢复状态
+  提示。可运行 `uv run vla-wam-daily sync-figures` 手动回填；缓存失败会使用可信的
+  arXiv HTML 原图并在后续每日运行重试，CORS 下载失败会自动打开原图。源码或 PDF
+  回退因置信不足而返回 `not_found` 时，请从论文 PDF 查看，不要放宽规则强行截取。
 - **本地构建找不到数据**：从仓库根目录保留 `data/`，或为构建显式设置
   `VLA_WAM_DATA_DIR`；自定义数据目录的父目录必须预先存在。
 
@@ -209,10 +233,10 @@ arXiv API 不稳定提供作者机构，因此本站不推断或展示机构。
 
 - AI 分析仅基于标题和摘要，不是论文全文评审，可能遗漏细节或误判相关性。
 - arXiv 分类和关键词预筛存在漏报；模型评分也不能替代领域专家判断。
-- Figure 依赖 arXiv HTML 转换和源图片可用性；不是每篇论文都有可解析的 Fig. 1 /
-  Fig. 2，远程下载降级仍可能受浏览器 CORS 策略影响。
-- 站点只镜像已发布论文中解析成功的 Fig. 1 / Fig. 2，不截图 PDF，也不保证第三方
-  内容可依法再分发；使用者仍需核对原论文许可证。
+- Figure 依赖 arXiv HTML、源码包或 PDF 中存在可明确识别的素材；不是每篇论文都有
+  达到置信条件的 Fig. 1 / Fig. 2，远程下载降级仍可能受浏览器 CORS 策略影响。
+- 站点只缓存已发布论文中可靠识别的 Fig. 1 / Fig. 2；PDF 自动裁剪可能因置信不足而
+  明确降级，也不保证论文内容可依法再分发，使用者仍需核对原论文许可证。
 - RSS、搜索和归档是静态构建产物；最近一次工作流失败时会继续展示上一版。
 - Weekly Top 5 是从当周高分论文中确定性选取的阅读入口，不是引用量或学术影响排名。
 

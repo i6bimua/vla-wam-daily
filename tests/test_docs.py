@@ -8,9 +8,9 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 README = (ROOT / "README.md").read_text(encoding="utf-8")
-MAIN_DESIGN = (
-    ROOT / "docs/superpowers/specs/2026-07-27-vla-wam-daily-design.md"
-).read_text(encoding="utf-8")
+MAIN_DESIGN = (ROOT / "docs/superpowers/specs/2026-07-27-vla-wam-daily-design.md").read_text(
+    encoding="utf-8"
+)
 FIGURE_DESIGN = (
     ROOT / "docs/superpowers/specs/2026-07-29-paper-figure-display-design.md"
 ).read_text(encoding="utf-8")
@@ -37,9 +37,7 @@ def tracked_files() -> tuple[Path, ...]:
         stdout=subprocess.PIPE,
     )
     return tuple(
-        ROOT / os.fsdecode(raw_path)
-        for raw_path in result.stdout.split(b"\0")
-        if raw_path
+        ROOT / os.fsdecode(raw_path) for raw_path in result.stdout.split(b"\0") if raw_path
     )
 
 
@@ -179,6 +177,20 @@ def test_readme_documents_permanent_records_local_figures_and_fallbacks() -> Non
         assert text in README
 
 
+def test_readme_documents_multistage_figure_recovery_and_backfill() -> None:
+    for text in (
+        "arXiv HTML → arXiv 源码包 → arXiv PDF 自动裁剪",
+        "`web/public/figures/{arxiv_id}/v{version}/`",
+        "uv run vla-wam-daily sync-figures",
+        "PDF 自动裁剪可能因置信不足而明确降级",
+        "Figure 2 永远不会冒充 Figure 1",
+        "24 小时后重试",
+        "pdfplumber",
+        "pypdfium2",
+    ):
+        assert text in README
+
+
 def test_license_is_complete_mit_text() -> None:
     license_text = (ROOT / "LICENSE").read_text(encoding="utf-8")
     assert license_text.startswith("MIT License\n")
@@ -240,9 +252,7 @@ def test_repository_tracked_files_contain_no_secret_like_bytes() -> None:
         for path in tracked_files()
         if any(pattern.search(path.read_bytes()) for pattern in secret_patterns)
     ]
-    assert offending_paths == [], (
-        f"tracked files contain potential secret bytes: {offending_paths}"
-    )
+    assert offending_paths == [], f"tracked files contain potential secret bytes: {offending_paths}"
 
 
 def test_tracked_paper_images_stay_inside_mirrors_or_test_fixtures() -> None:
