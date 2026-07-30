@@ -15,6 +15,7 @@ from vla_wam_daily.models import (
 
 LOGGER = logging.getLogger(__name__)
 RECOVERY_RETRY_INTERVAL = timedelta(hours=24)
+FIGURE_RECOVERY_VERSION = 1
 _FATAL_RECOVERY_ERRORS = (MemoryError, RecursionError)
 
 
@@ -100,7 +101,10 @@ class FigureRecoveryService:
 
     @staticmethod
     def _should_skip(gallery: FigureGallery, checked_at: datetime) -> bool:
-        if gallery.recovery_status is FigureRecoveryStatus.NOT_FOUND:
+        if (
+            gallery.recovery_status is FigureRecoveryStatus.NOT_FOUND
+            and gallery.recovery_version == FIGURE_RECOVERY_VERSION
+        ):
             return True
         return (
             gallery.recovery_status is FigureRecoveryStatus.FETCH_FAILED
@@ -246,6 +250,7 @@ class FigureRecoveryService:
                 update={
                     "recovery_status": FigureRecoveryStatus.AVAILABLE,
                     "recovery_checked_at": checked_at,
+                    "recovery_version": FIGURE_RECOVERY_VERSION,
                 }
             )
 
@@ -268,6 +273,7 @@ class FigureRecoveryService:
                     "figures": figures,
                     "recovery_status": FigureRecoveryStatus.AVAILABLE,
                     "recovery_checked_at": checked_at,
+                    "recovery_version": FIGURE_RECOVERY_VERSION,
                 }
             )
 
@@ -289,5 +295,6 @@ class FigureRecoveryService:
                 "figures": figures,
                 "recovery_status": status,
                 "recovery_checked_at": checked_at,
+                "recovery_version": FIGURE_RECOVERY_VERSION,
             }
         )

@@ -352,6 +352,7 @@ def test_available_figure_gallery_serializes_public_contract() -> None:
         "checked_at": "2026-07-27T00:00:00Z",
         "recovery_status": "available",
         "recovery_checked_at": None,
+        "recovery_version": 0,
     }
 
 

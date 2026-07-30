@@ -1,5 +1,5 @@
 import logging
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from datetime import datetime
 from pathlib import Path
 from typing import Protocol
@@ -60,6 +60,15 @@ def _cached_path_count(gallery: FigureGallery) -> int:
     )
 
 
+def _gallery_completeness(gallery: FigureGallery) -> tuple[int, int, int, int]:
+    return (
+        _cached_path_count(gallery),
+        int(any(figure.number == 1 for figure in gallery.figures)),
+        len(gallery.figures),
+        sum(len(figure.image_urls) for figure in gallery.figures),
+    )
+
+
 def _normalized_paths(
     gallery: FigureGallery,
 ) -> dict[tuple[int, int], str | None]:
@@ -77,6 +86,7 @@ def _normalized_paths(
 
 def _select_galleries(
     data_files: Sequence[DataFile],
+    cache_entries: Iterable[FigureCacheEntry],
 ) -> dict[tuple[str, int], FigureGallery]:
     galleries: dict[tuple[str, int], FigureGallery] = {}
     for data_file in data_files:
@@ -85,10 +95,20 @@ def _select_galleries(
             current = galleries.get(identity)
             if (
                 current is None
-                or _cached_path_count(paper.figure_gallery)
-                > _cached_path_count(current)
+                or _gallery_completeness(paper.figure_gallery)
+                > _gallery_completeness(current)
             ):
                 galleries[identity] = paper.figure_gallery
+    for entry in cache_entries:
+        arxiv_id, version_text = entry.key.rsplit(":v", maxsplit=1)
+        identity = arxiv_id, int(version_text)
+        current = galleries.get(identity)
+        if (
+            current is None
+            or _gallery_completeness(entry.gallery)
+            > _gallery_completeness(current)
+        ):
+            galleries[identity] = entry.gallery
     return galleries
 
 
@@ -153,7 +173,11 @@ def synchronize_figure_assets(
     if latest is None:
         raise FileNotFoundError(f"latest data file is missing: {data_dir / 'latest.json'}")
     archives = load_archives(data_dir)
-    source_galleries = _select_galleries([*archives.values(), latest])
+    figure_cache = load_figure_cache(data_dir)
+    source_galleries = _select_galleries(
+        [*archives.values(), latest],
+        figure_cache.values(),
+    )
     updated_galleries: dict[tuple[str, int], FigureGallery] = {}
     panels_reused = 0
     panels_mirrored = 0
@@ -222,7 +246,7 @@ def synchronize_figure_assets(
         filename: _replace_galleries(archive, updated_galleries)
         for filename, archive in archives.items()
     }
-    updated_cache = load_figure_cache(data_dir)
+    updated_cache = dict(figure_cache)
     for (arxiv_id, version), gallery in updated_galleries.items():
         key = figure_cache_key(arxiv_id, version)
         updated_cache[key] = FigureCacheEntry(key=key, gallery=gallery)

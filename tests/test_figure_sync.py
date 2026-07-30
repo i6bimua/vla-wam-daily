@@ -16,6 +16,7 @@ from vla_wam_daily.storage import (
     load_archives,
     load_data_file,
     load_figure_cache,
+    save_figure_sync,
     save_successful_run,
 )
 
@@ -410,3 +411,108 @@ def test_sync_isolates_one_recovery_exception_and_continues(
     assert len(calls) == 2
     assert report.papers_scanned == 2
     assert report.recovery_failed == 1
+
+
+def test_sync_uses_more_complete_cache_gallery_and_replaces_record_copies(
+    tmp_path: Path,
+) -> None:
+    complete = make_gallery()
+    figure_two = make_gallery().figures[1]
+    incomplete = FigureGallery(
+        status=FigureStatus.AVAILABLE,
+        html_url="https://arxiv.org/html/2607.12345v1",
+        figures=(figure_two,),
+        checked_at=NOW,
+    )
+    record = make_record().model_copy(update={"figure_gallery": incomplete})
+    key = figure_cache_key("2607.12345", 1)
+    save_successful_run(
+        tmp_path,
+        [record],
+        {},
+        RunStats(published=1, figure_available=1),
+        NOW,
+        figure_cache={key: FigureCacheEntry(key=key, gallery=complete)},
+    )
+
+    class RecordingRecovery:
+        def __init__(self) -> None:
+            self.calls: list[FigureGallery] = []
+
+        def recover_gallery(
+            self,
+            gallery: FigureGallery,
+            *,
+            checked_at: datetime,
+        ) -> FigureGallery:
+            self.calls.append(gallery)
+            return gallery
+
+    recovery = RecordingRecovery()
+    synchronize(
+        data_dir=tmp_path,
+        store=RecordingStore(),
+        recovery=recovery,
+    )
+
+    assert recovery.calls == [complete]
+    latest = load_data_file(tmp_path / "latest.json")
+    assert latest is not None
+    archives = load_archives(tmp_path)
+    cached = load_figure_cache(tmp_path)[key].gallery
+    assert latest.papers[0].figure_gallery == cached
+    assert all(
+        paper.figure_gallery == cached
+        for archive in archives.values()
+        for paper in archive.papers
+    )
+
+
+def test_sync_processes_identity_present_only_in_figure_cache_once(
+    tmp_path: Path,
+) -> None:
+    seed_current_and_historical_records(tmp_path)
+    latest = load_data_file(tmp_path / "latest.json")
+    assert latest is not None
+    archives = load_archives(tmp_path)
+    cache = load_figure_cache(tmp_path)
+    cache_only_gallery = make_gallery(arxiv_id="2512.99999")
+    cache_only_key = figure_cache_key("2512.99999", 1)
+    cache[cache_only_key] = FigureCacheEntry(
+        key=cache_only_key,
+        gallery=cache_only_gallery,
+    )
+    save_figure_sync(
+        tmp_path,
+        latest=latest,
+        archives=archives,
+        figure_cache=cache,
+    )
+
+    class RecordingRecovery:
+        def __init__(self) -> None:
+            self.calls: list[str] = []
+
+        def recover_gallery(
+            self,
+            gallery: FigureGallery,
+            *,
+            checked_at: datetime,
+        ) -> FigureGallery:
+            self.calls.append(str(gallery.html_url))
+            return gallery
+
+    recovery = RecordingRecovery()
+    report = synchronize(
+        data_dir=tmp_path,
+        store=RecordingStore(),
+        recovery=recovery,
+    )
+
+    assert report.papers_scanned == 3
+    assert recovery.calls.count(str(cache_only_gallery.html_url)) == 1
+    assert (
+        load_figure_cache(tmp_path)[cache_only_key].gallery.figures[0]
+        .cached_image_paths[0]
+        is not None
+    )

@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+import vla_wam_daily.figure_recovery as recovery_module
 from vla_wam_daily.figure_recovery import FigureRecoveryService
 from vla_wam_daily.figure_recovery_types import (
     RecoveredFigure,
@@ -383,10 +384,56 @@ def test_skip_permanent_results_and_throttle_recent_fetch_failure() -> None:
             recovery_status=status,
             recovery_checked_at=checked_at,
         )
+        if status is FigureRecoveryStatus.NOT_FOUND:
+            original = original.model_copy(
+                update={
+                    "recovery_version": recovery_module.FIGURE_RECOVERY_VERSION
+                }
+            )
         recovery = service(html=gallery(), source=None, pdf=None, calls=calls)
 
         assert recovery.recover_gallery(original, checked_at=CHECKED_AT) == original
         assert calls == []
+
+
+def test_historical_gallery_defaults_recovery_version_to_zero() -> None:
+    payload = gallery().model_dump(mode="python")
+    payload.pop("recovery_version", None)
+
+    historical = FigureGallery.model_validate(payload)
+
+    assert historical.recovery_version == 0
+
+
+def test_not_found_is_permanent_only_for_current_recovery_version() -> None:
+    old = gallery(
+        recovery_status=FigureRecoveryStatus.NOT_FOUND,
+        recovery_checked_at=CHECKED_AT - timedelta(hours=48),
+    ).model_copy(update={"recovery_version": 0})
+    calls: list[str] = []
+    recovery = service(html=gallery(), source=None, pdf=None, calls=calls)
+
+    refreshed = recovery.recover_gallery(old, checked_at=CHECKED_AT)
+
+    assert calls[0] == f"html:{ARXIV_ID}:v{VERSION}:{CHECKED_AT.isoformat()}"
+    assert refreshed.recovery_status is FigureRecoveryStatus.NOT_FOUND
+    assert (
+        refreshed.recovery_version
+        == recovery_module.FIGURE_RECOVERY_VERSION
+    )
+
+    current_calls: list[str] = []
+    current_recovery = service(
+        html=gallery(),
+        source=None,
+        pdf=None,
+        calls=current_calls,
+    )
+    assert (
+        current_recovery.recover_gallery(refreshed, checked_at=CHECKED_AT)
+        == refreshed
+    )
+    assert current_calls == []
 
 
 def test_fetch_failure_retries_after_twenty_four_hours() -> None:

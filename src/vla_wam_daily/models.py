@@ -371,6 +371,7 @@ class FigureGallery(FrozenStrictModel):
     checked_at: UtcDatetime
     recovery_status: FigureRecoveryStatus = FigureRecoveryStatus.NOT_ATTEMPTED
     recovery_checked_at: UtcDatetime | None = None
+    recovery_version: int = Field(default=0, ge=0)
 
     @model_validator(mode="before")
     @classmethod
