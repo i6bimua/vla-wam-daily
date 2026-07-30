@@ -70,6 +70,9 @@ describe("home paper Figure preview contract", () => {
     expect(css).toMatch(
       /\.paper-card__figure-preview img\s*\{[^}]*object-fit:\s*contain/s,
     );
+    expect(css).toMatch(
+      /\.paper-card--compact\s+\.paper-card__lead\s*\{[^}]*grid-template-columns:\s*1fr/s,
+    );
   });
 });
 
