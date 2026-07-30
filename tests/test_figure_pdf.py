@@ -124,6 +124,22 @@ def test_figure_ten_does_not_match_figure_one() -> None:
     assert extract(make_target_pdf(caption="Figure 10: Wrong figure.")) is None
 
 
+def test_default_render_resolution_is_approximately_300_dpi() -> None:
+    candidate = extract(make_target_pdf())
+
+    assert candidate is not None
+    with Image.open(io.BytesIO(candidate.content)) as image:
+        width, height = image.size
+
+    crop_width_points = 400 + 2 * 6
+    helvetica_12_descent_points = 2.484
+    crop_height_points = 180 + (430 - 390) + helvetica_12_descent_points + 2 * 6
+    expected_width = crop_width_points * 300 / 72
+    expected_height = crop_height_points * 300 / 72
+    assert width == pytest.approx(expected_width, abs=2)
+    assert height == pytest.approx(expected_height, abs=2)
+
+
 def draw_image_visual(canvas: Canvas) -> None:
     image = Image.new("RGB", (80, 40), (30, 100, 210))
     canvas.drawImage(
@@ -247,6 +263,20 @@ def test_scanned_page_without_machine_readable_caption_is_not_ocrd() -> None:
             height=PAGE_SIZE[1],
             preserveAspectRatio=False,
         )
+
+    assert extract(make_pdf(page)) is None
+
+
+def test_near_full_page_visual_candidate_is_rejected_by_crop_coverage_bound() -> None:
+    def page(canvas: Canvas) -> None:
+        draw_rect_visual(
+            canvas,
+            x=6,
+            y=35,
+            width=600,
+            height=745,
+        )
+        draw_caption(canvas, "Figure 1: Near-full-page candidate.", x=20, y=18)
 
     assert extract(make_pdf(page)) is None
 
