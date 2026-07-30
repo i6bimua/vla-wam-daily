@@ -1717,6 +1717,40 @@ def test_follows_redirect_only_for_the_same_exact_source_identity() -> None:
     assert requests[1].url.host == "www.arxiv.org"
 
 
+def test_follows_official_src_redirect_for_the_same_exact_source_identity() -> None:
+    requests: list[httpx.Request] = []
+    body = make_tar(
+        {
+            "main.tex": make_figure_tex(),
+            "figures/model.png": PNG_BYTES,
+            "figures/later.png": b"later",
+        }
+    )
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        if request.url.path.startswith("/e-print/"):
+            return httpx.Response(
+                301,
+                headers={
+                    "location": f"/src/{ARXIV_ID}v{VERSION}",
+                },
+            )
+        return httpx.Response(200, content=body)
+
+    extractor, client = make_extractor(handler=httpx.MockTransport(handler))
+    try:
+        candidate = extractor.extract(ARXIV_ID, VERSION)
+    finally:
+        client.close()
+
+    assert candidate is not None
+    assert [request.url.path for request in requests] == [
+        f"/e-print/{ARXIV_ID}v{VERSION}",
+        f"/src/{ARXIV_ID}v{VERSION}",
+    ]
+
+
 @pytest.mark.parametrize(
     "location",
     [
@@ -1728,7 +1762,9 @@ def test_follows_redirect_only_for_the_same_exact_source_identity() -> None:
         f"https://arxiv.org/e-print/{ARXIV_ID}v{VERSION}?download=1",
         f"https://arxiv.org/e-print/{ARXIV_ID}v2",
         "https://arxiv.org/e-print/2607.99999v1",
-        f"https://arxiv.org/src/{ARXIV_ID}v{VERSION}",
+        f"https://arxiv.org/src/{ARXIV_ID}v2",
+        "https://arxiv.org/src/2607.99999v1",
+        f"https://arxiv.org/src/{ARXIV_ID}v{VERSION}/other",
     ],
 )
 def test_rejects_redirects_that_change_exact_source_identity(

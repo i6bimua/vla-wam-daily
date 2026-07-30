@@ -1209,6 +1209,9 @@ def _safe_source_redirect(
         port = parsed.port
     except ValueError:
         return None
+    allowed_paths = {expected_path}
+    if expected_path.startswith("/e-print/"):
+        allowed_paths.add(f"/src/{expected_path.removeprefix('/e-print/')}")
     if (
         parsed.scheme != "https"
         or parsed.hostname not in ARXIV_FIGURE_HOSTS
@@ -1217,7 +1220,7 @@ def _safe_source_redirect(
         or port not in (None, 443)
         or "?" in candidate
         or "#" in candidate
-        or parsed.path != expected_path
+        or parsed.path not in allowed_paths
     ):
         return None
     return candidate

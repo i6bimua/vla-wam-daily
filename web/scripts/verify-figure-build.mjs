@@ -25,7 +25,7 @@ const fallbackCases = [
   [
     "2607.20001",
     "html_unavailable",
-    "arXiv 暂未提供 HTML 版本，无法提取 Fig. 1 / Fig. 2。",
+    "arXiv HTML 不可用，源码包和 PDF 中也未能提取到 Fig. 1 / Fig. 2。",
     false,
   ],
   ["2607.20002", "not_found", "在 arXiv HTML 中未找到 Fig. 1 / Fig. 2。", true],

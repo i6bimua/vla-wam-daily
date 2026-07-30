@@ -15,7 +15,7 @@ from vla_wam_daily.models import (
 
 LOGGER = logging.getLogger(__name__)
 RECOVERY_RETRY_INTERVAL = timedelta(hours=24)
-FIGURE_RECOVERY_VERSION = 1
+FIGURE_RECOVERY_VERSION = 2
 _FATAL_RECOVERY_ERRORS = (MemoryError, RecursionError)
 
 
