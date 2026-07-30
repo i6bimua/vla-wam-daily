@@ -1,12 +1,16 @@
+import fcntl
 import logging
 import os
-import tempfile
+import secrets
+import stat
 from collections.abc import Iterable
+from contextlib import suppress
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit
 
 import httpx
 
+from vla_wam_daily.figure_recovery_types import DEFAULT_MAX_ASSET_BYTES
 from vla_wam_daily.figures import figure_cache_key
 from vla_wam_daily.models import (
     ARXIV_FIGURE_HOSTS,
@@ -60,7 +64,7 @@ class ArxivFigureStore:
         public_dir: Path,
         user_agent: str,
         timeout_seconds: float = 30,
-        max_image_bytes: int = 15_000_000,
+        max_image_bytes: int = DEFAULT_MAX_ASSET_BYTES,
         max_redirects: int = 3,
         client: httpx.Client | None = None,
     ) -> None:
@@ -150,16 +154,20 @@ class ArxivFigureStore:
         target_directory: Path,
         target: Path,
         chunks: Iterable[bytes],
-    ) -> None:
-        if target.parent != target_directory or target.is_symlink():
+        no_clobber: bool = False,
+    ) -> bool:
+        if target.parent != target_directory:
             raise ValueError("Figure asset target is unsafe")
-        descriptor, temporary_name = tempfile.mkstemp(
-            dir=target_directory,
-            prefix=f".{target.name}.",
-            suffix=".tmp",
+        directory_descriptor = self._open_target_directory_fd(
+            target_directory
         )
-        temporary_path = Path(temporary_name)
+        temporary_name: str | None = None
         try:
+            fcntl.flock(directory_descriptor, fcntl.LOCK_EX)
+            descriptor, temporary_name = self._create_temporary_file(
+                directory_descriptor,
+                target.name,
+            )
             total_bytes = 0
             try:
                 handle = os.fdopen(descriptor, "wb")
@@ -178,17 +186,118 @@ class ArxivFigureStore:
                     raise ValueError("Figure image response is empty")
                 handle.flush()
                 os.fsync(handle.fileno())
-            os.replace(temporary_path, target)
-            directory_descriptor = os.open(
-                target_directory,
-                os.O_RDONLY | getattr(os, "O_DIRECTORY", 0),
+            state = self._target_state(
+                directory_descriptor,
+                target.name,
             )
-            try:
-                os.fsync(directory_descriptor)
-            finally:
-                os.close(directory_descriptor)
+            if no_clobber:
+                if state == "nonempty":
+                    return False
+                if state == "empty":
+                    os.unlink(target.name, dir_fd=directory_descriptor)
+                try:
+                    os.link(
+                        temporary_name,
+                        target.name,
+                        src_dir_fd=directory_descriptor,
+                        dst_dir_fd=directory_descriptor,
+                        follow_symlinks=False,
+                    )
+                except FileExistsError as error:
+                    if (
+                        self._target_state(
+                            directory_descriptor,
+                            target.name,
+                        )
+                        == "nonempty"
+                    ):
+                        return False
+                    raise ValueError(
+                        "Figure asset target changed during publication"
+                    ) from error
+            else:
+                os.replace(
+                    temporary_name,
+                    target.name,
+                    src_dir_fd=directory_descriptor,
+                    dst_dir_fd=directory_descriptor,
+                )
+            os.fsync(directory_descriptor)
+            return True
         finally:
-            temporary_path.unlink(missing_ok=True)
+            if temporary_name is not None:
+                with suppress(FileNotFoundError):
+                    os.unlink(temporary_name, dir_fd=directory_descriptor)
+            os.close(directory_descriptor)
+
+    def _open_target_directory_fd(self, target_directory: Path) -> int:
+        try:
+            components = target_directory.relative_to(self.public_dir).parts
+        except ValueError as error:
+            raise ValueError("Figure asset directory escapes public_dir") from error
+        flags = (
+            os.O_RDONLY
+            | getattr(os, "O_DIRECTORY", 0)
+            | getattr(os, "O_NOFOLLOW", 0)
+        )
+        try:
+            descriptor = os.open(self.public_dir, flags)
+            for component in components:
+                try:
+                    next_descriptor = os.open(
+                        component,
+                        flags,
+                        dir_fd=descriptor,
+                    )
+                finally:
+                    os.close(descriptor)
+                descriptor = next_descriptor
+        except OSError as error:
+            raise ValueError(
+                "Figure asset directory cannot be opened safely"
+            ) from error
+        return descriptor
+
+    @staticmethod
+    def _create_temporary_file(
+        directory_descriptor: int,
+        target_name: str,
+    ) -> tuple[int, str]:
+        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+        for _attempt in range(100):
+            name = f".{target_name}.{secrets.token_hex(8)}.tmp"
+            try:
+                descriptor = os.open(
+                    name,
+                    flags,
+                    0o600,
+                    dir_fd=directory_descriptor,
+                )
+            except FileExistsError:
+                continue
+            return descriptor, name
+        raise OSError("could not allocate a temporary Figure asset")
+
+    @staticmethod
+    def _target_state(
+        directory_descriptor: int,
+        target_name: str,
+    ) -> str:
+        try:
+            details = os.stat(
+                target_name,
+                dir_fd=directory_descriptor,
+                follow_symlinks=False,
+            )
+        except FileNotFoundError:
+            return "missing"
+        if stat.S_ISLNK(details.st_mode):
+            raise ValueError(
+                "Figure asset target must not be a symbolic link"
+            )
+        if not stat.S_ISREG(details.st_mode):
+            raise ValueError("Figure asset target must be a regular file")
+        return "nonempty" if details.st_size > 0 else "empty"
 
     def install_recovered_figure(
         self,
@@ -236,6 +345,7 @@ class ArxivFigureStore:
             target_directory=target_directory,
             target=target,
             chunks=(content,),
+            no_clobber=True,
         )
         return relative_path
 

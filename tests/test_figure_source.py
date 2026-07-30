@@ -4,25 +4,56 @@ from collections.abc import Mapping, Sequence
 
 import httpx
 import pytest
+from PIL import Image
 
+from vla_wam_daily.figure_recovery_types import DEFAULT_MAX_ASSET_BYTES
 from vla_wam_daily.figure_source import (
     ArxivSourceFigureExtractor,
     TransientRecoveryError,
+    _lex_tex,
 )
 
 ARXIV_ID = "2607.12345"
 VERSION = 1
 SOURCE_URL = f"https://arxiv.org/e-print/{ARXIV_ID}v{VERSION}"
-PNG_BYTES = b"\x89PNG\r\n\x1a\nfigure"
+
+
+def make_image(
+    format_: str,
+    *,
+    size: tuple[int, int] = (2, 2),
+    frames: int = 1,
+) -> bytes:
+    output = io.BytesIO()
+    images = [
+        Image.new("RGB", size, (index * 20, 80, 120))
+        for index in range(frames)
+    ]
+    images[0].save(
+        output,
+        format=format_,
+        save_all=frames > 1,
+        append_images=images[1:],
+    )
+    return output.getvalue()
+
+
+PNG_BYTES = make_image("PNG")
+JPEG_BYTES = make_image("JPEG")
+WEBP_BYTES = make_image("WEBP")
+GIF_BYTES = make_image("GIF")
 
 
 def make_tar(
     files: Mapping[str, bytes],
     *,
     extra_members: Sequence[tarfile.TarInfo] = (),
+    mode: str = "w:gz",
+    format_: int | None = None,
 ) -> bytes:
     output = io.BytesIO()
-    with tarfile.open(fileobj=output, mode="w:gz") as archive:
+    options = {} if format_ is None else {"format": format_}
+    with tarfile.open(fileobj=output, mode=mode, **options) as archive:
         for name, content in files.items():
             member = tarfile.TarInfo(name)
             member.size = len(content)
@@ -131,25 +162,24 @@ def test_boundedly_inlines_one_literal_local_tex_file(command: str) -> None:
         {
             "main.tex": main,
             "sections/intro.tex": included,
-            "assets/robot.webp": b"RIFFwebp",
+            "assets/robot.webp": WEBP_BYTES,
         }
     )
 
     assert candidate is not None
     assert candidate.caption == "A robot policy."
     assert candidate.extension == "webp"
-    assert candidate.content == b"RIFFwebp"
+    assert candidate.content == WEBP_BYTES
 
 
 @pytest.mark.parametrize(
     ("asset_name", "content", "expected_extension"),
     [
         ("figure.png", PNG_BYTES, "png"),
-        ("figure.jpg", b"\xff\xd8\xffjpg", "jpg"),
-        ("figure.jpeg", b"\xff\xd8\xffjpeg", "jpg"),
-        ("figure.webp", b"RIFFwebp", "webp"),
-        ("figure.gif", b"GIF89a", "gif"),
-        ("figure.svg", b"<svg/>", "svg"),
+        ("figure.jpg", JPEG_BYTES, "jpg"),
+        ("figure.jpeg", JPEG_BYTES, "jpg"),
+        ("figure.webp", WEBP_BYTES, "webp"),
+        ("figure.gif", GIF_BYTES, "gif"),
     ],
 )
 def test_accepts_each_supported_source_asset_extension(
@@ -174,14 +204,94 @@ def test_resolves_optional_asset_extension_inside_main_archive_root() -> None:
     candidate = extract_from_tar(
         {
             "bundle/main.tex": make_figure_tex(image_target="images/architecture"),
-            "bundle/images/architecture.svg": b"<svg>architecture</svg>",
+            "bundle/images/architecture.webp": WEBP_BYTES,
             "bundle/figures/later.png": b"later",
         }
     )
 
     assert candidate is not None
-    assert candidate.extension == "svg"
-    assert candidate.content == b"<svg>architecture</svg>"
+    assert candidate.extension == "webp"
+    assert candidate.content == WEBP_BYTES
+
+
+def test_source_svg_asset_is_not_published_without_sanitization() -> None:
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": make_figure_tex(image_target="figure.svg"),
+                "figure.svg": b"<svg><script>alert(1)</script></svg>",
+                "figures/later.png": PNG_BYTES,
+            }
+        )
+        is None
+    )
+
+
+@pytest.mark.parametrize(
+    ("asset_name", "content"),
+    [
+        ("figure.png", b"\x89PNG\r\n\x1a\ntruncated"),
+        ("figure.png", JPEG_BYTES),
+        ("figure.jpg", PNG_BYTES),
+    ],
+)
+def test_rejects_malformed_or_extension_mismatched_raster_assets(
+    asset_name: str,
+    content: bytes,
+) -> None:
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": make_figure_tex(image_target=asset_name),
+                asset_name: content,
+                "figures/later.png": PNG_BYTES,
+            }
+        )
+        is None
+    )
+
+
+@pytest.mark.parametrize(
+    ("name", "value", "asset_name", "content"),
+    [
+        ("max_image_dimension", 1, "figure.png", PNG_BYTES),
+        ("max_image_pixels", 3, "figure.png", PNG_BYTES),
+        ("max_image_frames", 1, "figure.gif", make_image("GIF", frames=2)),
+        (
+            "max_asset_bytes",
+            len(PNG_BYTES) - 1,
+            "figure.png",
+            PNG_BYTES,
+        ),
+    ],
+)
+def test_rejects_source_raster_assets_over_decode_bounds(
+    name: str,
+    value: int,
+    asset_name: str,
+    content: bytes,
+) -> None:
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": make_figure_tex(image_target=asset_name),
+                asset_name: content,
+                "figures/later.png": PNG_BYTES,
+            },
+            **{name: value},
+        )
+        is None
+    )
+
+
+def test_extractor_and_store_share_the_same_default_asset_byte_limit() -> None:
+    extractor, client = make_extractor(
+        handler=httpx.MockTransport(lambda _request: httpx.Response(404))
+    )
+    try:
+        assert extractor.max_asset_bytes == DEFAULT_MAX_ASSET_BYTES
+    finally:
+        client.close()
 
 
 def unsafe_member(name: str, type_: bytes = tarfile.REGTYPE) -> tarfile.TarInfo:
@@ -325,6 +435,88 @@ def test_rejects_oversized_total_tex_text_bytes() -> None:
     )
 
     assert candidate is None
+
+
+@pytest.mark.parametrize("format_", [tarfile.PAX_FORMAT, tarfile.GNU_FORMAT])
+def test_rejects_archive_metadata_over_global_uncompressed_cap(
+    format_: int,
+) -> None:
+    long_component = "m" * 4_000
+    body = make_tar(
+        {
+            f"{long_component}/main.tex": make_figure_tex(),
+            f"{long_component}/figures/model.png": PNG_BYTES,
+            f"{long_component}/figures/later.png": PNG_BYTES,
+        },
+        format_=format_,
+    )
+
+    extractor, client = make_extractor(
+        body,
+        max_compressed_bytes=len(body),
+        max_archive_bytes=2_000,
+    )
+    try:
+        assert extractor.extract(ARXIV_ID, VERSION) is None
+    finally:
+        client.close()
+
+
+@pytest.mark.parametrize("mode", ["w:bz2", "w:xz"])
+def test_rejects_unsupported_compressed_tar_formats(mode: str) -> None:
+    body = make_tar(
+        {
+            "main.tex": make_figure_tex(),
+            "figures/model.png": PNG_BYTES,
+            "figures/later.png": PNG_BYTES,
+        },
+        mode=mode,
+    )
+
+    extractor, client = make_extractor(body)
+    try:
+        assert extractor.extract(ARXIV_ID, VERSION) is None
+    finally:
+        client.close()
+
+
+def test_accepts_raw_tar_within_global_archive_cap() -> None:
+    body = make_tar(
+        {
+            "main.tex": make_figure_tex(),
+            "figures/model.png": PNG_BYTES,
+            "figures/later.png": PNG_BYTES,
+        },
+        mode="w",
+    )
+    extractor, client = make_extractor(body, max_archive_bytes=len(body))
+    try:
+        assert extractor.extract(ARXIV_ID, VERSION) is not None
+    finally:
+        client.close()
+
+
+@pytest.mark.parametrize("error_type", [ValueError, OverflowError])
+def test_tar_parser_value_and_overflow_errors_are_permanent_failures(
+    monkeypatch: pytest.MonkeyPatch,
+    error_type: type[Exception],
+) -> None:
+    body = make_tar(
+        {
+            "main.tex": make_figure_tex(),
+            "figures/model.png": PNG_BYTES,
+        }
+    )
+
+    def fail_open(*_args: object, **_kwargs: object) -> None:
+        raise error_type("malformed sparse or PAX metadata")
+
+    monkeypatch.setattr(tarfile, "open", fail_open)
+    extractor, client = make_extractor(body)
+    try:
+        assert extractor.extract(ARXIV_ID, VERSION) is None
+    finally:
+        client.close()
 
 
 @pytest.mark.parametrize(
@@ -914,6 +1106,166 @@ def test_macro_definition_after_first_figure_does_not_change_candidate() -> None
 
 
 @pytest.mark.parametrize(
+    "prefix",
+    [
+        r"\setcounter{figure}{5}",
+        r"\addtocounter{figure}{2}",
+        r"\counterwithin{figure}{section}",
+        r"\counterwithout{figure}{section}",
+        r"\stepcounter{figure}",
+        r"\refstepcounter{figure}",
+    ],
+)
+def test_returns_none_for_counter_mutation_before_candidate(
+    prefix: str,
+) -> None:
+    main = (
+        rf"""
+\documentclass{{article}}
+{prefix}
+\begin{{document}}
+\begin{{figure}}
+\includegraphics{{figure.png}}
+\caption{{Counter semantics are ambiguous.}}
+\end{{figure}}
+\end{{document}}
+""".encode()
+    )
+
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": main,
+                "figure.png": PNG_BYTES,
+            }
+        )
+        is None
+    )
+
+
+@pytest.mark.parametrize("dependency", ["local.sty", "local.cls", "LOCAL.STY"])
+def test_returns_none_when_archive_contains_local_tex_semantic_dependency(
+    dependency: str,
+) -> None:
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": make_figure_tex(),
+                dependency: rb"\renewcommand{\includegraphics}[1]{}",
+                "figures/model.png": PNG_BYTES,
+                "figures/later.png": PNG_BYTES,
+            }
+        )
+        is None
+    )
+
+
+@pytest.mark.parametrize(
+    "main",
+    [
+        rb"""
+\documentclass{article}
+\begin{figure}
+\includegraphics{figure.png}
+\caption{A preamble Figure.}
+\end{figure}
+\begin{document}
+\end{document}
+""",
+        rb"""
+\documentclass{article}
+\begin{document}
+\begin{minipage}{\textwidth}
+\begin{figure}
+\includegraphics{figure.png}
+\caption{A nested Figure.}
+\end{figure}
+\end{minipage}
+\end{document}
+""",
+        rb"""
+\documentclass{article}
+\begin{document}
+\newcommand{\wrapped}{%
+  \begin{figure}
+  \includegraphics{figure.png}
+  \caption{A command-nested Figure.}
+  \end{figure}
+}
+\end{document}
+""",
+        rb"""
+\documentclass{article}
+\begin{document}
+\begin{figure}
+\resizebox{\textwidth}{!}{\includegraphics{figure.png}}
+\caption{A nested image command.}
+\end{figure}
+\end{document}
+""",
+        rb"""
+\documentclass{article}
+\begin{document}
+\begin{figure}
+\includegraphics{figure.png}
+\caption[Short]{\parbox{\textwidth}{A nested caption command.}}
+\end{figure}
+\end{document}
+""",
+    ],
+)
+def test_candidate_and_required_commands_must_be_in_direct_document_context(
+    main: bytes,
+) -> None:
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": main,
+                "figure.png": PNG_BYTES,
+            }
+        )
+        is None
+    )
+
+
+def test_escaped_verbatim_end_does_not_expose_fake_figure_commands() -> None:
+    main = rb"""
+\documentclass{article}
+\begin{document}
+\begin{verbatim}
+\\end{verbatim}
+\begin{figure}
+\includegraphics{figure.png}
+\caption{Still verbatim, with no literal terminator.}
+\end{figure}
+\end{document}
+"""
+
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": main,
+                "figure.png": PNG_BYTES,
+            }
+        )
+        is None
+    )
+
+
+def test_tex_lexer_has_a_stable_linear_scan_work_bound() -> None:
+    repeated = (
+        "\\\\\\% escaped percent \\\\begin{figure} "
+        "\\verb|\\includegraphics{fake.png}| % comment\n"
+    )
+    text = repeated * 20_000 + make_figure_tex().decode()
+
+    lexed = _lex_tex(text)
+
+    assert lexed is not None
+    assert lexed.scan_steps <= len(text) * 3
+
+
+@pytest.mark.parametrize(
     "caption",
     [
         "NUL \x00 control.",
@@ -1084,7 +1436,7 @@ def test_source_404_is_an_unambiguous_not_found() -> None:
         client.close()
 
 
-@pytest.mark.parametrize("status_code", [429, 500, 503])
+@pytest.mark.parametrize("status_code", [408, 425, 429, 500, 503])
 def test_source_retryable_http_failures_raise_typed_transient_error(
     status_code: int,
 ) -> None:
@@ -1209,12 +1561,17 @@ def test_invalid_empty_or_oversized_source_body_is_deterministic_failure(
     [
         ("timeout_seconds", 0),
         ("max_compressed_bytes", 0),
+        ("max_archive_bytes", 0),
         ("max_redirects", -1),
         ("max_members", 0),
         ("max_member_bytes", 0),
         ("max_total_uncompressed_bytes", 0),
         ("max_include_depth", -1),
         ("max_tex_bytes", 0),
+        ("max_asset_bytes", 0),
+        ("max_image_dimension", 0),
+        ("max_image_pixels", 0),
+        ("max_image_frames", 0),
     ],
 )
 def test_extractor_rejects_invalid_constructor_bounds(

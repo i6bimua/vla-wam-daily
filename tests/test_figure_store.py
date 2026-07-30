@@ -1,4 +1,6 @@
 import os
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import httpx
@@ -562,7 +564,7 @@ def test_store_rejects_invalid_recovered_figure_parameters(
     client.close()
 
 
-def test_store_cleans_recovered_temp_file_after_atomic_replace_failure(
+def test_store_cleans_recovered_temp_file_after_atomic_link_failure(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -572,11 +574,11 @@ def test_store_cleans_recovered_temp_file_after_atomic_replace_failure(
         httpx.MockTransport(lambda _request: httpx.Response(404)),
     )
 
-    def fail_replace(_source: os.PathLike[str], _target: os.PathLike[str]) -> None:
-        raise OSError("simulated replace failure")
+    def fail_link(*_args: object, **_kwargs: object) -> None:
+        raise OSError("simulated link failure")
 
-    monkeypatch.setattr("vla_wam_daily.figure_store.os.replace", fail_replace)
-    with store, pytest.raises(OSError, match="simulated replace failure"):
+    monkeypatch.setattr("vla_wam_daily.figure_store.os.link", fail_link)
+    with store, pytest.raises(OSError, match="simulated link failure"):
         store.install_recovered_figure(
             arxiv_id="2607.12345",
             version=1,
@@ -590,6 +592,106 @@ def test_store_cleans_recovered_temp_file_after_atomic_replace_failure(
     assert not (
         public_dir / "figures/2607.12345/v1/fig1-panel1.png"
     ).exists()
+    client.close()
+
+
+@pytest.mark.parametrize("existing_empty", [False, True])
+def test_concurrent_recovered_writers_publish_once_without_overwrite(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    existing_empty: bool,
+) -> None:
+    public_dir = tmp_path / "public"
+    target = public_dir / "figures/2607.12345/v1/fig1-panel1.png"
+    if existing_empty:
+        target.parent.mkdir(parents=True)
+        target.touch()
+    stores = [
+        make_store(
+            public_dir,
+            httpx.MockTransport(lambda _request: httpx.Response(404)),
+        )
+        for _ in range(2)
+    ]
+    start_barrier = threading.Barrier(2)
+    real_link = os.link
+    link_calls: list[tuple[object, object]] = []
+    calls_lock = threading.Lock()
+
+    def racing_link(
+        source: object,
+        target: object,
+        **kwargs: object,
+    ) -> None:
+        with calls_lock:
+            link_calls.append((source, target))
+        real_link(source, target, **kwargs)
+
+    monkeypatch.setattr("vla_wam_daily.figure_store.os.link", racing_link)
+
+    def install(index: int) -> str:
+        store, _client = stores[index]
+        start_barrier.wait(timeout=5)
+        return store.install_recovered_figure(
+            arxiv_id="2607.12345",
+            version=1,
+            figure_number=1,
+            panel=1,
+            extension="png",
+            content=f"writer-{index}".encode(),
+        )
+
+    try:
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            paths = list(executor.map(install, range(2)))
+    finally:
+        for store, client in stores:
+            store.close()
+            client.close()
+
+    assert paths[0] == paths[1]
+    assert target.read_bytes() in {b"writer-0", b"writer-1"}
+    assert len(link_calls) == 1
+    assert all(not Path(str(source)).is_absolute() for source, _ in link_calls)
+
+
+def test_recovered_publish_revalidates_a_racing_target_symlink(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    public_dir = tmp_path / "public"
+    outside = tmp_path / "outside.png"
+    outside.write_bytes(b"outside")
+    store, client = make_store(
+        public_dir,
+        httpx.MockTransport(lambda _request: httpx.Response(404)),
+    )
+    real_link = os.link
+
+    def inject_symlink(
+        source: object,
+        target: object,
+        **kwargs: object,
+    ) -> None:
+        directory_fd = kwargs["dst_dir_fd"]
+        os.symlink(outside, target, dir_fd=directory_fd)
+        real_link(source, target, **kwargs)
+
+    monkeypatch.setattr(
+        "vla_wam_daily.figure_store.os.link",
+        inject_symlink,
+    )
+    with store, pytest.raises(ValueError, match="symbolic link"):
+        store.install_recovered_figure(
+            arxiv_id="2607.12345",
+            version=1,
+            figure_number=1,
+            panel=1,
+            extension="png",
+            content=b"recovered",
+        )
+
+    assert outside.read_bytes() == b"outside"
     client.close()
 
 
