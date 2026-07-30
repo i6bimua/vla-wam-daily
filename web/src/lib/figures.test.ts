@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { resolveFigurePanelSource } from "./figures";
+import {
+  figurePanelDownloadFilename,
+  resolveFigurePanelSource,
+} from "./figures";
 
 const originalUrl = "https://arxiv.org/html/2607.12345v1/x1.png";
 
@@ -74,4 +77,42 @@ describe("Figure panel source resolution", () => {
       ).toThrow(/base path/i);
     },
   );
+});
+
+describe("Figure panel download filename", () => {
+  it("uses the cached asset extension for a local download", () => {
+    const source = resolveFigurePanelSource({
+      originalUrl,
+      cachedPath: "/figures/2607.12345/v1/fig1-panel1.svg",
+      basePath: "/vla-wam-daily/",
+    });
+
+    expect(
+      figurePanelDownloadFilename({
+        arxivId: "2607.12345",
+        version: 1,
+        figure: 1,
+        panel: 1,
+        source,
+      }),
+    ).toBe("2607.12345-v1-fig1-panel1.svg");
+  });
+
+  it("uses the original extension for a remote fallback", () => {
+    const source = resolveFigurePanelSource({
+      originalUrl,
+      cachedPath: null,
+      basePath: "/vla-wam-daily/",
+    });
+
+    expect(
+      figurePanelDownloadFilename({
+        arxivId: "2607.12345",
+        version: 1,
+        figure: 1,
+        panel: 1,
+        source,
+      }),
+    ).toBe("2607.12345-v1-fig1-panel1.png");
+  });
 });

@@ -33,6 +33,18 @@ test("desktop home exposes research cards and live filters", async ({
   ).toBeVisible();
   await expect(page.locator("[data-result-count]")).toHaveText("4");
 
+  const paperCard = page.locator('[data-paper-card][data-id="2607.12345"]');
+  await expect(paperCard.locator("details.analysis")).not.toHaveAttribute(
+    "open",
+    "",
+  );
+  const preview = paperCard.locator("[data-figure-preview]");
+  await expect(preview).toBeVisible();
+  await expect(preview.locator("img")).toHaveAttribute(
+    "src",
+    /\/figures\/2607\.12345\/v1\/fig1-panel1\.svg$/,
+  );
+
   await page.getByLabel("最低相关性").selectOption("8");
 
   await expect(page.locator("[data-result-count]")).toHaveText("1");
@@ -82,7 +94,18 @@ test("mobile navigation and paper detail remain usable", async ({ page }) => {
   await expect(navigation).toBeVisible();
   await expect(navigation.getByRole("link", { name: "搜索" })).toBeVisible();
 
-  await page.locator('[data-paper-card][data-id="2607.12345"] h2 a').click();
+  const paperCard = page.locator('[data-paper-card][data-id="2607.12345"]');
+  const textBox = await paperCard.locator(".paper-card__text").boundingBox();
+  const previewBox = await paperCard
+    .locator("[data-figure-preview]")
+    .boundingBox();
+  expect(textBox).not.toBeNull();
+  expect(previewBox).not.toBeNull();
+  expect(previewBox!.y).toBeGreaterThanOrEqual(
+    textBox!.y + textBox!.height - 1,
+  );
+
+  await paperCard.locator("h2 a").click();
 
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "用于机器人操作的视觉语言动作策略",
@@ -105,7 +128,24 @@ test("paper detail immediately renders remote Figure 1 and Figure 2", async ({
   await expect(page.locator("[data-figure-image]")).toHaveCount(2);
 });
 
-test("download button saves a routed arXiv image with a stable name", async ({
+test("local Figure download uses the cached file and extension", async ({
+  page,
+}) => {
+  await page.goto("papers/2607.12345/");
+
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByRole("link", { name: "下载 Figure 1 面板 1/1 原图" }).click();
+  const download = await downloadPromise;
+
+  expect(download.suggestedFilename()).toBe("2607.12345-v1-fig1-panel1.svg");
+  expect(await download.failure()).toBeNull();
+  const downloadPath = await download.path();
+  expect(downloadPath).not.toBeNull();
+  const downloadedText = await readFile(downloadPath!, "utf8");
+  expect(downloadedText).toContain("<svg");
+});
+
+test("remote fallback download saves an arXiv image with a stable name", async ({
   page,
 }) => {
   await routeFigureImages(page);
@@ -113,11 +153,11 @@ test("download button saves a routed arXiv image with a stable name", async ({
 
   const downloadPromise = page.waitForEvent("download");
   await page
-    .getByRole("button", { name: "下载 Figure 1 面板 1/1 原图" })
+    .getByRole("button", { name: "下载 Figure 2 面板 1/1 原图" })
     .click();
   const download = await downloadPromise;
 
-  expect(download.suggestedFilename()).toBe("2607.12345-v1-fig1-panel1.png");
+  expect(download.suggestedFilename()).toBe("2607.12345-v1-fig2-panel1.png");
   expect(await download.failure()).toBeNull();
   const downloadPath = await download.path();
   expect(downloadPath).not.toBeNull();
@@ -135,11 +175,10 @@ test("broken remote images expose the PDF fallback", async ({ page }) => {
   await page.goto("papers/2607.12345/");
   await page.locator(".figure-gallery__grid").scrollIntoViewIfNeeded();
 
+  const visibleFallback = page.locator(".figure-load-error:visible");
+  await expect(visibleFallback.getByText("该面板暂时无法加载。")).toBeVisible();
   await expect(
-    page.getByText("该面板暂时无法从 arXiv 加载。").first(),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("link", { name: /查看 PDF/ }).first(),
+    visibleFallback.getByRole("link", { name: /查看 PDF/ }),
   ).toBeVisible();
 });
 

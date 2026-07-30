@@ -34,6 +34,45 @@ describe("PaperExplorer presentation contract", () => {
   });
 });
 
+describe("home paper Figure preview contract", () => {
+  it("renders Figure 1 before the expandable research notes", async () => {
+    const card = await source("components/PaperCard.astro");
+    const preview = await source("components/FigurePreview.astro");
+
+    expect(card).toContain(
+      'import FigurePreview from "./FigurePreview.astro";',
+    );
+    expect(card).toContain("<FigurePreview paper={paper} />");
+    expect(card.indexOf("<FigurePreview")).toBeLessThan(
+      card.indexOf('<details class="analysis"'),
+    );
+    expect(preview).toContain("figure.number === 1");
+    expect(preview).toContain("figure.image_urls[0]");
+    expect(preview).toContain("figure.cached_image_paths[0]");
+    expect(preview).toContain("resolveFigurePanelSource");
+    expect(preview).toContain("data-figure-preview");
+    expect(preview).toContain("figure.caption");
+    expect(preview).toContain("Fig. 1 暂不可用");
+  });
+
+  it("uses the approved smaller title and responsive lead layout", async () => {
+    const css = await source("styles/global.css");
+
+    expect(css).toMatch(
+      /\.paper-card h2\s*\{[^}]*font-size:\s*clamp\(1\.35rem,\s*2\.4vw,\s*2rem\)/s,
+    );
+    expect(css).toMatch(
+      /\.paper-card__lead\s*\{[^}]*display:\s*grid[^}]*grid-template-columns:\s*minmax\(0,\s*1\.15fr\)\s+minmax\(16rem,\s*0\.85fr\)/s,
+    );
+    expect(css).toMatch(
+      /@media\s*\(max-width:\s*44rem\)[\s\S]*\.paper-card__lead\s*\{[^}]*grid-template-columns:\s*1fr/s,
+    );
+    expect(css).toMatch(
+      /\.paper-card__figure-preview img\s*\{[^}]*object-fit:\s*contain/s,
+    );
+  });
+});
+
 describe("Pagefind search presentation contract", () => {
   it("loads the base-scoped index in guarded batches without unsafe rendering", async () => {
     const component = await source("components/SearchPanel.astro");

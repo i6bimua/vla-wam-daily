@@ -73,9 +73,8 @@ describe("remote Figure component contracts", () => {
       "utf8",
     );
 
-    expect(component).toContain(
-      'import { resolveFigurePanelSource } from "../lib/figures";',
-    );
+    expect(component).toContain("resolveFigurePanelSource");
+    expect(component).toContain("figurePanelDownloadFilename");
     expect(component).toContain("figure.cached_image_paths[index]");
     expect(component).toContain("source.displayUrl");
     expect(component).toContain("source.originalUrl");

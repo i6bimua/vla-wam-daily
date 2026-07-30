@@ -1,5 +1,6 @@
 ---
 import FigureGallery from "./FigureGallery.astro";
+import FigurePreview from "./FigurePreview.astro";
 import type { Paper } from "../lib/schema";
 
 interface Props {
@@ -49,13 +50,17 @@ const links = [
     <p class="paper-card__id">arXiv:{paper.arxiv_id}</p>
   </header>
 
-  <h2 id={titleId}>
-    <a href={`${base}papers/${paper.arxiv_id}/`}>{paper.title_zh}</a>
-  </h2>
-  <p class="original-title" lang="en">{paper.title}</p>
-  <p class="authors">{paper.authors.join(" · ")}</p>
-
-  <p class="summary">{paper.analysis.one_sentence_summary}</p>
+  <div class="paper-card__lead">
+    <div class="paper-card__text">
+      <h2 id={titleId}>
+        <a href={`${base}papers/${paper.arxiv_id}/`}>{paper.title_zh}</a>
+      </h2>
+      <p class="original-title" lang="en">{paper.title}</p>
+      <p class="authors">{paper.authors.join(" · ")}</p>
+      <p class="summary">{paper.analysis.one_sentence_summary}</p>
+    </div>
+    {!compact && <FigurePreview paper={paper} />}
+  </div>
 
   {
     !compact && (

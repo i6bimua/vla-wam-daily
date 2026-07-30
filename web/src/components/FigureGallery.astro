@@ -1,6 +1,8 @@
 ---
-import { figureDownloadFilename } from "../lib/figure-download";
-import { resolveFigurePanelSource } from "../lib/figures";
+import {
+  figurePanelDownloadFilename,
+  resolveFigurePanelSource,
+} from "../lib/figures";
 import type { Paper } from "../lib/schema";
 
 interface Props {
@@ -77,17 +79,17 @@ function statusMessage(status: Paper["figure_gallery"]["status"]): string {
                 const panel = index + 1;
                 const panelName = `面板 ${panel}/${figure.image_urls.length}`;
                 const panelAlt = `${figure.label}，${panelName}：${figure.caption}`;
-                const filename = figureDownloadFilename({
-                  arxivId,
-                  version,
-                  figure: figure.number,
-                  panel,
-                  imageUrl,
-                });
                 const source = resolveFigurePanelSource({
                   originalUrl: imageUrl,
                   cachedPath: figure.cached_image_paths[index],
                   basePath,
+                });
+                const filename = figurePanelDownloadFilename({
+                  arxivId,
+                  version,
+                  figure: figure.number,
+                  panel,
+                  source,
                 });
                 return (
                   <div class="remote-figure__panel" data-figure-panel>

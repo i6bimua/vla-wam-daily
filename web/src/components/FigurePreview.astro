@@ -1,0 +1,83 @@
+---
+import { resolveFigurePanelSource } from "../lib/figures";
+import type { Paper } from "../lib/schema";
+
+interface Props {
+  paper: Paper;
+}
+
+const { paper } = Astro.props;
+const basePath = import.meta.env.BASE_URL;
+const figure = paper.figure_gallery.figures.find(
+  (figure) => figure.number === 1,
+);
+const originalUrl = figure?.image_urls[0];
+const source =
+  figure && originalUrl
+    ? resolveFigurePanelSource({
+        originalUrl: figure.image_urls[0],
+        cachedPath: figure.cached_image_paths[0],
+        basePath,
+      })
+    : null;
+const detailUrl = `${basePath}papers/${paper.arxiv_id}/`;
+---
+
+<aside class="paper-card__figure-preview" data-figure-preview>
+  {
+    figure && source ? (
+      <a
+        href={detailUrl}
+        aria-label={`查看 ${paper.title_zh} 的论文详情与完整图注`}
+      >
+        <figure>
+          <div class="paper-card__figure-preview-media">
+            <img
+              src={source.displayUrl}
+              alt={`Figure 1：${figure.caption}`}
+              loading="lazy"
+              decoding="async"
+              referrerpolicy="no-referrer"
+              data-figure-preview-image
+            />
+            <div
+              class="paper-card__figure-preview-fallback"
+              data-figure-preview-fallback
+              role="status"
+              hidden
+            >
+              <span>Fig. 1 暂不可用</span>
+            </div>
+          </div>
+          <figcaption>
+            <strong>Fig. 1</strong>
+            <span>查看论文与完整图注</span>
+          </figcaption>
+        </figure>
+      </a>
+    ) : (
+      <div class="paper-card__figure-placeholder" role="status">
+        <span>Fig. 1 暂不可用</span>
+      </div>
+    )
+  }
+</aside>
+
+<script>
+  function markPreviewFailed(image: HTMLImageElement): void {
+    image.hidden = true;
+    image
+      .closest<HTMLElement>("[data-figure-preview]")
+      ?.querySelector<HTMLElement>("[data-figure-preview-fallback]")
+      ?.removeAttribute("hidden");
+  }
+
+  document
+    .querySelectorAll<HTMLImageElement>("[data-figure-preview-image]")
+    .forEach((image) => {
+      image.addEventListener("error", () => markPreviewFailed(image));
+      if (image.complete && image.naturalWidth === 0) {
+        markPreviewFailed(image);
+      }
+    });
+</script>
