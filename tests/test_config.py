@@ -5,7 +5,7 @@ import pytest
 import yaml
 from pydantic import ValidationError
 
-from vla_wam_daily.config import load_config
+from vla_wam_daily.config import ArxivConfig, load_config
 from vla_wam_daily.models import ALLOWED_TAGS, Topic
 
 
@@ -28,10 +28,17 @@ def write_config(tmp_path: Path, payload: dict[str, object]) -> tuple[Path, Path
 
 def test_default_config_uses_quality_model() -> None:
     config = load_config(Path("config/topics.yaml"))
+    assert config.arxiv.max_results_per_category == 2000
     assert config.analysis.model_for("quality") == "deepseek-v4-pro"
     assert config.analysis.model_for("economy") == "deepseek-v4-flash"
     assert config.analysis.threshold == 6
     assert config.analysis.max_candidates == 60
+
+
+def test_arxiv_schema_default_supports_three_day_catchup_capacity() -> None:
+    config = ArxivConfig(categories=["cs.RO"])
+
+    assert config.max_results_per_category == 2000
 
 
 def test_standalone_vla_and_wam_are_not_exact_phrases() -> None:

@@ -43,7 +43,7 @@ CompositeRuleName = Annotated[
 class ArxivConfig(StrictModel):
     categories: ConfigStringList
     lookback_days: int = Field(default=3, ge=1, le=31)
-    max_results_per_category: int = Field(default=500, ge=1, le=2000)
+    max_results_per_category: int = Field(default=2000, ge=1, le=2000)
     request_delay_seconds: float = Field(default=3.0, ge=0)
 
 
