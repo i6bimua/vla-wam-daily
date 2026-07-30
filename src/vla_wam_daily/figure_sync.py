@@ -1,5 +1,6 @@
 import logging
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
+from datetime import datetime
 from pathlib import Path
 from typing import Protocol
 
@@ -8,8 +9,10 @@ from pydantic import Field
 from vla_wam_daily.figures import figure_cache_key
 from vla_wam_daily.models import (
     DataFile,
+    FigureAsset,
     FigureCacheEntry,
     FigureGallery,
+    FigureRecoveryStatus,
     FigureStatus,
     FrozenStrictModel,
     PaperRecord,
@@ -28,11 +31,25 @@ class FigureStore(Protocol):
     def mirror_gallery(self, gallery: FigureGallery) -> FigureGallery: ...
 
 
+class FigureRecovery(Protocol):
+    def recover_gallery(
+        self,
+        gallery: FigureGallery,
+        *,
+        checked_at: datetime,
+    ) -> FigureGallery: ...
+
+
 class FigureSyncReport(FrozenStrictModel):
     papers_scanned: int = Field(ge=0)
     panels_reused: int = Field(ge=0)
     panels_mirrored: int = Field(ge=0)
     panels_failed: int = Field(ge=0)
+    html_recovered: int = Field(default=0, ge=0)
+    source_recovered: int = Field(default=0, ge=0)
+    pdf_recovered: int = Field(default=0, ge=0)
+    recovery_not_found: int = Field(default=0, ge=0)
+    recovery_failed: int = Field(default=0, ge=0)
 
 
 def _cached_path_count(gallery: FigureGallery) -> int:
@@ -40,6 +57,86 @@ def _cached_path_count(gallery: FigureGallery) -> int:
         path is not None
         for figure in gallery.figures
         for path in figure.cached_image_paths
+    )
+
+
+def _gallery_completeness(gallery: FigureGallery) -> tuple[int, int, int, int]:
+    return (
+        int(any(figure.number == 1 for figure in gallery.figures)),
+        _cached_path_count(gallery),
+        len(gallery.figures),
+        sum(len(figure.image_urls) for figure in gallery.figures),
+    )
+
+
+def _figure_completeness(figure: FigureAsset) -> tuple[int, int]:
+    return (
+        sum(path is not None for path in figure.cached_image_paths),
+        len(figure.image_urls),
+    )
+
+
+def _merge_figure_candidates(
+    first: FigureAsset,
+    second: FigureAsset,
+) -> FigureAsset:
+    preferred, other = (
+        (second, first)
+        if _figure_completeness(second) > _figure_completeness(first)
+        else (first, second)
+    )
+    if (
+        preferred.source != other.source
+        or preferred.image_urls != other.image_urls
+    ):
+        return preferred
+    return preferred.model_copy(
+        update={
+            "cached_image_paths": tuple(
+                preferred_path or other_path
+                for preferred_path, other_path in zip(
+                    preferred.cached_image_paths,
+                    other.cached_image_paths,
+                    strict=True,
+                )
+            )
+        }
+    )
+
+
+def _merge_gallery_candidates(
+    first: FigureGallery,
+    second: FigureGallery,
+) -> FigureGallery:
+    preferred, other = (
+        (second, first)
+        if _gallery_completeness(second) > _gallery_completeness(first)
+        else (first, second)
+    )
+    figures = {figure.number: figure for figure in preferred.figures}
+    for figure in other.figures:
+        current = figures.get(figure.number)
+        figures[figure.number] = (
+            figure
+            if current is None
+            else _merge_figure_candidates(current, figure)
+        )
+    merged_figures = tuple(figures.values())
+    has_figure_one = 1 in figures
+    return preferred.model_copy(
+        update={
+            "status": (
+                FigureStatus.AVAILABLE
+                if merged_figures
+                else preferred.status
+            ),
+            "figures": merged_figures,
+            "recovery_status": (
+                FigureRecoveryStatus.AVAILABLE
+                if has_figure_one
+                else preferred.recovery_status
+            ),
+        }
     )
 
 
@@ -60,18 +157,30 @@ def _normalized_paths(
 
 def _select_galleries(
     data_files: Sequence[DataFile],
+    cache_entries: Iterable[FigureCacheEntry],
 ) -> dict[tuple[str, int], FigureGallery]:
     galleries: dict[tuple[str, int], FigureGallery] = {}
     for data_file in data_files:
         for paper in data_file.papers:
             identity = paper.arxiv_id, paper.version
             current = galleries.get(identity)
-            if (
-                current is None
-                or _cached_path_count(paper.figure_gallery)
-                > _cached_path_count(current)
-            ):
-                galleries[identity] = paper.figure_gallery
+            galleries[identity] = (
+                paper.figure_gallery
+                if current is None
+                else _merge_gallery_candidates(
+                    current,
+                    paper.figure_gallery,
+                )
+            )
+    for entry in cache_entries:
+        arxiv_id, version_text = entry.key.rsplit(":v", maxsplit=1)
+        identity = arxiv_id, int(version_text)
+        current = galleries.get(identity)
+        galleries[identity] = (
+            entry.gallery
+            if current is None
+            else _merge_gallery_candidates(current, entry.gallery)
+        )
     return galleries
 
 
@@ -92,37 +201,108 @@ def _replace_galleries(
     return data_file.model_copy(update={"papers": papers})
 
 
+def _figure_one(gallery: FigureGallery) -> FigureAsset | None:
+    return next(
+        (figure for figure in gallery.figures if figure.number == 1),
+        None,
+    )
+
+
+def _recovery_outcome(
+    before: FigureGallery,
+    after: FigureGallery,
+    *,
+    now: datetime,
+) -> str | None:
+    if after == before or after.recovery_checked_at != now:
+        return None
+    if after.recovery_status is FigureRecoveryStatus.NOT_FOUND:
+        return "not_found"
+    if after.recovery_status is FigureRecoveryStatus.FETCH_FAILED:
+        return "failed"
+    after_figure = _figure_one(after)
+    if (
+        after.recovery_status is FigureRecoveryStatus.AVAILABLE
+        and after_figure is not None
+    ):
+        return after_figure.source
+    return None
+
+
+def _reraise_fatal(error: Exception) -> None:
+    if isinstance(error, (MemoryError, RecursionError)):
+        raise error
+
+
 def synchronize_figure_assets(
     *,
     data_dir: Path,
     store: FigureStore,
+    recovery: FigureRecovery,
+    now: datetime,
 ) -> FigureSyncReport:
     latest = load_data_file(data_dir / "latest.json")
     if latest is None:
         raise FileNotFoundError(f"latest data file is missing: {data_dir / 'latest.json'}")
     archives = load_archives(data_dir)
-    source_galleries = _select_galleries([*archives.values(), latest])
+    figure_cache = load_figure_cache(data_dir)
+    source_galleries = _select_galleries(
+        [*archives.values(), latest],
+        figure_cache.values(),
+    )
     updated_galleries: dict[tuple[str, int], FigureGallery] = {}
     panels_reused = 0
     panels_mirrored = 0
     panels_failed = 0
+    html_recovered = 0
+    source_recovered = 0
+    pdf_recovered = 0
+    recovery_not_found = 0
+    recovery_failed = 0
 
     for identity, gallery in sorted(source_galleries.items()):
         before = _normalized_paths(gallery)
-        if gallery.status is FigureStatus.AVAILABLE:
+        try:
+            recovered = recovery.recover_gallery(gallery, checked_at=now)
+            if recovered.html_url != gallery.html_url:
+                raise ValueError("Figure recovery changed the gallery identity")
+        except Exception as error:
+            _reraise_fatal(error)
+            LOGGER.exception(
+                "unexpected Figure recovery failure for %sv%s",
+                identity[0],
+                identity[1],
+            )
+            recovered = gallery
+            recovery_failed += 1
+        else:
+            match _recovery_outcome(gallery, recovered, now=now):
+                case "arxiv_html":
+                    html_recovered += 1
+                case "arxiv_source":
+                    source_recovered += 1
+                case "arxiv_pdf":
+                    pdf_recovered += 1
+                case "not_found":
+                    recovery_not_found += 1
+                case "failed":
+                    recovery_failed += 1
+
+        if recovered.status is FigureStatus.AVAILABLE:
             try:
-                mirrored = store.mirror_gallery(gallery)
-            except Exception:
+                mirrored = store.mirror_gallery(recovered)
+            except Exception as error:
+                _reraise_fatal(error)
                 LOGGER.exception(
                     "unexpected Figure synchronization failure for %sv%s",
                     identity[0],
                     identity[1],
                 )
-                mirrored = gallery
+                mirrored = recovered
         else:
-            mirrored = gallery
+            mirrored = recovered
         after = _normalized_paths(mirrored)
-        if gallery.status is FigureStatus.AVAILABLE:
+        if mirrored.status is FigureStatus.AVAILABLE:
             for panel_identity, path in after.items():
                 previous = before.get(panel_identity)
                 if path is None:
@@ -138,7 +318,7 @@ def synchronize_figure_assets(
         filename: _replace_galleries(archive, updated_galleries)
         for filename, archive in archives.items()
     }
-    updated_cache = load_figure_cache(data_dir)
+    updated_cache = dict(figure_cache)
     for (arxiv_id, version), gallery in updated_galleries.items():
         key = figure_cache_key(arxiv_id, version)
         updated_cache[key] = FigureCacheEntry(key=key, gallery=gallery)
@@ -153,4 +333,9 @@ def synchronize_figure_assets(
         panels_reused=panels_reused,
         panels_mirrored=panels_mirrored,
         panels_failed=panels_failed,
+        html_recovered=html_recovered,
+        source_recovered=source_recovered,
+        pdf_recovered=pdf_recovered,
+        recovery_not_found=recovery_not_found,
+        recovery_failed=recovery_failed,
     )

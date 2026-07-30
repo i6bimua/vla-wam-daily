@@ -110,10 +110,12 @@ test("mobile navigation and paper detail remain usable", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "用于机器人操作的视觉语言动作策略",
   );
-  await expect(page.getByRole("link", { name: "PDF" })).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "PDF", exact: true }),
+  ).toBeVisible();
 });
 
-test("paper detail immediately renders remote Figure 1 and Figure 2", async ({
+test("paper detail renders source-aware Figure 1 and Figure 2", async ({
   page,
 }) => {
   await routeFigureImages(page);
@@ -126,6 +128,14 @@ test("paper detail immediately renders remote Figure 1 and Figure 2", async ({
   await expect(page.getByText("The model architecture.")).toBeVisible();
   await expect(page.getByText("Robot evaluation environments.")).toBeVisible();
   await expect(page.locator("[data-figure-image]")).toHaveCount(2);
+  await expect(page.getByText("来源：PDF 自动裁剪")).toBeVisible();
+  await expect(page.getByText("来源：arXiv HTML")).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "查看 Figure 1 所在的论文 PDF" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "在 arXiv HTML 中定位 Figure 2" }),
+  ).toBeVisible();
 });
 
 test("local Figure download uses the cached file and extension", async ({
@@ -143,6 +153,12 @@ test("local Figure download uses the cached file and extension", async ({
   expect(downloadPath).not.toBeNull();
   const downloadedText = await readFile(downloadPath!, "utf8");
   expect(downloadedText).toContain("<svg");
+  await expect(
+    page.getByRole("link", { name: "查看 Figure 1 面板 1/1 原图" }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("link", { name: "查看 Figure 1 所在的论文 PDF" }),
+  ).toBeVisible();
 });
 
 test("remote fallback download saves an arXiv image with a stable name", async ({
@@ -178,7 +194,7 @@ test("broken remote images expose the PDF fallback", async ({ page }) => {
   const visibleFallback = page.locator(".figure-load-error:visible");
   await expect(visibleFallback.getByText("该面板暂时无法加载。")).toBeVisible();
   await expect(
-    visibleFallback.getByRole("link", { name: /查看 PDF/ }),
+    visibleFallback.getByRole("link", { name: /查看论文 PDF/ }),
   ).toBeVisible();
 });
 

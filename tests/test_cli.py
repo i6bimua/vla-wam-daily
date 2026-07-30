@@ -123,6 +123,24 @@ class Harness:
             self.constructor("asset"),
             raising=False,
         )
+        monkeypatch.setattr(
+            cli_module,
+            "ArxivSourceFigureExtractor",
+            self.constructor("source"),
+            raising=False,
+        )
+        monkeypatch.setattr(
+            cli_module,
+            "ArxivPdfFigureExtractor",
+            self.constructor("pdf"),
+            raising=False,
+        )
+        monkeypatch.setattr(
+            cli_module,
+            "FigureRecoveryService",
+            self.constructor("recovery"),
+            raising=False,
+        )
         monkeypatch.setattr(cli_module, "run_daily", self.run_daily, raising=False)
         monkeypatch.setattr(
             cli_module,
@@ -216,6 +234,24 @@ def install_client_sentries(
     monkeypatch.setattr(cli_module, "ArxivFigureStore", unexpected_client("asset"))
     monkeypatch.setattr(
         cli_module,
+        "ArxivSourceFigureExtractor",
+        unexpected_client("source"),
+        raising=False,
+    )
+    monkeypatch.setattr(
+        cli_module,
+        "ArxivPdfFigureExtractor",
+        unexpected_client("pdf"),
+        raising=False,
+    )
+    monkeypatch.setattr(
+        cli_module,
+        "FigureRecoveryService",
+        unexpected_client("recovery"),
+        raising=False,
+    )
+    monkeypatch.setattr(
+        cli_module,
         "run_daily",
         lambda **kwargs: pytest.fail("pipeline must not run"),
     )
@@ -300,13 +336,25 @@ def test_sync_figures_does_not_require_deepseek_and_prints_report(
     data_dir.mkdir()
     (data_dir / "latest.json").write_text("{}\n", encoding="utf-8")
     events: list[str] = []
-    asset = ManagedClient("asset", events)
-    constructor_kwargs: dict[str, object] = {}
+    instances = {
+        kind: ManagedClient(kind, events)
+        for kind in ("asset", "html", "source", "pdf")
+    }
+    constructor_kwargs: dict[str, dict[str, object]] = {}
     sync_kwargs: dict[str, object] = {}
 
-    def construct_asset(**kwargs: object) -> ManagedClient:
-        constructor_kwargs.update(kwargs)
-        return asset
+    def constructor(kind: str) -> Callable[..., ManagedClient]:
+        def construct(**kwargs: object) -> ManagedClient:
+            events.append(f"construct:{kind}")
+            constructor_kwargs[kind] = kwargs
+            return instances[kind]
+
+        return construct
+
+    def construct_recovery(**kwargs: object) -> object:
+        events.append("construct:recovery")
+        constructor_kwargs["recovery"] = kwargs
+        return object()
 
     def synchronize(**kwargs: object) -> FigureSyncReport:
         sync_kwargs.update(kwargs)
@@ -317,8 +365,28 @@ def test_sync_figures_does_not_require_deepseek_and_prints_report(
             panels_failed=1,
         )
 
-    monkeypatch.setattr(cli_module, "ArxivFigureStore", construct_asset)
+    monkeypatch.setattr(cli_module, "ArxivFigureStore", constructor("asset"))
+    monkeypatch.setattr(cli_module, "ArxivFigureClient", constructor("html"))
+    monkeypatch.setattr(
+        cli_module,
+        "ArxivSourceFigureExtractor",
+        constructor("source"),
+        raising=False,
+    )
+    monkeypatch.setattr(
+        cli_module,
+        "ArxivPdfFigureExtractor",
+        constructor("pdf"),
+        raising=False,
+    )
+    monkeypatch.setattr(
+        cli_module,
+        "FigureRecoveryService",
+        construct_recovery,
+        raising=False,
+    )
     monkeypatch.setattr(cli_module, "synchronize_figure_assets", synchronize)
+    before = datetime.now(UTC)
 
     result = RUNNER.invoke(
         cli_module.app,
@@ -330,6 +398,7 @@ def test_sync_figures_does_not_require_deepseek_and_prints_report(
             str(public_dir),
         ],
     )
+    after = datetime.now(UTC)
 
     assert result.exit_code == 0
     assert json.loads(result.stdout) == {
@@ -337,10 +406,53 @@ def test_sync_figures_does_not_require_deepseek_and_prints_report(
         "panels_reused": 2,
         "panels_mirrored": 4,
         "panels_failed": 1,
+        "html_recovered": 0,
+        "source_recovered": 0,
+        "pdf_recovered": 0,
+        "recovery_not_found": 0,
+        "recovery_failed": 0,
     }
-    assert constructor_kwargs["public_dir"] == public_dir
-    assert sync_kwargs == {"data_dir": data_dir, "store": asset}
-    assert events == ["enter:asset", "close:asset"]
+    assert constructor_kwargs["asset"]["public_dir"] == public_dir
+    assert constructor_kwargs["asset"]["user_agent"] == cli_module.DEFAULT_USER_AGENT
+    shared_client = constructor_kwargs["asset"]["client"]
+    assert constructor_kwargs["html"] == {
+        "user_agent": cli_module.DEFAULT_USER_AGENT,
+        "request_delay_seconds": 3.0,
+        "client": shared_client,
+    }
+    assert constructor_kwargs["source"] == {
+        "user_agent": cli_module.DEFAULT_USER_AGENT,
+        "client": shared_client,
+    }
+    assert constructor_kwargs["pdf"] == {
+        "user_agent": cli_module.DEFAULT_USER_AGENT,
+        "client": shared_client,
+    }
+    assert constructor_kwargs["recovery"] == {
+        "html_fetcher": instances["html"],
+        "source_extractor": instances["source"],
+        "pdf_extractor": instances["pdf"],
+        "store": instances["asset"],
+    }
+    assert sync_kwargs["data_dir"] == data_dir
+    assert sync_kwargs["store"] is instances["asset"]
+    assert sync_kwargs["recovery"] is not None
+    assert before <= sync_kwargs["now"] <= after
+    assert events == [
+        "construct:asset",
+        "enter:asset",
+        "construct:html",
+        "enter:html",
+        "construct:source",
+        "enter:source",
+        "construct:pdf",
+        "enter:pdf",
+        "construct:recovery",
+        "close:pdf",
+        "close:source",
+        "close:html",
+        "close:asset",
+    ]
 
 
 def test_sync_figures_rejects_missing_latest_before_constructing_store(
@@ -769,18 +881,40 @@ def test_persisted_daily_run_synchronizes_figures_after_clients_close(
     )
 
     assert result.exit_code == 0
-    assert harness.constructor_kwargs["asset"] == {
-        "public_dir": public_dir,
-        "user_agent": cli_module.DEFAULT_USER_AGENT,
-    }
+    assert harness.constructor_kwargs["asset"]["public_dir"] == public_dir
+    assert (
+        harness.constructor_kwargs["asset"]["user_agent"]
+        == cli_module.DEFAULT_USER_AGENT
+    )
+    shared_client = harness.constructor_kwargs["asset"]["client"]
+    assert harness.constructor_kwargs["source"]["client"] is shared_client
+    assert harness.constructor_kwargs["pdf"]["client"] is shared_client
     assert harness.sync_kwargs == {
         "data_dir": tmp_path,
         "store": harness.instances["asset"],
+        "recovery": harness.instances["recovery"],
+        "now": harness.sync_kwargs["now"],
     }
     assert harness.events.index("close:figure") < harness.events.index(
         "construct:asset"
     )
-    assert harness.events[-3:] == ["enter:asset", "sync", "close:asset"]
+    assert harness.sync_kwargs["now"].tzinfo is UTC
+    assert harness.events[-14:] == [
+        "construct:asset",
+        "enter:asset",
+        "construct:figure",
+        "enter:figure",
+        "construct:source",
+        "enter:source",
+        "construct:pdf",
+        "enter:pdf",
+        "construct:recovery",
+        "sync",
+        "close:pdf",
+        "close:source",
+        "close:figure",
+        "close:asset",
+    ]
 
 
 def test_dry_run_never_constructs_or_synchronizes_figure_store(

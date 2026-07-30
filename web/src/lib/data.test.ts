@@ -327,10 +327,172 @@ describe("the Figure contract", () => {
     expect(() => figureGallerySchema.parse(gallery)).toThrow(/fragment/i);
   });
 
-  it("loads historical Figure assets without cached paths", () => {
+  it("rejects a query on the exact gallery HTML URL", () => {
+    expect(() =>
+      figureGallerySchema.parse({
+        ...figureGallery(),
+        html_url: "https://arxiv.org/html/2607.12345v1?download=1",
+      }),
+    ).toThrow(/query/i);
+  });
+
+  it("loads historical Figure assets with aligned empty cache slots", () => {
     const parsed = figureGallerySchema.parse(figureGallery());
 
-    expect(parsed.figures[0].cached_image_paths).toEqual([]);
+    expect(parsed.figures[0].cached_image_paths).toEqual([null]);
+    expect(parsed.figures[1].cached_image_paths).toEqual([null]);
+  });
+
+  it.each([
+    ["arxiv_source", "https://arxiv.org/e-print/2607.12345v1"],
+    ["arxiv_pdf", "https://arxiv.org/pdf/2607.12345v1"],
+  ] as const)("accepts a local-only %s Figure", (source, sourceUrl) => {
+    const parsed = figureGallerySchema.parse({
+      ...figureGallery(),
+      figures: [
+        {
+          number: 1,
+          label: "Figure 1",
+          caption: "Recovered Figure 1.",
+          image_urls: [null],
+          cached_image_paths: ["/figures/2607.12345/v1/fig1-panel1.png"],
+          source_url: sourceUrl,
+          source,
+        },
+      ],
+      recovery_status: "available",
+      recovery_checked_at: timestamp,
+      recovery_version: 1,
+    });
+
+    expect(parsed.figures[0].image_urls).toEqual([null]);
+    expect(parsed.figures[0].cached_image_paths).toEqual([
+      "/figures/2607.12345/v1/fig1-panel1.png",
+    ]);
+    expect(parsed.figures[0].source).toBe(source);
+  });
+
+  it.each([
+    ["source paper", "arxiv_source", "https://arxiv.org/e-print/2607.99999v1"],
+    [
+      "source version",
+      "arxiv_source",
+      "https://arxiv.org/e-print/2607.12345v2",
+    ],
+    ["PDF paper", "arxiv_pdf", "https://arxiv.org/pdf/2607.99999v1"],
+    ["PDF version", "arxiv_pdf", "https://arxiv.org/pdf/2607.12345v2"],
+    [
+      "source query",
+      "arxiv_source",
+      "https://arxiv.org/e-print/2607.12345v1?download=1",
+    ],
+    ["PDF fragment", "arxiv_pdf", "https://arxiv.org/pdf/2607.12345v1#page=2"],
+  ] as const)(
+    "rejects a recovered Figure with a mismatched %s identity",
+    (_label, source, sourceUrl) => {
+      expect(() =>
+        figureGallerySchema.parse({
+          ...figureGallery(),
+          figures: [
+            {
+              number: 1,
+              label: "Figure 1",
+              caption: "Recovered Figure 1.",
+              image_urls: [null],
+              cached_image_paths: ["/figures/2607.12345/v1/fig1-panel1.png"],
+              source_url: sourceUrl,
+              source,
+            },
+          ],
+        }),
+      ).toThrow();
+    },
+  );
+
+  it("rejects panels without a remote URL or local cache", () => {
+    expect(() =>
+      figureGallerySchema.parse({
+        ...figureGallery(),
+        figures: [
+          {
+            number: 1,
+            label: "Figure 1",
+            caption: "Missing Figure 1.",
+            image_urls: [null],
+            cached_image_paths: [null],
+            source_url: "https://arxiv.org/pdf/2607.12345v1",
+            source: "arxiv_pdf",
+          },
+        ],
+      }),
+    ).toThrow(/remote URL or cached path/i);
+  });
+
+  it("requires HTML panels to be remote and recovered panels to be local-only", () => {
+    const gallery = figureGallery();
+    expect(() =>
+      figureGallerySchema.parse({
+        ...gallery,
+        figures: [
+          {
+            ...gallery.figures[0],
+            image_urls: [null],
+            cached_image_paths: ["/figures/2607.12345/v1/fig1-panel1.png"],
+          },
+        ],
+      }),
+    ).toThrow(/HTML/i);
+    expect(() =>
+      figureGallerySchema.parse({
+        ...gallery,
+        figures: [
+          {
+            ...gallery.figures[0],
+            cached_image_paths: ["/figures/2607.12345/v1/fig1-panel1.png"],
+            source: "arxiv_pdf",
+            source_url: "https://arxiv.org/pdf/2607.12345v1",
+          },
+        ],
+      }),
+    ).toThrow(/local-only/i);
+  });
+
+  it("normalizes historical recovery metadata from the real Figure 1", () => {
+    expect(figureGallerySchema.parse(figureGallery()).recovery_status).toBe(
+      "available",
+    );
+    expect(
+      figureGallerySchema.parse({
+        ...figureGallery(),
+        status: "available",
+        figures: [figureGallery().figures[1]],
+      }).recovery_status,
+    ).toBe("not_attempted");
+  });
+
+  it("enforces recovery status invariants", () => {
+    expect(() =>
+      figureGallerySchema.parse({
+        ...figureGallery(),
+        status: "available",
+        figures: [figureGallery().figures[1]],
+        recovery_status: "available",
+      }),
+    ).toThrow(/Figure 1/i);
+    expect(() =>
+      figureGallerySchema.parse({
+        ...figureGallery(),
+        status: "available",
+        figures: [figureGallery().figures[1]],
+        recovery_status: "not_found",
+      }),
+    ).toThrow(/timestamp/i);
+    expect(() =>
+      figureGallerySchema.parse({
+        ...figureGallery(),
+        recovery_version: -1,
+      }),
+    ).toThrow();
   });
 
   it("preserves aligned local Figure panel paths", () => {

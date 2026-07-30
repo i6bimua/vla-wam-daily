@@ -189,4 +189,35 @@ describe("remote Figure component contracts", () => {
     expect(component).toContain("查看 PDF");
     expect(component).toMatch(/本地缓存[\s\S]*arXiv\s+原图/);
   });
+
+  it("renders source-aware labels and omits nonexistent remote actions", async () => {
+    const component = await readFile(
+      resolve(sourceRoot, "components/FigureGallery.astro"),
+      "utf8",
+    );
+
+    expect(component).toContain("来源：arXiv 源码包");
+    expect(component).toContain("来源：PDF 自动裁剪");
+    expect(component).toContain("查看论文 PDF");
+    expect(component).toMatch(/source\.originalUrl\s*&&[\s\S]*查看 arXiv 原图/);
+    expect(component).toMatch(
+      /figure\.source\s*===\s*"arxiv_html"[\s\S]*定位原文/,
+    );
+    expect(component).toMatch(
+      /source\.isLocal[\s\S]*下载本站缓存[\s\S]*查看论文 PDF/,
+    );
+  });
+
+  it("keeps the home preview strictly bound to the real Figure 1", async () => {
+    const component = await readFile(
+      resolve(sourceRoot, "components/FigurePreview.astro"),
+      "utf8",
+    );
+
+    expect(component).toMatch(
+      /\.figures\.find\(\s*\(figure\)\s*=>\s*figure\.number\s*===\s*1/,
+    );
+    expect(component).not.toMatch(/figures\s*\[\s*0\s*\]/);
+    expect(component).toContain("originalUrl: figure.image_urls[0]");
+  });
 });

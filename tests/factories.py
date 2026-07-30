@@ -4,6 +4,7 @@ from vla_wam_daily.models import (
     Analysis,
     FigureAsset,
     FigureGallery,
+    FigureRecoveryStatus,
     FigureStatus,
     PaperRecord,
     Provenance,
@@ -43,6 +44,11 @@ def make_gallery(
         html_url=html_url,
         figures=figures,
         checked_at=timestamp,
+        recovery_status=(
+            FigureRecoveryStatus.AVAILABLE
+            if any(figure.number == 1 for figure in figures)
+            else FigureRecoveryStatus.NOT_ATTEMPTED
+        ),
     )
 
 

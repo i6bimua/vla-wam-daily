@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated
 
+import httpx
 import typer
 from pydantic import ValidationError
 from yaml import YAMLError
@@ -12,6 +13,9 @@ from yaml import YAMLError
 from vla_wam_daily.arxiv_client import ArxivClient
 from vla_wam_daily.config import load_config
 from vla_wam_daily.deepseek_client import DeepSeekClient
+from vla_wam_daily.figure_pdf import ArxivPdfFigureExtractor
+from vla_wam_daily.figure_recovery import FigureRecoveryService
+from vla_wam_daily.figure_source import ArxivSourceFigureExtractor
 from vla_wam_daily.figure_store import ArxivFigureStore
 from vla_wam_daily.figure_sync import (
     FigureSyncReport,
@@ -25,6 +29,7 @@ DEFAULT_DATA_DIR = Path("data")
 DEFAULT_PUBLIC_DIR = Path("web/public")
 DEFAULT_PROMPT_PATH = Path("prompts/analysis-v1.md")
 DEFAULT_USER_AGENT = "VLA-WAM-Daily/0.1 (https://github.com/vla-wam-daily/vla-wam-daily)"
+DEFAULT_FIGURE_REQUEST_DELAY_SECONDS = 3.0
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -59,11 +64,46 @@ def _run_figure_sync(
     public_dir: Path,
     user_agent: str,
 ) -> FigureSyncReport:
-    with ArxivFigureStore(
-        public_dir=public_dir,
-        user_agent=user_agent,
-    ) as store:
-        return synchronize_figure_assets(data_dir=data_dir, store=store)
+    with ExitStack() as stack:
+        client = stack.enter_context(httpx.Client())
+        store = stack.enter_context(
+            ArxivFigureStore(
+                public_dir=public_dir,
+                user_agent=user_agent,
+                client=client,
+            )
+        )
+        html_fetcher = stack.enter_context(
+            ArxivFigureClient(
+                user_agent=user_agent,
+                request_delay_seconds=DEFAULT_FIGURE_REQUEST_DELAY_SECONDS,
+                client=client,
+            )
+        )
+        source_extractor = stack.enter_context(
+            ArxivSourceFigureExtractor(
+                user_agent=user_agent,
+                client=client,
+            )
+        )
+        pdf_extractor = stack.enter_context(
+            ArxivPdfFigureExtractor(
+                user_agent=user_agent,
+                client=client,
+            )
+        )
+        recovery = FigureRecoveryService(
+            html_fetcher=html_fetcher,
+            source_extractor=source_extractor,
+            pdf_extractor=pdf_extractor,
+            store=store,
+        )
+        return synchronize_figure_assets(
+            data_dir=data_dir,
+            store=store,
+            recovery=recovery,
+            now=datetime.now(UTC),
+        )
 
 
 @app.callback()
