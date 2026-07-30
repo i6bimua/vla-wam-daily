@@ -33,7 +33,7 @@ _ANY_CAPTION_RE = re.compile(
     r"(?!\d|\.\d)(?:\s*[:.]|\s+(?=(?-i:[A-Z0-9])))",
     re.IGNORECASE,
 )
-_MAX_CAPTION_CONTINUATION_LINES = 2
+_MAX_CAPTION_CONTINUATION_LINES = 3
 _MAX_CAPTION_LINE_GAP = 10.0
 _MAX_CROP_PAGE_RATIO = 0.85
 _EXPECTED_PDF_ERRORS = (PdfiumError, OSError, ValueError, UnicodeError)
@@ -176,17 +176,29 @@ def _captions(lines: list[_TextLine]) -> tuple[list[_Caption], list[_TextLine]]:
         parts = [line.text[match.end() :].strip()]
         caption_box = line.box
         previous = line
-        for continuation in lines[index + 1 : index + 1 + _MAX_CAPTION_CONTINUATION_LINES]:
+        continuation_count = 0
+        for continuation in lines[index + 1 :]:
             if (
                 _ANY_CAPTION_RE.match(continuation.text)
-                or previous.box.bottom - continuation.box.top > _MAX_CAPTION_LINE_GAP
-                or continuation.box.top > previous.box.bottom
-                or abs(continuation.box.left - line.box.left) > 36
+                or previous.box.bottom - continuation.box.top
+                > _MAX_CAPTION_LINE_GAP
             ):
+                break
+            if abs(continuation.box.left - line.box.left) > 36:
+                if (
+                    continuation.box.top > previous.box.bottom
+                    and _horizontal_overlap(continuation.box, line.box) == 0
+                ):
+                    continue
+                break
+            if continuation.box.top > previous.box.bottom:
                 break
             parts.append(continuation.text)
             caption_box = caption_box.union(continuation.box)
             previous = continuation
+            continuation_count += 1
+            if continuation_count >= _MAX_CAPTION_CONTINUATION_LINES:
+                break
         normalized = _normalize_text(" ".join(parts))
         if normalized is not None:
             targets.append(_Caption(normalized, caption_box))

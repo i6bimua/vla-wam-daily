@@ -210,6 +210,66 @@ def test_extracts_punctuation_free_figure_one_caption_with_unique_visual() -> No
     assert candidate.caption == "See2Think architecture"
 
 
+def test_caption_continuation_skips_an_interleaved_right_column_line() -> None:
+    lines = [
+        figure_pdf._TextLine(
+            "Fig. 1. Methods for transferring text-conditioned models to speech. a) uses",
+            figure_pdf._Box(54.10, 173.94, 298.47, 181.11),
+        ),
+        figure_pdf._TextLine(
+            "an Automatic Speech Recognition (ASR) model to transcribe the speech,",
+            figure_pdf._Box(54.29, 164.97, 298.36, 172.14),
+        ),
+        figure_pdf._TextLine(
+            "but it mistranscribes, causing complete failure of the downstream task. b) is",
+            figure_pdf._Box(54.02, 156.00, 298.47, 163.18),
+        ),
+        figure_pdf._TextLine(
+            "speaker variations. Motivated by these findings, we introduce",
+            figure_pdf._Box(313.71, 153.95, 557.80, 162.92),
+        ),
+        figure_pdf._TextLine(
+            "trained directly on speech, bypassing the discrete mistranscription problem.",
+            figure_pdf._Box(54.10, 147.04, 298.25, 154.21),
+        ),
+        figure_pdf._TextLine(
+            "This close fourth continuation must not be consumed.",
+            figure_pdf._Box(54.10, 138.07, 298.25, 145.24),
+        ),
+    ]
+
+    captions, _neighbors = figure_pdf._captions(lines)
+
+    assert [caption.text for caption in captions] == [
+        "Methods for transferring text-conditioned models to speech. "
+        "a) uses an Automatic Speech Recognition (ASR) model to transcribe "
+        "the speech, but it mistranscribes, causing complete failure of the "
+        "downstream task. b) is trained directly on speech, bypassing the "
+        "discrete mistranscription problem."
+    ]
+
+
+def test_caption_continuation_stops_at_a_shifted_same_column_line() -> None:
+    lines = [
+        figure_pdf._TextLine(
+            "Figure 1: Target caption.",
+            figure_pdf._Box(54, 174, 298, 181),
+        ),
+        figure_pdf._TextLine(
+            "Indented body text.",
+            figure_pdf._Box(100, 165, 298, 172),
+        ),
+        figure_pdf._TextLine(
+            "A later aligned line must not be reached.",
+            figure_pdf._Box(54, 156, 298, 163),
+        ),
+    ]
+
+    captions, _neighbors = figure_pdf._captions(lines)
+
+    assert [caption.text for caption in captions] == ["Target caption."]
+
+
 def test_prose_reference_without_punctuation_is_not_a_caption() -> None:
     assert (
         extract(make_target_pdf(caption="Figure 1 shows how the method works."))
