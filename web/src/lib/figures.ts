@@ -2,12 +2,14 @@ import { figureDownloadFilename } from "./figure-download";
 
 const cachedFigurePathPattern =
   /^\/figures\/\d{4}\.\d{4,5}\/v[1-9]\d*\/fig[12]-panel[1-9]\d*\.(png|jpg|webp|gif|svg)$/;
+const cachedFigureDownloadPathPattern =
+  /(?:^|\/)figures\/(\d{4}\.\d{4,5})\/v([1-9]\d*)\/fig([12])-panel([1-9]\d*)\.(png|jpg|webp|gif|svg)$/;
 const basePathPattern = /^\/(?:[^/]+\/)*$/;
 
 export interface FigurePanelSource {
   displayUrl: string;
   downloadUrl: string;
-  originalUrl: string;
+  originalUrl: string | null;
   isLocal: boolean;
 }
 
@@ -19,24 +21,38 @@ export function figurePanelDownloadFilename(input: {
   source: FigurePanelSource;
 }): string {
   const { arxivId, version, figure, panel, source } = input;
-  const remoteFilename = figureDownloadFilename({
-    arxivId,
-    version,
-    figure,
-    panel,
-    imageUrl: source.originalUrl,
-  });
-  if (!source.isLocal) return remoteFilename;
-
-  const extension = /\.(png|jpg|webp|gif|svg)$/i.exec(source.downloadUrl)?.[0];
-  if (!extension) {
-    throw new Error("Invalid cached Figure download extension");
+  if (!source.isLocal) {
+    if (source.originalUrl === null) {
+      throw new Error("Remote Figure panel requires an original URL");
+    }
+    return figureDownloadFilename({
+      arxivId,
+      version,
+      figure,
+      panel,
+      imageUrl: source.originalUrl,
+    });
   }
-  return remoteFilename.replace(/\.[a-z0-9]+$/i, extension.toLowerCase());
+
+  const cachedIdentity = cachedFigureDownloadPathPattern.exec(
+    new URL(source.downloadUrl, "https://local.invalid").pathname,
+  );
+  if (
+    !cachedIdentity ||
+    cachedIdentity[1] !== arxivId ||
+    Number.parseInt(cachedIdentity[2] ?? "", 10) !== version ||
+    Number.parseInt(cachedIdentity[3] ?? "", 10) !== figure ||
+    Number.parseInt(cachedIdentity[4] ?? "", 10) !== panel
+  ) {
+    throw new Error("Invalid cached Figure download identity");
+  }
+  const extension = cachedIdentity[5];
+  if (!extension) throw new Error("Invalid cached Figure download extension");
+  return `${arxivId}-v${version}-fig${figure}-panel${panel}.${extension.toLowerCase()}`;
 }
 
 export function resolveFigurePanelSource(input: {
-  originalUrl: string;
+  originalUrl: string | null;
   cachedPath: string | null | undefined;
   basePath: string;
 }): FigurePanelSource {
@@ -45,6 +61,9 @@ export function resolveFigurePanelSource(input: {
     throw new Error("Invalid GitHub Pages base path");
   }
   if (cachedPath === null || cachedPath === undefined) {
+    if (originalUrl === null) {
+      throw new Error("Figure panel requires a remote or cached source");
+    }
     return {
       displayUrl: originalUrl,
       downloadUrl: originalUrl,

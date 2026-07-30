@@ -2,6 +2,8 @@ import { z } from "zod";
 
 const arxivIdPattern = /^\d{4}\.\d{4,5}$/;
 const arxivHtmlPathPattern = /^\/html\/(\d{4}\.\d{4,5})v([1-9]\d*)$/;
+const arxivSourcePathPattern = /^\/e-print\/(\d{4}\.\d{4,5})v([1-9]\d*)$/;
+const arxivPdfPathPattern = /^\/pdf\/(\d{4}\.\d{4,5})v([1-9]\d*)$/;
 const cachedFigurePathPattern =
   /^\/figures\/(\d{4}\.\d{4,5})\/v([1-9]\d*)\/fig([12])-panel([1-9]\d*)\.(png|jpg|webp|gif|svg)$/;
 const allowedArxivHosts = new Set(["arxiv.org", "www.arxiv.org"]);
@@ -49,7 +51,7 @@ export const tagSchema = z.enum([
 function parseArxivUrl(
   value: string,
   context: z.RefinementCtx,
-  kind: "html" | "image" | "source",
+  kind: "html" | "image",
 ): URL | null {
   let url: URL;
   try {
@@ -71,16 +73,16 @@ function parseArxivUrl(
         "Figure URL must use HTTPS on arxiv.org without credentials or a custom port",
     });
   }
-  if (kind !== "source" && url.hash) {
+  if (url.hash) {
     context.addIssue({
       code: "custom",
       message: "Figure URL must not contain a fragment",
     });
   }
-  if (kind === "source" && url.hash.length < 2) {
+  if (kind === "html" && url.search) {
     context.addIssue({
       code: "custom",
-      message: "Figure source URL must contain a non-empty fragment",
+      message: "Figure HTML URL must not contain a query",
     });
   }
   return url;
@@ -106,28 +108,83 @@ const arxivImageUrlSchema = z.url().superRefine((value, context) => {
   }
 });
 
-const arxivSourceUrlSchema = z.url().superRefine((value, context) => {
-  const url = parseArxivUrl(value, context, "source");
-  if (url && !arxivHtmlPathPattern.test(url.pathname)) {
+function parseFigureSourceIdentity(
+  value: string,
+  source: "arxiv_html" | "arxiv_source" | "arxiv_pdf",
+  context: z.RefinementCtx,
+): RegExpExecArray | null {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    context.addIssue({ code: "custom", message: "Figure URL must be valid" });
+    return null;
+  }
+  if (
+    url.protocol !== "https:" ||
+    !allowedArxivHosts.has(url.hostname) ||
+    url.username ||
+    url.password ||
+    url.port
+  ) {
     context.addIssue({
       code: "custom",
-      message: "Figure source URL must identify an arXiv paper id and version",
+      message:
+        "Figure URL must use HTTPS on arxiv.org without credentials or a custom port",
     });
   }
-});
+  if (url.search) {
+    context.addIssue({
+      code: "custom",
+      message: "Figure source URL must not contain a query",
+    });
+  }
+  if (source === "arxiv_html") {
+    if (url.hash.length < 2) {
+      context.addIssue({
+        code: "custom",
+        message: "Figure source URL must contain a non-empty fragment",
+      });
+    }
+  } else if (url.hash) {
+    context.addIssue({
+      code: "custom",
+      message: "Recovered Figure source URL must not contain a fragment",
+    });
+  }
+  const pattern =
+    source === "arxiv_html"
+      ? arxivHtmlPathPattern
+      : source === "arxiv_source"
+        ? arxivSourcePathPattern
+        : arxivPdfPathPattern;
+  const identity = pattern.exec(url.pathname);
+  if (!identity) {
+    context.addIssue({
+      code: "custom",
+      message: `${source} URL must identify an arXiv paper id and version`,
+    });
+  }
+  return identity;
+}
 
 export const figureAssetSchema = z
   .object({
     number: z.union([z.literal(1), z.literal(2)]),
     label: nonBlankString,
     caption: nonBlankString,
-    image_urls: z.array(arxivImageUrlSchema).min(1),
+    image_urls: z.array(arxivImageUrlSchema.nullable()).min(1),
     cached_image_paths: z.array(z.string().nullable()).default([]),
-    source_url: arxivSourceUrlSchema,
-    source: z.literal("arxiv_html"),
+    source_url: z.url(),
+    source: z.enum(["arxiv_html", "arxiv_source", "arxiv_pdf"]),
   })
   .strict()
   .superRefine((asset, context) => {
+    const sourceIdentity = parseFigureSourceIdentity(
+      asset.source_url,
+      asset.source,
+      context,
+    );
     if (
       asset.cached_image_paths.length > 0 &&
       asset.cached_image_paths.length !== asset.image_urls.length
@@ -139,10 +196,38 @@ export const figureAssetSchema = z
       });
       return;
     }
-    const sourceIdentity = arxivHtmlPathPattern.exec(
-      new URL(asset.source_url).pathname,
-    );
-    for (const [index, path] of asset.cached_image_paths.entries()) {
+    const cachedPaths =
+      asset.cached_image_paths.length > 0
+        ? asset.cached_image_paths
+        : asset.image_urls.map(() => null);
+    if (
+      asset.source === "arxiv_html" &&
+      asset.image_urls.some((imageUrl) => imageUrl === null)
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["image_urls"],
+        message: "arXiv HTML Figure panels require remote image URLs",
+      });
+    }
+    if (
+      asset.source !== "arxiv_html" &&
+      asset.image_urls.some((imageUrl) => imageUrl !== null)
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["image_urls"],
+        message: "Recovered Figure panels must be local-only",
+      });
+    }
+    for (const [index, path] of cachedPaths.entries()) {
+      if (asset.image_urls[index] === null && path === null) {
+        context.addIssue({
+          code: "custom",
+          path: ["image_urls", index],
+          message: "Each Figure panel requires a remote URL or cached path",
+        });
+      }
       if (path === null) continue;
       const match = cachedFigurePathPattern.exec(path);
       if (
@@ -162,16 +247,20 @@ export const figureAssetSchema = z
     }
   })
   .transform((asset) => {
-    const image_urls: string[] = [];
+    const image_urls: Array<string | null> = [];
     const cached_image_paths: Array<string | null> = [];
     const seen = new Set<string>();
+    const cachedPaths =
+      asset.cached_image_paths.length > 0
+        ? asset.cached_image_paths
+        : asset.image_urls.map(() => null);
     for (const [index, imageUrl] of asset.image_urls.entries()) {
-      if (seen.has(imageUrl)) continue;
-      seen.add(imageUrl);
-      image_urls.push(imageUrl);
-      if (asset.cached_image_paths.length > 0) {
-        cached_image_paths.push(asset.cached_image_paths[index] ?? null);
+      if (imageUrl !== null) {
+        if (seen.has(imageUrl)) continue;
+        seen.add(imageUrl);
       }
+      image_urls.push(imageUrl);
+      cached_image_paths.push(cachedPaths[index] ?? null);
     }
     return {
       ...asset,
@@ -191,6 +280,11 @@ export const figureGallerySchema = z
     html_url: arxivHtmlUrlSchema,
     figures: z.array(figureAssetSchema).max(2),
     checked_at: utcDatetimeSchema,
+    recovery_status: z
+      .enum(["not_attempted", "available", "not_found", "fetch_failed"])
+      .optional(),
+    recovery_checked_at: utcDatetimeSchema.nullable().default(null),
+    recovery_version: nonNegativeInteger.default(0),
   })
   .strict()
   .superRefine((gallery, context) => {
@@ -213,11 +307,44 @@ export const figureGallerySchema = z
         message: "Unavailable Figure gallery must not contain figures",
       });
     }
+    const hasFigureOne = gallery.figures.some((figure) => figure.number === 1);
+    const recoveryStatus =
+      gallery.recovery_status ?? (hasFigureOne ? "available" : "not_attempted");
+    if (recoveryStatus === "available" && !hasFigureOne) {
+      context.addIssue({
+        code: "custom",
+        path: ["recovery_status"],
+        message: "Available Figure recovery requires Figure 1",
+      });
+    }
+    if (
+      (recoveryStatus === "not_found" || recoveryStatus === "fetch_failed") &&
+      gallery.recovery_checked_at === null
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["recovery_checked_at"],
+        message: "Terminal Figure recovery requires a checked timestamp",
+      });
+    }
 
     const galleryUrl = new URL(gallery.html_url);
     for (const [figureIndex, figure] of gallery.figures.entries()) {
-      const sourceUrl = new URL(figure.source_url);
-      if (sourceUrl.pathname !== galleryUrl.pathname) {
+      const sourcePath = new URL(figure.source_url).pathname;
+      const sourcePattern =
+        figure.source === "arxiv_html"
+          ? arxivHtmlPathPattern
+          : figure.source === "arxiv_source"
+            ? arxivSourcePathPattern
+            : arxivPdfPathPattern;
+      const sourceIdentity = sourcePattern.exec(sourcePath);
+      const galleryIdentity = arxivHtmlPathPattern.exec(galleryUrl.pathname);
+      if (
+        !sourceIdentity ||
+        !galleryIdentity ||
+        sourceIdentity[1] !== galleryIdentity[1] ||
+        sourceIdentity[2] !== galleryIdentity[2]
+      ) {
         context.addIssue({
           code: "custom",
           path: ["figures", figureIndex, "source_url"],
@@ -225,6 +352,7 @@ export const figureGallerySchema = z
         });
       }
       for (const [imageIndex, image] of figure.image_urls.entries()) {
+        if (image === null) continue;
         const imageUrl = new URL(image);
         if (!imageUrl.pathname.startsWith(`${galleryUrl.pathname}/`)) {
           context.addIssue({
@@ -238,6 +366,11 @@ export const figureGallerySchema = z
   })
   .transform((gallery) => ({
     ...gallery,
+    recovery_status:
+      gallery.recovery_status ??
+      (gallery.figures.some((figure) => figure.number === 1)
+        ? ("available" as const)
+        : ("not_attempted" as const)),
     figures: [...gallery.figures].sort(
       (left, right) => left.number - right.number,
     ),

@@ -40,6 +40,31 @@ describe("Figure panel source resolution", () => {
     },
   );
 
+  it("resolves a local-only recovered Figure panel", () => {
+    expect(
+      resolveFigurePanelSource({
+        originalUrl: null,
+        cachedPath: "/figures/2607.12345/v1/fig1-panel1.png",
+        basePath: "/vla-wam-daily/",
+      }),
+    ).toEqual({
+      displayUrl: "/vla-wam-daily/figures/2607.12345/v1/fig1-panel1.png",
+      downloadUrl: "/vla-wam-daily/figures/2607.12345/v1/fig1-panel1.png",
+      originalUrl: null,
+      isLocal: true,
+    });
+  });
+
+  it("rejects a panel without either source", () => {
+    expect(() =>
+      resolveFigurePanelSource({
+        originalUrl: null,
+        cachedPath: null,
+        basePath: "/vla-wam-daily/",
+      }),
+    ).toThrow(/source/i);
+  });
+
   it("normalizes the root Pages base path", () => {
     expect(
       resolveFigurePanelSource({
@@ -83,6 +108,24 @@ describe("Figure panel download filename", () => {
   it("uses the cached asset extension for a local download", () => {
     const source = resolveFigurePanelSource({
       originalUrl,
+      cachedPath: "/figures/2607.12345/v1/fig1-panel1.svg",
+      basePath: "/vla-wam-daily/",
+    });
+
+    expect(
+      figurePanelDownloadFilename({
+        arxivId: "2607.12345",
+        version: 1,
+        figure: 1,
+        panel: 1,
+        source,
+      }),
+    ).toBe("2607.12345-v1-fig1-panel1.svg");
+  });
+
+  it("uses the cached asset extension without a remote original", () => {
+    const source = resolveFigurePanelSource({
+      originalUrl: null,
       cachedPath: "/figures/2607.12345/v1/fig1-panel1.svg",
       basePath: "/vla-wam-daily/",
     });
