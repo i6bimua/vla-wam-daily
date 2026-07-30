@@ -206,12 +206,14 @@ def test_daily_inputs_are_validated_via_env_and_never_interpolated_in_shell() ->
     assert pipeline["env"]["DEEPSEEK_MODEL"] == "${{ vars.DEEPSEEK_MODEL }}"
     assert pipeline["env"]["RUN_FORCE_ARXIV_ID"] == "${{ steps.options.outputs.force_arxiv_id }}"
     assert 'args=(' in pipeline["run"]
+    assert '--public-dir' in pipeline["run"]
+    assert "web/public" in pipeline["run"]
     assert 'args+=(--force-arxiv-id "$RUN_FORCE_ARXIV_ID")' in pipeline["run"]
     assert 'uv run vla-wam-daily "${args[@]}"' in pipeline["run"]
     assert source.count("${{ secrets.DEEPSEEK_API_KEY }}") == 1
 
 
-def test_daily_dry_run_cannot_commit_or_deploy_and_non_dry_run_is_data_only() -> None:
+def test_daily_dry_run_cannot_commit_or_deploy_and_generated_paths_are_bounded() -> None:
     payload = workflow("daily.yml")
     source = workflow_source("daily.yml")
     update = payload["jobs"]["update"]
@@ -233,8 +235,11 @@ def test_daily_dry_run_cannot_commit_or_deploy_and_non_dry_run_is_data_only() ->
     assert 'git check-ref-format "refs/heads/${DEFAULT_BRANCH}"' in commit_step["run"]
     assert payload["jobs"]["build"]["if"] == "needs.update.outputs.dry_run == 'false'"
     assert payload["jobs"]["deploy"]["if"] == "needs.update.outputs.dry_run == 'false'"
-    assert "git add -- data" in source
+    assert "git add -- data web/public/figures" in source
     assert "git diff --cached --name-only" in source
+    assert 'data/*|web/public/figures/*' in source
+    assert "cached_image_paths" in source
+    assert 'Path("web/public")' in source
     assert "git add ." not in source
     assert "git add -A" not in source
     assert 'git rebase "refs/remotes/origin/${DEFAULT_BRANCH}"' in source

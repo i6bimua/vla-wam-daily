@@ -123,6 +123,7 @@ jobs:
             daily
             --lookback-days "$RUN_LOOKBACK_DAYS"
             --profile "$RUN_PROFILE"
+            --public-dir web/public
             --threshold "$RUN_THRESHOLD"
           )
           if [[ "$RUN_DRY_RUN" == "true" ]]; then
@@ -166,16 +167,32 @@ jobs:
           uv run python - <<'PY'
           from pathlib import Path
 
-          from vla_wam_daily.storage import load_cache, load_data_file, load_figure_cache
+          from vla_wam_daily.storage import (
+              load_archives,
+              load_cache,
+              load_data_file,
+              load_figure_cache,
+          )
 
           data_dir = Path("data")
-          if load_data_file(data_dir / "latest.json") is None:
+          public_dir = Path("web/public")
+          latest = load_data_file(data_dir / "latest.json")
+          if latest is None:
               raise SystemExit("data/latest.json is missing")
-          for archive_path in sorted((data_dir / "archive").glob("*.json")):
-              if load_data_file(archive_path) is None:
-                  raise SystemExit(f"{archive_path} is missing")
+          archives = load_archives(data_dir)
           load_cache(data_dir)
           load_figure_cache(data_dir)
+          for data_file in [latest, *archives.values()]:
+              for paper in data_file.papers:
+                  for figure in paper.figure_gallery.figures:
+                      for cached_path in figure.cached_image_paths:
+                          if cached_path is None:
+                              continue
+                          target = public_dir / cached_path.lstrip("/")
+                          if not target.is_file() or target.stat().st_size == 0:
+                              raise SystemExit(
+                                  f"cached Figure file is missing: {cached_path}"
+                              )
           PY
       - name: Commit and push generated data
         if: steps.options.outputs.dry_run == 'false'
@@ -187,13 +204,16 @@ jobs:
           git check-ref-format "refs/heads/${DEFAULT_BRANCH}"
           git config user.name "vla-wam-daily-bot"
           git config user.email "vla-wam-daily-bot@users.noreply.github.com"
-          git add -- data
+          git add -- data web/public/figures
           mapfile -t staged_paths < <(git diff --cached --name-only)
           for staged_path in "${staged_paths[@]}"; do
-            if [[ "$staged_path" != data/* ]]; then
-              echo "refusing to commit non-data path" >&2
-              exit 1
-            fi
+            case "$staged_path" in
+              data/*|web/public/figures/*) ;;
+              *)
+                echo "refusing to commit unexpected generated path" >&2
+                exit 1
+                ;;
+            esac
           done
           if git diff --cached --quiet; then
             echo "No generated data changes"

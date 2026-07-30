@@ -12,11 +12,17 @@ from yaml import YAMLError
 from vla_wam_daily.arxiv_client import ArxivClient
 from vla_wam_daily.config import load_config
 from vla_wam_daily.deepseek_client import DeepSeekClient
+from vla_wam_daily.figure_store import ArxivFigureStore
+from vla_wam_daily.figure_sync import (
+    FigureSyncReport,
+    synchronize_figure_assets,
+)
 from vla_wam_daily.figures import ArxivFigureClient
 from vla_wam_daily.pipeline import normalize_force_ids, run_daily
 
 DEFAULT_CONFIG_PATH = Path("config/topics.yaml")
 DEFAULT_DATA_DIR = Path("data")
+DEFAULT_PUBLIC_DIR = Path("web/public")
 DEFAULT_PROMPT_PATH = Path("prompts/analysis-v1.md")
 DEFAULT_USER_AGENT = "VLA-WAM-Daily/0.1 (https://github.com/vla-wam-daily/vla-wam-daily)"
 
@@ -35,9 +41,55 @@ def _require_input_file(path: Path, *, param_hint: str, label: str) -> None:
         )
 
 
+def _require_generated_data(data_dir: Path) -> None:
+    try:
+        has_latest = (data_dir / "latest.json").is_file()
+    except OSError:
+        has_latest = False
+    if not has_latest:
+        raise typer.BadParameter(
+            "data directory must contain a readable latest.json",
+            param_hint="--data-dir",
+        )
+
+
+def _run_figure_sync(
+    *,
+    data_dir: Path,
+    public_dir: Path,
+    user_agent: str,
+) -> FigureSyncReport:
+    with ArxivFigureStore(
+        public_dir=public_dir,
+        user_agent=user_agent,
+    ) as store:
+        return synchronize_figure_assets(data_dir=data_dir, store=store)
+
+
 @app.callback()
 def main() -> None:
     """VLA/WAM Daily command-line interface."""
+
+
+@app.command("sync-figures")
+def sync_figures(
+    data_dir: Annotated[
+        Path,
+        typer.Option(help="Generated data directory."),
+    ] = DEFAULT_DATA_DIR,
+    public_dir: Annotated[
+        Path,
+        typer.Option(help="Static site public directory."),
+    ] = DEFAULT_PUBLIC_DIR,
+) -> None:
+    """Mirror Figure 1 and Figure 2 for every archived paper."""
+    _require_generated_data(data_dir)
+    report = _run_figure_sync(
+        data_dir=data_dir,
+        public_dir=public_dir,
+        user_agent=os.getenv("ARXIV_USER_AGENT", DEFAULT_USER_AGENT),
+    )
+    typer.echo(report.model_dump_json())
 
 
 @app.command()
@@ -70,6 +122,10 @@ def daily(
         Path,
         typer.Option(help="Generated data directory."),
     ] = DEFAULT_DATA_DIR,
+    public_dir: Annotated[
+        Path,
+        typer.Option(help="Static site public directory."),
+    ] = DEFAULT_PUBLIC_DIR,
     prompt_path: Annotated[
         Path,
         typer.Option(help="Versioned analysis prompt path."),
@@ -189,6 +245,13 @@ def daily(
             force_ids=normalized_force_ids,
             dry_run=dry_run,
             now=datetime.now(UTC),
+        )
+
+    if not report.dry_run:
+        _run_figure_sync(
+            data_dir=data_dir,
+            public_dir=public_dir,
+            user_agent=user_agent,
         )
 
     typer.echo(

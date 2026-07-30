@@ -11,6 +11,7 @@ from typer.testing import CliRunner
 import vla_wam_daily.cli as cli_module
 from tests.factories import make_record
 from vla_wam_daily.config import AppConfig, load_config
+from vla_wam_daily.figure_sync import FigureSyncReport
 from vla_wam_daily.models import RunStats
 from vla_wam_daily.pipeline import RunReport
 
@@ -92,6 +93,7 @@ class Harness:
         self.events: list[str] = []
         self.constructor_kwargs: dict[str, dict[str, object]] = {}
         self.run_kwargs: dict[str, object] = {}
+        self.sync_kwargs: dict[str, object] = {}
         self.config_calls: list[tuple[Path, Path | None]] = []
         self.instances: dict[str, ManagedClient] = {}
         self.failure_stage = failure_stage
@@ -115,7 +117,19 @@ class Harness:
             self.constructor("figure"),
             raising=False,
         )
+        monkeypatch.setattr(
+            cli_module,
+            "ArxivFigureStore",
+            self.constructor("asset"),
+            raising=False,
+        )
         monkeypatch.setattr(cli_module, "run_daily", self.run_daily, raising=False)
+        monkeypatch.setattr(
+            cli_module,
+            "synchronize_figure_assets",
+            self.synchronize_figure_assets,
+            raising=False,
+        )
         self.config = config
 
     def load_config(self, path: Path, *, prompt_dir: Path | None = None) -> AppConfig:
@@ -149,6 +163,19 @@ class Harness:
         if self.failure_stage == "run":
             raise RuntimeError("pipeline failed")
         return self.report
+
+    def synchronize_figure_assets(
+        self,
+        **kwargs: object,
+    ) -> FigureSyncReport:
+        self.events.append("sync")
+        self.sync_kwargs = kwargs
+        return FigureSyncReport(
+            papers_scanned=1,
+            panels_reused=0,
+            panels_mirrored=2,
+            panels_failed=0,
+        )
 
 
 def invoke_daily(
@@ -186,10 +213,16 @@ def install_client_sentries(
     monkeypatch.setattr(cli_module, "ArxivClient", unexpected_client("arxiv"))
     monkeypatch.setattr(cli_module, "DeepSeekClient", unexpected_client("analysis"))
     monkeypatch.setattr(cli_module, "ArxivFigureClient", unexpected_client("figure"))
+    monkeypatch.setattr(cli_module, "ArxivFigureStore", unexpected_client("asset"))
     monkeypatch.setattr(
         cli_module,
         "run_daily",
         lambda **kwargs: pytest.fail("pipeline must not run"),
+    )
+    monkeypatch.setattr(
+        cli_module,
+        "synchronize_figure_assets",
+        lambda **kwargs: pytest.fail("Figure synchronization must not run"),
     )
 
 
@@ -236,6 +269,7 @@ def test_daily_help_lists_all_options_without_environment_files_or_network(
         "--dry-run",
         "--config-path",
         "--data-dir",
+        "--public-dir",
         "--prompt-path",
     ):
         assert option in stdout
@@ -253,6 +287,86 @@ def test_root_help_lists_daily_without_side_effects(monkeypatch: pytest.MonkeyPa
 
     assert result.exit_code == 0
     assert "daily" in result.stdout
+    assert "sync-figures" in result.stdout
+
+
+def test_sync_figures_does_not_require_deepseek_and_prints_report(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
+    data_dir = tmp_path / "data"
+    public_dir = tmp_path / "public"
+    data_dir.mkdir()
+    (data_dir / "latest.json").write_text("{}\n", encoding="utf-8")
+    events: list[str] = []
+    asset = ManagedClient("asset", events)
+    constructor_kwargs: dict[str, object] = {}
+    sync_kwargs: dict[str, object] = {}
+
+    def construct_asset(**kwargs: object) -> ManagedClient:
+        constructor_kwargs.update(kwargs)
+        return asset
+
+    def synchronize(**kwargs: object) -> FigureSyncReport:
+        sync_kwargs.update(kwargs)
+        return FigureSyncReport(
+            papers_scanned=3,
+            panels_reused=2,
+            panels_mirrored=4,
+            panels_failed=1,
+        )
+
+    monkeypatch.setattr(cli_module, "ArxivFigureStore", construct_asset)
+    monkeypatch.setattr(cli_module, "synchronize_figure_assets", synchronize)
+
+    result = RUNNER.invoke(
+        cli_module.app,
+        [
+            "sync-figures",
+            "--data-dir",
+            str(data_dir),
+            "--public-dir",
+            str(public_dir),
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert json.loads(result.stdout) == {
+        "papers_scanned": 3,
+        "panels_reused": 2,
+        "panels_mirrored": 4,
+        "panels_failed": 1,
+    }
+    assert constructor_kwargs["public_dir"] == public_dir
+    assert sync_kwargs == {"data_dir": data_dir, "store": asset}
+    assert events == ["enter:asset", "close:asset"]
+
+
+def test_sync_figures_rejects_missing_latest_before_constructing_store(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    events: list[str] = []
+    monkeypatch.setattr(
+        cli_module,
+        "ArxivFigureStore",
+        lambda **kwargs: events.append("constructed"),
+    )
+
+    result = RUNNER.invoke(
+        cli_module.app,
+        [
+            "sync-figures",
+            "--data-dir",
+            str(tmp_path / "missing"),
+            "--public-dir",
+            str(tmp_path / "public"),
+        ],
+    )
+
+    assert_parameter_error(result, "--data-dir")
+    assert events == []
 
 
 @pytest.mark.parametrize(
@@ -630,6 +744,59 @@ def test_success_writes_one_stable_unicode_json_line(
     )
     assert SECRET not in result.stdout
     assert SECRET not in result.stderr
+
+
+def test_persisted_daily_run_synchronizes_figures_after_clients_close(
+    monkeypatch: pytest.MonkeyPatch,
+    config: AppConfig,
+    prompt_path: Path,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("DEEPSEEK_API_KEY", SECRET)
+    report = RunReport(
+        stats=RunStats(published=1),
+        published=(make_record(),),
+        dry_run=False,
+    )
+    harness = Harness(monkeypatch, config, report=report)
+    public_dir = tmp_path / "public"
+
+    result = invoke_daily(
+        prompt_path,
+        "--public-dir",
+        str(public_dir),
+        data_dir=tmp_path,
+    )
+
+    assert result.exit_code == 0
+    assert harness.constructor_kwargs["asset"] == {
+        "public_dir": public_dir,
+        "user_agent": cli_module.DEFAULT_USER_AGENT,
+    }
+    assert harness.sync_kwargs == {
+        "data_dir": tmp_path,
+        "store": harness.instances["asset"],
+    }
+    assert harness.events.index("close:figure") < harness.events.index(
+        "construct:asset"
+    )
+    assert harness.events[-3:] == ["enter:asset", "sync", "close:asset"]
+
+
+def test_dry_run_never_constructs_or_synchronizes_figure_store(
+    monkeypatch: pytest.MonkeyPatch,
+    config: AppConfig,
+    prompt_path: Path,
+) -> None:
+    monkeypatch.setenv("DEEPSEEK_API_KEY", SECRET)
+    harness = Harness(monkeypatch, config)
+
+    result = invoke_daily(prompt_path, "--dry-run")
+
+    assert result.exit_code == 0
+    assert "asset" not in harness.constructor_kwargs
+    assert harness.sync_kwargs == {}
+    assert "sync" not in harness.events
 
 
 @pytest.mark.parametrize(
