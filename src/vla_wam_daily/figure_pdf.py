@@ -24,14 +24,16 @@ from vla_wam_daily.models import ARXIV_FIGURE_HOSTS
 
 LOGGER = logging.getLogger(__name__)
 _TARGET_CAPTION_RE = re.compile(
-    r"^(?:(?:figure)\s+1|(?:fig\.)\s*1)(?!\d|\.\d)\s*[:.]\s*",
+    r"^(?:(?:figure)\s+1|(?:fig\.)\s*1)"
+    r"(?!\d|\.\d)(?:\s*[:.]\s*|\s+(?=(?-i:[A-Z0-9])))",
     re.IGNORECASE,
 )
 _ANY_CAPTION_RE = re.compile(
-    r"^(?:figure|fig\.)\s*\d+(?!\d|\.\d)\s*[:.]",
+    r"^(?:figure|fig\.)\s*[1-9]\d*"
+    r"(?!\d|\.\d)(?:\s*[:.]|\s+(?=(?-i:[A-Z0-9])))",
     re.IGNORECASE,
 )
-_MAX_CAPTION_CONTINUATION_LINES = 2
+_MAX_CAPTION_CONTINUATION_LINES = 3
 _MAX_CAPTION_LINE_GAP = 10.0
 _MAX_CROP_PAGE_RATIO = 0.85
 _EXPECTED_PDF_ERRORS = (PdfiumError, OSError, ValueError, UnicodeError)
@@ -146,6 +148,9 @@ def _page_lines(
             continue
         char_box = _box(text_page.get_charbox(index))
         if char_box is None:
+            if character.isspace():
+                characters.append(character)
+                continue
             return []
         if (
             char_box.left < visible.left
@@ -171,17 +176,29 @@ def _captions(lines: list[_TextLine]) -> tuple[list[_Caption], list[_TextLine]]:
         parts = [line.text[match.end() :].strip()]
         caption_box = line.box
         previous = line
-        for continuation in lines[index + 1 : index + 1 + _MAX_CAPTION_CONTINUATION_LINES]:
+        continuation_count = 0
+        for continuation in lines[index + 1 :]:
             if (
                 _ANY_CAPTION_RE.match(continuation.text)
-                or previous.box.bottom - continuation.box.top > _MAX_CAPTION_LINE_GAP
-                or continuation.box.top > previous.box.bottom
-                or abs(continuation.box.left - line.box.left) > 36
+                or previous.box.bottom - continuation.box.top
+                > _MAX_CAPTION_LINE_GAP
             ):
+                break
+            if abs(continuation.box.left - line.box.left) > 36:
+                if (
+                    continuation.box.top > previous.box.bottom
+                    and _horizontal_overlap(continuation.box, line.box) == 0
+                ):
+                    continue
+                break
+            if continuation.box.top > previous.box.bottom:
                 break
             parts.append(continuation.text)
             caption_box = caption_box.union(continuation.box)
             previous = continuation
+            continuation_count += 1
+            if continuation_count >= _MAX_CAPTION_CONTINUATION_LINES:
+                break
         normalized = _normalize_text(" ".join(parts))
         if normalized is not None:
             targets.append(_Caption(normalized, caption_box))

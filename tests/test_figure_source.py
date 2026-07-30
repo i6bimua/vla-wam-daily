@@ -160,6 +160,37 @@ def test_extracts_first_direct_literal_figure_asset_and_plain_caption() -> None:
     assert candidate.source == "arxiv_source"
 
 
+def test_best_effort_accepts_harmless_class_and_unrelated_preamble_macro() -> None:
+    main = rb"""
+\documentclass{local}
+\newcommand{\projectname}{See2Think}
+\begin{document}
+\begin{figure}
+\centering
+\includegraphics[width=\textwidth]{figures/model.png}
+\caption{The literal first Figure.}
+\end{figure}
+\end{document}
+"""
+
+    candidate = extract_from_tar(
+        {
+            "main.tex": main,
+            "local.cls": rb"""
+\NeedsTeXFormat{LaTeX2e}
+\let\projectalias\relax
+\newcommand{\projectlabel}{Thinking with Video}
+""",
+            "figures/model.png": PNG_BYTES,
+        }
+    )
+
+    assert candidate is not None
+    assert candidate.caption == "The literal first Figure."
+    assert candidate.extension == "png"
+    assert candidate.content == PNG_BYTES
+
+
 @pytest.mark.parametrize("command", ["input", "include"])
 def test_boundedly_inlines_one_literal_local_tex_file(command: str) -> None:
     main = rf"""
@@ -1022,6 +1053,53 @@ def test_returns_none_when_preamble_redefines_includegraphics() -> None:
     )
 
 
+def test_returns_none_when_preamble_redefines_implicit_figure_semantics() -> None:
+    main = rb"""
+\documentclass{article}
+\renewcommand{\thefigure}{A}
+\begin{document}
+\begin{figure}
+\includegraphics{figure.png}
+\caption{This is not numbered Figure 1.}
+\end{figure}
+\end{document}
+"""
+
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": main,
+                "figure.png": PNG_BYTES,
+            }
+        )
+        is None
+    )
+
+
+def test_returns_none_when_dynamic_control_advances_figure_before_candidate() -> None:
+    main = rb"""
+\documentclass{article}
+\newcommand{\advancefigure}{\csname stepcounter\endcsname{figure}}
+\begin{document}
+\advancefigure
+\begin{figure}
+\includegraphics{figure.png}
+\caption{This is rendered as Figure 2, never Figure 1.}
+\end{figure}
+\end{document}
+"""
+
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": main,
+                "figure.png": PNG_BYTES,
+            }
+        )
+        is None
+    )
+
+
 def test_returns_none_when_conditional_hides_a_fake_first_figure() -> None:
     main = rb"""
 \documentclass{article}
@@ -1301,6 +1379,88 @@ def test_returns_none_when_archive_contains_local_tex_semantic_dependency(
                 dependency: rb"\renewcommand{\includegraphics}[1]{}",
                 "figures/model.png": PNG_BYTES,
                 "figures/later.png": PNG_BYTES,
+            }
+        )
+        is None
+    )
+
+
+@pytest.mark.parametrize(
+    "semantic_control",
+    [
+        rb"\setcounter{figure}{5}",
+        rb"\captionof{figure}{This consumes Figure 1.}",
+        rb"\renewcommand{\thefigure}{A}",
+        rb"\newcommand{\figure}{changed}",
+        rb"\newenvironment{figure}{}{}",
+    ],
+)
+def test_returns_none_when_local_class_changes_figure_selection(
+    semantic_control: bytes,
+) -> None:
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": make_figure_tex(),
+                "local.cls": semantic_control,
+                "figures/model.png": PNG_BYTES,
+                "figures/later.png": PNG_BYTES,
+            }
+        )
+        is None
+    )
+
+
+@pytest.mark.parametrize(
+    "alias_definition",
+    [
+        rb"\let\advancefigure\setcounter",
+        rb"\let \advancefigure = \setcounter",
+        rb"\futurelet\advancefigure\relax\setcounter",
+    ],
+)
+def test_returns_none_when_local_class_aliases_figure_selection_control(
+    alias_definition: bytes,
+) -> None:
+    semantic_dependency = (
+        alias_definition + rb"\advancefigure{figure}{5}"
+    )
+
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": make_figure_tex(),
+                "local.cls": semantic_dependency,
+                "figures/model.png": PNG_BYTES,
+                "figures/later.png": PNG_BYTES,
+            }
+        )
+        is None
+    )
+
+
+def test_returns_none_when_local_class_dynamically_advances_figure() -> None:
+    main = rb"""
+\documentclass{local}
+\begin{document}
+\advancefigure
+\begin{figure}
+\includegraphics{figure.png}
+\caption{This is rendered as Figure 2, never Figure 1.}
+\end{figure}
+\end{document}
+"""
+    local_class = (
+        rb"\newcommand{\advancefigure}"
+        rb"{\csname stepcounter\endcsname{figure}}"
+    )
+
+    assert (
+        extract_from_tar(
+            {
+                "main.tex": main,
+                "local.cls": local_class,
+                "figure.png": PNG_BYTES,
             }
         )
         is None
@@ -1609,6 +1769,40 @@ def test_follows_redirect_only_for_the_same_exact_source_identity() -> None:
     assert requests[1].url.host == "www.arxiv.org"
 
 
+def test_follows_official_src_redirect_for_the_same_exact_source_identity() -> None:
+    requests: list[httpx.Request] = []
+    body = make_tar(
+        {
+            "main.tex": make_figure_tex(),
+            "figures/model.png": PNG_BYTES,
+            "figures/later.png": b"later",
+        }
+    )
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        if request.url.path.startswith("/e-print/"):
+            return httpx.Response(
+                301,
+                headers={
+                    "location": f"/src/{ARXIV_ID}v{VERSION}",
+                },
+            )
+        return httpx.Response(200, content=body)
+
+    extractor, client = make_extractor(handler=httpx.MockTransport(handler))
+    try:
+        candidate = extractor.extract(ARXIV_ID, VERSION)
+    finally:
+        client.close()
+
+    assert candidate is not None
+    assert [request.url.path for request in requests] == [
+        f"/e-print/{ARXIV_ID}v{VERSION}",
+        f"/src/{ARXIV_ID}v{VERSION}",
+    ]
+
+
 @pytest.mark.parametrize(
     "location",
     [
@@ -1620,7 +1814,9 @@ def test_follows_redirect_only_for_the_same_exact_source_identity() -> None:
         f"https://arxiv.org/e-print/{ARXIV_ID}v{VERSION}?download=1",
         f"https://arxiv.org/e-print/{ARXIV_ID}v2",
         "https://arxiv.org/e-print/2607.99999v1",
-        f"https://arxiv.org/src/{ARXIV_ID}v{VERSION}",
+        f"https://arxiv.org/src/{ARXIV_ID}v2",
+        "https://arxiv.org/src/2607.99999v1",
+        f"https://arxiv.org/src/{ARXIV_ID}v{VERSION}/other",
     ],
 )
 def test_rejects_redirects_that_change_exact_source_identity(

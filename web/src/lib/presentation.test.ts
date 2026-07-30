@@ -190,6 +190,20 @@ describe("remote Figure component contracts", () => {
     expect(component).toMatch(/本地缓存[\s\S]*arXiv\s+原图/);
   });
 
+  it("explains that HTML, source, and PDF recovery were exhausted", async () => {
+    const component = await readFile(
+      resolve(sourceRoot, "components/FigureGallery.astro"),
+      "utf8",
+    );
+
+    expect(component).toContain(
+      "arXiv HTML 不可用，源码包和 PDF 中也未能提取到 Fig. 1 / Fig. 2。",
+    );
+    expect(component).not.toContain(
+      "arXiv 暂未提供 HTML 版本，无法提取 Fig. 1 / Fig. 2。",
+    );
+  });
+
   it("renders source-aware labels and omits nonexistent remote actions", async () => {
     const component = await readFile(
       resolve(sourceRoot, "components/FigureGallery.astro"),

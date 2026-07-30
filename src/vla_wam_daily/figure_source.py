@@ -670,27 +670,163 @@ _AMBIGUOUS_FIGURE_SELECTION_CONTROLS = frozenset(
         "includeonly",
     }
 )
+_DYNAMIC_SEMANTIC_CONTROLS = frozenset(
+    {
+        "catcode",
+        "csname",
+        "endcsname",
+        "expandafter",
+    }
+)
+_PROTECTED_FIGURE_CONTROL_WORDS = frozenset(
+    {
+        "begin",
+        "caption",
+        "end",
+        "endfigure",
+        "figure",
+        "fnum@figure",
+        "include",
+        "includegraphics",
+        "input",
+        "thefigure",
+        *_COUNTER_MUTATION_CONTROLS,
+        *_AMBIGUOUS_FIGURE_SELECTION_CONTROLS,
+    }
+)
+
+
+def _alias_binding_target(
+    lexed: _LexedTex,
+    index: int,
+) -> _ControlToken | None:
+    token = lexed.controls[index]
+    if token.word == "let":
+        offset = 2
+    elif token.word == "futurelet":
+        offset = 3
+    else:
+        return None
+    if index + offset >= len(lexed.controls):
+        return None
+
+    controls = lexed.controls[index : index + offset + 1]
+    if lexed.text[token.end : controls[1].start].strip():
+        return None
+    for previous, following in zip(
+        controls[1:-1],
+        controls[2:],
+        strict=True,
+    ):
+        separator = lexed.text[previous.end : following.start].strip()
+        if separator and not (
+            token.word == "let"
+            and previous is controls[1]
+            and separator == "="
+        ):
+            return None
+    return controls[-1]
 
 
 def _has_ambiguous_semantic_control(
     controls: tuple[_ControlToken, ...],
     *,
     end: int,
+    allow_preamble_ambiguity: bool,
+    figure_controls: frozenset[tuple[str | None, str | None]],
 ) -> bool:
-    for token in controls:
+    for index, token in enumerate(controls):
         if token.start >= end:
             break
         word = token.word
         if word is None:
             continue
-        if (
-            word in _MACRO_DEFINITION_CONTROLS
-            or word in _CONDITIONAL_CONTROLS
+        if word in _MACRO_DEFINITION_CONTROLS:
+            if not allow_preamble_ambiguity:
+                return True
+            if word in {"newenvironment", "renewenvironment"}:
+                return True
+            target = next(
+                (
+                    candidate
+                    for candidate in controls[index + 1 :]
+                    if candidate.start < end
+                ),
+                None,
+            )
+            if (
+                target is None
+                or target.word in _PROTECTED_FIGURE_CONTROL_WORDS
+                or (target.word, target.symbol) in figure_controls
+            ):
+                return True
+        elif (
+            word in _CONDITIONAL_CONTROLS
             or word in _COUNTER_MUTATION_CONTROLS
             or word in _AMBIGUOUS_FIGURE_SELECTION_CONTROLS
+            or word in _DYNAMIC_SEMANTIC_CONTROLS
             or word.startswith("if")
         ):
             return True
+    return False
+
+
+def _has_unsafe_local_semantic_dependency(
+    files: dict[PurePosixPath, bytes],
+) -> bool:
+    for path, content in files.items():
+        if path.suffix.casefold() not in {".sty", ".cls"}:
+            continue
+        try:
+            lexed = _lex_tex(content.decode("utf-8-sig"))
+        except UnicodeDecodeError:
+            return True
+        if lexed is None:
+            return True
+        for index, token in enumerate(lexed.controls):
+            word = token.word
+            if word in _DYNAMIC_SEMANTIC_CONTROLS:
+                expanded = next(iter(lexed.controls[index + 1 :]), None)
+                if (
+                    word != "expandafter"
+                    or expanded is not None
+                    and expanded.word in _PROTECTED_FIGURE_CONTROL_WORDS
+                ):
+                    return True
+            if word in {"let", "futurelet"}:
+                alias_target = _alias_binding_target(lexed, index)
+                if (
+                    alias_target is not None
+                    and alias_target.word in _PROTECTED_FIGURE_CONTROL_WORDS
+                ):
+                    return True
+            if word in (
+                _COUNTER_MUTATION_CONTROLS
+                | _AMBIGUOUS_FIGURE_SELECTION_CONTROLS
+            ):
+                argument = _literal_command_argument_at(
+                    lexed.text,
+                    token.end,
+                    allow_options=False,
+                )
+                if argument is not None and argument[0].strip() == "figure":
+                    return True
+            if token.word not in _MACRO_DEFINITION_CONTROLS:
+                continue
+            if word in {"newenvironment", "renewenvironment"}:
+                argument = _literal_command_argument_at(
+                    lexed.text,
+                    token.end,
+                    allow_options=False,
+                )
+                if argument is not None and argument[0].strip() == "figure":
+                    return True
+            target = next(iter(lexed.controls[index + 1 :]), None)
+            if (
+                target is not None
+                and target.word in _PROTECTED_FIGURE_CONTROL_WORDS
+            ):
+                return True
     return False
 
 
@@ -973,6 +1109,7 @@ def _extract_figure(
     max_pdf_objects: int,
     max_pdf_text_chars: int,
     source_url: str,
+    allow_preamble_ambiguity: bool = False,
 ) -> RecoveredFigure | None:
     root = main_path.parent
     expanded = _inline_tex(
@@ -991,20 +1128,24 @@ def _extract_figure(
     if block is None:
         return None
     body, _block_start, block_end, body_start, body_end = block
-    if (
-        _has_ambiguous_semantic_control(
-            expanded_lexed.controls,
-            end=block_end,
-        )
-        or _UNSAFE_FIGURE_RE.search(body)
-    ):
-        return None
-
     body_controls = [
         token
         for token in expanded_lexed.controls
         if body_start <= token.start < body_end
     ]
+    if (
+        _has_ambiguous_semantic_control(
+            expanded_lexed.controls,
+            end=block_end,
+            allow_preamble_ambiguity=allow_preamble_ambiguity,
+            figure_controls=frozenset(
+                (token.word, token.symbol) for token in body_controls
+            ),
+        )
+        or _UNSAFE_FIGURE_RE.search(body)
+    ):
+        return None
+
     for token in body_controls:
         word = token.word
         symbol = token.symbol
@@ -1085,6 +1226,9 @@ def _safe_source_redirect(
         port = parsed.port
     except ValueError:
         return None
+    allowed_paths = {expected_path}
+    if expected_path.startswith("/e-print/"):
+        allowed_paths.add(f"/src/{expected_path.removeprefix('/e-print/')}")
     if (
         parsed.scheme != "https"
         or parsed.hostname not in ARXIV_FIGURE_HOSTS
@@ -1093,7 +1237,7 @@ def _safe_source_redirect(
         or port not in (None, 443)
         or "?" in candidate
         or "#" in candidate
-        or parsed.path != expected_path
+        or parsed.path not in allowed_paths
     ):
         return None
     return candidate
@@ -1271,11 +1415,10 @@ class ArxivSourceFigureExtractor:
         tex_files = _decode_tex_files(files)
         if tex_files is None:
             return None
-        if any(
+        has_local_semantic_dependencies = any(
             path.suffix.casefold() in {".sty", ".cls"}
             for path in files
-        ):
-            return None
+        )
         declarations: list[tuple[PurePosixPath, str]] = []
         for path, lexed in tex_files.items():
             names = _literal_documentclass_declarations(lexed)
@@ -1285,6 +1428,29 @@ class ArxivSourceFigureExtractor:
         if len(declarations) != 1:
             return None
         try:
+            if not has_local_semantic_dependencies:
+                strict = _extract_figure(
+                    files,
+                    tex_files,
+                    main_path=declarations[0][0],
+                    max_include_depth=self.max_include_depth,
+                    max_tex_bytes=self.max_tex_bytes,
+                    max_asset_bytes=self.max_asset_bytes,
+                    max_image_dimension=self.max_image_dimension,
+                    max_image_pixels=self.max_image_pixels,
+                    max_image_frames=self.max_image_frames,
+                    max_pdf_page_dimension_points=self.max_pdf_page_dimension_points,
+                    max_pdf_objects=self.max_pdf_objects,
+                    max_pdf_text_chars=self.max_pdf_text_chars,
+                    source_url=source_url,
+                )
+                if strict is not None:
+                    return strict
+            if (
+                has_local_semantic_dependencies
+                and _has_unsafe_local_semantic_dependency(files)
+            ):
+                return None
             return _extract_figure(
                 files,
                 tex_files,
@@ -1299,6 +1465,7 @@ class ArxivSourceFigureExtractor:
                 max_pdf_objects=self.max_pdf_objects,
                 max_pdf_text_chars=self.max_pdf_text_chars,
                 source_url=source_url,
+                allow_preamble_ambiguity=True,
             )
         except (
             AssertionError,

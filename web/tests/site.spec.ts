@@ -215,7 +215,10 @@ test("figure gallery becomes one column on mobile", async ({ page }) => {
 });
 
 for (const [id, message] of [
-  ["2607.20001", "arXiv 暂未提供 HTML 版本，无法提取 Fig. 1 / Fig. 2。"],
+  [
+    "2607.20001",
+    "arXiv HTML 不可用，源码包和 PDF 中也未能提取到 Fig. 1 / Fig. 2。",
+  ],
   ["2607.20002", "在 arXiv HTML 中未找到 Fig. 1 / Fig. 2。"],
   ["2607.20003", "本次获取 Fig. 1 / Fig. 2 失败，论文其它内容仍可正常阅读。"],
 ] as const) {

@@ -406,10 +406,11 @@ def test_historical_gallery_defaults_recovery_version_to_zero() -> None:
 
 
 def test_not_found_is_permanent_only_for_current_recovery_version() -> None:
+    assert recovery_module.FIGURE_RECOVERY_VERSION == 2
     old = gallery(
         recovery_status=FigureRecoveryStatus.NOT_FOUND,
         recovery_checked_at=CHECKED_AT - timedelta(hours=48),
-    ).model_copy(update={"recovery_version": 0})
+    ).model_copy(update={"recovery_version": 1})
     calls: list[str] = []
     recovery = service(html=gallery(), source=None, pdf=None, calls=calls)
 

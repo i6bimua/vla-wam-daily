@@ -11,6 +11,7 @@ from PIL import Image
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen.canvas import Canvas
 
+from vla_wam_daily import figure_pdf
 from vla_wam_daily.figure_pdf import ArxivPdfFigureExtractor
 from vla_wam_daily.figure_recovery_types import TransientRecoveryError
 
@@ -21,6 +22,31 @@ PAGE_SIZE = (612, 792)
 USER_AGENT = "VLA-WAM-Daily-Test/0.1"
 
 DrawPage = Callable[[Canvas], None]
+
+
+class FakeTextPage:
+    def __init__(self, text: str, *, geometryless_indexes: set[int]) -> None:
+        self.text = text
+        self.geometryless_indexes = geometryless_indexes
+
+    def get_text_range(
+        self,
+        _index: int,
+        _count: int,
+        *,
+        errors: str,
+    ) -> str:
+        assert errors == "strict"
+        return self.text
+
+    def get_charbox(self, index: int) -> tuple[float, float, float, float]:
+        line_index = self.text.count("\n", 0, index)
+        line_start = self.text.rfind("\n", 0, index) + 1
+        left = 100.0 + (index - line_start) * 6
+        bottom = 450.0 - line_index * 60
+        if index in self.geometryless_indexes:
+            return (left, bottom, left, bottom)
+        return (left, bottom, left + 5, bottom + 12)
 
 
 def make_pdf(*pages: DrawPage, page_size: tuple[int, int] = PAGE_SIZE) -> bytes:
@@ -140,8 +166,126 @@ def test_extracts_supported_figure_one_caption_forms(
         assert 200 < image.height < 2_500
 
 
-def test_figure_ten_does_not_match_figure_one() -> None:
-    assert extract(make_target_pdf(caption="Figure 10: Wrong figure.")) is None
+def test_geometryless_whitespace_keeps_later_caption_but_non_whitespace_rejects() -> None:
+    text = "Body text\nFig. 1: See2Think architecture."
+    visible = figure_pdf._Box(0, 0, *PAGE_SIZE)
+    whitespace_index = text.index(" ")
+
+    lines = figure_pdf._page_lines(
+        FakeTextPage(text, geometryless_indexes={whitespace_index}),
+        char_count=len(text),
+        visible=visible,
+    )
+
+    assert [line.text for line in lines] == [
+        "Body text",
+        "Fig. 1: See2Think architecture.",
+    ]
+    crop = figure_pdf._crop_for_page(
+        lines,
+        [figure_pdf._Box(90, 430, 490, 610)],
+        visible=visible,
+        page_margin=6,
+        max_vertical_distance=72,
+        min_visual_area=900,
+        max_cluster_gap=12,
+        crop_padding=6,
+    )
+    assert crop is not None
+    assert crop[0] == "See2Think architecture."
+    assert (
+        figure_pdf._page_lines(
+            FakeTextPage(text, geometryless_indexes={0}),
+            char_count=len(text),
+            visible=visible,
+        )
+        == []
+    )
+
+
+def test_extracts_punctuation_free_figure_one_caption_with_unique_visual() -> None:
+    candidate = extract(make_target_pdf(caption="Figure 1 See2Think architecture"))
+
+    assert candidate is not None
+    assert candidate.caption == "See2Think architecture"
+
+
+def test_caption_continuation_skips_an_interleaved_right_column_line() -> None:
+    lines = [
+        figure_pdf._TextLine(
+            "Fig. 1. Methods for transferring text-conditioned models to speech. a) uses",
+            figure_pdf._Box(54.10, 173.94, 298.47, 181.11),
+        ),
+        figure_pdf._TextLine(
+            "an Automatic Speech Recognition (ASR) model to transcribe the speech,",
+            figure_pdf._Box(54.29, 164.97, 298.36, 172.14),
+        ),
+        figure_pdf._TextLine(
+            "but it mistranscribes, causing complete failure of the downstream task. b) is",
+            figure_pdf._Box(54.02, 156.00, 298.47, 163.18),
+        ),
+        figure_pdf._TextLine(
+            "speaker variations. Motivated by these findings, we introduce",
+            figure_pdf._Box(313.71, 153.95, 557.80, 162.92),
+        ),
+        figure_pdf._TextLine(
+            "trained directly on speech, bypassing the discrete mistranscription problem.",
+            figure_pdf._Box(54.10, 147.04, 298.25, 154.21),
+        ),
+        figure_pdf._TextLine(
+            "This close fourth continuation must not be consumed.",
+            figure_pdf._Box(54.10, 138.07, 298.25, 145.24),
+        ),
+    ]
+
+    captions, _neighbors = figure_pdf._captions(lines)
+
+    assert [caption.text for caption in captions] == [
+        "Methods for transferring text-conditioned models to speech. "
+        "a) uses an Automatic Speech Recognition (ASR) model to transcribe "
+        "the speech, but it mistranscribes, causing complete failure of the "
+        "downstream task. b) is trained directly on speech, bypassing the "
+        "discrete mistranscription problem."
+    ]
+
+
+def test_caption_continuation_stops_at_a_shifted_same_column_line() -> None:
+    lines = [
+        figure_pdf._TextLine(
+            "Figure 1: Target caption.",
+            figure_pdf._Box(54, 174, 298, 181),
+        ),
+        figure_pdf._TextLine(
+            "Indented body text.",
+            figure_pdf._Box(100, 165, 298, 172),
+        ),
+        figure_pdf._TextLine(
+            "A later aligned line must not be reached.",
+            figure_pdf._Box(54, 156, 298, 163),
+        ),
+    ]
+
+    captions, _neighbors = figure_pdf._captions(lines)
+
+    assert [caption.text for caption in captions] == ["Target caption."]
+
+
+def test_prose_reference_without_punctuation_is_not_a_caption() -> None:
+    assert (
+        extract(make_target_pdf(caption="Figure 1 shows how the method works."))
+        is None
+    )
+
+
+@pytest.mark.parametrize(
+    "caption",
+    [
+        "Figure 10: Wrong figure.",
+        "Figure 1.1: Wrong subsection.",
+    ],
+)
+def test_numbered_variants_do_not_match_figure_one(caption: str) -> None:
+    assert extract(make_target_pdf(caption=caption)) is None
 
 
 def test_default_render_resolution_is_approximately_300_dpi() -> None:
@@ -323,6 +467,15 @@ def test_neighboring_figure_caption_blocks_crossing_visual_region() -> None:
         draw_rect_visual(canvas, y=500)
         draw_caption(canvas, "Figure 2: This owns the visual.", y=455)
         draw_caption(canvas, "Figure 1: Must not cross Figure 2.", y=390)
+
+    assert extract(make_pdf(page), max_vertical_distance=160) is None
+
+
+def test_punctuation_free_neighboring_caption_blocks_crossing_visual_region() -> None:
+    def page(canvas: Canvas) -> None:
+        draw_rect_visual(canvas, y=500)
+        draw_caption(canvas, "Figure 2 Neighboring diagram", y=455)
+        draw_caption(canvas, "Figure 1 Target diagram", y=390)
 
     assert extract(make_pdf(page), max_vertical_distance=160) is None
 
