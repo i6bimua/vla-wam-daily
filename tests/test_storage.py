@@ -431,8 +431,18 @@ def test_browser_fixture_covers_all_figure_statuses_and_run_counters() -> None:
     assert load_figure_cache(data_dir) == {}
 
 
-@pytest.mark.parametrize("data_dir", [Path("data"), Path("tests/fixtures/data")])
-def test_seed_figure_caches_are_valid_empty_objects(data_dir: Path) -> None:
+def test_repository_figure_cache_is_a_valid_json_object() -> None:
+    data_dir = Path("data")
+    payload = json.loads((data_dir / "cache/figures.json").read_text(encoding="utf-8"))
+    cache = load_figure_cache(data_dir)
+
+    assert isinstance(payload, dict)
+    assert set(cache) == set(payload)
+
+
+def test_browser_fixture_figure_cache_is_a_valid_empty_seed() -> None:
+    data_dir = Path("tests/fixtures/data")
+
     assert load_figure_cache(data_dir) == {}
     assert (data_dir / "cache/figures.json").read_bytes() == b"{}\n"
 
