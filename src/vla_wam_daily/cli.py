@@ -27,7 +27,7 @@ from vla_wam_daily.pipeline import normalize_force_ids, run_daily
 DEFAULT_CONFIG_PATH = Path("config/topics.yaml")
 DEFAULT_DATA_DIR = Path("data")
 DEFAULT_PUBLIC_DIR = Path("web/public")
-DEFAULT_PROMPT_PATH = Path("prompts/analysis-v1.md")
+DEFAULT_PROMPT_PATH = Path("prompts/analysis-v2.md")
 DEFAULT_USER_AGENT = "VLA-WAM-Daily/0.1 (https://github.com/vla-wam-daily/vla-wam-daily)"
 DEFAULT_FIGURE_REQUEST_DELAY_SECONDS = 3.0
 

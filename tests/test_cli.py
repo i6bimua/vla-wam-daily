@@ -19,6 +19,10 @@ RUNNER = CliRunner()
 SECRET = "test-deepseek-secret"
 
 
+def test_default_prompt_path_selects_analysis_v2() -> None:
+    assert Path("prompts/analysis-v2.md") == cli_module.DEFAULT_PROMPT_PATH
+
+
 @pytest.fixture
 def real_cli_paths(tmp_path: Path) -> tuple[Path, Path, Path]:
     config_dir = tmp_path / "config"
@@ -30,7 +34,7 @@ def real_cli_paths(tmp_path: Path) -> tuple[Path, Path, Path]:
         Path("config/topics.yaml").read_text(encoding="utf-8"),
         encoding="utf-8",
     )
-    prompt_path = prompt_dir / "analysis-v1.md"
+    prompt_path = prompt_dir / "analysis-v2.md"
     prompt_path.write_text("只返回一个 JSON 对象。", encoding="utf-8")
     return config_path, prompt_path, tmp_path / "data"
 
@@ -42,7 +46,7 @@ def config() -> AppConfig:
 
 @pytest.fixture
 def prompt_path(tmp_path: Path) -> Path:
-    path = tmp_path / "analysis-v1.md"
+    path = tmp_path / "analysis-v2.md"
     path.write_text("只返回一个 JSON 对象。", encoding="utf-8")
     return path
 
@@ -584,8 +588,8 @@ def test_missing_configured_prompt_version_is_a_prompt_parameter_error(
     config_path, prompt_path, data_dir = real_cli_paths
     config_path.write_text(
         config_path.read_text(encoding="utf-8").replace(
-            'prompt_version: "1"',
             'prompt_version: "2"',
+            'prompt_version: "3"',
         ),
         encoding="utf-8",
     )
