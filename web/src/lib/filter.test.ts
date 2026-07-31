@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  TOPICS,
   createFilterPaper,
   filterPapers,
   parseFilterState,
@@ -44,6 +45,23 @@ const filterFixtures: readonly FilterPaper[] = [
     searchText: "Robot dataset",
   },
 ];
+
+it("uses the complete stable public topic order", () => {
+  expect(TOPICS).toEqual([
+    "VLA",
+    "WAM",
+    "World Model",
+    "Dataset",
+    "Benchmark",
+    "Speculative Decoding",
+    "Quantization",
+  ]);
+  expect(
+    parseFilterState(
+      "?topic=Quantization&topic=Speculative%20Decoding&topic=Unknown",
+    ).topics,
+  ).toEqual(["Speculative Decoding", "Quantization"]);
+});
 
 describe("parseFilterState", () => {
   it("trims query and canonicalizes valid repeated state", () => {

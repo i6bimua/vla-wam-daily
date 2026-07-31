@@ -44,6 +44,20 @@ export const TOPIC_ROUTES = [
     title: "VLA/WAM 基准评测",
     description: "汇集机器人通用策略、世界模型与动作生成的评测研究。",
   },
+  {
+    slug: "speculative-decoding",
+    topic: "Speculative Decoding",
+    navLabel: "推测解码",
+    title: "推测解码论文",
+    description: "追踪草稿模型、验证器与并行生成加速研究。",
+  },
+  {
+    slug: "quantization",
+    topic: "Quantization",
+    navLabel: "模型量化",
+    title: "模型量化论文",
+    description: "追踪整数、低比特、权重与激活量化研究。",
+  },
 ] as const satisfies readonly TopicRoute[];
 
 export function topicRouteBySlug(slug: string): TopicRoute | undefined {

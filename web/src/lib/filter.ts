@@ -6,6 +6,8 @@ export const TOPICS: readonly Topic[] = [
   "World Model",
   "Dataset",
   "Benchmark",
+  "Speculative Decoding",
+  "Quantization",
 ];
 export const DEFAULT_MINIMUM_SCORE = 6;
 export const MAX_FILTER_QUERY_LENGTH = 200;
