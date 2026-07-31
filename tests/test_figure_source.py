@@ -143,6 +143,56 @@ def extract_from_tar(
         client.close()
 
 
+def extract_all_from_tar(
+    files: Mapping[str, bytes],
+    **kwargs: object,
+):
+    extractor, client = make_extractor(make_tar(files), **kwargs)
+    try:
+        return extractor.extract_all(ARXIV_ID, VERSION)
+    finally:
+        client.close()
+
+
+def test_extracts_first_two_literal_overpic_pdf_assets() -> None:
+    main = rb"""
+\documentclass{article}
+\begin{document}
+\begin{figure}
+\centering
+\begin{overpic}[width=\textwidth]{figures/introduction_v9.pdf}
+\put(4,4){ignored overlay}
+\end{overpic}
+\caption{Overview of the proposed method.}
+\end{figure}
+\begin{figure*}
+\begin{overpic}[width=345.0pt]{figures/overview_v11.pdf}
+\end{overpic}
+\caption{Detailed system architecture.}
+\end{figure*}
+\end{document}
+"""
+
+    candidates = extract_all_from_tar(
+        {
+            "main.tex": main,
+            "figures/introduction_v9.pdf": make_pdf_asset(),
+            "figures/overview_v11.pdf": make_pdf_asset(),
+        }
+    )
+
+    assert [candidate.number for candidate in candidates] == [1, 2]
+    assert [candidate.caption for candidate in candidates] == [
+        "Overview of the proposed method.",
+        "Detailed system architecture.",
+    ]
+    assert all(candidate.extension == "png" for candidate in candidates)
+    assert all(
+        candidate.content.startswith(b"\x89PNG\r\n\x1a\n")
+        for candidate in candidates
+    )
+
+
 def test_extracts_first_direct_literal_figure_asset_and_plain_caption() -> None:
     candidate = extract_from_tar(
         {

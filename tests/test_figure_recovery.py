@@ -88,7 +88,7 @@ class FakeExtractor:
     def __init__(
         self,
         kind: str,
-        result: RecoveredFigure | None | BaseException,
+        result: RecoveredFigure | tuple[RecoveredFigure, ...] | None | BaseException,
         calls: list[str],
     ) -> None:
         self.kind = kind
@@ -99,7 +99,21 @@ class FakeExtractor:
         self.calls.append(f"{self.kind}:{arxiv_id}:v{version}")
         if isinstance(self.result, BaseException):
             raise self.result
+        if isinstance(self.result, tuple):
+            return self.result[0] if self.result else None
         return self.result
+
+    def extract_all(
+        self,
+        arxiv_id: str,
+        version: int,
+    ) -> tuple[RecoveredFigure, ...]:
+        self.calls.append(f"{self.kind}:{arxiv_id}:v{version}")
+        if isinstance(self.result, BaseException):
+            raise self.result
+        if self.result is None:
+            return ()
+        return self.result if isinstance(self.result, tuple) else (self.result,)
 
 
 class FakeStore:
@@ -140,7 +154,11 @@ class FakeStore:
         )
 
 
-def recovered(source: str = "arxiv_source") -> RecoveredFigure:
+def recovered(
+    source: str = "arxiv_source",
+    *,
+    number: int = 1,
+) -> RecoveredFigure:
     suffix = "e-print" if source == "arxiv_source" else "pdf"
     extension = "svg" if source == "arxiv_source" else "png"
     return RecoveredFigure(
@@ -149,14 +167,15 @@ def recovered(source: str = "arxiv_source") -> RecoveredFigure:
         content=source.encode(),
         source_url=f"https://arxiv.org/{suffix}/{ARXIV_ID}v{VERSION}",
         source=source,  # type: ignore[arg-type]
+        number=number,  # type: ignore[arg-type]
     )
 
 
 def service(
     *,
     html: FigureGallery | BaseException,
-    source: RecoveredFigure | None | BaseException,
-    pdf: RecoveredFigure | None | BaseException,
+    source: RecoveredFigure | tuple[RecoveredFigure, ...] | None | BaseException,
+    pdf: RecoveredFigure | tuple[RecoveredFigure, ...] | None | BaseException,
     calls: list[str],
     store: FakeStore | None = None,
 ) -> FigureRecoveryService:
@@ -166,6 +185,45 @@ def service(
         pdf_extractor=FakeExtractor("pdf", pdf, calls),
         store=store or FakeStore(calls),
     )
+
+
+def test_source_fills_both_missing_figure_numbers_without_pdf() -> None:
+    calls: list[str] = []
+    recovery = service(
+        html=gallery(),
+        source=(recovered(number=1), recovered(number=2)),
+        pdf=AssertionError("PDF extraction must not run"),
+        calls=calls,
+    )
+
+    result = recovery.recover_gallery(gallery(), checked_at=CHECKED_AT)
+
+    assert [figure.number for figure in result.figures] == [1, 2]
+    assert [figure.source for figure in result.figures] == [
+        "arxiv_source",
+        "arxiv_source",
+    ]
+    assert any(":fig2:panel1:" in call for call in calls)
+
+
+def test_html_figure_one_is_preserved_while_source_fills_figure_two() -> None:
+    calls: list[str] = []
+    original_figure_one = html_figure(1)
+    recovery = service(
+        html=gallery(original_figure_one),
+        source=(recovered(number=1), recovered(number=2)),
+        pdf=None,
+        calls=calls,
+    )
+
+    result = recovery.recover_gallery(
+        gallery(original_figure_one),
+        checked_at=CHECKED_AT,
+    )
+
+    assert result.figures[0] == original_figure_one
+    assert result.figures[1].number == 2
+    assert result.figures[1].source == "arxiv_source"
 
 
 def test_usable_cached_figure_one_skips_every_recovery_stage() -> None:
@@ -372,24 +430,21 @@ def test_install_failure_falls_through_to_pdf_success() -> None:
     assert f"pdf:{ARXIV_ID}:v{VERSION}" in calls
 
 
-def test_skip_permanent_results_and_throttle_recent_fetch_failure() -> None:
-    terminal_time = CHECKED_AT - timedelta(hours=48)
+def test_throttles_recent_negative_results_for_current_version() -> None:
     recent_failure_time = CHECKED_AT - timedelta(hours=23)
-    for status, checked_at in (
-        (FigureRecoveryStatus.NOT_FOUND, terminal_time),
-        (FigureRecoveryStatus.FETCH_FAILED, recent_failure_time),
+    for status in (
+        FigureRecoveryStatus.NOT_FOUND,
+        FigureRecoveryStatus.FETCH_FAILED,
     ):
         calls: list[str] = []
         original = gallery(
             recovery_status=status,
-            recovery_checked_at=checked_at,
+            recovery_checked_at=recent_failure_time,
+        ).model_copy(
+            update={
+                "recovery_version": recovery_module.FIGURE_RECOVERY_VERSION
+            }
         )
-        if status is FigureRecoveryStatus.NOT_FOUND:
-            original = original.model_copy(
-                update={
-                    "recovery_version": recovery_module.FIGURE_RECOVERY_VERSION
-                }
-            )
         recovery = service(html=gallery(), source=None, pdf=None, calls=calls)
 
         assert recovery.recover_gallery(original, checked_at=CHECKED_AT) == original
@@ -405,12 +460,12 @@ def test_historical_gallery_defaults_recovery_version_to_zero() -> None:
     assert historical.recovery_version == 0
 
 
-def test_not_found_is_permanent_only_for_current_recovery_version() -> None:
-    assert recovery_module.FIGURE_RECOVERY_VERSION == 2
+def test_version_two_not_found_retries_immediately_under_version_three() -> None:
+    assert recovery_module.FIGURE_RECOVERY_VERSION == 3
     old = gallery(
         recovery_status=FigureRecoveryStatus.NOT_FOUND,
         recovery_checked_at=CHECKED_AT - timedelta(hours=48),
-    ).model_copy(update={"recovery_version": 1})
+    ).model_copy(update={"recovery_version": 2})
     calls: list[str] = []
     recovery = service(html=gallery(), source=None, pdf=None, calls=calls)
 

@@ -14,6 +14,7 @@ class RecoveredFigure:
     content: bytes
     source_url: str
     source: RecoveredSource
+    number: Literal[1, 2] = 1
 
 
 class TransientRecoveryError(RuntimeError):

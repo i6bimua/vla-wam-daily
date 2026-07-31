@@ -607,9 +607,9 @@ def _inline_tex(
     return "".join(parts)
 
 
-def _first_figure_block(
+def _figure_blocks(
     lexed: _LexedTex,
-) -> tuple[str, int, int, int, int] | None:
+) -> tuple[tuple[str, int, int, int, int], ...]:
     figure_tokens = [
         token
         for token in lexed.controls
@@ -617,38 +617,48 @@ def _first_figure_block(
         and token.environment_argument in {"figure", "figure*"}
     ]
     if not figure_tokens:
-        return None
-    first = figure_tokens[0]
-    if (
-        first.word != "begin"
-        or not first.document_active
-        or first.environment_depth != 1
-        or first.current_environment != "document"
-        or first.brace_depth != 0
-        or first.bracket_depth != 0
-        or first.argument_end is None
-    ):
-        return None
-    following = figure_tokens[1] if len(figure_tokens) >= 2 else None
-    if (
-        following is None
-        or following.word != "end"
-        or following.environment_argument != first.environment_argument
-        or following.environment_depth != 2
-        or following.current_environment != first.environment_argument
-        or following.parent_environment != "document"
-        or following.brace_depth != 0
-        or following.bracket_depth != 0
-        or following.argument_end is None
-    ):
-        return None
-    return (
-        lexed.text[first.argument_end : following.start],
-        first.start,
-        following.argument_end,
-        first.argument_end,
-        following.start,
-    )
+        return ()
+    blocks: list[tuple[str, int, int, int, int]] = []
+    index = 0
+    while index + 1 < len(figure_tokens) and len(blocks) < 2:
+        opening = figure_tokens[index]
+        closing = figure_tokens[index + 1]
+        if (
+            opening.word != "begin"
+            or not opening.document_active
+            or opening.environment_depth != 1
+            or opening.current_environment != "document"
+            or opening.brace_depth != 0
+            or opening.bracket_depth != 0
+            or opening.argument_end is None
+            or closing.word != "end"
+            or closing.environment_argument != opening.environment_argument
+            or closing.environment_depth != 2
+            or closing.current_environment != opening.environment_argument
+            or closing.parent_environment != "document"
+            or closing.brace_depth != 0
+            or closing.bracket_depth != 0
+            or closing.argument_end is None
+        ):
+            return ()
+        blocks.append(
+            (
+                lexed.text[opening.argument_end : closing.start],
+                opening.start,
+                closing.argument_end,
+                opening.argument_end,
+                closing.start,
+            )
+        )
+        index += 2
+    return tuple(blocks)
+
+
+def _first_figure_block(
+    lexed: _LexedTex,
+) -> tuple[str, int, int, int, int] | None:
+    blocks = _figure_blocks(lexed)
+    return blocks[0] if blocks else None
 
 
 _COUNTER_MUTATION_CONTROLS = frozenset(
@@ -1109,6 +1119,7 @@ def _extract_figure(
     max_pdf_objects: int,
     max_pdf_text_chars: int,
     source_url: str,
+    figure_number: int = 1,
     allow_preamble_ambiguity: bool = False,
 ) -> RecoveredFigure | None:
     root = main_path.parent
@@ -1124,9 +1135,10 @@ def _extract_figure(
     expanded_lexed = _lex_tex(expanded)
     if expanded_lexed is None:
         return None
-    block = _first_figure_block(expanded_lexed)
-    if block is None:
+    blocks = _figure_blocks(expanded_lexed)
+    if figure_number not in {1, 2} or len(blocks) < figure_number:
         return None
+    block = blocks[figure_number - 1]
     body, _block_start, block_end, body_start, body_end = block
     body_controls = [
         token
@@ -1149,6 +1161,11 @@ def _extract_figure(
     for token in body_controls:
         word = token.word
         symbol = token.symbol
+        if (
+            token.environment_argument == "overpic"
+            and word in {"begin", "end"}
+        ) or token.current_environment == "overpic":
+            continue
         if word is not None:
             if word not in _ALLOWED_FIGURE_CONTROLS:
                 return None
@@ -1157,12 +1174,21 @@ def _extract_figure(
     graphics_tokens = [
         token for token in body_controls if token.word == "includegraphics"
     ]
+    overpic_tokens = [
+        token
+        for token in body_controls
+        if token.word == "begin"
+        and token.environment_argument == "overpic"
+    ]
     caption_tokens = [
         token for token in body_controls if token.word == "caption"
     ]
-    if len(graphics_tokens) != 1 or len(caption_tokens) != 1:
+    if len(graphics_tokens) + len(overpic_tokens) != 1 or len(caption_tokens) != 1:
         return None
-    required_tokens = (graphics_tokens[0], caption_tokens[0])
+    asset_token = (
+        graphics_tokens[0] if graphics_tokens else overpic_tokens[0]
+    )
+    required_tokens = (asset_token, caption_tokens[0])
     if any(
         token.brace_depth != 0
         or token.bracket_depth != 0
@@ -1173,9 +1199,16 @@ def _extract_figure(
         for token in required_tokens
     ):
         return None
+    asset_command_end = (
+        asset_token.end
+        if asset_token.word == "includegraphics"
+        else asset_token.argument_end
+    )
+    if asset_command_end is None:
+        return None
     asset_argument = _literal_command_argument_at(
         expanded_lexed.text,
-        graphics_tokens[0].end,
+        asset_command_end,
         allow_options=True,
     )
     caption_argument = _literal_command_argument_at(
@@ -1209,6 +1242,7 @@ def _extract_figure(
         content=content,
         source_url=source_url,
         source="arxiv_source",
+        number=figure_number,
     )
 
 
@@ -1392,16 +1426,16 @@ class ArxivSourceFigureExtractor:
         except httpx.RequestError as error:
             raise TransientRecoveryError("arXiv source request failed") from error
 
-    def extract(
+    def extract_all(
         self,
         arxiv_id: str,
         version: int,
-    ) -> RecoveredFigure | None:
+    ) -> tuple[RecoveredFigure, ...]:
         figure_cache_key(arxiv_id, version)
         source_url = f"https://arxiv.org/e-print/{arxiv_id}v{version}"
         body = self._download(source_url)
         if body is None:
-            return None
+            return ()
         files = _read_archive(
             body,
             max_archive_bytes=self.max_archive_bytes,
@@ -1411,10 +1445,10 @@ class ArxivSourceFigureExtractor:
             max_tex_bytes=self.max_tex_bytes,
         )
         if files is None:
-            return None
+            return ()
         tex_files = _decode_tex_files(files)
         if tex_files is None:
-            return None
+            return ()
         has_local_semantic_dependencies = any(
             path.suffix.casefold() in {".sty", ".cls"}
             for path in files
@@ -1423,50 +1457,57 @@ class ArxivSourceFigureExtractor:
         for path, lexed in tex_files.items():
             names = _literal_documentclass_declarations(lexed)
             if names is None:
-                return None
+                return ()
             declarations.extend((path, name) for name in names)
         if len(declarations) != 1:
-            return None
+            return ()
         try:
-            if not has_local_semantic_dependencies:
-                strict = _extract_figure(
-                    files,
-                    tex_files,
-                    main_path=declarations[0][0],
-                    max_include_depth=self.max_include_depth,
-                    max_tex_bytes=self.max_tex_bytes,
-                    max_asset_bytes=self.max_asset_bytes,
-                    max_image_dimension=self.max_image_dimension,
-                    max_image_pixels=self.max_image_pixels,
-                    max_image_frames=self.max_image_frames,
-                    max_pdf_page_dimension_points=self.max_pdf_page_dimension_points,
-                    max_pdf_objects=self.max_pdf_objects,
-                    max_pdf_text_chars=self.max_pdf_text_chars,
-                    source_url=source_url,
-                )
-                if strict is not None:
-                    return strict
             if (
                 has_local_semantic_dependencies
                 and _has_unsafe_local_semantic_dependency(files)
             ):
-                return None
-            return _extract_figure(
-                files,
-                tex_files,
-                main_path=declarations[0][0],
-                max_include_depth=self.max_include_depth,
-                max_tex_bytes=self.max_tex_bytes,
-                max_asset_bytes=self.max_asset_bytes,
-                max_image_dimension=self.max_image_dimension,
-                max_image_pixels=self.max_image_pixels,
-                max_image_frames=self.max_image_frames,
-                max_pdf_page_dimension_points=self.max_pdf_page_dimension_points,
-                max_pdf_objects=self.max_pdf_objects,
-                max_pdf_text_chars=self.max_pdf_text_chars,
-                source_url=source_url,
-                allow_preamble_ambiguity=True,
-            )
+                return ()
+            recovered: list[RecoveredFigure] = []
+            for figure_number in (1, 2):
+                candidate = None
+                if not has_local_semantic_dependencies:
+                    candidate = _extract_figure(
+                        files,
+                        tex_files,
+                        main_path=declarations[0][0],
+                        max_include_depth=self.max_include_depth,
+                        max_tex_bytes=self.max_tex_bytes,
+                        max_asset_bytes=self.max_asset_bytes,
+                        max_image_dimension=self.max_image_dimension,
+                        max_image_pixels=self.max_image_pixels,
+                        max_image_frames=self.max_image_frames,
+                        max_pdf_page_dimension_points=self.max_pdf_page_dimension_points,
+                        max_pdf_objects=self.max_pdf_objects,
+                        max_pdf_text_chars=self.max_pdf_text_chars,
+                        source_url=source_url,
+                        figure_number=figure_number,
+                    )
+                if candidate is None:
+                    candidate = _extract_figure(
+                        files,
+                        tex_files,
+                        main_path=declarations[0][0],
+                        max_include_depth=self.max_include_depth,
+                        max_tex_bytes=self.max_tex_bytes,
+                        max_asset_bytes=self.max_asset_bytes,
+                        max_image_dimension=self.max_image_dimension,
+                        max_image_pixels=self.max_image_pixels,
+                        max_image_frames=self.max_image_frames,
+                        max_pdf_page_dimension_points=self.max_pdf_page_dimension_points,
+                        max_pdf_objects=self.max_pdf_objects,
+                        max_pdf_text_chars=self.max_pdf_text_chars,
+                        source_url=source_url,
+                        figure_number=figure_number,
+                        allow_preamble_ambiguity=True,
+                    )
+                if candidate is not None:
+                    recovered.append(candidate)
+            return tuple(recovered)
         except (
             AssertionError,
             AttributeError,
@@ -1481,4 +1522,15 @@ class ArxivSourceFigureExtractor:
             raise
         except Exception:
             LOGGER.exception("Unexpected arXiv source figure extraction failure")
-            return None
+            return ()
+
+    def extract(
+        self,
+        arxiv_id: str,
+        version: int,
+    ) -> RecoveredFigure | None:
+        recovered = self.extract_all(arxiv_id, version)
+        return next(
+            (figure for figure in recovered if figure.number == 1),
+            None,
+        )
