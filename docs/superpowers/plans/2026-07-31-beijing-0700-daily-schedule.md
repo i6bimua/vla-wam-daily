@@ -194,7 +194,6 @@ Expected: all selected tests pass with zero failures.
 
 ```bash
 uv run ruff check tests/test_workflows.py tests/test_docs.py
-uv run ruff format --check tests/test_workflows.py tests/test_docs.py
 git diff --check origin/main...HEAD
 ```
 
