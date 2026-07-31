@@ -98,10 +98,16 @@ describe("weekly, methodology, RSS, and 404 route contracts", () => {
 describe("global navigation contract", () => {
   it("links every information route and reuses the central topic mapping", async () => {
     const header = await source("components/Header.astro");
+    const index = await source("pages/index.astro");
+    const methodology = await source("pages/methodology.astro");
     const layout = await source("layouts/BaseLayout.astro");
     const css = await source("styles/global.css");
 
     expect(header).toContain("TOPIC_ROUTES");
+    expect(header).toContain("Robotics & inference research brief");
+    expect(index).toContain("推测解码");
+    expect(index).toContain("模型量化");
+    expect(methodology).toContain("独立的推测解码或模型量化");
     for (const target of [
       "weekly/",
       "archive/",

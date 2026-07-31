@@ -11,7 +11,8 @@ export async function GET(context: APIContext): Promise<Response> {
   const feedSite = new URL(base, context.site);
   return rss({
     title: "VLA/WAM Daily",
-    description: "每日精选视觉语言动作、世界动作模型与机器人世界模型研究。",
+    description:
+      "每日精选视觉语言动作、世界动作模型、机器人世界模型、推测解码与模型量化研究。",
     site: feedSite,
     customData: "<language>zh-CN</language>",
     items: createRssItems(await loadArchive(), context.site, base),

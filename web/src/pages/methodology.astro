@@ -49,8 +49,8 @@ const issuesUrl = repository ? `https://github.com/${repository}/issues` : null;
     <section>
       <h2>数据来源与更新</h2>
       <p>
-        论文元数据来自 arXiv。默认配置关注 cs.RO、cs.CV、cs.AI 和
-        cs.LG；运行时可通过 --config-path 使用其他配置，因此当前 DataFile
+        论文元数据来自 arXiv。默认配置关注 cs.RO、cs.CV、cs.AI、cs.LG 和
+        cs.CL；运行时可通过 --config-path 使用其他配置，因此当前 DataFile
         不证明本次实际分类范围。站点默认按北京时间每日更新，但具体执行时间和频率可在
         GitHub Actions 工作流中配置。
       </p>
@@ -59,17 +59,21 @@ const issuesUrl = repository ? `https://github.com/${repository}/issues` : null;
     <section>
       <h2>两级筛选</h2>
       <p>
-        第一层用完整概念词和“模型概念 +
-        机器人动作”组合做确定性预筛，避免把整个大分类送入模型。第二层由当前分析模型根据论文标题与摘要给出相关性评分、主题和结构化研究笔记。
+        第一层用完整概念词以及受控的“模型概念 + 机器人动作”“推测 + 生成”“量化 +
+        模型”组合做确定性预筛，避免把整个大分类送入模型，也避免把 Stable
+        Diffusion、拓扑量子化等同名概念误收。第二层由当前分析模型根据论文标题与摘要给出相关性评分、主题和结构化研究笔记。
       </p>
     </section>
 
     <section>
       <h2>评分与发布阈值</h2>
       <ul>
-        <li>9–10：VLA、WAM 或机器人动作世界模型是论文核心。</li>
-        <li>7–8：强相关的方法、数据集、评测或通用机器人策略。</li>
-        <li>6：对该方向有直接价值的相邻研究。</li>
+        <li>
+          9–10：VLA、WAM
+          或机器人研究是论文核心，或推理效率方法与这些方向直接交叉。
+        </li>
+        <li>7–8：独立的推测解码或模型量化是论文核心。</li>
+        <li>6：对机器人或高效模型推理有明确方法价值的相邻研究。</li>
         <li>1–5：相关性较低；是否发布取决于本次运行配置。</li>
       </ul>
       <p>

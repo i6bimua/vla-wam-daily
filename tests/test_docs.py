@@ -192,6 +192,17 @@ def test_readme_documents_multistage_figure_recovery_and_backfill() -> None:
         assert text in README
 
 
+def test_readme_documents_inference_efficiency_topics_and_uncached_limit() -> None:
+    for text in (
+        "cs.CL",
+        "Speculative Decoding",
+        "Quantization",
+        "analysis-v2.md",
+        "未缓存",
+    ):
+        assert text in README
+
+
 def test_license_is_complete_mit_text() -> None:
     license_text = (ROOT / "LICENSE").read_text(encoding="utf-8")
     assert license_text.startswith("MIT License\n")

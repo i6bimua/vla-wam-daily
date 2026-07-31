@@ -122,10 +122,7 @@ async function writeArchive(
 
 describe("the public data contract", () => {
   it.each([
-    [
-      "Speculative Decoding",
-      ["Efficient Inference", "Speculative Decoding"],
-    ],
+    ["Speculative Decoding", ["Efficient Inference", "Speculative Decoding"]],
     ["Quantization", ["Efficient Inference", "Model Quantization"]],
   ])("accepts the %s topic and tags", (topic, tags) => {
     const payload = paper();
