@@ -11,7 +11,7 @@ Vision-Language-Action（VLA）和 World Action Model（WAM）相关的论文，
 
 首版成功标准：
 
-- 每天北京时间 10:30 自动运行，也能手动运行。
+- 每天北京时间 07:00 自动运行，也能手动运行。
 - 覆盖 VLA、WAM、机器人世界模型、latent/video action model、通用机器人策略，
   以及直接相关的数据集和评测。
 - 保留英文原始信息，同时提供中文标题、中文一句话总结和结构化分析。
@@ -316,7 +316,8 @@ About/Methodology 页面公开：
 
 ### `daily.yml`
 
-在 `30 2 * * *` UTC（北京时间 10:30）运行，也支持 `workflow_dispatch`。
+在 `0 7 * * *`、`Asia/Shanghai` 时区（北京时间 07:00）运行，也支持
+`workflow_dispatch`。
 
 手动输入支持：
 

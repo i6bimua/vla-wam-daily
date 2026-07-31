@@ -137,8 +137,8 @@ Astro 根据 `GITHUB_REPOSITORY` 推导项目子路径，显式 `BASE_PATH` 仍�
 5. 部署 job 使用 `github-pages` environment。若仓库启用了 environment 审批或
    分支保护，需要允许默认分支部署。
 
-`.github/workflows/daily.yml` 的计划表达式是 `30 2 * * *`（UTC），即每天
-北京时间 10:30。GitHub 的定时任务可能因平台排队稍晚开始。非 dry-run 成功后，工作流
+`.github/workflows/daily.yml` 使用 `0 7 * * *` 和 `Asia/Shanghai` 时区，即每天
+北京时间 07:00。GitHub 的定时任务可能因平台排队稍晚开始。非 dry-run 成功后，工作流
 只提交 `data/` 和 `web/public/figures/`，再构建并发布 Pages；任何测试、数据校验或
 构建失败都不会替换线上上一版。`.github/workflows/pages.yml` 在默认分支变化时使用
 现有数据与 Figure 镜像重建页面，不调用 DeepSeek。
