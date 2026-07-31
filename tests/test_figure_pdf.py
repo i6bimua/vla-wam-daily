@@ -140,6 +140,68 @@ def extract(body: bytes, **kwargs: object):
         client.close()
 
 
+def extract_all(body: bytes, **kwargs: object):
+    extractor, client = make_extractor(body, **kwargs)
+    try:
+        return extractor.extract_all(ARXIV_ID, VERSION)
+    finally:
+        client.close()
+
+
+def test_extracts_figure_one_and_two_from_separate_pages() -> None:
+    def figure_one_page(canvas: Canvas) -> None:
+        draw_rect_visual(canvas)
+        draw_caption(canvas, "Figure 1: First architecture.")
+
+    def figure_two_page(canvas: Canvas) -> None:
+        draw_rect_visual(canvas, color=(0.8, 0.2, 0.1))
+        draw_caption(canvas, "Figure 2: Second architecture.")
+
+    candidates = extract_all(make_pdf(figure_one_page, figure_two_page))
+
+    assert [candidate.number for candidate in candidates] == [1, 2]
+    assert [candidate.caption for candidate in candidates] == [
+        "First architecture.",
+        "Second architecture.",
+    ]
+
+
+def test_page_lines_tolerates_pdfium_decoded_text_count_mismatch() -> None:
+    text = "Body text\nFigure 1: Recover this caption."
+    lines = figure_pdf._page_lines(
+        FakeTextPage(text, geometryless_indexes=set()),
+        char_count=len(text) + 5,
+        visible=figure_pdf._Box(0, 0, *PAGE_SIZE),
+    )
+
+    assert [line.text for line in lines] == [
+        "Body text",
+        "Figure 1: Recover this caption.",
+    ]
+
+
+def test_wide_crop_fallback_uses_region_above_caption() -> None:
+    visible = figure_pdf._Box(0, 0, *PAGE_SIZE)
+    caption = figure_pdf._Caption(
+        1,
+        "Fallback diagram.",
+        figure_pdf._Box(100, 100, 400, 115),
+    )
+
+    crop = figure_pdf._wide_crop_for_caption(
+        caption,
+        visible=visible,
+        page_margin=6,
+        crop_padding=6,
+    )
+
+    assert crop is not None
+    assert crop[0] >= visible.left
+    assert crop[1] <= caption.box.bottom
+    assert crop[2] <= visible.right
+    assert crop[3] > caption.box.top
+
+
 @pytest.mark.parametrize(
     ("caption", "expected"),
     [

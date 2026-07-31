@@ -157,18 +157,20 @@ def extract_all_from_tar(
 def test_extracts_first_two_literal_overpic_pdf_assets() -> None:
     main = rb"""
 \documentclass{article}
+\newcommand{\method}{VAD}
 \begin{document}
 \begin{figure}
 \centering
 \begin{overpic}[width=\textwidth]{figures/introduction_v9.pdf}
 \put(4,4){ignored overlay}
 \end{overpic}
-\caption{Overview of the proposed method.}
+\Description{Accessible figure description.}
+\caption{Overview of the proposed \method{} method.}
 \end{figure}
 \begin{figure*}
 \begin{overpic}[width=345.0pt]{figures/overview_v11.pdf}
 \end{overpic}
-\caption{Detailed system architecture.}
+\caption{Detailed system architecture with $r_t^{\mathrm{vis}}$.}
 \end{figure*}
 \end{document}
 """
@@ -183,8 +185,8 @@ def test_extracts_first_two_literal_overpic_pdf_assets() -> None:
 
     assert [candidate.number for candidate in candidates] == [1, 2]
     assert [candidate.caption for candidate in candidates] == [
-        "Overview of the proposed method.",
-        "Detailed system architecture.",
+        "Overview of the proposed VAD method.",
+        "Detailed system architecture with r_t^vis.",
     ]
     assert all(candidate.extension == "png" for candidate in candidates)
     assert all(

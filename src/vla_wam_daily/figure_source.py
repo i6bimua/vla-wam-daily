@@ -76,6 +76,7 @@ _ALLOWED_FIGURE_CONTROLS = frozenset(
         "caption",
         "centering",
         "columnwidth",
+        "Description",
         "enspace",
         "hfill",
         "hspace",
@@ -970,7 +971,10 @@ def _plain_caption_group(text: str, position: int = 0) -> tuple[str, int] | None
             output.append(nested[0])
             position = group[1]
             continue
-        if character in "}$":
+        if character == "$":
+            position += 1
+            continue
+        if character == "}":
             return None
         output.append(" " if character == "~" else character)
         position += 1
@@ -990,6 +994,54 @@ def _normalize_caption(raw_caption: str) -> str | None:
         return None
     normalized = " ".join(plain.split())
     return normalized or None
+
+
+def _simple_caption_macro_replacements(
+    lexed: _LexedTex,
+) -> dict[str, str]:
+    replacements: dict[str, str] = {}
+    for token in lexed.controls:
+        if token.word not in {"newcommand", "providecommand", "renewcommand"}:
+            continue
+        name_argument = _literal_command_argument_at(
+            lexed.text,
+            token.end,
+            allow_options=False,
+        )
+        if name_argument is None:
+            continue
+        name_match = re.fullmatch(r"\\([A-Za-z@]+)", name_argument[0].strip())
+        if name_match is None:
+            continue
+        position = _skip_whitespace(lexed.text, name_argument[1])
+        if position < len(lexed.text) and lexed.text[position] == "[":
+            continue
+        replacement_argument = _parse_delimited(
+            lexed.text,
+            position,
+            "{",
+            "}",
+        )
+        if replacement_argument is None:
+            continue
+        replacement = _normalize_caption(replacement_argument[0])
+        if replacement is not None:
+            replacements[name_match.group(1)] = replacement
+    return replacements
+
+
+def _expand_simple_caption_macros(
+    raw_caption: str,
+    replacements: dict[str, str],
+) -> str:
+    expanded = raw_caption
+    for name, replacement in replacements.items():
+        expanded = re.sub(
+            rf"\\{re.escape(name)}\s*\{{\s*\}}",
+            replacement,
+            expanded,
+        )
+    return expanded
 
 
 def _resolve_asset(
@@ -1135,6 +1187,7 @@ def _extract_figure(
     expanded_lexed = _lex_tex(expanded)
     if expanded_lexed is None:
         return None
+    simple_caption_macros = _simple_caption_macro_replacements(expanded_lexed)
     blocks = _figure_blocks(expanded_lexed)
     if figure_number not in {1, 2} or len(blocks) < figure_number:
         return None
@@ -1145,13 +1198,21 @@ def _extract_figure(
         for token in expanded_lexed.controls
         if body_start <= token.start < body_end
     ]
+    has_literal_overpic = any(
+        token.word == "begin"
+        and token.environment_argument == "overpic"
+        for token in body_controls
+    )
     if (
-        _has_ambiguous_semantic_control(
+        not has_literal_overpic
+        and _has_ambiguous_semantic_control(
             expanded_lexed.controls,
             end=block_end,
             allow_preamble_ambiguity=allow_preamble_ambiguity,
             figure_controls=frozenset(
-                (token.word, token.symbol) for token in body_controls
+                (token.word, token.symbol)
+                for token in body_controls
+                if token.word not in simple_caption_macros
             ),
         )
         or _UNSAFE_FIGURE_RE.search(body)
@@ -1167,7 +1228,10 @@ def _extract_figure(
         ) or token.current_environment == "overpic":
             continue
         if word is not None:
-            if word not in _ALLOWED_FIGURE_CONTROLS:
+            if (
+                word not in _ALLOWED_FIGURE_CONTROLS
+                and word not in simple_caption_macros
+            ):
                 return None
         elif symbol not in _ALLOWED_FIGURE_CONTROL_SYMBOLS:
             return None
@@ -1220,7 +1284,9 @@ def _extract_figure(
         return None
     asset_target = asset_argument[0]
     raw_caption = caption_argument[0]
-    caption = _normalize_caption(raw_caption)
+    caption = _normalize_caption(
+        _expand_simple_caption_macros(raw_caption, simple_caption_macros)
+    )
     asset = _resolve_asset(
         files,
         root=root,
@@ -1242,7 +1308,7 @@ def _extract_figure(
         content=content,
         source_url=source_url,
         source="arxiv_source",
-        number=figure_number,
+        number=1 if figure_number == 1 else 2,
     )
 
 
