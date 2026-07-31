@@ -15,7 +15,7 @@ from vla_wam_daily.models import (
 
 LOGGER = logging.getLogger(__name__)
 RECOVERY_RETRY_INTERVAL = timedelta(hours=24)
-FIGURE_RECOVERY_VERSION = 2
+FIGURE_RECOVERY_VERSION = 3
 _FATAL_RECOVERY_ERRORS = (MemoryError, RecursionError)
 
 
@@ -29,7 +29,11 @@ class HtmlFigureFetcher(Protocol):
 
 
 class RecoveredFigureExtractor(Protocol):
-    def extract(self, arxiv_id: str, version: int) -> RecoveredFigure | None: ...
+    def extract_all(
+        self,
+        arxiv_id: str,
+        version: int,
+    ) -> tuple[RecoveredFigure, ...]: ...
 
 
 class RecoveryFigureStore(Protocol):
@@ -47,9 +51,12 @@ class RecoveryFigureStore(Protocol):
     ) -> str: ...
 
 
-def _figure_one(gallery: FigureGallery) -> FigureAsset | None:
+def _figure(
+    gallery: FigureGallery,
+    number: int,
+) -> FigureAsset | None:
     return next(
-        (figure for figure in gallery.figures if figure.number == 1),
+        (figure for figure in gallery.figures if figure.number == number),
         None,
     )
 
@@ -101,13 +108,13 @@ class FigureRecoveryService:
 
     @staticmethod
     def _should_skip(gallery: FigureGallery, checked_at: datetime) -> bool:
-        if (
-            gallery.recovery_status is FigureRecoveryStatus.NOT_FOUND
-            and gallery.recovery_version == FIGURE_RECOVERY_VERSION
-        ):
-            return True
         return (
-            gallery.recovery_status is FigureRecoveryStatus.FETCH_FAILED
+            gallery.recovery_status
+            in {
+                FigureRecoveryStatus.NOT_FOUND,
+                FigureRecoveryStatus.FETCH_FAILED,
+            }
+            and gallery.recovery_version == FIGURE_RECOVERY_VERSION
             and gallery.recovery_checked_at is not None
             and checked_at - gallery.recovery_checked_at
             < RECOVERY_RETRY_INTERVAL
@@ -126,11 +133,16 @@ class FigureRecoveryService:
             )
             for figure in refreshed.figures
         )
-        if (
-            2 in originals
-            and not any(figure.number == 2 for figure in figures)
-        ):
-            figures = (*figures, originals[2])
+        refreshed_numbers = {figure.number for figure in figures}
+        figures = (
+            *figures,
+            *(
+                figure
+                for number, figure in originals.items()
+                if number not in refreshed_numbers
+            ),
+        )
+        figures = tuple(sorted(figures, key=lambda figure: figure.number))
         return original.model_copy(
             update={
                 "status": (
@@ -154,14 +166,14 @@ class FigureRecoveryService:
         cached_path = self.store.install_recovered_figure(
             arxiv_id=arxiv_id,
             version=version,
-            figure_number=1,
+            figure_number=recovered.number,
             panel=1,
             extension=recovered.extension,
             content=recovered.content,
         )
         return FigureAsset(
-            number=1,
-            label="Figure 1",
+            number=recovered.number,
+            label=f"Figure {recovered.number}",
             caption=recovered.caption,
             image_urls=(None,),
             cached_image_paths=(cached_path,),
@@ -175,29 +187,50 @@ class FigureRecoveryService:
         *,
         arxiv_id: str,
         version: int,
-    ) -> tuple[FigureAsset | None, bool]:
+        missing_numbers: set[int],
+    ) -> tuple[tuple[FigureAsset, ...], bool]:
         try:
-            recovered = extractor.extract(arxiv_id, version)
-            if recovered is None:
-                return None, False
-            return (
-                self._install(
-                    recovered,
-                    arxiv_id=arxiv_id,
-                    version=version,
-                ),
-                False,
-            )
+            recovered = extractor.extract_all(arxiv_id, version)
+            installed: list[FigureAsset] = []
+            had_failure = False
+            seen: set[int] = set()
+            for candidate in recovered:
+                if (
+                    candidate.number not in missing_numbers
+                    or candidate.number in seen
+                ):
+                    continue
+                seen.add(candidate.number)
+                try:
+                    installed.append(
+                        self._install(
+                            candidate,
+                            arxiv_id=arxiv_id,
+                            version=version,
+                        )
+                    )
+                except _FATAL_RECOVERY_ERRORS:
+                    raise
+                except Exception:
+                    had_failure = True
+                    LOGGER.warning(
+                        "Figure %s install failed for %sv%s",
+                        candidate.number,
+                        arxiv_id,
+                        version,
+                        exc_info=True,
+                    )
+            return tuple(installed), had_failure
         except _FATAL_RECOVERY_ERRORS:
             raise
         except Exception:
             LOGGER.warning(
-                "Figure 1 recovery stage failed for %sv%s",
+                "Figure recovery stage failed for %sv%s",
                 arxiv_id,
                 version,
                 exc_info=True,
             )
-            return None, True
+            return (), True
 
     def recover_gallery(
         self,
@@ -206,17 +239,35 @@ class FigureRecoveryService:
         checked_at: datetime,
     ) -> FigureGallery:
         arxiv_id, version = parse_arxiv_html_identity(gallery.html_url)
-        existing_figure_one = _figure_one(gallery)
-        if existing_figure_one is not None:
-            if existing_figure_one.source == "arxiv_html":
-                if any(
-                    path is not None
-                    for path in existing_figure_one.cached_image_paths
+        usable_figures: list[FigureAsset] = []
+        for figure in gallery.figures:
+            if figure.number not in {1, 2}:
+                continue
+            if figure.source == "arxiv_html":
+                if (
+                    figure.number == 1
+                    and any(path is not None for path in figure.cached_image_paths)
                 ):
-                    self._has_usable_local_panel(existing_figure_one)
-                return gallery
-            if self._has_usable_local_panel(existing_figure_one):
-                return gallery
+                    self._has_usable_local_panel(figure)
+                usable_figures.append(figure)
+            elif self._has_usable_local_panel(figure):
+                usable_figures.append(figure)
+        if tuple(usable_figures) != gallery.figures:
+            gallery = gallery.model_copy(
+                update={
+                    "status": (
+                        FigureStatus.AVAILABLE
+                        if usable_figures
+                        else FigureStatus.NOT_FOUND
+                    ),
+                    "figures": tuple(usable_figures),
+                    "recovery_status": FigureRecoveryStatus.NOT_ATTEMPTED,
+                    "recovery_checked_at": None,
+                }
+            )
+
+        if {figure.number for figure in gallery.figures} == {1, 2}:
+            return gallery
 
         if self._should_skip(gallery, checked_at):
             return gallery
@@ -232,7 +283,7 @@ class FigureRecoveryService:
             raise
         except Exception:
             LOGGER.warning(
-                "Figure 1 HTML refresh failed for %sv%s",
+                "Figure HTML refresh failed for %sv%s",
                 arxiv_id,
                 version,
                 exc_info=True,
@@ -245,7 +296,7 @@ class FigureRecoveryService:
             had_failure = refreshed.status is FigureStatus.FETCH_FAILED
 
         merged = self._merge_html_refresh(gallery, refreshed)
-        if _figure_one(merged) is not None:
+        if {figure.number for figure in merged.figures} == {1, 2}:
             return merged.model_copy(
                 update={
                     "recovery_status": FigureRecoveryStatus.AVAILABLE,
@@ -255,31 +306,48 @@ class FigureRecoveryService:
             )
 
         for extractor in (self.source_extractor, self.pdf_extractor):
-            recovered_figure, failed = self._try_extractor(
+            missing_numbers = {1, 2} - {
+                figure.number for figure in merged.figures
+            }
+            recovered_figures, failed = self._try_extractor(
                 extractor,
                 arxiv_id=arxiv_id,
                 version=version,
+                missing_numbers=missing_numbers,
             )
             had_failure = had_failure or failed
-            if recovered_figure is None:
-                continue
-            figures = (
-                recovered_figure,
-                *(figure for figure in merged.figures if figure.number != 1),
+            existing_numbers = {figure.number for figure in merged.figures}
+            accepted = tuple(
+                figure
+                for figure in recovered_figures
+                if figure.number not in existing_numbers
             )
+            if accepted:
+                merged = merged.model_copy(
+                    update={
+                        "status": FigureStatus.AVAILABLE,
+                        "figures": tuple(
+                            sorted(
+                                (*merged.figures, *accepted),
+                                key=lambda figure: figure.number,
+                            )
+                        ),
+                    }
+                )
+            if {figure.number for figure in merged.figures} == {1, 2}:
+                break
+
+        figure_one = _figure(merged, 1)
+        if figure_one is not None:
             return merged.model_copy(
                 update={
                     "status": FigureStatus.AVAILABLE,
-                    "figures": figures,
                     "recovery_status": FigureRecoveryStatus.AVAILABLE,
                     "recovery_checked_at": checked_at,
                     "recovery_version": FIGURE_RECOVERY_VERSION,
                 }
             )
 
-        figures = tuple(
-            figure for figure in merged.figures if figure.number != 1
-        )
         status = (
             FigureRecoveryStatus.FETCH_FAILED
             if had_failure
@@ -289,10 +357,9 @@ class FigureRecoveryService:
             update={
                 "status": (
                     FigureStatus.AVAILABLE
-                    if figures
+                    if merged.figures
                     else merged.status
                 ),
-                "figures": figures,
                 "recovery_status": status,
                 "recovery_checked_at": checked_at,
                 "recovery_version": FIGURE_RECOVERY_VERSION,

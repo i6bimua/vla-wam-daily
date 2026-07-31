@@ -25,10 +25,15 @@ const fallbackCases = [
   [
     "2607.20001",
     "html_unavailable",
-    "arXiv HTML 不可用，源码包和 PDF 中也未能提取到 Fig. 1 / Fig. 2。",
+    "暂未从官方 HTML、源码包或 PDF 中恢复出可靠的 Fig. 1 / Fig. 2 面板。",
     false,
   ],
-  ["2607.20002", "not_found", "在 arXiv HTML 中未找到 Fig. 1 / Fig. 2。", true],
+  [
+    "2607.20002",
+    "not_found",
+    "暂未从官方 HTML、源码包或 PDF 中恢复出可靠的 Fig. 1 / Fig. 2 面板。",
+    true,
+  ],
   [
     "2607.20003",
     "fetch_failed",
