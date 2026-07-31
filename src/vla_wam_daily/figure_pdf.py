@@ -2,12 +2,16 @@ import logging
 import math
 import re
 import unicodedata
+from collections.abc import Mapping
 from dataclasses import dataclass
+from io import BytesIO
 from typing import TypeGuard
 from urllib.parse import urljoin, urlsplit
 
 import httpx
+import pdfplumber
 import pypdfium2 as pdfium
+from pdfplumber.pdf import PDF
 from pypdfium2 import PdfiumError
 
 from vla_wam_daily.figure_pdf_render import (
@@ -164,6 +168,88 @@ def _page_lines(
         characters.append(character)
         line_box = char_box if line_box is None else line_box.union(char_box)
     finish_line()
+    lines.sort(key=lambda line: (-line.box.top, line.box.left))
+    return lines
+
+
+def _pdfplumber_page_lines(
+    page: pdfplumber.page.Page,
+    *,
+    visible: _Box,
+) -> list[_TextLine]:
+    raw_words = page.extract_words(
+        x_tolerance=2,
+        y_tolerance=3,
+        keep_blank_chars=False,
+    )
+    words: list[tuple[float, float, str, _Box]] = []
+    page_top = float(page.bbox[3])
+    for raw_word in raw_words:
+        if not isinstance(raw_word, Mapping):
+            continue
+        text = raw_word.get("text")
+        x0 = raw_word.get("x0")
+        x1 = raw_word.get("x1")
+        top = raw_word.get("top")
+        bottom = raw_word.get("bottom")
+        if (
+            not isinstance(text, str)
+            or not _finite_number(x0)
+            or not _finite_number(x1)
+            or not _finite_number(top)
+            or not _finite_number(bottom)
+        ):
+            continue
+        word_box = _Box(
+            float(x0),
+            page_top - float(bottom),
+            float(x1),
+            page_top - float(top),
+        )
+        if (
+            word_box.width <= 0
+            or word_box.height < 0
+            or word_box.left < visible.left
+            or word_box.bottom < visible.bottom
+            or word_box.right > visible.right
+            or word_box.top > visible.top
+        ):
+            continue
+        words.append((float(top), float(x0), text, word_box))
+
+    words.sort(key=lambda item: (item[0], item[1]))
+    rows: list[list[tuple[float, float, str, _Box]]] = []
+    for word in words:
+        if not rows or abs(rows[-1][0][0] - word[0]) > 3:
+            rows.append([word])
+        else:
+            rows[-1].append(word)
+
+    lines: list[_TextLine] = []
+    for row in rows:
+        segment: list[tuple[float, float, str, _Box]] = []
+
+        def finish_segment(
+            current_segment: list[tuple[float, float, str, _Box]],
+        ) -> None:
+            if not current_segment:
+                return
+            normalized = _normalize_text(
+                " ".join(item[2] for item in current_segment)
+            )
+            if normalized is None:
+                return
+            line_box = current_segment[0][3]
+            for item in current_segment[1:]:
+                line_box = line_box.union(item[3])
+            lines.append(_TextLine(normalized, line_box))
+
+        for word in row:
+            if segment and word[3].left - segment[-1][3].right > 36:
+                finish_segment(segment)
+                segment = []
+            segment.append(word)
+        finish_segment(segment)
     lines.sort(key=lambda line: (-line.box.top, line.box.left))
     return lines
 
@@ -377,12 +463,18 @@ def _crops_for_page(
             crop_padding=crop_padding,
         )
         if crop is None and allow_wide_fallback:
-            crop = _wide_crop_for_caption(
-                caption,
-                visible=visible,
-                page_margin=page_margin,
-                crop_padding=crop_padding,
+            has_neighboring_caption_above = any(
+                other.box.bottom >= caption.box.top
+                for other in captions
+                if other is not caption
             )
+            if not has_neighboring_caption_above:
+                crop = _wide_crop_for_caption(
+                    caption,
+                    visible=visible,
+                    page_margin=page_margin,
+                    crop_padding=crop_padding,
+                )
         if crop is not None:
             matches.append((caption.number, caption.text, crop))
     return tuple(matches)
@@ -610,9 +702,15 @@ class ArxivPdfFigureExtractor:
         body: bytes,
     ) -> tuple[tuple[int, str, bytes], ...]:
         document = pdfium.PdfDocument(body)
+        text_document: PDF | None = None
         try:
+            text_document = pdfplumber.open(BytesIO(body))
             page_count = len(document)
-            if page_count < 1 or page_count > self.max_pages:
+            if (
+                page_count < 1
+                or page_count > self.max_pages
+                or len(text_document.pages) != page_count
+            ):
                 return ()
             total_objects = 0
             total_text_chars = 0
@@ -640,15 +738,8 @@ class ArxivPdfFigureExtractor:
                         or total_text_chars > self.max_total_text_chars
                     ):
                         return ()
-                    decoded_text = text_page.get_text_range(
-                        0,
-                        char_count,
-                        errors="strict",
-                    )
-                    decoded_count_mismatch = len(decoded_text) != char_count
-                    lines = _page_lines(
-                        text_page,
-                        char_count=char_count,
+                    lines = _pdfplumber_page_lines(
+                        text_document.pages[page_index],
                         visible=visible,
                     )
 
@@ -683,7 +774,7 @@ class ArxivPdfFigureExtractor:
                         min_visual_area=self.min_visual_area,
                         max_cluster_gap=self.max_cluster_gap,
                         crop_padding=self.crop_padding,
-                        allow_wide_fallback=decoded_count_mismatch,
+                        allow_wide_fallback=True,
                     )
                     for number, caption, crop in page_crops:
                         detected.append(
@@ -725,6 +816,8 @@ class ArxivPdfFigureExtractor:
                     recovered.append((figure_number, caption, content))
             return tuple(recovered)
         finally:
+            if text_document is not None:
+                text_document.close()
             document.close()
 
     def _extract_pdf(

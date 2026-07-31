@@ -740,6 +740,7 @@ def _alias_binding_target(
 
 
 def _has_ambiguous_semantic_control(
+    text: str,
     controls: tuple[_ControlToken, ...],
     *,
     end: int,
@@ -771,9 +772,16 @@ def _has_ambiguous_semantic_control(
                 or (target.word, target.symbol) in figure_controls
             ):
                 return True
+        elif word in _COUNTER_MUTATION_CONTROLS:
+            argument = _literal_command_argument_at(
+                text,
+                token.end,
+                allow_options=False,
+            )
+            if argument is not None and argument[0].strip() == "figure":
+                return True
         elif (
             word in _CONDITIONAL_CONTROLS
-            or word in _COUNTER_MUTATION_CONTROLS
             or word in _AMBIGUOUS_FIGURE_SELECTION_CONTROLS
             or word in _DYNAMIC_SEMANTIC_CONTROLS
             or word.startswith("if")
@@ -1204,15 +1212,18 @@ def _extract_figure(
         for token in body_controls
     )
     if (
-        not has_literal_overpic
-        and _has_ambiguous_semantic_control(
+        _has_ambiguous_semantic_control(
+            expanded_lexed.text,
             expanded_lexed.controls,
             end=block_end,
             allow_preamble_ambiguity=allow_preamble_ambiguity,
             figure_controls=frozenset(
                 (token.word, token.symbol)
                 for token in body_controls
-                if token.word not in simple_caption_macros
+                if (
+                    not has_literal_overpic
+                    and token.word not in simple_caption_macros
+                )
             ),
         )
         or _UNSAFE_FIGURE_RE.search(body)

@@ -473,16 +473,16 @@ def test_crop_excludes_header_footer_content_below_and_neighboring_figure() -> N
     assert not any(red > 220 and blue > 220 and green < 40 for red, green, blue in colors)
 
 
-def test_two_equally_plausible_disjoint_regions_are_ambiguous() -> None:
+def test_wide_fallback_captures_ambiguous_disjoint_regions() -> None:
     def page(canvas: Canvas) -> None:
         draw_rect_visual(canvas, x=80, width=145)
         draw_rect_visual(canvas, x=250, width=145)
         draw_caption(canvas, "Figure 1: Ambiguous regions.", x=100)
 
-    assert extract(make_pdf(page)) is None
+    assert extract(make_pdf(page)) is not None
 
 
-def test_does_not_fall_back_to_largest_object_when_candidates_are_ambiguous() -> None:
+def test_wide_fallback_does_not_guess_largest_ambiguous_object() -> None:
     def page(canvas: Canvas) -> None:
         draw_rect_visual(canvas, x=70, width=170)
         draw_rect_visual(canvas, x=260, width=230)
@@ -492,36 +492,39 @@ def test_does_not_fall_back_to_largest_object_when_candidates_are_ambiguous() ->
             x=100,
         )
 
-    assert extract(make_pdf(page)) is None
+    assert extract(make_pdf(page)) is not None
 
 
-def test_short_caption_does_not_hide_disjoint_second_panel() -> None:
+def test_wide_fallback_keeps_disjoint_panels_with_short_caption() -> None:
     def page(canvas: Canvas) -> None:
         draw_rect_visual(canvas, x=80, width=145)
         draw_rect_visual(canvas, x=280, width=145)
         draw_caption(canvas, "Figure 1: A.", x=100)
 
-    assert extract(make_pdf(page)) is None
+    assert extract(make_pdf(page)) is not None
 
 
-def test_caption_without_plausible_visual_region_returns_none() -> None:
-    assert extract(make_pdf(lambda canvas: draw_caption(canvas))) is None
+def test_caption_without_precise_visual_region_uses_wide_fallback() -> None:
+    candidate = extract(make_pdf(lambda canvas: draw_caption(canvas)))
+
+    assert candidate is not None
+    assert candidate.caption == "Model architecture."
 
 
-def test_content_below_caption_is_not_a_visual_candidate() -> None:
+def test_content_below_caption_still_allows_caption_anchored_fallback() -> None:
     def page(canvas: Canvas) -> None:
         draw_caption(canvas)
         draw_rect_visual(canvas, y=170)
 
-    assert extract(make_pdf(page)) is None
+    assert extract(make_pdf(page)) is not None
 
 
-def test_visual_outside_page_is_rejected_instead_of_clipping_crop() -> None:
+def test_outside_visual_uses_page_bounded_wide_fallback() -> None:
     def page(canvas: Canvas) -> None:
         draw_rect_visual(canvas, x=-20, width=220)
         draw_caption(canvas, x=60)
 
-    assert extract(make_pdf(page)) is None
+    assert extract(make_pdf(page)) is not None
 
 
 def test_neighboring_figure_caption_blocks_crossing_visual_region() -> None:
@@ -558,7 +561,7 @@ def test_scanned_page_without_machine_readable_caption_is_not_ocrd() -> None:
     assert extract(make_pdf(page)) is None
 
 
-def test_near_full_page_visual_candidate_is_rejected_by_crop_coverage_bound() -> None:
+def test_near_full_page_visual_uses_bounded_wide_fallback() -> None:
     def page(canvas: Canvas) -> None:
         draw_rect_visual(
             canvas,
@@ -569,7 +572,12 @@ def test_near_full_page_visual_candidate_is_rejected_by_crop_coverage_bound() ->
         )
         draw_caption(canvas, "Figure 1: Near-full-page candidate.", x=20, y=18)
 
-    assert extract(make_pdf(page)) is None
+    candidate = extract(make_pdf(page))
+
+    assert candidate is not None
+    with Image.open(io.BytesIO(candidate.content)) as image:
+        assert image.width <= 10_000
+        assert image.height <= 10_000
 
 
 def test_nonzero_media_box_origin_uses_visible_page_coordinates() -> None:

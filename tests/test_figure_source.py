@@ -195,6 +195,30 @@ def test_extracts_first_two_literal_overpic_pdf_assets() -> None:
     )
 
 
+def test_overpic_does_not_bypass_figure_counter_safety() -> None:
+    main = rb"""
+\documentclass{article}
+\begin{document}
+\setcounter{figure}{7}
+\begin{figure}
+\begin{overpic}{figure.pdf}
+\end{overpic}
+\caption{Actually Figure 8.}
+\end{figure}
+\end{document}
+"""
+
+    assert (
+        extract_all_from_tar(
+            {
+                "main.tex": main,
+                "figure.pdf": make_pdf_asset(),
+            }
+        )
+        == ()
+    )
+
+
 def test_extracts_first_direct_literal_figure_asset_and_plain_caption() -> None:
     candidate = extract_from_tar(
         {
