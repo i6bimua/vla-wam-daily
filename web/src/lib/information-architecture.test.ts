@@ -73,6 +73,10 @@ describe("weekly, methodology, RSS, and 404 route contracts", () => {
     expect(page).toContain("不会猜测");
     expect(page).toContain("arXiv");
     expect(page).toContain("缓存");
+    expect(page).toMatch(
+      /arXiv HTML\s*→\s*arXiv 源码包\s*→\s*arXiv PDF\s*自动裁剪/,
+    );
+    expect(page).toContain("本站静态资源");
     expect(page).toContain("北京时间");
     expect(page).toContain("工作流");
     expect(page).toContain("反馈");
