@@ -197,7 +197,7 @@ describe("remote Figure component contracts", () => {
     );
 
     expect(component).toContain(
-      "arXiv HTML 不可用，源码包和 PDF 中也未能提取到 Fig. 1 / Fig. 2。",
+      "暂未从官方 HTML、源码包或 PDF 中恢复出可靠的 Fig. 1 / Fig. 2 面板。",
     );
     expect(component).not.toContain(
       "arXiv 暂未提供 HTML 版本，无法提取 Fig. 1 / Fig. 2。",

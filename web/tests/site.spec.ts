@@ -217,9 +217,12 @@ test("figure gallery becomes one column on mobile", async ({ page }) => {
 for (const [id, message] of [
   [
     "2607.20001",
-    "arXiv HTML 不可用，源码包和 PDF 中也未能提取到 Fig. 1 / Fig. 2。",
+    "暂未从官方 HTML、源码包或 PDF 中恢复出可靠的 Fig. 1 / Fig. 2 面板。",
   ],
-  ["2607.20002", "在 arXiv HTML 中未找到 Fig. 1 / Fig. 2。"],
+  [
+    "2607.20002",
+    "暂未从官方 HTML、源码包或 PDF 中恢复出可靠的 Fig. 1 / Fig. 2 面板。",
+  ],
   ["2607.20003", "本次获取 Fig. 1 / Fig. 2 失败，论文其它内容仍可正常阅读。"],
 ] as const) {
   test(`Figure fallback for ${id}`, async ({ page }) => {
