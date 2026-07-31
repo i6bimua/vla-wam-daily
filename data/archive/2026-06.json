@@ -1,6 +1,95 @@
 {
-  "generated_at": "2026-07-31T03:05:54.615565Z",
+  "generated_at": "2026-07-31T03:10:33.547526Z",
   "papers": [
+    {
+      "abstract": "Neural video codecs have surpassed classical codecs in coding efficiency but remain impractical for deployment due to cross-platform incompatibility and high computational cost. Existing quantization-based solutions fail to produce deterministic results across diverse hardware platforms, leading to catastrophic decoding failures. We introduce MLVC, a hardware-robust neural video codec designed for practical cross-platform inference. The key idea is to explicitly transmit scale parameters through the hyperprior, which guarantees entropy coding consistency across devices without requiring bit-exact arithmetic. While this increases bitrate overhead, we recover most of the coding efficiency through architectural improvements (gated memory, ReGLU activation), a long-term reference recovery mechanism, and domain-specific perceptual training. On the VCD video conferencing benchmark, MLVC achieves >70% BD-rate (MOS) improvement over hardware HEVC, the strongest deployable baseline, while reaching subjective quality competitive with DCVC-RT, which cannot operate across diverse platforms. Both the encoder and decoder run at 100 FPS on average on commodity NPUs from Apple, Intel, and Qualcomm. MLVC is the first neural video codec to combine competitive compression performance, real-time speed, and cross-platform robustness across diverse consumer devices, making it suitable for widespread deployment. Code is available at https://github.com/microsoft/mlvc.",
+      "analysis": {
+        "key_results": "在VCD视频会议基准上，主观BD-rate相比硬件HEVC改善>70%，编解码器在Apple、Intel、Qualcomm NPU上平均100 FPS运行。",
+        "limitations": "摘要未说明",
+        "main_contribution": "首次实现同时具备有竞争力的压缩性能、实时速度和跨平台鲁棒性的神经网络视频编解码器，适用于消费设备广泛部署。",
+        "method": "通过超先验显式传输尺度参数以保证跨设备熵编码一致性，结合门控记忆、ReGLU激活、长期参考恢复机制和域特定感知训练。",
+        "one_sentence_summary": "提出硬件鲁棒的神经网络视频编解码器MLVC，通过显式传输尺度参数确保跨平台确定性推理，并以架构改进恢复编码效率。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "与VLA/WAM无直接关系；本文专注于视频编解码器的模型量化与跨平台高效推理，属于独立的高效推理主题，对本站主题无直接贡献。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Model Quantization",
+          "Video Generation"
+        ]
+      },
+      "arxiv_categories": [
+        "eess.IV",
+        "cs.AI",
+        "cs.CV",
+        "cs.LG"
+      ],
+      "arxiv_id": "2606.28027",
+      "authors": [
+        "Tanel P\\\"arnamaa",
+        "Martin Lumiste",
+        "Ardi Loot",
+        "Evgenii Indenbom",
+        "Andrei Znobishchev",
+        "Ando Saabas"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-07-31T03:10:33.547526Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2606.28027/v2/fig1-panel1.png"
+            ],
+            "caption": "Neural codecs fail across diverse platforms. A video is encoded on an Apple M3 NPU and then decoded on another device (Intel Lunar Lake NPU). Existing state-of-the-art neural video codecs (e.g., DCVC-RT [ dcvc-rt ] ) suffer from catastrophic decoding failures due to numerical divergence between platforms, even when using quantization or calibration information [ tian2023towards ] . Classical codecs like H.265 and the proposed neural codec MLVC both decode reliably across diverse platforms, while MLVC achieves significantly higher visual quality at the same bitrate.",
+            "image_urls": [
+              "https://arxiv.org/html/2606.28027v2/x1.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2606.28027v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2606.28027/v2/fig2-panel1.png"
+            ],
+            "caption": "Overview of the video coding framework adopted in this work, following modern learned codecs (e.g., DCVC-RT). The encoder maps the current frame x t x_{t} and temporal context F t − 1 F_{t-1} to the latent representation y t y_{t} . The Entropy Parameter Network, conditioned on y t y_{t} and the temporal prior context F t − 1 e F_{t-1}^{e} , produces the mean μ t \\mu_{t} and scale σ t \\sigma_{t} parameters. The mean is subtracted from y t y_{t} , and the residual is quantized (Q) and arithmetic encoded (AE) under a zero-mean Gaussian entropy model 𝒩 ​ ( 0 , σ t 2 ) \\mathcal{N}(0,\\sigma_{t}^{2}) to obtain the bitstream. On the decoder side, arithmetic decoding (AD) recovers y ^ t \\hat{y}_{t} , and the mean μ t \\mu_{t} is added back. The decoder, further conditioned on temporal context F t − 1 F_{t-1} , produces the decoded feature f t f_{t} , from which the reconstruction network (Recon. Net) yields the reconstructed frame x ^ t \\hat{x}_{t} . Finally, the state extractor derives the updated temporal contexts F t F_{t} and F t e F_{t}^{e} from f t f_{t} for the next time step.",
+            "image_urls": [
+              "https://arxiv.org/html/2606.28027v2/x2.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2606.28027v2#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2606.28027v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-07-31T03:10:33.547526Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-06-26T12:32:50Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2606.28027",
+        "code_url": "https://github.com/microsoft/mlvc",
+        "pdf_url": "https://arxiv.org/pdf/2606.28027",
+        "project_url": null
+      },
+      "title": "MLVC: Multi-platform Learned Video Codec for Real-World Deployment",
+      "title_zh": "MLVC：面向真实世界部署的多平台神经网络视频编解码器",
+      "updated_at": "2026-07-29T11:18:32Z",
+      "version": 2
+    },
     {
       "abstract": "On-policy distillation (OPD) has recently become a prominent post-training recipe by combining two desirable ingredients: on-policy student-generated trajectories and dense token-level teacher supervision. Yet how this hybrid training regime shapes a model remains poorly understood. We characterize the sparsity and geometry of OPD parameter updates across several language and vision-language model pairs and application settings. OPD updates are small and coordinate-sparse at checkpoint precision, while remaining distributed across layers and modules. This sparse support is operationally meaningful: masked training on the discovered subnetwork nearly recovers full-training performance. At the matrix level, the updates are numerically full-rank but spectrally concentrated. Their visible supports avoid coordinates emphasized by the source's principal structure and favor low-magnitude source coordinates, while the source singular-value spectra change little. Together, these findings show that OPD exhibits important weight-space signatures of on-policy post-training despite using dense teacher supervision.",
       "analysis": {
@@ -91,20 +180,20 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 0,
-    "completion_tokens": 13112,
+    "cache_hits": 41,
+    "completion_tokens": 13557,
     "error_categories": {},
     "failed": 0,
-    "fetched": 559,
-    "figure_available": 28,
-    "figure_cache_hits": 17,
+    "fetched": 1192,
+    "figure_available": 62,
+    "figure_cache_hits": 50,
     "figure_failed": 0,
-    "figure_requests": 13,
-    "figure_unavailable": 2,
-    "model_calls": 41,
-    "prefiltered": 41,
-    "prompt_tokens": 36356,
-    "published": 30,
-    "total_tokens": 49468
+    "figure_requests": 15,
+    "figure_unavailable": 3,
+    "model_calls": 43,
+    "prefiltered": 84,
+    "prompt_tokens": 38411,
+    "published": 65,
+    "total_tokens": 51968
   }
 }
