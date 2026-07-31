@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-31T03:10:33.547526Z",
+  "generated_at": "2026-07-31T03:15:22.466924Z",
   "papers": [
     {
       "abstract": "Recent vision-language-action and diffusion-based robot policies often use action chunking, where each policy query predicts a sequence of future actions and the robot executes an open-loop prefix before re-querying. While this interface improves local motion continuity, deployment still requires choosing the execution horizon: how much of each predicted chunk should be executed before acquiring a new observation. However, our experiments show that success is strongly task-dependent and non-monotonic with respect to the execution horizon, making a single constant horizon an unreliable deployment rule. We propose PACE (Phase-Aware Chunk Execution), a training-free test-time execution method that selects the execution horizon online from the predicted chunk itself. PACE exploits the phase-dependent kinematic structure of manipulation trajectories by identifying low-speed transition points in the predicted speed profile and using them as candidate replanning boundaries. Because PACE uses only the predicted action chunk, it is plug-and-play and requires no retraining or access to policy internals. We validate PACE through large-scale evaluations in both simulation and real-robot settings. On 50 RoboTwin2.0 tasks, PACE raises the average success rate from 57.8% to 64.2%. In real-robot experiments on bimanual ALOHA and single-arm Franka platforms, PACE improves the average task score from 60.7 to 77.7 and the average success rate from 50.7% to 70.4%. Ablations and rollout-level analyses show that PACE adapts execution horizons across manipulation phases, shortening near transitions while preserving longer execution during coherent motion.",
@@ -88,6 +88,193 @@
       "title": "PACE: Phase-Aware Chunk Execution for Robot Policies with Action Chunking",
       "title_zh": "PACE：面向动作分块的机器人策略的相位感知分块执行方法",
       "updated_at": "2026-07-29T14:34:05Z",
+      "version": 2
+    },
+    {
+      "abstract": "World models for interactive text agents must typically be learned from observation-action trajectories alone. Specifically, the environment returns text observations after each action, but does not expose a ground-truth latent state nor an inspectable transition model.A research gap remains in how to induce executable code as a world model in this black-box setting for prediction and agent decision making. We introduce PatchWorld, a gradient-free framework that turns offline trajectories into executable Python world models through counterexample-guided code repair.Instead of predicting the next observation with a black-box model, PatchWorld induces symbolic belief-state programs whose action updates can be inspected, replayed, and locally patched. Across seven AgentGym environments, PatchWorld-Simple achieves the highest code-based decision-making score among evaluated methods (76.4% macro success in live one-step lookahead), matching or exceeding LLM-based lookahead while invoking no LLM calls inside the world-model prediction module itself. We further find that a human-specified residual-memory bias improves surface observation fidelity but weakens agent decision-making utility. This reveals a tradeoff in executable world models, since improving observation fidelity can come at the expense of action-discriminative dynamics, and vice versa. Code is available at https://github.com/HKBU-KnowComp/PatchWorld.",
+      "analysis": {
+        "key_results": "在7个AgentGym环境中，PatchWorld-Simple取得最高的基于代码的决策得分（单步前瞻宏成功率为76.4%），匹配或超过基于LLM的前瞻，且世界模型预测模块本身不调用LLM；人工残差记忆偏置提高表层观察保真度但削弱决策效用，揭示了可执行世界模型中观察保真度与动作区分动态之间的权衡。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出PatchWorld框架，一种无梯度方法，将文本智能体的离线交互轨迹转化为可检查、可修补的符号化信念状态程序（可执行世界模型）。",
+        "method": "反例引导的代码修复（counterexample-guided code repair），从观察-动作轨迹中归纳Python程序作为世界模型，并引入人工设定的残差记忆偏置。",
+        "one_sentence_summary": "提出PatchWorld框架，通过反例引导的代码修复将离线轨迹转换为可执行的Python世界模型，用于预测和决策。",
+        "primary_topic": "World Model",
+        "relation_to_vla_wam": "该工作研究文本智能体的可执行世界模型，不直接涉及VLA、机器人动作预测或空间世界建模，但其归纳符号程序作为世界模型的方法可能对机器人世界的结构化建模有方法论参考价值。",
+        "relevance_score": 6,
+        "tags": [
+          "World Modeling",
+          "Generalist Robotics"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "arxiv_id": "2605.30880",
+      "authors": [
+        "Jiaxin Bai",
+        "Yue Guo",
+        "Yifei Dong",
+        "Jiaxuan Xiong",
+        "Tianshi Zheng",
+        "Yixia Li",
+        "Tianqing Fang",
+        "Yufei Li",
+        "Yisen Gao",
+        "Haoyu Huang",
+        "Zhongwei Xie",
+        "Hong Ting Tsang",
+        "Zihao Wang",
+        "Lihui Liu",
+        "Jeff Z. Pan",
+        "Yangqiu Song"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-07-31T03:15:22.466924Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2605.30880/v4/fig1-panel1.png"
+            ],
+            "caption": "Text-agent environments are black-box POMDPs: a latent state s t s_{t} transitions under action a t a_{t} and emits unstructured text observations o t o_{t} , but s t s_{t} is never exposed (C1-C2). The agent (and any world model) maintains a belief s ^ t ≠ s t \\hat{s}_{t}\\neq s_{t} , updated by predicting through actions and correcting from observations. Offline logs alone are underdetermined (C3): many beliefs can fit the same ( o t , a t , o t + 1 ) (o_{t},a_{t},o_{t+1}) while differing in transfer, so replay on held-out validation trajectories is needed to probe generalization.",
+            "image_urls": [
+              "https://arxiv.org/html/2605.30880v4/x1.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.30880v4#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2605.30880/v4/fig2-panel1.png"
+            ],
+            "caption": "Overall framework of PatchWorld for generative optimization of executable world models and their subsequent repair and evaluation.",
+            "image_urls": [
+              "https://arxiv.org/html/2605.30880v4/x2.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.30880v4#S1.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2605.30880v4",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-07-31T03:15:22.466924Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-05-29T06:11:14Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2605.30880",
+        "code_url": "https://github.com/HKBU-KnowComp/PatchWorld",
+        "pdf_url": "https://arxiv.org/pdf/2605.30880",
+        "project_url": null
+      },
+      "title": "PatchWorld: Gradient-Free Optimization of Executable World Models for Agent Environments",
+      "title_zh": "PatchWorld：面向智能体环境的可执行世界模型无梯度优化",
+      "updated_at": "2026-07-28T07:47:30Z",
+      "version": 4
+    },
+    {
+      "abstract": "Vision-Language-Action (VLA) models provide a promising foundation for general-purpose robotics, yet their real-world deployment demands the ability to continually acquire new skills without forgetting prior ones. While recent studies have explored continual learning for VLA models in simulated settings, the challenge remains largely unexamined under realistic physical conditions. To bridge this gap, we construct a real-world continual learning benchmark comprising ten diverse sequential manipulation tasks across both single-arm and bimanual configurations. Through extensive experiments on this benchmark, we find that naive sequential fine-tuning leads to severe catastrophic forgetting, whereas a well-configured experience replay (ER) approach can effectively mitigate forgetting and outperform joint multi-task training under equivalent computational budgets. Notably, by synthesizing our empirical findings, we successfully achieve stable continual learning across the full 10-task heterogeneous stream, retaining previously acquired capabilities while adapting to diverse new skills in real-world deployment. This work presents an empirical study grounded in real-world continual VLA learning and offers actionable insights for deploying robust, long-lived robotic policies.",
+      "analysis": {
+        "key_results": "简单顺序微调导致严重灾难性遗忘；配置良好的经验回放有效缓解遗忘，并在等量计算预算下胜过联合多任务训练；实现10项任务稳定连续学习。",
+        "limitations": "摘要未说明",
+        "main_contribution": "构建真实世界VLA连续学习基准，实证表明经验回放可缓解遗忘并优于等计算预算下的联合多任务训练。",
+        "method": "在包含单臂和双臂操作的10项异构任务序列上进行连续微调与经验回放对比实验。",
+        "one_sentence_summary": "构建真实世界连续学习基准，验证经验回放可有效减轻VLA模型灾难性遗忘，并实现10项异构任务的稳定连续学习。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "核心研究VLA模型在真实场景中的持续学习与遗忘问题，直接聚焦VLA模型部署的长期鲁棒性。",
+        "relevance_score": 9,
+        "tags": [
+          "Robot Learning",
+          "Generalist Robotics",
+          "Robot Manipulation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2605.26820",
+      "authors": [
+        "Jiarun Zhu",
+        "Yijun Hong",
+        "Xiaoquan Sun",
+        "Zetian Xu",
+        "Qijun He",
+        "Haijier Chen",
+        "Zhiyong Wang",
+        "Mingqi Yuan",
+        "Wenjun Zeng",
+        "Jiayu Chen"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-07-31T03:15:22.466924Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2605.26820/v2/fig1-panel1.png"
+            ],
+            "caption": "This paper investigates continual adaptation of VLA models under real-world robotic data streams. Our ER-based approach achieves robust continual learning performance across diverse manipulation tasks.",
+            "image_urls": [
+              "https://arxiv.org/html/2605.26820v2/x1.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.26820v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2605.26820/v2/fig2-panel1.png"
+            ],
+            "caption": "Overview of the robot platform, individual manipulation tasks, stepwise evaluation protocol, and two distinct continual task streams. These tasks span rigid-body manipulation, bimanual coordination, and complex deformable-object manipulation, requiring diverse motion primitives and providing a comprehensive benchmark for evaluating the continual learning capability of VLA models in real-world scenarios.",
+            "image_urls": [
+              "https://arxiv.org/html/2605.26820v2/x2.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.26820v2#S2.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2605.26820v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-07-31T03:15:22.466924Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-05-26T10:39:02Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2605.26820",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2605.26820",
+        "project_url": null
+      },
+      "title": "Can Vision-Language-Action Models Learn from Real-World Data Continually without Forgetting?",
+      "title_zh": "视觉-语言-动作模型能否在现实世界中持续学习而不遗忘？",
+      "updated_at": "2026-07-28T12:31:10Z",
       "version": 2
     },
     {
@@ -283,20 +470,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 41,
-    "completion_tokens": 13557,
-    "error_categories": {},
-    "failed": 0,
-    "fetched": 1192,
-    "figure_available": 62,
-    "figure_cache_hits": 50,
+    "cache_hits": 84,
+    "completion_tokens": 10831,
+    "error_categories": {
+      "ValidationError": 1
+    },
+    "failed": 1,
+    "fetched": 1771,
+    "figure_available": 85,
+    "figure_cache_hits": 65,
     "figure_failed": 0,
-    "figure_requests": 15,
-    "figure_unavailable": 3,
-    "model_calls": 43,
-    "prefiltered": 84,
-    "prompt_tokens": 38411,
-    "published": 65,
-    "total_tokens": 51968
+    "figure_requests": 25,
+    "figure_unavailable": 5,
+    "model_calls": 34,
+    "prefiltered": 118,
+    "prompt_tokens": 29627,
+    "published": 90,
+    "total_tokens": 40458
   }
 }
