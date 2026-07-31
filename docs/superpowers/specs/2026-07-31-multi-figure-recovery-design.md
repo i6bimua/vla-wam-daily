@@ -22,10 +22,9 @@ the recovery service only installs Figure 1 and permanently skips a
 ## Goals
 
 - Recover Figure 1 and Figure 2 independently from arXiv HTML, source, or PDF.
-- Safely recover literal local assets used by `overpic` without executing
-  TeX or interpreting arbitrary macros.
-- Detect PDF captions even when PDFium character and decoded-text counts
-  differ.
+- Recover literal local assets used by ordinary `overpic` blocks.
+- When a precise source asset or PDF crop cannot be recovered, use a larger
+  caption-anchored PDF crop rather than leaving the figure unavailable.
 - Retry negative recovery results after a bounded interval.
 - Invalidate current negative recovery records once so historical papers are
   reconsidered.
@@ -36,7 +35,6 @@ the recovery service only installs Figure 1 and permanently skips a
 
 - Execute LaTeX, shell escapes, Lua, TikZ, or arbitrary author macros.
 - Guess images from filenames without a structural relationship to a figure.
-- Publish a full-page screenshot as a Figure.
 - Recover Figure 3 or later figures in this change.
 - Replace a usable HTML or locally cached Figure with a lower-priority source.
 
@@ -64,12 +62,10 @@ The gallery recovery status remains a summary:
 Figure 2 may exist without Figure 1, but that does not make the Figure 1
 recovery summary `available`.
 
-### Safe source extraction
+### Simple source extraction
 
 The source parser examines the first two top-level `figure` or `figure*`
-environments in document order. It assigns their normal LaTeX sequence
-numbers 1 and 2 only when no counter manipulation or ambiguous figure
-semantics occur before them.
+environments in document order and treats them as Figure 1 and Figure 2.
 
 Each supported figure must contain:
 
@@ -79,34 +75,24 @@ Each supported figure must contain:
   `\begin{overpic}[...]{...}` environment;
 - a literal local asset path that stays inside the source archive root.
 
-For `overpic`, the parser allows only layout commands and comments that do not
-alter the underlying asset. It rejects active drawing commands such as
-`\put`, unsafe control sequences, nested figure constructs, multiple assets,
-remote paths, traversal, or ambiguous macro-generated paths.
+For `overpic`, only its literal background asset is extracted; overlay
+commands are not executed. Remote, traversal, missing, or macro-generated
+asset paths are rejected. Single-page PDF assets continue to be rendered to
+PNG under the existing size, object, dimension, and output limits.
 
-Literal zero-argument text macros used by captions may be expanded only when
-their preamble definition is a bounded plain-text replacement. Unsupported
-caption macros cause that source candidate to be skipped rather than guessed.
-Single-page PDF assets continue to be rendered to PNG under the existing
-size, object, dimension, and output limits.
-
-### PDF caption and crop extraction
+### PDF crop fallback
 
 PDF text lines use `pdfplumber` word geometry, which provides decoded text and
 bounding boxes without assuming that decoded string length equals PDFium's
 internal character count. PDFium remains responsible for page objects and
 final rendering.
 
-Caption detection recognizes Figure 1 and Figure 2 separately. A candidate is
-accepted only when:
-
-- exactly one caption for that number is found in the document;
-- exactly one nearby visual cluster overlaps that caption horizontally;
-- the crop is smaller than the existing page-area limit;
-- all existing object, text, page, pixel, and output-byte limits pass.
-
-Each accepted crop includes only the visual cluster and caption. Ambiguous
-pages return no candidate for that number.
+Caption detection recognizes Figure 1 and Figure 2 separately. It first uses
+the existing nearby-object crop. If that does not produce a candidate, it
+renders a wider region from a bounded point above the caption through the end
+of the caption. This fallback may include surrounding whitespace or nearby
+text, but must not exceed the page, pixel, and output-byte limits. It is still
+preferable to a missing figure for this site.
 
 ### Negative-cache policy
 
@@ -142,15 +128,16 @@ download behavior.
 
 ## Testing
 
-Tests are written before production changes and must demonstrate the original
-failures:
+Tests are written before production changes and demonstrate the original
+failure:
 
 - a source archive with literal `overpic` Figure 1 and Figure 2 is rejected
   before the fix, then recovers both after the fix;
-- unsafe or ambiguous `overpic` content remains rejected;
+- traversal and missing `overpic` assets remain rejected;
 - a PDF whose decoded text length differs from the PDFium character count can
   recover Figure 1 and Figure 2;
-- ambiguous or duplicate captions remain rejected;
+- a larger caption-anchored PDF crop is used when precise object selection
+  fails;
 - recovery merges HTML, source, and PDF results without overwriting a higher
   priority figure;
 - Figure 2 can be installed and downloaded;
