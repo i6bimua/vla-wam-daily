@@ -396,11 +396,6 @@ def run_daily(
         elif identity in forced_identities:
             candidates.append((paper, forced_rules_by_identity[identity]))
 
-    if len(candidates) > config.analysis.max_candidates:
-        raise CandidateLimitError(
-            f"{len(candidates)} candidates exceeds limit {config.analysis.max_candidates}"
-        )
-
     analysis_cache = load_cache(data_dir)
     records: list[AnalyzedPaperRecord] = []
     pending: list[tuple[RawPaper, list[str], str]] = []
@@ -418,6 +413,12 @@ def run_daily(
             cache_hits += 1
         else:
             pending.append((paper, rules, key))
+
+    if len(pending) > config.analysis.max_candidates:
+        raise CandidateLimitError(
+            f"{len(pending)} uncached candidates exceeds limit "
+            f"{config.analysis.max_candidates}"
+        )
 
     failures = 0
     error_categories: dict[str, int] = {}

@@ -291,7 +291,10 @@ def test_candidate_limit_is_checked_before_any_model_or_figure_request(
     client = ProgrammableAnalysisClient()
     figure_fetcher = FakeFigureFetcher()
 
-    with pytest.raises(CandidateLimitError, match="2 candidates exceeds limit 1"):
+    with pytest.raises(
+        CandidateLimitError,
+        match="2 uncached candidates exceeds limit 1",
+    ):
         run(
             tmp_path,
             fetcher=FakeFetcher([raw_paper("2607.10001"), raw_paper("2607.10002")]),
@@ -304,6 +307,45 @@ def test_candidate_limit_is_checked_before_any_model_or_figure_request(
     assert client.calls == []
     assert figure_fetcher.calls == []
     assert not any(tmp_path.iterdir())
+
+
+def test_candidate_limit_counts_only_uncached_model_work(tmp_path: Path) -> None:
+    cached_records = [
+        analyzed_record("2607.10001"),
+        analyzed_record("2607.10002"),
+    ]
+    analysis_cache = dict(analysis_entry(record) for record in cached_records)
+    figure_cache = dict(
+        figure_entry(make_gallery(arxiv_id=record.arxiv_id, version=record.version))
+        for record in cached_records
+    )
+    pipeline_module.save_successful_run(
+        tmp_path,
+        [],
+        analysis_cache,
+        RunStats(),
+        NOW - timedelta(hours=1),
+        figure_cache=figure_cache,
+    )
+    client = ProgrammableAnalysisClient()
+
+    report = run(
+        tmp_path,
+        fetcher=FakeFetcher(
+            [
+                raw_paper("2607.10001"),
+                raw_paper("2607.10002"),
+                raw_paper("2607.10003"),
+            ]
+        ),
+        analysis_client=client,
+        config=configured(max_candidates=1),
+    )
+
+    assert report.stats.prefiltered == 3
+    assert report.stats.cache_hits == 2
+    assert report.stats.model_calls == 1
+    assert [call["arxiv_id"] for call in client.calls] == ["2607.10003"]
 
 
 @pytest.mark.parametrize(
