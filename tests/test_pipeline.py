@@ -65,6 +65,7 @@ def analyzed_record(
     *,
     version: int = 1,
     score: int = 8,
+    prompt_version: str = "2",
 ) -> AnalyzedPaperRecord:
     payload = make_record(
         arxiv_id=arxiv_id,
@@ -72,6 +73,7 @@ def analyzed_record(
         score=score,
     ).model_dump(mode="json")
     payload.pop("figure_gallery")
+    payload["provenance"]["prompt_version"] = prompt_version
     return AnalyzedPaperRecord.model_validate(payload)
 
 
@@ -502,6 +504,32 @@ def test_analysis_cache_is_reused_but_forced_id_bypasses_it(tmp_path: Path) -> N
     assert cached_report.stats.model_calls == 0
     assert forced_report.stats.cache_hits == 0
     assert forced_report.stats.model_calls == 1
+    assert len(client.calls) == 1
+
+
+def test_prompt_version_change_invalidates_analysis_cache(tmp_path: Path) -> None:
+    cached = analyzed_record(prompt_version="1")
+    key, entry = analysis_entry(cached)
+    gallery = make_gallery()
+    figure_key, cached_figure = figure_entry(gallery)
+    pipeline_module.save_successful_run(
+        tmp_path,
+        [],
+        {key: entry},
+        RunStats(),
+        NOW - timedelta(hours=1),
+        figure_cache={figure_key: cached_figure},
+    )
+    client = ProgrammableAnalysisClient()
+
+    report = run(
+        tmp_path,
+        fetcher=FakeFetcher([raw_paper()]),
+        analysis_client=client,
+    )
+
+    assert report.stats.cache_hits == 0
+    assert report.stats.model_calls == 1
     assert len(client.calls) == 1
 
 
