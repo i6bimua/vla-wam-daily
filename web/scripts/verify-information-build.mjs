@@ -81,6 +81,8 @@ const topicExpectations = [
   ["world-model", "机器人世界模型论文", 0],
   ["dataset", "VLA/WAM 数据集", 0],
   ["benchmark", "VLA/WAM 基准评测", 0],
+  ["speculative-decoding", "推测解码论文", 0],
+  ["quantization", "模型量化论文", 0],
 ];
 for (const [slug, title, expectedCount] of topicExpectations) {
   const page = await text(`topics/${slug}/index.html`);

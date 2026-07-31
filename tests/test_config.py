@@ -33,6 +33,8 @@ def test_default_config_uses_quality_model() -> None:
     assert config.analysis.model_for("economy") == "deepseek-v4-flash"
     assert config.analysis.threshold == 6
     assert config.analysis.max_candidates == 60
+    assert "cs.CL" in config.arxiv.categories
+    assert config.analysis.prompt_version == "2"
 
 
 def test_arxiv_schema_default_supports_three_day_catchup_capacity() -> None:
@@ -176,7 +178,8 @@ def test_unknown_profile_error_lists_sorted_choices() -> None:
 
 
 def test_prompt_taxonomy_matches_models() -> None:
-    prompt = Path("prompts/analysis-v1.md").read_text(encoding="utf-8")
+    config = load_config(Path("config/topics.yaml"))
+    prompt = config.analysis.prompt_path(Path("prompts")).read_text(encoding="utf-8")
 
     def values_after(heading: str) -> set[str]:
         section = prompt.split(heading, maxsplit=1)[1].split("\n\n", maxsplit=1)[0]
@@ -184,3 +187,5 @@ def test_prompt_taxonomy_matches_models() -> None:
 
     assert values_after("Allowed primary_topic values:") == {topic.value for topic in Topic}
     assert values_after("Allowed tags:") == ALLOWED_TAGS
+    assert "directly combines" in prompt
+    assert "standalone speculative decoding or model quantization" in prompt

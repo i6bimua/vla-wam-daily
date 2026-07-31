@@ -1,6 +1,8 @@
 from datetime import UTC, datetime
 from pathlib import Path
 
+import pytest
+
 from vla_wam_daily.config import load_config
 from vla_wam_daily.models import RawPaper
 from vla_wam_daily.prefilter import contains_phrase, match_paper, normalize
@@ -80,3 +82,53 @@ def test_matches_are_ordered_and_deduplicated() -> None:
         "composite:vision_language_robotics",
     ]
     assert matches.count("exact:vision-language-action") == 1
+
+
+@pytest.mark.parametrize(
+    ("title", "abstract", "expected_rule"),
+    [
+        (
+            "Fast LLM Inference with Speculative Decoding",
+            "A draft model accelerates generation.",
+            "exact:speculative-decoding",
+        ),
+        (
+            "Assisted Generation with a Small Drafter",
+            "The language model verifier accepts drafted tokens.",
+            "exact:assisted-generation",
+        ),
+        (
+            "Integer-Only Quantization for Transformers",
+            "We accelerate model inference with INT8 weights.",
+            "exact:integer-only-quantization",
+        ),
+        (
+            "Accurate INT4 Compression",
+            "Low-bit transformer weights improve inference efficiency.",
+            "composite:model_quantization",
+        ),
+    ],
+)
+def test_inference_efficiency_topics_match(
+    title: str,
+    abstract: str,
+    expected_rule: str,
+) -> None:
+    config = load_config(Path("config/topics.yaml")).prefilter
+    assert expected_rule in match_paper(paper(title, abstract), config)
+
+
+@pytest.mark.parametrize(
+    ("title", "abstract"),
+    [
+        ("SD Image Generation", "We improve Stable Diffusion sampling."),
+        ("Quantization of Topological Charge", "A lattice field theory study."),
+        ("A Draft Model of Urban Policy", "We discuss a preliminary model."),
+    ],
+)
+def test_inference_efficiency_ambiguities_do_not_match(
+    title: str,
+    abstract: str,
+) -> None:
+    config = load_config(Path("config/topics.yaml")).prefilter
+    assert match_paper(paper(title, abstract), config) == []

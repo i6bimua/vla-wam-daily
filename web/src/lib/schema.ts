@@ -32,17 +32,22 @@ export const topicSchema = z.enum([
   "World Model",
   "Dataset",
   "Benchmark",
+  "Speculative Decoding",
+  "Quantization",
 ]);
 
 export const tagSchema = z.enum([
   "Action Prediction",
   "Data",
+  "Efficient Inference",
   "Evaluation",
   "Generalist Robotics",
+  "Model Quantization",
   "Policy Learning",
   "Robot Learning",
   "Robot Manipulation",
   "Simulation",
+  "Speculative Decoding",
   "Video Generation",
   "Vision-Language",
   "World Modeling",

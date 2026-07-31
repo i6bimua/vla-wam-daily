@@ -42,6 +42,28 @@ def valid_ai_output_payload() -> dict[str, object]:
     }
 
 
+@pytest.mark.parametrize(
+    "topic",
+    ["Speculative Decoding", "Quantization"],
+)
+def test_analysis_accepts_inference_efficiency_topics(topic: str) -> None:
+    payload = make_record().model_dump(mode="json")
+    payload["analysis"]["primary_topic"] = topic
+
+    assert PaperRecord.model_validate(payload).analysis.primary_topic is Topic(topic)
+
+
+@pytest.mark.parametrize(
+    "tag",
+    ["Efficient Inference", "Speculative Decoding", "Model Quantization"],
+)
+def test_analysis_accepts_inference_efficiency_tags(tag: str) -> None:
+    payload = make_record().model_dump(mode="json")
+    payload["analysis"]["tags"] = [tag]
+
+    assert PaperRecord.model_validate(payload).analysis.tags == (tag,)
+
+
 def load_persisted_record(
     boundary: str,
     record_payload: dict[str, object],

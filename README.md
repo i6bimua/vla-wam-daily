@@ -1,18 +1,20 @@
 # VLA/WAM Daily
 
-面向 Vision-Language-Action（VLA）、World Action Model（WAM）和机器人世界模型的
-每日研究门户。项目用 Python 从 arXiv 获取元数据并调用 DeepSeek 做摘要级中文分析，
-再由 Astro 生成静态网站、Pagefind 搜索索引和 RSS，通过 GitHub Actions 部署到
-GitHub Pages；不需要数据库或常驻服务器。
+面向 Vision-Language-Action（VLA）、World Action Model（WAM）、机器人世界模型、
+Speculative Decoding（推测解码）和 Quantization（模型量化）的每日研究门户。项目用
+Python 从 arXiv 获取元数据并调用 DeepSeek 做摘要级中文分析，再由 Astro 生成静态网站、
+Pagefind 搜索索引和 RSS，通过 GitHub Actions 部署到 GitHub Pages；不需要数据库或
+常驻服务器。
 
 ## 功能
 
-- 每天通过 arXiv OAI-PMH 抓取 `cs.RO`、`cs.CV`、`cs.AI`、`cs.LG` 元数据，先做
-  确定性关键词预筛，再做 DeepSeek 相关性评分；手动指定论文时仍使用 arXiv 查询 API。
+- 每天通过 arXiv OAI-PMH 抓取 `cs.RO`、`cs.CV`、`cs.AI`、`cs.LG`、`cs.CL`
+  元数据，先用完整概念词与受控组合规则做确定性关键词预筛，再做 DeepSeek 相关性评分；
+  手动指定论文时仍使用 arXiv 查询 API。
 - 展示中英文标题、一句话总结、核心贡献、方法、摘要报告的实验结果与局限，以及与
   VLA/WAM 的关系。
-- 提供 Today、VLA、WAM、World Models、Datasets、Benchmarks、Weekly Top 5、
-  月度归档和 RSS。
+- 提供 Today、VLA、WAM、World Models、Datasets、Benchmarks、
+  Speculative Decoding、Quantization、Weekly Top 5、月度归档和 RSS。
 - Pagefind 支持中英文全文搜索；页面支持主题、日期、分数、代码状态筛选和移动端布局。
 - 按“arXiv HTML → arXiv 源码包 → arXiv PDF 自动裁剪”的顺序恢复 Fig. 1，
   同时从 HTML 识别 Fig. 2、英文 caption 和多 panel 原图；把可用面板永久缓存到
@@ -39,8 +41,9 @@ GitHub Pages；不需要数据库或常驻服务器。
 
 仓库默认/示例发布阈值是 6，运行时可通过 CLI 或手动工作流输入覆盖。`DataFile`
 不保存本次实际运行阈值，因此已构建页面不能仅凭数据文件宣称某次运行使用了哪个阈值。
-每次最多分析 60 篇新候选；超过上限会停止更新，而不是截断后发布不完整结果。新论文
-分析失败比例超过 30% 时，整次数据更新失败并保留线上上一版。
+`analysis.max_candidates` 只限制未命中分析缓存、实际需要调用 DeepSeek 的论文；缓存
+命中不会占用该额度。默认每次最多分析 60 篇未缓存候选；超过上限会停止更新，而不是截断
+后发布不完整结果。新论文分析失败比例超过 30% 时，整次数据更新失败并保留线上上一版。
 
 失败处理是显式且有上限的：arXiv 和 DeepSeek 对超时、429 和瞬态错误执行有限指数退避；
 重试耗尽后记录错误，不会用占位内容覆盖正常数据。无效或不符合 Schema 的 AI 输出绝不发布，
@@ -106,11 +109,13 @@ Astro 根据 `GITHUB_REPOSITORY` 推导项目子路径，显式 `BASE_PATH` 仍�
 
 ## 配置
 
-- `config/topics.yaml`：arXiv 分类、回看天数、请求间隔、超时与重试策略、预筛短语与
-  组合规则、发布阈值、60 篇候选上限、30% 失败阈值、并发数和模型档位。默认给
-  arXiv 请求 60 秒超时、最多 5 次指数退避重试；每日范围抓取默认使用更适合增量收割的
-  OAI-PMH，避免 GitHub 公共 Runner 共享出口触发查询 API 的系统级限流。
-- `prompts/analysis-v1.md`：DeepSeek 的结构化 JSON Prompt。修改时应同步增加
+- `config/topics.yaml`：arXiv 分类（含 `cs.CL`）、回看天数、请求间隔、超时与重试
+  策略、预筛短语与组合规则、发布阈值、60 篇未缓存候选上限、30% 失败阈值、并发数和
+  模型档位。推测解码与模型量化使用完整短语或受控词组组合，避免把 Stable Diffusion、
+  拓扑量子化等同名概念误收。默认给 arXiv 请求 60 秒超时、最多 5 次指数退避重试；
+  每日范围抓取默认使用更适合增量收割的 OAI-PMH，避免 GitHub 公共 Runner 共享出口
+  触发查询 API 的系统级限流。
+- `prompts/analysis-v2.md`：DeepSeek 的结构化 JSON Prompt。修改时应同步增加
   `prompt_version`，使缓存和结果 provenance 可追溯。
 - `data/latest.json`：最新数据；`data/archive/YYYY-MM.json`：永久月度归档；
   `data/cache/analyses.json` 与 `data/cache/figures.json`：分析和 Figure 元数据缓存。

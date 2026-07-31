@@ -121,6 +121,20 @@ async function writeArchive(
 }
 
 describe("the public data contract", () => {
+  it.each([
+    ["Speculative Decoding", ["Efficient Inference", "Speculative Decoding"]],
+    ["Quantization", ["Efficient Inference", "Model Quantization"]],
+  ])("accepts the %s topic and tags", (topic, tags) => {
+    const payload = paper();
+    payload.analysis.primary_topic = topic;
+    payload.analysis.tags = tags;
+
+    const parsed = paperSchema.parse(payload);
+
+    expect(parsed.analysis.primary_topic).toBe(topic);
+    expect(parsed.analysis.tags).toEqual(tags);
+  });
+
   it("loads the repository fixture with all four Figure states", async () => {
     const fixture = resolve(
       dirname(fileURLToPath(import.meta.url)),

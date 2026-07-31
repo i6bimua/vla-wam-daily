@@ -179,18 +179,23 @@ class Topic(StrEnum):
     WORLD_MODEL = "World Model"
     DATASET = "Dataset"
     BENCHMARK = "Benchmark"
+    SPECULATIVE_DECODING = "Speculative Decoding"
+    QUANTIZATION = "Quantization"
 
 
 ALLOWED_TAGS = frozenset(
     {
         "Action Prediction",
         "Data",
+        "Efficient Inference",
         "Evaluation",
         "Generalist Robotics",
+        "Model Quantization",
         "Policy Learning",
         "Robot Learning",
         "Robot Manipulation",
         "Simulation",
+        "Speculative Decoding",
         "Video Generation",
         "Vision-Language",
         "World Modeling",
