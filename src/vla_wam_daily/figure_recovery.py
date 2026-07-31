@@ -255,6 +255,11 @@ class FigureRecoveryService:
         if tuple(usable_figures) != gallery.figures:
             gallery = gallery.model_copy(
                 update={
+                    "status": (
+                        FigureStatus.AVAILABLE
+                        if usable_figures
+                        else FigureStatus.NOT_FOUND
+                    ),
                     "figures": tuple(usable_figures),
                     "recovery_status": FigureRecoveryStatus.NOT_ATTEMPTED,
                     "recovery_checked_at": None,

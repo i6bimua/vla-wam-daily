@@ -540,6 +540,37 @@ def test_missing_local_recovered_figure_is_retried() -> None:
     assert result.figures[0].source == "arxiv_pdf"
 
 
+def test_only_missing_local_recovered_figure_is_retried() -> None:
+    calls: list[str] = []
+    missing_path = f"/figures/{ARXIV_ID}/v{VERSION}/fig1-panel1.svg"
+    source_figure = FigureAsset(
+        number=1,
+        label="Figure 1",
+        caption="Missing local panel.",
+        image_urls=(None,),
+        cached_image_paths=(missing_path,),
+        source_url=f"https://arxiv.org/e-print/{ARXIV_ID}v{VERSION}",
+        source="arxiv_source",
+    )
+    recovery = service(
+        html=gallery(),
+        source=(recovered(number=1), recovered(number=2)),
+        pdf=None,
+        calls=calls,
+    )
+
+    result = recovery.recover_gallery(
+        gallery(
+            source_figure,
+            recovery_status=FigureRecoveryStatus.AVAILABLE,
+        ),
+        checked_at=CHECKED_AT,
+    )
+
+    assert [figure.number for figure in result.figures] == [1, 2]
+    assert result.recovery_status is FigureRecoveryStatus.AVAILABLE
+
+
 def test_fatal_resource_errors_are_not_swallowed() -> None:
     recovery = service(
         html=gallery(),
