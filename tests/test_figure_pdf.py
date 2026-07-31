@@ -545,6 +545,15 @@ def test_punctuation_free_neighboring_caption_blocks_crossing_visual_region() ->
     assert extract(make_pdf(page), max_vertical_distance=160) is None
 
 
+def test_figure_three_caption_blocks_wide_figure_one_crop() -> None:
+    def page(canvas: Canvas) -> None:
+        draw_rect_visual(canvas, y=500)
+        draw_caption(canvas, "Figure 3: This owns the visual.", y=455)
+        draw_caption(canvas, "Figure 1: Must not cross Figure 3.", y=390)
+
+    assert extract(make_pdf(page), max_vertical_distance=160) is None
+
+
 def test_scanned_page_without_machine_readable_caption_is_not_ocrd() -> None:
     page_image = Image.new("RGB", PAGE_SIZE, "white")
 

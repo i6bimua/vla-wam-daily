@@ -778,7 +778,13 @@ def _has_ambiguous_semantic_control(
                 token.end,
                 allow_options=False,
             )
-            if argument is not None and argument[0].strip() == "figure":
+            if argument is None:
+                return True
+            counter_target = argument[0].strip()
+            if (
+                counter_target == "figure"
+                or re.fullmatch(r"[A-Za-z@]+", counter_target) is None
+            ):
                 return True
         elif (
             word in _CONDITIONAL_CONTROLS

@@ -463,18 +463,18 @@ def _crops_for_page(
             crop_padding=crop_padding,
         )
         if crop is None and allow_wide_fallback:
-            has_neighboring_caption_above = any(
-                other.box.bottom >= caption.box.top
-                for other in captions
-                if other is not caption
+            wide_crop = _wide_crop_for_caption(
+                caption,
+                visible=visible,
+                page_margin=page_margin,
+                crop_padding=crop_padding,
             )
-            if not has_neighboring_caption_above:
-                crop = _wide_crop_for_caption(
-                    caption,
-                    visible=visible,
-                    page_margin=page_margin,
-                    crop_padding=crop_padding,
-                )
+            if wide_crop is not None and not any(
+                neighbor.box.bottom >= caption.box.top
+                and neighbor.box.bottom <= wide_crop[3]
+                for neighbor in neighbors
+            ):
+                crop = wide_crop
         if crop is not None:
             matches.append((caption.number, caption.text, crop))
     return tuple(matches)

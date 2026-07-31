@@ -219,6 +219,31 @@ def test_overpic_does_not_bypass_figure_counter_safety() -> None:
     )
 
 
+def test_overpic_rejects_macro_generated_figure_counter_target() -> None:
+    main = rb"""
+\documentclass{article}
+\newcommand{\fc}{figure}
+\begin{document}
+\setcounter{\fc}{7}
+\begin{figure}
+\begin{overpic}{figure.pdf}
+\end{overpic}
+\caption{Actually Figure 8.}
+\end{figure}
+\end{document}
+"""
+
+    assert (
+        extract_all_from_tar(
+            {
+                "main.tex": main,
+                "figure.pdf": make_pdf_asset(),
+            }
+        )
+        == ()
+    )
+
+
 def test_extracts_first_direct_literal_figure_asset_and_plain_caption() -> None:
     candidate = extract_from_tar(
         {
