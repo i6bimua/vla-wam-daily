@@ -9,6 +9,20 @@ async function source(relativePath: string): Promise<string> {
   return readFile(resolve(sourceRoot, relativePath), "utf8").catch(() => "");
 }
 
+describe("homepage collection contract", () => {
+  it("renders the cumulative archive instead of the rolling latest snapshot", async () => {
+    const page = await source("pages/index.astro");
+
+    expect(page).toContain("loadLatestDataFile");
+    expect(page).toContain("loadArchive");
+    expect(page).toContain("const [latest, papers] = await Promise.all");
+    expect(page).not.toContain("selectCurrentPapers(latest.papers)");
+    expect(page).toContain("All research");
+    expect(page).toContain("全部研究");
+    expect(page).toContain("归档尚为空");
+  });
+});
+
 describe("topic and archive route contracts", () => {
   it("always builds all central topic routes with PaperExplorer", async () => {
     const page = await source("pages/topics/[topic].astro");
