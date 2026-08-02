@@ -555,7 +555,8 @@ def test_browser_fixture_covers_all_figure_statuses_and_run_counters() -> None:
     assert archive.stats == expected_stats
     latest_records = {(paper.arxiv_id, paper.version): paper for paper in latest.papers}
     archive_records = {(paper.arxiv_id, paper.version): paper for paper in archive.papers}
-    assert latest_records == archive_records
+    assert latest_records.items() <= archive_records.items()
+    assert set(archive_records) - set(latest_records) == {("2607.09999", 1)}
     latest_statuses = {
         identity: paper.figure_gallery.status for identity, paper in latest_records.items()
     }

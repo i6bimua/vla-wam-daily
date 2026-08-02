@@ -45,7 +45,7 @@ requireBuild(embeddedMatch, "home must embed minimal filter JSON");
 const embeddedSource = embeddedMatch[1];
 const filterRecords = JSON.parse(embeddedSource);
 requireBuild(
-  Array.isArray(filterRecords) && filterRecords.length === 4,
+  Array.isArray(filterRecords) && filterRecords.length === 5,
   "filter JSON must contain one record per fixture paper",
 );
 const expectedRecordKeys = [
@@ -124,10 +124,12 @@ try {
   }
   requireBuild(
     filters.topic.VLA === 4 &&
-      filters.score["6"] === 3 &&
+      filters.topic.WAM === 1 &&
+      filters.score["6"] === 4 &&
       filters.score["8"] === 1 &&
-      filters.code.no === 4 &&
-      filters.date["2026-07-27"] === 4,
+      filters.code.no === 5 &&
+      filters.date["2026-07-27"] === 4 &&
+      filters.date["2026-07-01"] === 1,
     "Pagefind filter counts must match fixture papers",
   );
 

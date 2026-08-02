@@ -77,7 +77,7 @@ const notFound = await text("404.html");
 
 const topicExpectations = [
   ["vla", "视觉语言动作（VLA）论文", expectEmptyArchive ? 0 : 4],
-  ["wam", "世界动作模型（WAM）论文", 0],
+  ["wam", "世界动作模型（WAM）论文", expectEmptyArchive ? 0 : 1],
   ["world-model", "机器人世界模型论文", 0],
   ["dataset", "VLA/WAM 数据集", 0],
   ["benchmark", "VLA/WAM 基准评测", 0],
@@ -120,14 +120,21 @@ if (expectEmptyArchive) {
   const archiveMonth = await text("archive/2026-07/index.html");
   requireBuild(
     archiveIndex.includes(`href="${base}archive/2026-07/"`) &&
-      archiveIndex.includes("4 篇论文"),
+      archiveIndex.includes("5 篇论文"),
     "archive index must link the fixture month with its current-paper count",
   );
   requireBuild(
     archiveMonth.includes("2026-07-27") &&
-      countPaperCards(archiveMonth) === 4 &&
-      archiveMonth.includes(`href="${base}papers/2607.12345/"`),
+      countPaperCards(archiveMonth) === 5 &&
+      archiveMonth.includes(`href="${base}papers/2607.12345/"`) &&
+      archiveMonth.includes(`href="${base}papers/2607.09999/"`),
     "monthly archive must group compact cards by day and retain detail links",
+  );
+  requireBuild(
+    countPaperCards(home) === 5 &&
+      home.includes(`data-id="2607.09999"`) &&
+      home.includes("Archive-only cumulative homepage fixture"),
+    "home must include the archive-only fixture omitted from latest.json",
   );
   requireBuild(
     countPaperCards(weekly) === 2 &&
@@ -199,7 +206,7 @@ requireBuild(
   "RSS channel metadata and site link must match the configured base",
 );
 requireBuild(
-  items.length === (expectEmptyArchive ? 0 : 4),
+  items.length === (expectEmptyArchive ? 0 : 5),
   "RSS item count must match the current archive",
 );
 for (const item of items) {
