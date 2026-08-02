@@ -1,10 +1,12 @@
 ---
 import PaperExplorer from "../components/PaperExplorer.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { loadLatestDataFile, selectCurrentPapers } from "../lib/data";
+import { loadArchive, loadLatestDataFile } from "../lib/data";
 
-const latest = await loadLatestDataFile();
-const papers = selectCurrentPapers(latest.papers);
+const [latest, papers] = await Promise.all([
+  loadLatestDataFile(),
+  loadArchive(),
+]);
 const updated = new Intl.DateTimeFormat("zh-CN", {
   year: "numeric",
   month: "long",
@@ -57,8 +59,8 @@ const topics = [
   <section id="latest" class="latest" aria-labelledby="latest-heading">
     <header class="section-heading">
       <div>
-        <p class="eyebrow">Today’s selection</p>
-        <h2 id="latest-heading">今日研究</h2>
+        <p class="eyebrow">All research</p>
+        <h2 id="latest-heading">全部研究</h2>
       </div>
       <p>{papers.length} 篇 · 按发布时间与相关性整理</p>
     </header>
@@ -68,7 +70,7 @@ const topics = [
         <PaperExplorer papers={papers} />
       ) : (
         <p class="empty-state">
-          今天尚无论文达到发布阈值。下一次每日任务成功后会自动更新。
+          归档尚为空；下一次每日任务发布论文后会自动更新。
         </p>
       )
     }

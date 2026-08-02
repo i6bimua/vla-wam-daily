@@ -31,7 +31,10 @@ test("desktop home exposes research cards and live filters", async ({
   await expect(page.getByRole("heading", { name: /把模型前沿/ })).toBeVisible();
   await expect(page.getByRole("link", { name: "推测解码" })).toBeVisible();
   await expect(page.getByRole("link", { name: "模型量化" })).toBeVisible();
-  await expect(page.locator("[data-result-count]")).toHaveText("4");
+  await expect(page.locator("[data-result-count]")).toHaveText("5");
+  await expect(
+    page.locator('[data-paper-card][data-id="2607.09999"]'),
+  ).toBeVisible();
 
   const paperCard = page.locator('[data-paper-card][data-id="2607.12345"]');
   await expect(paperCard.locator("details.analysis")).not.toHaveAttribute(
