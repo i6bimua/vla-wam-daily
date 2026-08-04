@@ -220,7 +220,8 @@ Figure URL 与 caption 优先来自对应论文的 arXiv HTML；无法取得时�
   完全一致；来自 fork 的 pull request 默认不能读取上游 Secret。
 - **Pages 返回 404**：确认 Pages Source 是 GitHub Actions，`github-pages`
   environment 未阻止部署，并检查 Actions 中 `Deploy Pages` 的目标 URL。
-- **每日任务没有准点运行**：先确认工作流位于默认分支且 Actions 已启用；可用
+- **每日任务没有准点运行**：自动任务安排在北京时间 07:00 和 12:00，午间运行会补抓
+  早间尚未同步的 arXiv 元数据。先确认工作流位于默认分支且 Actions 已启用；可用
   `workflow_dispatch` 手动补跑。GitHub schedule 不是实时调度器，排队延迟不代表失败。
 - **没有新论文**：查看运行摘要，区分 arXiv 正常返回零篇、预筛无命中和 arXiv
   请求失败；必要时将 `lookback_days` 暂时调大。
