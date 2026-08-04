@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-01T23:53:18.181573Z",
+  "generated_at": "2026-08-04T05:18:35.763554Z",
   "papers": [
     {
       "abstract": "Robot action planning in the real world is challenging as it requires not only understanding the current state of the environment but also predicting how it will evolve in response to actions. Vision-language-action (VLA), which repurpose large-scale vision-language models for robot action generation using action experts, have achieved notable success across a variety of robotic tasks. Nevertheless, their performance remains constrained by the scope of their training data, exhibiting limited generalization to unseen scenarios and vulnerability to diverse contextual perturbations. More recently, world models have been revisited as an alternative to VLAs. These models, referred to as world action models (WAMs), are built upon world models that are trained on large corpora of video data to predict future states. With minor adaptations, their latent representation can be decoded into robot actions. It has been suggested that their explicit dynamic prediction capacity, combined with spatiotemporal priors acquired from web-scale video pretraining, enables WAMs to generalize more effectively than VLAs. In this paper, we conduct a comparative study of prominent state-of-the-art VLA policies and recently released WAMs. We evaluate their performance on the LIBERO-Plus and RoboTwin 2.0-Plus benchmarks under various visual and language perturbations. Our results show that WAMs achieve strong robustness, with LingBot-VA reaching 74.2% success rate on RoboTwin 2.0-Plus and Cosmos-Policy achieving 82.2% on LIBERO-Plus. While VLAs such as $\\pi_{0.5}$ can achieve comparable robustness on certain tasks, they typically require extensive training with diverse robotic datasets and varied learning objectives. The evaluation code for the RoboTwin2.0-Plus benchmark is available at: https://robot-robustness.github.io/RoboTwin2.0-Plus/.",
@@ -70,6 +70,96 @@
       "title_zh": "世界行动模型比VLA泛化能力更强吗？一项鲁棒性研究",
       "updated_at": "2026-07-30T02:24:57Z",
       "version": 5
+    },
+    {
+      "abstract": "Tactile sensing is a crucial capability for Vision-Language-Action (VLA) architectures, as it enables dexterous and safe manipulation in contact-rich tasks. However, reliance on dedicated tactile hardware increases cost and reduces reproducibility across robotic platforms. We argue that tactile-aware manipulation can be learned offline and deployed without direct haptic feedback at inference. To this end, we present HapticVLA, which proceeds in two tightly coupled stages: Safety-Aware Reward-Weighted Flow Matching (SA-RWFM) and Tactile Distillation (TD). SA-RWFM trains a flow-matching action expert that incorporates precomputed, safety-aware tactile rewards penalizing excessive grasping force and suboptimal grasping trajectories. TD further transfers this tactile-aware capability into a conventional VLA: we distill a compact tactile token from the SA-RWFM teacher and train a student VLA to predict that token from vision and state modalities, enabling tactile-aware action generation at inference without requiring on-board tactile sensors. This design preserves contact-rich tactile-aware reasoning within VLA while removing the need for on-board tactile sensors during deployment. On real-world experiments, HapticVLA achieves a mean success rate of 86.7%, consistently outperforming baseline VLAs - including versions provided with direct tactile feedback during inference.",
+      "analysis": {
+        "key_results": "真实世界实验中平均成功率达86.7%，持续优于基线VLA，包括在推理时提供直接触觉反馈的版本。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出HapticVLA框架，结合Safety-Aware Reward-Weighted Flow Matching和Tactile Distillation，使VLA模型在无推理时触觉传感的情况下仍能进行触觉感知的安全操作。",
+        "method": "两阶段方法：1) Safety-Aware Reward-Weighted Flow Matching训练流匹配动作专家，融入安全触觉奖励；2) Tactile Distillation将触觉令牌蒸馏到学生VLA中，从视觉和状态模态预测该令牌，实现无触觉传感器的推理。",
+        "one_sentence_summary": "提出HapticVLA框架，通过离线学习触觉感知并蒸馏到视觉-语言-动作模型中，在推理时无需触觉传感器即可实现安全的接触丰富操作。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "论文直接针对VLA架构，通过触觉知识蒸馏实现无需触觉硬件的安全操作，对本站VLA研究方向高度相关。",
+        "relevance_score": 9,
+        "tags": [
+          "Robot Manipulation",
+          "Policy Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2603.15257",
+      "authors": [
+        "Konstantin Gubernatorov",
+        "Mikhail Sannikov",
+        "Ilya Mikhalchuk",
+        "Egor Kuznetsov",
+        "Makar Artemov",
+        "Ogunwoye Faith Oluwatobi",
+        "Marcelino Fernando",
+        "Artem Asanov",
+        "Ziang Guo",
+        "Dzmitry Tsetserukou"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-04T05:18:35.763554Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2603.15257/v2/fig1-panel1.png"
+            ],
+            "caption": "HapticVLA is the first VLA model to enable tactile-aware manipulation without requiring force sensors at inference. Alongside vision, language, and state modalities it processes tactile reward, enabling safe action generation for contact-rich manipulation. Our approach leverages tactile distillation to preserve haptic-aware reasoning while eliminating tactile modality through distillation.",
+            "image_urls": [
+              "https://arxiv.org/html/2603.15257v2/sections/figures/teaser.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2603.15257v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2603.15257/v2/fig2-panel1.png"
+            ],
+            "caption": "Framework overview of HapticVLA. After dataset collection we perform offline tactile reward calculation for each episode based on manipulator state and tactile maps. During VLA training, along with language, vision and state modalities passed into VLM, this reward is passed as an additional condition directly into SA-RWFM action expert. To eliminate the need for tactile hardware, we further perform tactile distillation on our trained VLA. At inference, the distilled VLA predicts tactile representations solely from vision and state inputs enabling tactile-aware contact-rich manipulation.",
+            "image_urls": [
+              "https://arxiv.org/html/2603.15257v2/sections/figures/method.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2603.15257v2#S2.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2603.15257v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-04T05:18:35.763554Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-03-16T13:24:58Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2603.15257",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2603.15257",
+        "project_url": null
+      },
+      "title": "HapticVLA: Contact-Rich Manipulation via Vision-Language-Action Model without Inference-Time Tactile Sensing",
+      "title_zh": "HapticVLA：一种无需推理时触觉传感的视觉-语言-动作模型实现接触丰富操作",
+      "updated_at": "2026-08-02T20:22:57Z",
+      "version": 2
     },
     {
       "abstract": "Imitation Learning (IL) enables robots to acquire manipulation skills from expert demonstrations. Diffusion Policy (DP) models multi-modal expert behaviors but degrades when naively increasing stacked observation horizons, limiting long-horizon manipulation. We propose Self-Evolving Gated Attention (SEGA), a temporal module that maintains a time-evolving latent state via gated attention, enabling efficient recurrent updates that accumulate long-term context into a compact latent representation while filtering irrelevant temporal information. Integrating SEGA into DP yields Self-Evolving Diffusion Policy (SeedPolicy), which resolves the temporal modeling bottleneck and extends the effective temporal horizon with moderate overhead. On the RoboTwin 2.0 benchmark with 50 manipulation tasks, SeedPolicy outperforms DP and other IL baselines. Averaged across both CNN and Transformer backbones, SeedPolicy achieves 36.8% relative improvement in clean settings and 169% relative improvement in randomized challenging settings over the DP. Compared to vision-language-action models such as RDT with 1.2B parameters, SeedPolicy achieves stronger performance in the clean setting with one to two orders of magnitude fewer parameters, demonstrating strong efficiency. These results establish SeedPolicy as a state-of-the-art imitation learning method for long-horizon robotic manipulation. Code is available at: https://github.com/Youqiang-Gui/SeedPolicy.",
@@ -247,20 +337,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 49,
-    "completion_tokens": 0,
-    "error_categories": {},
-    "failed": 0,
-    "fetched": 621,
-    "figure_available": 34,
-    "figure_cache_hits": 34,
+    "cache_hits": 0,
+    "completion_tokens": 25779,
+    "error_categories": {
+      "ValidationError": 2
+    },
+    "failed": 2,
+    "fetched": 1375,
+    "figure_available": 55,
+    "figure_cache_hits": 0,
     "figure_failed": 0,
-    "figure_requests": 2,
-    "figure_unavailable": 2,
-    "model_calls": 0,
-    "prefiltered": 49,
-    "prompt_tokens": 0,
-    "published": 36,
-    "total_tokens": 0
+    "figure_requests": 62,
+    "figure_unavailable": 7,
+    "model_calls": 83,
+    "prefiltered": 83,
+    "prompt_tokens": 71993,
+    "published": 62,
+    "total_tokens": 97772
   }
 }

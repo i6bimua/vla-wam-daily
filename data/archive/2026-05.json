@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-31T23:57:28.758056Z",
+  "generated_at": "2026-08-04T05:18:35.763554Z",
   "papers": [
     {
       "abstract": "Recent vision-language-action and diffusion-based robot policies often use action chunking, where each policy query predicts a sequence of future actions and the robot executes an open-loop prefix before re-querying. While this interface improves local motion continuity, deployment still requires choosing the execution horizon: how much of each predicted chunk should be executed before acquiring a new observation. However, our experiments show that success is strongly task-dependent and non-monotonic with respect to the execution horizon, making a single constant horizon an unreliable deployment rule. We propose PACE (Phase-Aware Chunk Execution), a training-free test-time execution method that selects the execution horizon online from the predicted chunk itself. PACE exploits the phase-dependent kinematic structure of manipulation trajectories by identifying low-speed transition points in the predicted speed profile and using them as candidate replanning boundaries. Because PACE uses only the predicted action chunk, it is plug-and-play and requires no retraining or access to policy internals. We validate PACE through large-scale evaluations in both simulation and real-robot settings. On 50 RoboTwin2.0 tasks, PACE raises the average success rate from 57.8% to 64.2%. In real-robot experiments on bimanual ALOHA and single-arm Franka platforms, PACE improves the average task score from 60.7 to 77.7 and the average success rate from 50.7% to 70.4%. Ablations and rollout-level analyses show that PACE adapts execution horizons across manipulation phases, shortening near transitions while preserving longer execution during coherent motion.",
@@ -278,6 +278,94 @@
       "version": 2
     },
     {
+      "abstract": "Model quantization is widely used to reduce memory, latency, and deployment cost, and is typically judged by whether predictive accuracy is preserved. In decision systems that provide algorithmic recourse, however, accuracy preservation is not sufficient: a small actionable change that flips the decision of a full-precision model may fail after quantization, or require a substantially larger intervention. This paper studies this deployment mismatch and introduces counterfactual sensitivity under quantization, a framework for measuring how compression changes recourse behavior. We propose two metrics: Validity Drop (VD), which measures the fraction of full-precision recourse actions that no longer achieve the target outcome after quantization, and Counterfactual Recourse Gap (CRG), which measures the increase in minimal recourse cost under the quantized model. To mitigate this failure mode, we introduce Counterfactual-Faithful Quantization (CFQ), a quantization-aware training method that jointly learns quantizer parameters and mixed-precision bit allocation while preserving the target prediction at teacher-generated recourse points. CFQ is compatible with standard LSQ/PACT-style quantizers and mixed-precision policies, and can also be instantiated as a training-free calibration procedure for post-training quantization. Experiments on Adult, German Credit, and COMPAS show that standard QAT and mixed-precision baselines can preserve accuracy while substantially degrading recourse stability. At matched accuracy and bit budget, CFQ consistently reduces VD and CRG; for example, on Adult, CFQ reduces VD/CRG from $0.121/0.162$ for an accuracy-centric mixed-precision baseline to $0.061/0.071$.",
+      "analysis": {
+        "key_results": "在Adult、German Credit、COMPAS上，CFQ在匹配准确率和位宽下持续降低VD和CRG；例如Adult上，VD/CRG从准确率优先的混合精度基线的0.121/0.162降至0.061/0.071。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出反事实敏感性量化框架和两个度量指标（VD、CRG），以及缓解问题的CFQ方法。",
+        "method": "提出Counterfactual-Faithful Quantization (CFQ)，一种量化感知训练方法，联合学习量化器参数和混合精度分配，同时保护教师生成的追索点上的目标预测；也可实例化为后训练量化的免训练校准过程。",
+        "one_sentence_summary": "该论文研究模型量化对算法追索行为的影响，并提出反事实忠实量化以在保持精度的同时减少追索有效性下降。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "无直接关系；该工作聚焦于决策系统中的公平性与可解释性，而非机器人操作或世界模型。",
+        "relevance_score": 8,
+        "tags": [
+          "Efficient Inference",
+          "Model Quantization"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.CV"
+      ],
+      "arxiv_id": "2605.17160",
+      "authors": [
+        "Chaymae Yahyati",
+        "Ismail Lamaakal",
+        "Khalid El Makkaoui",
+        "Ibrahim Ouahbi"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-04T05:18:35.763554Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2605.17160/v3/fig1-panel1.png"
+            ],
+            "caption": "CFQ pipeline. A teacher recourse action δ fp \\delta_{\\mathrm{fp}} is computed on the full-precision model using a small number of projected gradient steps and is treated as a constant via stop-gradient. The quantized model f q f_{q} is trained to preserve task accuracy and to keep x + δ fp x+\\delta_{\\mathrm{fp}} a valid counterfactual under quantization, while mixed-precision bit allocation and quantizer parameters are optimized under a bit budget. We do not claim a new recourse solver or a new quantizer; we introduce a deployment objective that makes recourse validity and recourse cost explicit constraints of quantization.",
+            "image_urls": [
+              "https://arxiv.org/html/2605.17160v3/fifi.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.17160v3#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2605.17160/v3/fig2-panel1.png"
+            ],
+            "caption": "Same accuracy, different recourse. Quantization can shift local decision geometry: a minimal actionable recourse δ f ⋆ \\delta_{f}^{\\star} that flips the full-precision model may fail for the quantized model, requiring a different or larger action δ f q ⋆ \\delta_{f_{q}}^{\\star} even when predictive accuracy is unchanged.",
+            "image_urls": [
+              "https://arxiv.org/html/2605.17160v3/fifi2.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.17160v3#S2.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2605.17160v3",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:model-quantization",
+        "exact:post-training-quantization",
+        "exact:quantization-aware-training",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-04T05:18:35.763554Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-05-16T21:19:31Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2605.17160",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2605.17160",
+        "project_url": null
+      },
+      "title": "When Bits Break Recourse: Counterfactual-Faithful Quantization",
+      "title_zh": "当比特破坏追索权：反事实忠实量化",
+      "updated_at": "2026-08-03T11:44:18Z",
+      "version": 3
+    },
+    {
       "abstract": "Neural architecture search (NAS) is a powerful approach for automating model design, but existing methods often optimize for accuracy alone or rely on proxy metrics such as bit operations (BOPs) that correlate poorly with hardware cost. This gap is particularly large for FPGA deployment, where cost is dominated by a multi-dimensional budget of lookup tables, DSPs, flip-flops, BRAM, and latency. We present the Surrogate Neural Architecture Codesign Package (SNAC-Pack), an open-source AutoML framework for hardware-aware neural architecture codesign and end-to-end FPGA deployment. SNAC-Pack runs a multi-objective global search with Optuna and NSGA-II, loading trials to a shared SQLite store that enables parallel workers across compute nodes. A hardware surrogate model outputs per-trial resource and latency estimates, avoiding the synthesis cost that would otherwise dominate the search loop. A local search stage then applies quantization-aware training (QAT) together with iterative magnitude pruning in a combined compression loop, after which the final model is synthesized to FPGA firmware via the hls4ml Python library. A YAML configuration and an optional agentic frontend let users run the pipeline on new datasets without modifying the framework. We demonstrate SNAC-Pack on jet classification at the Large Hadron Collider and superconducting qubit readout, discovering compact Pareto-optimal architectures that either match baseline task performance while reducing FPGA resource utilization or substantially reduce hardware utilization with only modest decreases in task performance. In the qubit readout case, SNAC-Pack also reduces the design space exploration process from months of manual fine-tuning to hours of automated search.",
       "analysis": {
         "key_results": "在LHC喷注分类和超导量子比特读出任务上，发现紧凑的帕累托最优架构，能以轻微性能损失大幅降低硬件利用率，并将设计空间探索从数月缩短至小时级。",
@@ -466,24 +554,116 @@
       "title_zh": "Orchard：面向可扩展智能体建模的开源框架",
       "updated_at": "2026-07-30T16:17:23Z",
       "version": 3
+    },
+    {
+      "abstract": "Procedural tasks with multiple ordered steps are ubiquitous in daily life. Recent advances in multimodal large language models (MLLMs) have enabled personal assistants that support daily activities. However, existing systems primarily provide reactive guidance triggered by user queries, or limited proactive assistance for isolated short-term events rather than long-horizon procedural tasks. In this work, we introduce Pro$^2$Assist, a step-aware proactive assistant that continuously tracks fine-grained task progress and reasons over the user's evolving state to provide timely assistance throughout tasks. Pro$^2$Assist leverages multimodal data from augmented reality (AR) glasses to achieve motion-based perception. It then extracts step-oriented procedural context from multi-scale temporal dynamics and task-specific expert knowledge. Based on both sensory input and procedural context, Pro$^2$Assist performs continuous reasoning to infer user needs and display timely assistance on AR glasses. We evaluate Pro$^2$Assist using a dataset curated from public sources and a real-world dataset collected on our testbed with AR glasses. Extensive evaluations show that Pro$^2$Assist outperforms the best-performing baselines by over 21% in procedural action understanding accuracy, and it achieves up to 2.29x the proactive timing accuracy of baselines. A user study with 20 participants further shows that 90% find Pro$^2$Assist useful, indicating its effectiveness for real-world procedural assistance.",
+      "analysis": {
+        "key_results": "在程序动作理解准确率上比最佳基线高出21%以上，主动时机准确率高达基线2.29倍，20人用户研究显示90%认为有用。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出Pro²Assist，一个能够持续跟踪细粒度任务进度并主动推理用户需求以提供及时辅助的步骤感知主动辅助系统。",
+        "method": "利用AR眼镜的多模态数据进行基于运动的感知，从多尺度时间动态和任务特定专家知识中提取步骤导向的程序上下文，并结合感官输入与程序上下文进行连续推理。",
+        "one_sentence_summary": "提出一种利用AR眼镜多模态数据进行连续步骤感知并主动提供辅助的系统，用于长时程日常程序任务。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该系统结合了语言理解、视觉感知（多模态）与动作预测（主动辅助），是面向程序任务的视觉-语言-动作（VLA）系统，对具身智能与日常任务自动化具有直接参考价值。",
+        "relevance_score": 8,
+        "tags": [
+          "Vision-Language",
+          "Action Prediction",
+          "Generalist Robotics"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.AI",
+        "cs.HC"
+      ],
+      "arxiv_id": "2605.04227",
+      "authors": [
+        "Lilin Xu",
+        "Bufang Yang",
+        "Siyang Jiang",
+        "Kaiwei Liu",
+        "Kaiyuan Hou",
+        "Yuang Fan",
+        "Hongkai Chen",
+        "Zhenyu Yan",
+        "Xiaofan Jiang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-04T05:18:35.763554Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2605.04227/v2/fig1-panel1.png"
+            ],
+            "caption": "Application scenario of Pro²Assist. Pro²Assist provides continuous, step-aware proactive assistance by reasoning over the user’s evolving state in the task workflow (left), while reactive procedural assistants rely on explicit user requests and one-shot proactive assistants provide isolated assistance for the overall event (right).",
+            "image_urls": [
+              "https://arxiv.org/html/2605.04227v2/x1.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.04227v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2605.04227/v2/fig2-panel1.png"
+            ],
+            "caption": "An example of an existing proactive system in procedural tasks (Yang et al. , 2025b ) .",
+            "image_urls": [
+              "https://arxiv.org/html/2605.04227v2/x2.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.04227v2#S3.F3.1"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2605.04227v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-04T05:18:35.763554Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-05-05T19:12:11Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2605.04227",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2605.04227",
+        "project_url": null
+      },
+      "title": "Pro$^2$Assist: Continuous Step-aware Proactive Assistance with Multi-modal Egocentric Perception for Long-horizon Procedural Tasks",
+      "title_zh": "Pro²Assist：面向长时程程序任务的多模态自我中心感知连续步骤感知主动辅助系统",
+      "updated_at": "2026-08-01T20:12:35Z",
+      "version": 2
     }
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 85,
-    "completion_tokens": 0,
-    "error_categories": {},
-    "failed": 0,
-    "fetched": 1240,
-    "figure_available": 63,
-    "figure_cache_hits": 65,
+    "cache_hits": 0,
+    "completion_tokens": 25779,
+    "error_categories": {
+      "ValidationError": 2
+    },
+    "failed": 2,
+    "fetched": 1375,
+    "figure_available": 55,
+    "figure_cache_hits": 0,
     "figure_failed": 0,
-    "figure_requests": 0,
-    "figure_unavailable": 2,
-    "model_calls": 0,
-    "prefiltered": 85,
-    "prompt_tokens": 0,
-    "published": 65,
-    "total_tokens": 0
+    "figure_requests": 62,
+    "figure_unavailable": 7,
+    "model_calls": 83,
+    "prefiltered": 83,
+    "prompt_tokens": 71993,
+    "published": 62,
+    "total_tokens": 97772
   }
 }
