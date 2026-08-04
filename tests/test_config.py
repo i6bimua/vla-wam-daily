@@ -32,7 +32,7 @@ def test_default_config_uses_quality_model() -> None:
     assert config.analysis.model_for("quality") == "deepseek-v4-pro"
     assert config.analysis.model_for("economy") == "deepseek-v4-flash"
     assert config.analysis.threshold == 6
-    assert config.analysis.max_candidates == 60
+    assert config.analysis.max_candidates == 100
     assert "cs.CL" in config.arxiv.categories
     assert config.analysis.prompt_version == "2"
 

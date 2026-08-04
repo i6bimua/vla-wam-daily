@@ -225,7 +225,7 @@ Figure URL 与 caption 优先来自对应论文的 arXiv HTML；无法取得时�
   `workflow_dispatch` 手动补跑。GitHub schedule 不是实时调度器，排队延迟不代表失败。
 - **没有新论文**：查看运行摘要，区分 arXiv 正常返回零篇、预筛无命中和 arXiv
   请求失败；必要时将 `lookback_days` 暂时调大。
-- **候选超过 60 或失败超过 30%**：这是防止不完整数据上线的质量门槛。检查关键词、
+- **候选超过 100 或失败超过 30%**：这是防止不完整数据上线的质量门槛。检查关键词、
   arXiv/DeepSeek 状态后重跑，不要通过提交半成品 JSON 绕过。
 - **Figure 不显示或不能直接下载**：先检查相应
   `web/public/figures/{arxiv_id}/v{version}/` 文件是否存在，再查看卡片中的恢复状态
