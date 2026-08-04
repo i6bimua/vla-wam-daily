@@ -148,6 +148,8 @@ def test_readme_explains_pages_schedule_secrets_sources_and_troubleshooting() ->
         "Vincentqyw/cv-arxiv-daily",
     ):
         assert text in README
+    assert "默认每次最多分析 60 篇" not in README
+    assert "60 篇未缓存候选上限" not in README
     assert "Secret" in README
     assert "论文许可证" in README
 
