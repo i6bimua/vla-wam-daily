@@ -195,7 +195,10 @@ def test_pages_builds_existing_data_only_and_deploys_with_minimal_permissions() 
 def test_daily_schedule_dispatch_defaults_and_permissions_are_bounded() -> None:
     payload = workflow("daily.yml")
     dispatch = payload["on"]["workflow_dispatch"]["inputs"]
-    assert payload["on"]["schedule"] == [{"cron": "0 7 * * *", "timezone": "Asia/Shanghai"}]
+    assert payload["on"]["schedule"] == [
+        {"cron": "0 7 * * *", "timezone": "Asia/Shanghai"},
+        {"cron": "0 12 * * *", "timezone": "Asia/Shanghai"},
+    ]
     assert dispatch["lookback_days"]["default"] == "3"
     assert dispatch["profile"]["default"] == "quality"
     assert dispatch["profile"]["options"] == ["quality", "economy"]

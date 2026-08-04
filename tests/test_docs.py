@@ -136,7 +136,7 @@ def test_readme_explains_pages_schedule_secrets_sources_and_troubleshooting() ->
         "DEEPSEEK_MODEL",
         "GitHub Actions",
         "github-pages",
-        "北京时间 07:00",
+        "北京时间 07:00 和 12:00",
         "Asia/Shanghai",
         "workflow_dispatch",
         "dry-run",
