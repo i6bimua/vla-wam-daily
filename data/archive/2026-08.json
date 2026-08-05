@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-05T06:30:10.676244Z",
+  "generated_at": "2026-08-05T23:56:02.035203Z",
   "papers": [
     {
       "abstract": "Bimanual manipulation policies trained with imitation learning are typically evaluated on workstation or datacenter-class GPUs, leaving the cost of deploying them on embedded hardware largely uncharacterized. We present a bimanual SO-101 system running entirely on an NVIDIA Jetson Orin Nano Super (8 GB), the entry-level tier of NVIDIA's embedded line, using a desktop GPU (RTX 3070) only for offline training, evaluated on pick-and-place of a deformable beanbag. First, we build a GStreamer capture pipeline backed by NVMM buffers that removes redundant host-device copies from three-camera sensing. Contrary to expectation, the conventional path fit the memory budget and dropped no frames; what zero-copy sensing recovers is CPU headroom (peak single-core utilization 98.0% to 77.0%) and worst-case latency (117.31 ms to 101.52 ms). Second, we train ACT and Diffusion Policy on identical demonstrations, each at its own reference budget (100k gradient steps for ACT, 200k for Diffusion Policy). ACT converges to a task-competent policy (19/20 trials) while Diffusion Policy does not converge to a usable one (0/10) even at twice the step count, which we attribute to differing convergence costs rather than an accuracy ceiling. Third, we convert ACT to TensorRT. FP16 reduces mean inference latency from 114.02 ms to 17.93 ms (6.4x) and INT8 to 12.65 ms (9.0x), with task success preserved at all three precisions (19/20, 18/20, 19/20). We report two findings not previously documented for ACT: TensorRT's general-purpose INT8 calibration quantizes the ResNet18 backbone but accepts zero of 145 transformer layers, explaining INT8's negligible size reduction over FP16 (0.9%) despite a further 28% latency gain; and the need for quantization is conditional on ACT's action-chunking configuration, feasible in full precision at n_action_steps = 100 but not at the per-step re-prediction temporal ensembling requires.",
@@ -273,7 +273,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.03854v1",
-        "recovery_checked_at": "2026-08-05T06:35:42.454949Z",
+        "recovery_checked_at": "2026-08-05T23:56:34.045487Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1799,6 +1799,95 @@
       "version": 1
     },
     {
+      "abstract": "Vision-and-Language Navigation (VLN) requires an agent to follow a route-level instruction by executing its constituent steps from egocentric visual observations. Existing VLM-based navigators typically supervise both capabilities through next-action prediction alone, making progress-tracking errors difficult to distinguish from execution errors. When an agent deviates from the route, a corrective action label may recover the next movement but does not indicate whether the agent selected the wrong sub-instruction or failed to execute the correct one. Consequently, the agent may continue making decisions from an erroneous progress state. To resolve this ambiguity, we propose \\textbf{Route2Step}, a framework that decouples semantic progress tracking from action generation through an explicit step-level interface. The Instruction Analysis Module ($\\mathcal{M}_{\\mathrm{IA}}$) predicts this state from the global instruction and visual history. Conditioned on the predicted state and recent observations, the Action Generation Module ($\\mathcal{M}_{\\mathrm{AG}}$) generates local action chunks. To supervise the progress state without manual temporal labels, E-SPA, a step-alignment procedure, associates sub-instructions with their corresponding portions of route-level demonstrations. These alignments enable state supervision for incorrect progress estimates, while direct action supervision is reserved for rollout groups that repeatedly fail under the correct active sub-instruction. On R2R-CE, Route2Step improves SR from 48.1\\% to 55.3\\% and SPL from 43.3\\% to 48.2\\%, using 190K state-level corrective samples while requiring only 11.5K directly action-supervised states. Experiments in real-world indoor and outdoor environments further demonstrate the practical applicability of Route2Step. The project page is: https://sisyphus-hxy.github.io/Route2Step/.",
+      "analysis": {
+        "key_results": "在 R2R-CE 基准上，SR 从 48.1% 提升至 55.3%，SPL 从 43.3% 提升至 48.2%；使用 190K 状态级校正样本，仅需 11.5K 直接动作监督状态。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出 Route2Step 框架，将视觉语言导航中的语义进度跟踪与动作生成解耦，并通过 E-SPA 步骤对齐程序实现无需人工时间标签的状态监督。",
+        "method": "Instruction Analysis Module (M_IA) 从全局指令和视觉历史预测当前子指令；Action Generation Module (M_AG) 根据预测状态和近期观察生成局部动作块；E-SPA 自动将子指令与演示轨迹对齐以提供状态监督。",
+        "one_sentence_summary": "提出 Route2Step 框架，将VLN中的语义进度跟踪与动作生成解耦，通过显式步骤级接口和自动对齐程序改善导航性能。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "本文聚焦于视觉语言导航（VLN），属于 VLA（视觉-语言-动作）在机器人导航中的直接应用，提出了解耦进度跟踪与动作生成的架构，对基于 VLM 的机器人导航策略具有方法学参考价值。",
+        "relevance_score": 8,
+        "tags": [
+          "Vision-Language",
+          "Robot Learning",
+          "Robot Manipulation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.RO"
+      ],
+      "arxiv_id": "2608.03143",
+      "authors": [
+        "Xiangyun Huang",
+        "Xiangchen Wang",
+        "Runfeng Lin",
+        "Yihao Xu",
+        "Kangyu Huang",
+        "Jiang Hengchen",
+        "Xiwang Dong",
+        "Lin Jiarong"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-05T23:56:02.035203Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2608.03143/v1/fig1-panel1.png"
+            ],
+            "caption": "Route2Step separates route-level understanding from step-level execution. ℳ IA \\mathcal{M}_{\\mathrm{IA}} identifies the active sub-instruction from the full route instruction and visual history, while ℳ AG \\mathcal{M}_{\\mathrm{AG}} executes it using recent observations.",
+            "image_urls": [
+              "https://arxiv.org/html/2608.03143v1/x1.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2608.03143v1#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2608.03143/v1/fig2-panel1.png"
+            ],
+            "caption": "Overview of Route2Step. Given the global instruction and visual history, ℳ IA \\mathcal{M}_{\\mathrm{IA}} predicts the active sub-instruction and execution state, identifying which route step remains active and whether execution is Normal or Recovering . Conditioned on the global instruction, this explicit interface, and recent observations, ℳ AG \\mathcal{M}_{\\mathrm{AG}} predicts action chunks for executing the active step.",
+            "image_urls": [
+              "https://arxiv.org/html/2608.03143v1/x2.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2608.03143v1#S1.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2608.03143v1",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-05T23:56:02.035203Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-08-04T05:14:45Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2608.03143",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2608.03143",
+        "project_url": "https://sisyphus-hxy.github.io/Route2Step/"
+      },
+      "title": "From Routes to Steps: Separating Semantic Progress from Local Execution in Vision-and-Language Navigation",
+      "title_zh": "从路线到步骤：在视觉语言导航中分离语义进度与局部执行",
+      "updated_at": "2026-08-04T05:14:45Z",
+      "version": 1
+    },
+    {
       "abstract": "Static quantization assigns one weight precision to every denoising step. To preserve quality, that precision must accommodate the most quantization-sensitive step, even though many other steps can tolerate fewer bits. The resulting model may satisfy its memory budget, but it repeatedly pays worst-case arithmetic throughout the denoising trajectory. We introduce Temporal-Adaptive Bit Sparsification Quantization (TASQ) to separate these two costs. TASQ stores one shared maximum-precision weight buffer and learns a Temporal-Spatial LSB Mask that selects a lower effective precision for each layer and denoising stage by truncating least-significant bits. Storage therefore remains fixed by the worst case, while BitOPs decrease at less sensitive stages without per-stage weight copies or runtime search. A Temporal-Precision Engine maps the learned schedule to bit-serial execution, where cycles scale with effective precision and switching precision has no measured cycle overhead. On PixArt-Sigma, SANA-1.6B, and SDXL-Turbo, TASQ achieves quality comparable to static quantization with less computation. Together with the Temporal-Precision Engine, it reduces execution cycles by 25 to 50 percent over static quantization and by 6.1 to 7.5x over a naive static 8-bit bit-serial execution. Code is available at https://github.com/seokho-han/tasq.",
       "analysis": {
         "key_results": "在PixArt-Sigma、SANA-1.6B和SDXL-Turbo上，TASQ在质量可比静态量化的情况下，与静态量化相比执行周期减少25%-50%，与朴素静态8位位串行执行相比减少6.1-7.5倍。",
@@ -1933,7 +2022,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.03052v1",
-        "recovery_checked_at": "2026-08-05T06:35:42.454949Z",
+        "recovery_checked_at": "2026-08-05T23:56:34.045487Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -5728,7 +5817,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.01013v1",
-        "recovery_checked_at": "2026-08-05T06:35:42.454949Z",
+        "recovery_checked_at": "2026-08-05T23:56:34.045487Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -5864,7 +5953,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.00859v1",
-        "recovery_checked_at": "2026-08-05T06:35:42.454949Z",
+        "recovery_checked_at": "2026-08-05T23:56:34.045487Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -6629,22 +6718,20 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 55,
-    "completion_tokens": 19423,
-    "error_categories": {
-      "ValidationError": 4
-    },
-    "failed": 4,
-    "fetched": 1816,
-    "figure_available": 83,
-    "figure_cache_hits": 42,
+    "cache_hits": 98,
+    "completion_tokens": 1328,
+    "error_categories": {},
+    "failed": 0,
+    "fetched": 1507,
+    "figure_available": 75,
+    "figure_cache_hits": 75,
     "figure_failed": 0,
-    "figure_requests": 47,
-    "figure_unavailable": 6,
-    "model_calls": 63,
-    "prefiltered": 118,
-    "prompt_tokens": 52752,
-    "published": 89,
-    "total_tokens": 72175
+    "figure_requests": 2,
+    "figure_unavailable": 2,
+    "model_calls": 4,
+    "prefiltered": 102,
+    "prompt_tokens": 3726,
+    "published": 77,
+    "total_tokens": 5054
   }
 }
