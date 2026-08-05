@@ -4225,6 +4225,56 @@
       "version": 1
     }
   },
+  "analysis:v1:4432bf575cccd0aa234f03a05ea4172357198ca8ee4604dcb84eace5725bf537": {
+    "key": "analysis:v1:4432bf575cccd0aa234f03a05ea4172357198ca8ee4604dcb84eace5725bf537",
+    "record": {
+      "abstract": "Visual AutoRegressive Modeling (VAR) has excelled in natural image generation via next-scale prediction, but its use on topology-structured data like human skeletons is still unexplored. VARPose is proposed to adaptively densify 2D sparse poses, thereby enriching the anatomical information available for 3D lifting models. Our core contributions are twofold. First, we introduce a Granularity-agnostic Pose Tokenizer (GPT), which employs a single hybrid codebook and a residual quantization strategy to encode poses of varying densities into a unified, multi-scale discrete representation. Our results demonstrate the strong generalizability of this representation. By decoupling the representation from the projection, we can successfully decode novel pose granularities using a frozen codebook with a retrained decoder. Second, we propose UniSkelar, a unified autoregressive model that treats \"joint density\" as \"scale\". UniSkelar learns to predict the token sequence for the next density level in a coarse-to-fine manner, conditioned on the sparsest pose. VARPose not only outperforms state-of-the-art methods and generalizes to unseen granularities, but also confers tangible performance gains on downstream tasks, such as 3D Pose Estimation and Human Mesh Recovery, through 2D pose densification. Our code and model are available at https://github.com/BRL-SYSU/VARPose.git.",
+      "analysis": {
+        "key_results": "VARPose在2D姿态稠密化任务上超越现有方法，能泛化到未见过的粒度，并在3D姿态估计和人体网格恢复任务上带来性能提升。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出粒度无关的姿态分词器（GPT）和统一自回归模型UniSkelar，实现将不同密度的2D姿态编码为统一的多尺度离散表示，并自回归预测更稠密的姿态序列，增强3D提升任务。",
+        "method": "使用混合码本和残差量化的GPT将姿态编码为多尺度离散表示，并用UniSkelar以从粗到精的方式自回归预测姿态标记序列。",
+        "one_sentence_summary": "提出VARPose，通过粒度无关的姿态分词器和统一自回归模型将稀疏2D姿态自适应稠密化，从而提升下游3D姿态估计和人体网格恢复的性能。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "该工作聚焦于人体姿态的量化表示和自回归生成，其方法（残差量化、多尺度离散表示）可迁移至机器人动作或世界模型的压缩与高效推理，但未直接涉及VLA/WAM主题。",
+        "relevance_score": 8,
+        "tags": [
+          "Model Quantization",
+          "Vision-Language",
+          "Robot Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV"
+      ],
+      "arxiv_id": "2608.02214",
+      "authors": [
+        "Kaiyuan Pu",
+        "Tiantian Yang",
+        "Dan Zeng"
+      ],
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-04T23:58:57.244011Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-08-03T13:36:24Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2608.02214",
+        "code_url": "https://github.com/BRL-SYSU/VARPose.git",
+        "pdf_url": "https://arxiv.org/pdf/2608.02214",
+        "project_url": null
+      },
+      "title": "VARPose: Flexible 2D Pose Densification via Visual Autoregressive Modeling for Enhanced 3D Lifting",
+      "title_zh": "VARPose：通过视觉自回归建模实现灵活的2D姿态稠密化以增强3D提升",
+      "updated_at": "2026-08-03T13:36:24Z",
+      "version": 1
+    }
+  },
   "analysis:v1:4721800ba4a8be7c32c003f46c9e39e9712294d5c78371eb364fae4cf900795d": {
     "key": "analysis:v1:4721800ba4a8be7c32c003f46c9e39e9712294d5c78371eb364fae4cf900795d",
     "record": {
@@ -4637,6 +4687,67 @@
       "title": "StatePlay: State-Aware Game World Models for Mechanics-Consistent Generation",
       "title_zh": "StatePlay: 面向机制一致性生成的状态感知游戏世界模型",
       "updated_at": "2026-07-29T10:49:30Z",
+      "version": 1
+    }
+  },
+  "analysis:v1:4eb95215d318ff9c5fce2ffe08b6395488363cf70857033e5ef1dfe01f4f4b44": {
+    "key": "analysis:v1:4eb95215d318ff9c5fce2ffe08b6395488363cf70857033e5ef1dfe01f4f4b44",
+    "record": {
+      "abstract": "Vision-Language-Action (VLA) models have emerged as a prominent paradigm for end-to-end autonomous driving; however, their efficient deployment is severely constrained by high computational latency and exposure bias arising from sequential autoregressive decoding. Conversely, while specialized diffusion policies enable low-latency, parallel execution, training them from scratch typically yields narrow, single-task architectures that lack holistic visual-linguistic reasoning. Successfully transforming pre-trained autoregressive generalists into parallel diffusion models could combine multi-task cognitive intelligence with execution efficiency, yet this transition presents a formidable architectural challenge due to mismatched attention patterns (causal versus bidirectional) and divergent optimization objectives. To bridge this divide, we introduce WAM-Diff2, a multi-task discrete diffusion VLA framework powered by a three-stage hierarchical distillation strategy. By structuring the architectural shift through progressive block-wise adaptation, block-wise distillation, and model-wise cross-scale distillation, WAM-Diff2 preserves the underlying semantic foundations of the base model while accelerating inference. Extensive evaluations across driving understanding, perception, and planning benchmarks demonstrate that WAM-Diff2 effectively mitigates exposure bias and achieves performance parity with autoregressive baselines. Crucially, the autoregressive-to-diffusion transition yields a 2.8x decoding speedup, which scales to an ultimate 15.1x acceleration when combined with system-level optimizations including FlashInfer and CUDA Graphs.",
+      "analysis": {
+        "key_results": "自动驾驶理解、感知和规划基准测试表明，WAM-Diff2有效缓解暴露偏差，性能与自回归基线相当，解码加速2.8倍，结合FlashInfer和CUDA Graphs等系统优化后总加速达15.1倍。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出一种将预训练自回归VLA模型转换为并行扩散模型的多任务离散扩散框架，通过分层蒸馏保留语义基础并加速推理。",
+        "method": "三阶段分层蒸馏：逐块适配、逐块蒸馏、模型级跨尺度蒸馏，实现自回归到扩散的架构转换。",
+        "one_sentence_summary": "提出WAM-Diff2框架，通过三阶段分层蒸馏将自回归VLA模型转化为多任务离散扩散模型，在保持性能的同时实现显著推理加速。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该工作直接针对VLA模型的推理效率问题，通过自回归到扩散的蒸馏实现加速，与本站VLA和高效推理主题高度相关；文中提及的WAM代表World-Action-Model概念，但未深入世界建模细节。",
+        "relevance_score": 10,
+        "tags": [
+          "Efficient Inference",
+          "Policy Learning",
+          "Vision-Language",
+          "Robot Learning",
+          "Speculative Decoding"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.AI",
+        "cs.CV"
+      ],
+      "arxiv_id": "2608.01035",
+      "authors": [
+        "Zhihao Zhu",
+        "Hanlin Shang",
+        "Mingwang Xu",
+        "Feipeng Cai",
+        "Zhuolin He",
+        "Yaoyi Li",
+        "Jianhua Han",
+        "Hang Xu",
+        "Siyu Zhu"
+      ],
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-04T23:58:57.244011Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-08-02T06:45:16Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2608.01035",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2608.01035",
+        "project_url": null
+      },
+      "title": "WAM-Diff2: Hierarchical AR-to-Diffusion Distillation for Highly Efficient Autonomous Driving VLA",
+      "title_zh": "WAM-Diff2：面向高效自动驾驶VLA的分层自回归到扩散蒸馏",
+      "updated_at": "2026-08-02T06:45:16Z",
       "version": 1
     }
   },
