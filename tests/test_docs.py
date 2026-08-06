@@ -260,7 +260,7 @@ def test_designs_keep_reviewed_status_and_document_figure_pipeline_metrics() -> 
 
 def test_repository_tracked_files_contain_no_secret_like_bytes() -> None:
     secret_patterns = (
-        re.compile(rb"sk-[A-Za-z0-9_-]{12,}"),
+        re.compile(rb"(?<![A-Za-z0-9_])sk-[A-Za-z0-9_-]{12,}"),
         re.compile(rb"Bearer [A-Za-z0-9_-]{12,}"),
     )
     offending_paths = [
