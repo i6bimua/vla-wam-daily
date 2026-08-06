@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-05T23:56:02.035203Z",
+  "generated_at": "2026-08-06T07:02:24.946198Z",
   "papers": [
     {
       "abstract": "Deploying large language models in realistic server environments poses challenges, as the system needs to provide high-quality responses with low latency. Quantization is a common approach to reduce the memory footprint and improve inference efficiency, yet its impact on latency and throughput is rarely evaluated under controlled, orchestration-level workloads. In this work we study the quantization trade-offs of two translation model families, EuroLLM \\citep{martins2025eurollm} and Hy-MT2 \\citep{zheng2026hy} across five models ranging from 1.7B to 22B for efficient deployment on a single A100 or H100 GPU. We demonstrate that combining a document-chunking strategy with W4A8 or W8A8 quantization improves the latency-throughput Pareto-curve under a wide range of workloads. Furthermore, since standard machine translation (MT) benchmarks rely on isolated sentences and fail to capture long-context dynamics, we introduce a document-level evaluation from WMT24++ to assess how text chunking strategies affect translation quality under quantization. Our results reveal that standard segment-level evaluation can fail to predict the interaction between quantization and long-context document translation. While Hy-MT2 remains robust under quantization, EuroLLM shows strong sensitivity and translation quality collapses rapidly for all considered quantization formats. Overall, our experiments show that the trade-off between inference efficiency and translation quality depends not only on the quantization format, but also on the choice of text chunking strategy.",
@@ -325,7 +325,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.28624v1",
-        "recovery_checked_at": "2026-08-05T23:56:34.045487Z",
+        "recovery_checked_at": "2026-08-06T07:07:04.239529Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -487,7 +487,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.28589v1",
-        "recovery_checked_at": "2026-08-05T23:56:34.045487Z",
+        "recovery_checked_at": "2026-08-06T07:07:04.239529Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -635,7 +635,7 @@
         "checked_at": "2026-08-01T23:53:18.181573Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2607.28415v1",
-        "recovery_checked_at": "2026-08-05T06:35:42.454949Z",
+        "recovery_checked_at": "2026-08-06T07:07:04.239529Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "html_unavailable"
@@ -1225,7 +1225,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.28226v1",
-        "recovery_checked_at": "2026-08-05T23:56:34.045487Z",
+        "recovery_checked_at": "2026-08-06T07:07:04.239529Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -3519,7 +3519,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.26769v1",
-        "recovery_checked_at": "2026-08-05T23:56:34.045487Z",
+        "recovery_checked_at": "2026-08-06T07:07:04.239529Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -3588,7 +3588,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.27269v1",
-        "recovery_checked_at": "2026-08-05T23:56:34.045487Z",
+        "recovery_checked_at": "2026-08-06T07:07:04.239529Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -4040,7 +4040,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.26579v1",
-        "recovery_checked_at": "2026-08-05T23:56:34.045487Z",
+        "recovery_checked_at": "2026-08-06T07:07:04.239529Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -4561,7 +4561,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.26055v1",
-        "recovery_checked_at": "2026-08-05T23:56:34.045487Z",
+        "recovery_checked_at": "2026-08-06T07:07:04.239529Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -6353,6 +6353,102 @@
       "version": 2
     },
     {
+      "abstract": "As LLM agents increasingly rely on the Model Context Protocol (MCP) to invoke isolated external sandboxes, disaggregated sandbox deployment introduces a fundamental tension between resource utilization and interactive tail latency. Persistent long-lived sandbox reservations incur excessive memory overhead at scale, while lazy on-demand instantiation generates severe cold-start penalties that degrade response performance under multi-tenant, multi-turn agent workloads. To resolve this dilemma, we present SpecBox, a runtime built around speculative sandbox preallocation tailored for dynamic LLM agent execution pipelines. At its core, SpecBox implements keyword matching and streaming semantic embedding to enable intent-driven sandbox prewarming, which identifies pending tool execution demands mid-LLM token generation and fully overlaps sandbox bootstrapping with model inference. To extend prewarming windows across sequential agent steps, the framework leverages context-aware stochastic prefetching atop a sandbox dependency graph to probabilistically forecast future sandbox switches ahead of execution. We complement these speculative mechanisms with two orthogonal optimizations: a semantic result cache that prunes redundant repeated sandbox invocations, and a dedicated out-of-band shared-memory transport plane that bypasses conventional network serialization to deliver zero-copy artifact transfers. Evaluated on high-concurrency multi-turn agent traces, our prototype demonstrates that SpecBox cuts P99 end-to-end latency by up to $2.9\\times$ relative to the on-demand sandbox baseline, while slashing peak memory consumption by $45.9\\%$ compared to permanently reserved sandbox deployments.",
+      "analysis": {
+        "key_results": "在多轮智能体高并发测试中，P99 端到端延迟比按需沙箱基线降低最高 2.9 倍，峰值内存占用比持久预留沙箱减少 45.9%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出 SpecBox 运行时，结合意图驱动的沙箱预热、上下文感知的随机预取、语义结果缓存以及共享内存传输，以解决 LLM 智能体在隔离沙箱中执行外部工具时的延迟与资源矛盾。",
+        "method": "将关键词匹配与流式语义嵌入用于意图推测并预先启动沙箱，利用沙箱依赖图进行随机预取，通过语义缓存消除冗余调用，并采用带外共享内存实现零拷贝传输。",
+        "one_sentence_summary": "SpecBox 通过推测性沙箱预分配和语义缓存等技术，在 LLM 智能体服务中同时降低尾部延迟和内存开销。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "论文专注于 LLM 智能体服务中的推测性预调度和延迟优化，未直接涉及 VLA、WAM 或机器人领域，但推测机制和缓存方法可为机器人智能体效率优化提供启发。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.DC",
+        "cs.AI",
+        "cs.LG",
+        "cs.PF"
+      ],
+      "arxiv_id": "2607.23933",
+      "authors": [
+        "Yihui Zhang (1)",
+        "Tianyu Wo (1)",
+        "Jinghao Wang (1)",
+        "Xiaoyang Sun (2)",
+        "Menghao Zhang (1)",
+        "Cangzhou Yuan (1)",
+        "Li Li (1)",
+        "Chunming Hu (1)",
+        "Albert Y. Zomaya (3)",
+        "Renyu Yang (1) ((1) Beihang University",
+        "(2) University of Leeds",
+        "(3) The University of Sydney)"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-06T07:02:24.946198Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2607.23933/v2/fig1-panel1.png"
+            ],
+            "caption": "Proactive and overlapped execution v.s. the native vanilla approaches",
+            "image_urls": [
+              "https://arxiv.org/html/2607.23933v2/x1.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2607.23933v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2607.23933/v2/fig2-panel1.png",
+              "/figures/2607.23933/v2/fig2-panel2.png"
+            ],
+            "caption": "Execution bottlenecks in agent runtimes. (a) Execution-step latency breakdown. (b) Mean cold-start latency across 32 sandboxed environments, including all MCPBench (Wang et al. , 2025 ) sandboxes and additional commonly used environments. Most sandboxes initialize in 2–4 seconds, while resource-intensive environments can require up to approximately 20 seconds.",
+            "image_urls": [
+              "https://arxiv.org/html/2607.23933v2/x2.png",
+              "https://arxiv.org/html/2607.23933v2/x3.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2607.23933v2#S2.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2607.23933v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:speculative_generation"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-06T07:02:24.946198Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-07-27T02:10:35Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2607.23933",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2607.23933",
+        "project_url": null
+      },
+      "title": "SpecBox: Speculative Sandbox Scheduling for Efficient LLM Agent Serving",
+      "title_zh": "SpecBox：面向高效LLM智能体服务的推测性沙箱调度",
+      "updated_at": "2026-08-05T01:08:13Z",
+      "version": 2
+    },
+    {
       "abstract": "Language agents can now interact fluently with users in software, but robots still struggle to bring comparable interaction to physical tasks. Current robot-control paradigms, including vision-language-action policies and world-model-based planners, are mainly optimized for instruction execution, leaving users with little visibility into why an action is chosen and few mechanisms to redirect, correct, or teach the robot through interaction. To solve this problem, we present the World-Cognition Model (WCM), a human-centered embodied agent built on the SLAK architecture (Sensing, Logic, Action, and Knowledge) and an asynchronous runtime. SLAK separates perception, reasoning, control, and memory, while the runtime allows reasoning, dialogue, and execution to proceed concurrently. WCM further introduces a human-in-the-loop teaching mode that enables users to interactively teach the robot difficult or long-horizon tasks. Teaching episodes and autonomous task rollouts are refined into chain-of-thought supervision to continually improve the model. WCM achieves a 73.8% average success rate across nine real-world human-robot interaction tasks, including tasks held out from CoT fine-tuning and a long-horizon task learned through teaching.",
       "analysis": {
         "key_results": "在九项真实世界人机交互任务中平均成功率达73.8%，包括思维链微调未见的任务和通过教学学习的长时域任务。",
@@ -6788,6 +6884,91 @@
       "version": 2
     },
     {
+      "abstract": "Perceiving multimodal cues and forecasting fine-grained actions from an egocentric (Ego) perspective is vital for applications like robot manipulation. However, previous studies either rely mainly on under-informed visual inputs to predict coarse human motions or follow the VRM/VLA paradigm, which suffers from insufficient robot data and the gap between human and robot embodiments. We observe that 3D hand pose naturally serves as a unified representation to bridge human-robot actions. Hence, we investigate an under-explored Vision-Language guided Egocentric 3D Hand Pose Forecasting (VL-EHPF) task, which aims to predict future Ego 3D hand poses from visual observations, a language instruction, and pose states. To overcome the limited field-of-view and highly dynamic motions in the Ego view, we propose a framework dubbed Exo2EgoPose, which innovatively leverages holistic and stable exocentric (Exo) demonstrations as guidance to compensate for partial and dynamic Ego-view cues. Specifically, we introduce a Dual-level Exocentric Reconstruction Module (DERM), which incorporates the paired Exo videos as supervision to reconstruct their video-level and chunked frame-level representations, thereby modeling spatial contexts and temporal dynamics. Then, the Global-to-Local Modulation Module (GLMM) utilizes the reconstructed hierarchical Exo representations for progressive feature refinement via attention mechanisms and adaptive modulation, enabling comprehensive Exo guidance for accurate Ego hand pose forecasting. Extensive experiments on \\textit{AssemblyHands}, \\textit{Ego-Exo4D}, and our newly constructed \\textit{EgoMe-pose} benchmarks show the superiority of our method, which outperforms state-of-the-art methods by a large margin. Moreover, it demonstrates an effective human-to-robot transfer capability and yields improvements on the \\textit{CALVIN} dataset.",
+      "analysis": {
+        "key_results": "在AssemblyHands、Ego-Exo4D和自建EgoMe-pose基准上显著优于现有最先进方法，在CALVIN数据集上展示了有效的机器人迁移能力并带来性能提升。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出Exo2EgoPose框架，利用外中心演示补偿以自我为中心视角的局限，实现视觉-语言引导的以自我为中心的3D手姿态预测，并证明其在人-机器人迁移中的有效性。",
+        "method": "Exo2EgoPose框架，包含双层级外中心重建模块(DERM)和全局到局部调制模块(GLMM)，利用外中心视频重建空间上下文和时序动态，并通过注意力机制和自适应调制实现精细特征优化。",
+        "one_sentence_summary": "该论文提出利用外中心演示引导的以自我为中心的3D手姿态预测方法，以弥合人-机器人动作差距，并在机器人操作任务中展现迁移能力。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "论文直接聚焦于VLA范式中的动作预测问题，通过统一的手姿态表示桥接人类和机器人动作，提升了机器人操作任务的视觉-语言引导动作预测性能，显著相关于VLA主题。",
+        "relevance_score": 9,
+        "tags": [
+          "Action Prediction",
+          "Robot Learning",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV"
+      ],
+      "arxiv_id": "2607.15890",
+      "authors": [
+        "Zhaofeng Shi",
+        "Heqian Qiu",
+        "Lanxiao Wang",
+        "Xiang Li",
+        "and Hongliang Li"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-06T07:02:24.946198Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2607.15890/v2/fig1-panel1.png"
+            ],
+            "caption": "Schematic of the VL-EHPF task and ideology of the proposed Exo2EgoPose Framework.",
+            "image_urls": [
+              "https://arxiv.org/html/2607.15890v2/x1.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2607.15890v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2607.15890/v2/fig2-panel1.png"
+            ],
+            "caption": "Overview of our Exo2EgoPose framework. First, we adopt multiple modality-specific encoders to extract features, which are then tokenized and fed into a multimodal Transformer with initialized queries. Then, the DERM reconstructs the representations of the whole video clip and future chunked frames from the Exo perspective during training to construct Ego-Exo cross-view correspondence. Next, the GLMM utilizes the reconstructed Exo knowledge as guidance and performs comprehensive global-to-local feature refinement, which facilitates accurate prediction for the future Ego 3D hand poses.",
+            "image_urls": [
+              "https://arxiv.org/html/2607.15890v2/x2.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2607.15890v2#S2.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2607.15890v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-06T07:02:24.946198Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-07-17T12:05:07Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2607.15890",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2607.15890",
+        "project_url": null
+      },
+      "title": "Exo2EgoPose: Leveraging Exocentric Demonstrations for Vision-Language guided Egocentric 3D Hand Pose Forecasting",
+      "title_zh": "利用外中心演示进行视觉-语言引导的以自我为中心的3D手姿态预测",
+      "updated_at": "2026-08-05T10:06:27Z",
+      "version": 2
+    },
+    {
       "abstract": "Predictive world models enable robots to plan by imagining the outcomes of their actions, but their value for control hinges on generating many rollouts quickly. This creates a bottleneck for diffusion-based world models: multistep sampling makes each rollout expensive, limiting large-scale action search at inference time. We introduce DriftWorld, an action-conditioned world model based on drifting generative models. Rather than denoising iteratively at inference, DriftWorld learns an action-conditioned drift during training, allowing it to generate future frames from the current observation and a candidate action sequence in a single forward pass at 30+ fps, which is 17x faster on average than diffusion based baselines. We evaluate DriftWorld on standard vision-based robotic manipulation benchmarks, including Bridge-V2, RT-1, Language Table, Push-T, and Robomimic. By producing rollouts that are both accurate and fast, DriftWorld achieves state-of-the-art decision-making performance with far less inference time than diffusion-based world model baselines. Beyond online control, DriftWorld can also serve as an offline simulator for ranking real-world robot policies, with rollout-based scores correlating with ground truth at up to 0.99. These results show that drifting models are a strong fit for robot world modeling, where fast, high-quality imagination directly supports planning and policy evaluation.",
       "analysis": {
         "key_results": "推理速度30+ fps，平均比扩散基线快17倍；在Bridge-V2、RT-1、Language Table、Push-T和Robomimic等机器人操作基准上取得了最优决策性能；离线评估中，基于rollout的分数与真实策略性能的相关性可达0.99。",
@@ -6995,7 +7176,7 @@
         "checked_at": "2026-07-31T03:15:22.466924Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2607.10137v2",
-        "recovery_checked_at": "2026-08-05T06:35:42.454949Z",
+        "recovery_checked_at": "2026-08-06T07:07:04.239529Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "html_unavailable"
@@ -7510,20 +7691,20 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 98,
-    "completion_tokens": 1328,
+    "cache_hits": 89,
+    "completion_tokens": 15911,
     "error_categories": {},
     "failed": 0,
-    "fetched": 1507,
-    "figure_available": 75,
-    "figure_cache_hits": 75,
+    "fetched": 1972,
+    "figure_available": 91,
+    "figure_cache_hits": 64,
     "figure_failed": 0,
-    "figure_requests": 2,
-    "figure_unavailable": 2,
-    "model_calls": 4,
-    "prefiltered": 102,
-    "prompt_tokens": 3726,
-    "published": 77,
-    "total_tokens": 5054
+    "figure_requests": 35,
+    "figure_unavailable": 8,
+    "model_calls": 50,
+    "prefiltered": 139,
+    "prompt_tokens": 45151,
+    "published": 99,
+    "total_tokens": 61062
   }
 }

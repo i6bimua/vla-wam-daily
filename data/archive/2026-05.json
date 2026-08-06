@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-05T23:56:02.035203Z",
+  "generated_at": "2026-08-06T07:02:24.946198Z",
   "papers": [
     {
       "abstract": "Recent vision-language-action and diffusion-based robot policies often use action chunking, where each policy query predicts a sequence of future actions and the robot executes an open-loop prefix before re-querying. While this interface improves local motion continuity, deployment still requires choosing the execution horizon: how much of each predicted chunk should be executed before acquiring a new observation. However, our experiments show that success is strongly task-dependent and non-monotonic with respect to the execution horizon, making a single constant horizon an unreliable deployment rule. We propose PACE (Phase-Aware Chunk Execution), a training-free test-time execution method that selects the execution horizon online from the predicted chunk itself. PACE exploits the phase-dependent kinematic structure of manipulation trajectories by identifying low-speed transition points in the predicted speed profile and using them as candidate replanning boundaries. Because PACE uses only the predicted action chunk, it is plug-and-play and requires no retraining or access to policy internals. We validate PACE through large-scale evaluations in both simulation and real-robot settings. On 50 RoboTwin2.0 tasks, PACE raises the average success rate from 57.8% to 64.2%. In real-robot experiments on bimanual ALOHA and single-arm Franka platforms, PACE improves the average task score from 60.7 to 77.7 and the average success rate from 50.7% to 70.4%. Ablations and rollout-level analyses show that PACE adapts execution horizons across manipulation phases, shortening near transitions while preserving longer execution during coherent motion.",
@@ -560,6 +560,66 @@
     {
       "abstract": "Model quantization is widely used to reduce memory, latency, and deployment cost, and is typically judged by whether predictive accuracy is preserved. In decision systems that provide algorithmic recourse, however, accuracy preservation is not sufficient: a small actionable change that flips the decision of a full-precision model may fail after quantization, or require a substantially larger intervention. This paper studies this deployment mismatch and introduces counterfactual sensitivity under quantization, a framework for measuring how compression changes recourse behavior. We propose two metrics: Validity Drop (VD), which measures the fraction of full-precision recourse actions that no longer achieve the target outcome after quantization, and Counterfactual Recourse Gap (CRG), which measures the increase in minimal recourse cost under the quantized model. To mitigate this failure mode, we introduce Counterfactual-Faithful Quantization (CFQ), a quantization-aware training method that jointly learns quantizer parameters and mixed-precision bit allocation while preserving the target prediction at teacher-generated recourse points. CFQ is compatible with standard LSQ/PACT-style quantizers and mixed-precision policies, and can also be instantiated as a training-free calibration procedure for post-training quantization. Experiments on Adult, German Credit, and COMPAS show that standard QAT and mixed-precision baselines can preserve accuracy while substantially degrading recourse stability. At matched accuracy and bit budget, CFQ consistently reduces VD and CRG; for example, on Adult, CFQ reduces VD/CRG from $0.121/0.162$ for an accuracy-centric mixed-precision baseline to $0.061/0.071$.",
       "analysis": {
+        "key_results": "在Adult、German Credit、COMPAS数据集上，CFQ在同等精度和位预算下稳定降低VD和CRG，例如在Adult上将VD/CRG从0.121/0.162降至0.061/0.071。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出反事实敏感性量化框架及度量指标VD和CRG，并设计CFQ训练方法以在量化时保持追索有效性。",
+        "method": "反事实忠信量化(CFQ)，一种在量化感知训练中联合学习量化器参数和混合精度分配，同时保护教师模型追索点预测的方法。",
+        "one_sentence_summary": "研究模型量化对算法追索行为的影响，并提出反事实忠信量化以保持追索稳定性。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "该工作关注模型量化在决策系统追索性上的影响，不涉及视觉语言行动模型、世界模型或机器人学，无直接关系。",
+        "relevance_score": 6,
+        "tags": [
+          "Model Quantization"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.CV"
+      ],
+      "arxiv_id": "2605.17160",
+      "authors": [
+        "Chaymae Yahyati",
+        "Ismail Lamaakal",
+        "Khalid El Makkaoui",
+        "Ibrahim Ouahbi"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-06T07:02:24.946198Z",
+        "figures": [],
+        "html_url": "https://arxiv.org/html/2605.17160v4",
+        "recovery_checked_at": "2026-08-06T07:07:04.239529Z",
+        "recovery_status": "not_found",
+        "recovery_version": 3,
+        "status": "html_unavailable"
+      },
+      "matched_rules": [
+        "exact:model-quantization",
+        "exact:post-training-quantization",
+        "exact:quantization-aware-training",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-06T07:02:24.946198Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-05-16T21:19:31Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2605.17160",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2605.17160",
+        "project_url": null
+      },
+      "title": "When Bits Break Recourse: Counterfactual-Faithful Quantization",
+      "title_zh": "当比特破坏追索：反事实忠信量化",
+      "updated_at": "2026-08-04T20:55:20Z",
+      "version": 4
+    },
+    {
+      "abstract": "Model quantization is widely used to reduce memory, latency, and deployment cost, and is typically judged by whether predictive accuracy is preserved. In decision systems that provide algorithmic recourse, however, accuracy preservation is not sufficient: a small actionable change that flips the decision of a full-precision model may fail after quantization, or require a substantially larger intervention. This paper studies this deployment mismatch and introduces counterfactual sensitivity under quantization, a framework for measuring how compression changes recourse behavior. We propose two metrics: Validity Drop (VD), which measures the fraction of full-precision recourse actions that no longer achieve the target outcome after quantization, and Counterfactual Recourse Gap (CRG), which measures the increase in minimal recourse cost under the quantized model. To mitigate this failure mode, we introduce Counterfactual-Faithful Quantization (CFQ), a quantization-aware training method that jointly learns quantizer parameters and mixed-precision bit allocation while preserving the target prediction at teacher-generated recourse points. CFQ is compatible with standard LSQ/PACT-style quantizers and mixed-precision policies, and can also be instantiated as a training-free calibration procedure for post-training quantization. Experiments on Adult, German Credit, and COMPAS show that standard QAT and mixed-precision baselines can preserve accuracy while substantially degrading recourse stability. At matched accuracy and bit budget, CFQ consistently reduces VD and CRG; for example, on Adult, CFQ reduces VD/CRG from $0.121/0.162$ for an accuracy-centric mixed-precision baseline to $0.061/0.071$.",
+      "analysis": {
         "key_results": "在Adult、German Credit、COMPAS上，CFQ在匹配准确率和位宽下持续降低VD和CRG；例如Adult上，VD/CRG从准确率优先的混合精度基线的0.121/0.162降至0.061/0.071。",
         "limitations": "摘要未说明",
         "main_contribution": "提出反事实敏感性量化框架和两个度量指标（VD、CRG），以及缓解问题的CFQ方法。",
@@ -928,20 +988,20 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 98,
-    "completion_tokens": 1328,
+    "cache_hits": 89,
+    "completion_tokens": 15911,
     "error_categories": {},
     "failed": 0,
-    "fetched": 1507,
-    "figure_available": 75,
-    "figure_cache_hits": 75,
+    "fetched": 1972,
+    "figure_available": 91,
+    "figure_cache_hits": 64,
     "figure_failed": 0,
-    "figure_requests": 2,
-    "figure_unavailable": 2,
-    "model_calls": 4,
-    "prefiltered": 102,
-    "prompt_tokens": 3726,
-    "published": 77,
-    "total_tokens": 5054
+    "figure_requests": 35,
+    "figure_unavailable": 8,
+    "model_calls": 50,
+    "prefiltered": 139,
+    "prompt_tokens": 45151,
+    "published": 99,
+    "total_tokens": 61062
   }
 }

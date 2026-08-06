@@ -1,0 +1,204 @@
+{
+  "generated_at": "2026-08-06T07:02:24.946198Z",
+  "papers": [
+    {
+      "abstract": "Does Chain-of-Thought (CoT) reasoning genuinely improve Vision Language Action (VLA) models, or does it merely add overhead? Existing CoT-VLA systems report limited and inconsistent gains, yet no prior work has rigorously diagnosed when and why CoT helps robots act. Through systematic experiments, we identify two necessary conditions that must be jointly satisfied for CoT to be effective in VLA: (1) Decoding Alignment: CoT and actions must be generated with modality-appropriate mechanisms; forcing both through a single autoregressive decoder is not merely suboptimal but actively harmful, degrading performance by 4.2 percentage points; (2) Causal Alignment: CoT must be causally linked to task success via outcome-based optimization; without it, supervised CoT is indistinguishable from no reasoning at all under action-execution-sensitive dynamics shift, exhibiting a 32.0 pp performance drop nearly identical to the 31.6 pp drop of a reasoning-free baseline. Guided by these findings, we build DeepThinkVLA: a hybrid-attention decoder satisfies Condition 1 by pairing causal attention for language with bidirectional attention for parallel action decoding, while a two-stage SFT-then-RL pipeline satisfies Condition 2 by aligning the full reasoning: action chain with sparse task-success rewards. DeepThinkVLA achieves 97.0\\% success on LIBERO, 79.0\\% robustness on LIBERO-Plus (vs. 61.6\\% for $\\pi_0$-FAST), and 59.3\\% success on RoboTwin 2.0, exceeding the strongest baseline by 21.7 points. Furthermore, real-robot experiments provide preliminary evidence for the physical applicability of our CoT data construction and hybrid architecture. Our codes are available at https://github.com/OpenBMB/DeepThinkVLA.",
+      "analysis": {
+        "key_results": "在 LIBERO 上达到 97.0% 成功率，LIBERO-Plus 鲁棒性 79.0%，RoboTwin 2.0 上 59.3%，优于最强基线 21.7 个百分点。",
+        "limitations": "摘要未说明",
+        "main_contribution": "识别出 CoT 在 VLA 中有效的两个必要条件（解码对齐和因果对齐），并据此提出 DeepThinkVLA 架构和训练策略，在多个基准上大幅超越现有方法。",
+        "method": "混合注意力解码器（因果注意力用于语言，双向注意力用于并行动作解码）以及两阶段 SFT-then-RL 流水线，用于对齐完整推理与动作链。",
+        "one_sentence_summary": "通过识别并满足解码对齐和因果对齐两个必要条件，DeepThinkVLA 显著提升了 VLA 模型的推理与动作执行能力，在多个基准上取得最优性能。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "本文直接针对 VLA 模型，通过改进推理与动作解码机制提升机器人策略性能，是核心 VLA 研究。",
+        "relevance_score": 9,
+        "tags": [
+          "Policy Learning",
+          "Robot Manipulation",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.RO"
+      ],
+      "arxiv_id": "2511.15669",
+      "authors": [
+        "Cheng Yin",
+        "Yankai Lin",
+        "Wang Xu",
+        "Sikyuen Tam",
+        "Xiangrui Zeng",
+        "Zhiyuan Liu",
+        "Zhouping Yin"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-06T07:02:24.946198Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2511.15669/v3/fig1-panel1.png"
+            ],
+            "caption": "Comparison of VLA architectures. DeepThinkVLA introduces a hybrid design that pairs autoregressive CoT reasoning with parallel action decoding.",
+            "image_urls": [
+              "https://arxiv.org/html/2511.15669v3/x1.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2511.15669v3#S3.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2511.15669/v3/fig2-panel1.png"
+            ],
+            "caption": "Two-stage pipeline for embodied CoT dataset construction. Stage 1 extracts keyframes via gripper state changes and queries a cloud LVLM; Stage 2 fine-tunes a local VLM on the keyframe CoT to annotate intermediate frames.",
+            "image_urls": [
+              "https://arxiv.org/html/2511.15669v3/x2.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2511.15669v3#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2511.15669v3",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-06T07:02:24.946198Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2025-10-31T05:26:16Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2511.15669",
+        "code_url": "https://github.com/OpenBMB/DeepThinkVLA",
+        "pdf_url": "https://arxiv.org/pdf/2511.15669",
+        "project_url": null
+      },
+      "title": "DeepThinkVLA: Enhancing Reasoning Capability of Vision-Language-Action Models",
+      "title_zh": "DeepThinkVLA：增强视觉语言动作模型的推理能力",
+      "updated_at": "2026-08-05T03:23:59Z",
+      "version": 3
+    },
+    {
+      "abstract": "Vision-Language-Action (VLA) models have shown strong manipulation capability when trained with large-scale imitation learning datasets. However, these datasets that predominantly consist of successful trajectories rarely provide the corrective supervision required when execution deviates from standard demonstrations. During deployment, these physical deviations lead to the distributional shift that drives policy to failure scenarios, yet missing failure recovery data prevents policy from correcting these execution deviations. To address this failure recovery problem, we propose a coverage-guided data augmentation framework RESample to actively supplement demonstration datasets for failure recovery. Specifically, to guide the augmentation and generate failure modes that possibly appear in the real world, RESample trains a conservative coverage function to identify failure cases that reside within the actual data distribution but are missing in the standard successful demonstrations. Guided by the evaluated coverage discrepancy, we perform exploratory sampling to actively sample exploration behaviors followed by recovery actions, extending the coverage of training data with failure recovery trajectories. With the augmented trajectory, the refined policy, which deviated in real settings, can recover from failure. Experiments on the LIBERO benchmark and real-world manipulation tasks show that RESample consistently improves policy success rates, achieving up to 12% absolute gain with no more than 20% additional samples.",
+      "analysis": {
+        "key_results": "在LIBERO基准和真实世界操作任务中，RESample将策略成功率提升最多12%，且仅需至多20%的额外样本。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出了一种覆盖率引导的数据增强框架RESample，通过显式补充失败恢复数据来提升策略对执行偏差的鲁棒性。",
+        "method": "训练保守的覆盖率函数识别缺失的失败模式，并利用覆盖率差异引导探索性采样，生成探索行为与恢复动作以扩展训练数据。",
+        "one_sentence_summary": "RESample通过主动生成失败恢复轨迹来增强示范数据集，以解决VLA模型在实际部署中的分布偏移问题。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该研究直接聚焦于Vision-Language-Action (VLA)模型的数据增强，旨在提升机器人操作策略的鲁棒性，与本站主题高度相关。",
+        "relevance_score": 9,
+        "tags": [
+          "Robot Learning",
+          "Robot Manipulation",
+          "Data",
+          "Policy Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "arxiv_id": "2510.17640",
+      "authors": [
+        "Yuquan Xue",
+        "Guanxing Lu",
+        "Zhenyu Wu",
+        "Chuanrui Zhang",
+        "Bofang Jia",
+        "Zhengyi Gu",
+        "Ziwei Wang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-06T07:02:24.946198Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2510.17640/v4/fig1-panel1.png"
+            ],
+            "caption": "Illustration of the recovery-data gap in imitation learning. Top: Conventional policies trained on successful demonstrations may fail once small execution errors move the robot away from the demonstrated path. Bottom: RESample augments the dataset with targeted deviation-and-recovery trajectories, enabling the policy to correct common execution errors and complete the task.",
+            "image_urls": [
+              "https://arxiv.org/html/2510.17640v4/x1.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2510.17640v4#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2510.17640/v4/fig2-panel1.png"
+            ],
+            "caption": "An Overview of RESample Framework. RESample first trains an initial policy and a coverage function on successful demonstrations. During policy rollout, interaction-critical states are detected, where candidate action chunks are sampled from the current policy. The coverage function then selects weakly covered but recoverable deviation trajectories, which are added to the original demonstrations to refine the policy with targeted recovery data.",
+            "image_urls": [
+              "https://arxiv.org/html/2510.17640v4/x2.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2510.17640v4#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2510.17640v4",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-06T07:02:24.946198Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2025-10-20T15:21:12Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2510.17640",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2510.17640",
+        "project_url": null
+      },
+      "title": "RESample: A Robust Data Augmentation Framework via Exploratory Sampling for Robotic Manipulation",
+      "title_zh": "RESample：一种基于探索性采样的鲁棒数据增强框架用于机器人操作",
+      "updated_at": "2026-08-05T02:51:23Z",
+      "version": 4
+    }
+  ],
+  "schema_version": "1",
+  "stats": {
+    "cache_hits": 89,
+    "completion_tokens": 15911,
+    "error_categories": {},
+    "failed": 0,
+    "fetched": 1972,
+    "figure_available": 91,
+    "figure_cache_hits": 64,
+    "figure_failed": 0,
+    "figure_requests": 35,
+    "figure_unavailable": 8,
+    "model_calls": 50,
+    "prefiltered": 139,
+    "prompt_tokens": 45151,
+    "published": 99,
+    "total_tokens": 61062
+  }
+}
