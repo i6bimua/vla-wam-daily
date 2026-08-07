@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-06T07:02:24.946198Z",
+  "generated_at": "2026-08-07T01:40:56.397531Z",
   "papers": [
     {
       "abstract": "World models simulate environmental dynamics to enable embodied agents to plan and reason about future states. While real-world perception is inherently multimodal, existing approaches focus primarily on visual observations, leaving crucial spatial and temporal acoustic cues underexplored. In this work, we present a unified formulation of Audio-Visual World Models (AVWM), casting multimodal environment simulation under action control as a partially observable Markov decision process with synchronized audio-visual observations. As a foundational benchmark, we construct AVW-4k, comprising 30 hours of action-annotated binaural audio-visual trajectories across 76 indoor environments. To capture these physically grounded multisensory dynamics, we propose AV-CDiT (Audio-Visual Conditional Diffusion Transformer), featuring a novel modality expert architecture that balances visual and auditory learning, optimized via a three-stage training strategy. Extensive experiments demonstrate that AV-CDiT achieves high-fidelity prediction across both visual and auditory modalities. Furthermore, we validate its practical utility in embodied navigation, showing that AVWM significantly enhances a pretrained agent in continuous audio-visual navigation tasks.",
@@ -87,6 +87,95 @@
       "title_zh": "音频-视觉世界模型：学习物理基础的多感官动态",
       "updated_at": "2026-08-04T10:04:10Z",
       "version": 4
+    },
+    {
+      "abstract": "Vision-Language-Action (VLA) policies excel in aligning language, perception, and robot control. However, most VLAs are trained purely by imitation, which overfits to demonstrations, and is brittle under distribution shift. Reinforcement learning (RL) directly optimizes task reward and thus addresses this misalignment, but real-robot interaction is expensive and conventional simulators are hard to engineer and transfer. We address both data efficiency and optimization stability in VLA post-training via a learned world model and an RL procedure tailored to flow-based action heads. Specifically, we first introduce Prophet, a unified action-to-video robot world model pretrained on large-scale, heterogeneous robot data to learn reusable action-outcome dynamics and then few-shot adapted to new robots, objects, and environments, yielding a rollout-ready simulator. Upon Prophet, we reinforce action policies with our proposed FlowScale, which couples Flow-GRPO with intrinsic stepwise reweighting to stabilize gradients. Together, our solution provides a practical, data- and compute-efficient path to VLA post-training. Experiments show 5-17% success gains on public benchmarks and 24-30% on real robots across diverse VLA backbones.",
+      "analysis": {
+        "key_results": "在公共基准测试上成功提升5-17%，真实机器人上提升24-30%，涵盖多种VLA基座。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出一个统一的动作到视频的机器人世界模型Prophet和一个与流式动作头匹配的RL过程FlowScale，为VLA后训练提供数据与计算高效的路径。",
+        "method": "使用大规模异构机器人数据预训练Prophet世界模型（动作到视频），再对新机器人少样本适配作为 rollout 模拟器，在此之上用FlowScale（Flow-GRPO 结合内在步级重加权）增强动作策略。",
+        "one_sentence_summary": "提出Prophet世界模型和FlowScale强化学习方法，实现VLA策略数据与计算高效的后训练，并在基准和真实机器人上显著提升成功率。",
+        "primary_topic": "World Model",
+        "relation_to_vla_wam": "直接应用于VLA策略后训练，通过世界模型和高效RL解决了VLA的分布偏移和训练效率问题，对本站主题高度相关。",
+        "relevance_score": 10,
+        "tags": [
+          "World Modeling",
+          "Efficient Inference",
+          "Policy Learning",
+          "Robot Manipulation",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2511.20633",
+      "authors": [
+        "Jiahui Zhang",
+        "Ze Huang",
+        "Chun Gu",
+        "Zipei Ma",
+        "Li Zhang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-07T01:40:56.397531Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2511.20633/v2/fig1-panel1.png"
+            ],
+            "caption": "We propose a framework that uses a world model as a real-world simulator to post-train VLA policies. Our world model Prophet is pretrained on large-scale robot trajectories to model action-to-video dynamics. The pretrained Prophet enables `prophesying' precise, physically plausible long-horizon rollouts, and can be rapidly adapted via few-shot fine-tuning to new environments, objects, and trajectories. Upon Prophet, we introduce the FA-GRPO with FlowScale RL algorithm to more stably and efficiently improve policies. Together, our training paradigm turns diverse logged data and a single pretrained world model into a unified engine for scalable, data-efficient, and safely improvable VLA systems.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_source",
+            "source_url": "https://arxiv.org/e-print/2511.20633v2"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2511.20633/v2/fig2-panel1.png"
+            ],
+            "caption": "ProphRL Training paradigm. Given an initial frame and instruction, the policy predicts an action chunk and Prophet generates the future robot rollout, updating the policy input, current frame, and history buffer until the episode ends. An offline reward model scores each full trajectory, and the policy is reinforced with FA-GRPO and FlowScale using these `prophesied' and realistic rollouts.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_source",
+            "source_url": "https://arxiv.org/e-print/2511.20633v2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2511.20633v2",
+        "recovery_checked_at": "2026-08-07T01:46:30.827860Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics",
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-07T01:40:56.397531Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2025-11-25T18:52:56Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2511.20633",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2511.20633",
+        "project_url": "https://logosroboticsgroup.github.io/ProphRL"
+      },
+      "title": "Reinforcing Action Policies by Prophesying",
+      "title_zh": "通过预言强化动作策略",
+      "updated_at": "2026-08-06T15:13:22Z",
+      "version": 2
     },
     {
       "abstract": "Diffusion-based large language models (dLLMs) have recently gained significant attention for their exceptional performance and inherent potential for parallel decoding. Existing frameworks further enhance its inference efficiency by enabling KV caching. However, its bidirectional attention mechanism necessitates periodic cache refreshes that interleave prefill and decoding phases, both contributing substantial inference cost and constraining achievable speedup. Inspired by the heterogeneous arithmetic intensity of the prefill and decoding phases, we propose ODB-dLLM, a framework that orchestrates dual-boundaries to accelerate dLLM inference. In the prefill phase, we find that the predefined fixed response length introduces heavy yet redundant computational overhead, which affects efficiency. To alleviate this, ODB-dLLM incorporates an adaptive length prediction mechanism that progressively reduces prefill overhead and unnecessary computation. In the decoding phase, we analyze the computational characteristics of dLLMs and propose a dLLM-specific jump-share speculative decoding method to enhance efficiency by reducing the number of decoding iterations. Experimental results demonstrate that ODB-dLLM achieves 46-162x and 2.63-6.30x speedups over the baseline dLLM and Fast-dLLM, respectively, while simultaneously mitigating the accuracy degradation in existing acceleration frameworks.",
@@ -179,20 +268,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 89,
-    "completion_tokens": 15911,
-    "error_categories": {},
-    "failed": 0,
-    "fetched": 1972,
-    "figure_available": 91,
+    "cache_hits": 91,
+    "completion_tokens": 19175,
+    "error_categories": {
+      "ValidationError": 4
+    },
+    "failed": 4,
+    "fetched": 1987,
+    "figure_available": 105,
     "figure_cache_hits": 64,
     "figure_failed": 0,
-    "figure_requests": 35,
-    "figure_unavailable": 8,
-    "model_calls": 50,
-    "prefiltered": 139,
-    "prompt_tokens": 45151,
-    "published": 99,
-    "total_tokens": 61062
+    "figure_requests": 48,
+    "figure_unavailable": 7,
+    "model_calls": 64,
+    "prefiltered": 155,
+    "prompt_tokens": 53319,
+    "published": 112,
+    "total_tokens": 72494
   }
 }

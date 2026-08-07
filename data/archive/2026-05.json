@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-06T07:02:24.946198Z",
+  "generated_at": "2026-08-07T01:40:56.397531Z",
   "papers": [
     {
       "abstract": "Recent vision-language-action and diffusion-based robot policies often use action chunking, where each policy query predicts a sequence of future actions and the robot executes an open-loop prefix before re-querying. While this interface improves local motion continuity, deployment still requires choosing the execution horizon: how much of each predicted chunk should be executed before acquiring a new observation. However, our experiments show that success is strongly task-dependent and non-monotonic with respect to the execution horizon, making a single constant horizon an unreliable deployment rule. We propose PACE (Phase-Aware Chunk Execution), a training-free test-time execution method that selects the execution horizon online from the predicted chunk itself. PACE exploits the phase-dependent kinematic structure of manipulation trajectories by identifying low-speed transition points in the predicted speed profile and using them as candidate replanning boundaries. Because PACE uses only the predicted action chunk, it is plug-and-play and requires no retraining or access to policy internals. We validate PACE through large-scale evaluations in both simulation and real-robot settings. On 50 RoboTwin2.0 tasks, PACE raises the average success rate from 57.8% to 64.2%. In real-robot experiments on bimanual ALOHA and single-arm Franka platforms, PACE improves the average task score from 60.7 to 77.7 and the average success rate from 50.7% to 70.4%. Ablations and rollout-level analyses show that PACE adapts execution horizons across manipulation phases, shortening near transitions while preserving longer execution during coherent motion.",
@@ -896,6 +896,89 @@
       "version": 3
     },
     {
+      "abstract": "State-of-the-art model-based Reinforcement Learning (RL) approaches either use gradient-free, population-based methods for planning, learned policy networks, or a combination of policy networks and planning. Hybrid approaches that combine Model Predictive Control (MPC) with a learned model and a policy prior to leverage the advantages of both paradigms have shown promising results. However, these approaches typically rely on gradient-free optimization methods, which can be computationally expensive for high-dimensional control tasks. While gradient-based methods are a promising alternative, recent works have empirically shown that gradient-based methods often perform worse than their gradient-free counterparts. We propose Dream-MPC, a novel approach that generates few candidate trajectories from a rolled-out policy and optimizes each trajectory by gradient ascent using a learned world model, uncertainty regularization and amortization of optimization iterations over time by reusing previously optimized actions. Our results on 24 continuous control tasks show that Dream-MPC can significantly improve the performance of the underlying policy and can outperform gradient-free MPC and state-of-the-art baselines. Code and videos are available at https://dream-mpc.github.io.",
+      "analysis": {
+        "key_results": "在24个连续控制任务上，Dream-MPC显著提升底层策略性能，并优于无梯度MPC与现有基线。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出Dream-MPC，一种结合策略先验与梯度优化、基于世界模型的梯度式模型预测控制方法。",
+        "method": "利用学习的世界模型生成少量候选轨迹，通过梯度上升、不确定性正则化和跨时间步复用优化动作进行轨迹优化。",
+        "one_sentence_summary": "Dream-MPC利用学习的世界模型、梯度上升与复用先前优化动作的摊销，高效生成并优化候选轨迹，在连续控制任务上优于无梯度MPC及基线。",
+        "primary_topic": "World Model",
+        "relation_to_vla_wam": "该工作聚焦于基于世界模型的梯度优化MPC，虽不直接涉及VLA或WAM架构，但其世界建模与基于模型的规划方法对机器人动作预测及世界模型学习具有方法论参考价值。",
+        "relevance_score": 6,
+        "tags": [
+          "World Modeling",
+          "Robot Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.RO"
+      ],
+      "arxiv_id": "2605.04568",
+      "authors": [
+        "Jonathan Spieler",
+        "Sven Behnke"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-07T01:40:56.397531Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2605.04568/v3/fig1-panel1.png"
+            ],
+            "caption": "Aggregate performance metrics. Optimality gap, interquartile median (IQM), mean and median normalized scores with 95% confidence intervals of different methods. Notably, Dream-MPC with a strong policy achieves the best results.",
+            "image_urls": [
+              "https://arxiv.org/html/2605.04568v3/x1.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.04568v3#S0.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2605.04568/v3/fig2-panel1.png"
+            ],
+            "caption": "Overview of the proposed approach. Dream-MPC optimizes action sequences rolled out from a policy network π \\pi in latent space z z with gradient-based MPC. N N candidate trajectories are sampled from the policy prior and optimized for I I iterations using gradient ascent to maximize the objective J J . The first action from the candidate trajectory with the highest value of J J is applied to the environment, and the procedure is repeated for the next time step. The policy network and world model are shared across candidates and time steps.",
+            "image_urls": [
+              "https://arxiv.org/html/2605.04568v3/x2.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.04568v3#S1.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2605.04568v3",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-07T01:40:56.397531Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-05-06T07:13:11Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2605.04568",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2605.04568",
+        "project_url": "https://dream-mpc.github.io/"
+      },
+      "title": "Dream-MPC: Gradient-Based Model Predictive Control with Latent Imagination",
+      "title_zh": "Dream-MPC：基于梯度的隐式想象模型预测控制",
+      "updated_at": "2026-08-06T08:09:10Z",
+      "version": 3
+    },
+    {
       "abstract": "Procedural tasks with multiple ordered steps are ubiquitous in daily life. Recent advances in multimodal large language models (MLLMs) have enabled personal assistants that support daily activities. However, existing systems primarily provide reactive guidance triggered by user queries, or limited proactive assistance for isolated short-term events rather than long-horizon procedural tasks. In this work, we introduce Pro$^2$Assist, a step-aware proactive assistant that continuously tracks fine-grained task progress and reasons over the user's evolving state to provide timely assistance throughout tasks. Pro$^2$Assist leverages multimodal data from augmented reality (AR) glasses to achieve motion-based perception. It then extracts step-oriented procedural context from multi-scale temporal dynamics and task-specific expert knowledge. Based on both sensory input and procedural context, Pro$^2$Assist performs continuous reasoning to infer user needs and display timely assistance on AR glasses. We evaluate Pro$^2$Assist using a dataset curated from public sources and a real-world dataset collected on our testbed with AR glasses. Extensive evaluations show that Pro$^2$Assist outperforms the best-performing baselines by over 21% in procedural action understanding accuracy, and it achieves up to 2.29x the proactive timing accuracy of baselines. A user study with 20 participants further shows that 90% find Pro$^2$Assist useful, indicating its effectiveness for real-world procedural assistance.",
       "analysis": {
         "key_results": "在程序动作理解准确率上比最佳基线高出21%以上，主动时机准确率高达基线2.29倍，20人用户研究显示90%认为有用。",
@@ -988,20 +1071,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 89,
-    "completion_tokens": 15911,
-    "error_categories": {},
-    "failed": 0,
-    "fetched": 1972,
-    "figure_available": 91,
+    "cache_hits": 91,
+    "completion_tokens": 19175,
+    "error_categories": {
+      "ValidationError": 4
+    },
+    "failed": 4,
+    "fetched": 1987,
+    "figure_available": 105,
     "figure_cache_hits": 64,
     "figure_failed": 0,
-    "figure_requests": 35,
-    "figure_unavailable": 8,
-    "model_calls": 50,
-    "prefiltered": 139,
-    "prompt_tokens": 45151,
-    "published": 99,
-    "total_tokens": 61062
+    "figure_requests": 48,
+    "figure_unavailable": 7,
+    "model_calls": 64,
+    "prefiltered": 155,
+    "prompt_tokens": 53319,
+    "published": 112,
+    "total_tokens": 72494
   }
 }
