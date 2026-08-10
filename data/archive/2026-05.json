@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-09T05:07:43.295216Z",
+  "generated_at": "2026-08-10T05:28:15.785272Z",
   "papers": [
     {
       "abstract": "Recent vision-language-action and diffusion-based robot policies often use action chunking, where each policy query predicts a sequence of future actions and the robot executes an open-loop prefix before re-querying. While this interface improves local motion continuity, deployment still requires choosing the execution horizon: how much of each predicted chunk should be executed before acquiring a new observation. However, our experiments show that success is strongly task-dependent and non-monotonic with respect to the execution horizon, making a single constant horizon an unreliable deployment rule. We propose PACE (Phase-Aware Chunk Execution), a training-free test-time execution method that selects the execution horizon online from the predicted chunk itself. PACE exploits the phase-dependent kinematic structure of manipulation trajectories by identifying low-speed transition points in the predicted speed profile and using them as candidate replanning boundaries. Because PACE uses only the predicted action chunk, it is plug-and-play and requires no retraining or access to policy internals. We validate PACE through large-scale evaluations in both simulation and real-robot settings. On 50 RoboTwin2.0 tasks, PACE raises the average success rate from 57.8% to 64.2%. In real-robot experiments on bimanual ALOHA and single-arm Franka platforms, PACE improves the average task score from 60.7 to 77.7 and the average success rate from 50.7% to 70.4%. Ablations and rollout-level analyses show that PACE adapts execution horizons across manipulation phases, shortening near transitions while preserving longer execution during coherent motion.",
@@ -272,6 +272,100 @@
       "title": "Speculative Decoding and the Curse of Multilinguality",
       "title_zh": "推测解码与多语言性的诅咒",
       "updated_at": "2026-08-04T17:55:16Z",
+      "version": 2
+    },
+    {
+      "abstract": "Vision-Language-Action (VLA) models unify perception, reasoning, and control within a single policy, yet their multi-billion-parameter backbones and diffusion-based action heads make on-device deployment prohibitively expensive. Prior quantization efforts offer only partial solutions, compressing the LLM backbone while leaving the DiT action head at full precision, or resorting to mixed-precision schemes, driven by the belief that uniformly quantizing the action head is inherently unstable. We challenge this assumption with Omega-QVLA, the first training-free post-training quantization framework that compresses both the language backbone and the entire diffusion action head of a VLA model to a uniform W4A4 precision, eliminating the need for mixed-precision allocation. Omega-QVLA combines a composite SVD-Hadamard rotation that equalizes per-channel weight energy while diffusing residual activation outliers with per-step DiT activation scaling quantization that absorbs dynamic-range drift across denoising steps. On LIBERO, Omega-QVLA compresses Pi 0.5 and GR00T N1.5 to W4A4 with 98.0% and 87.8% task success rates, matching or exceeding their FP16 references of 97.1% and 87.0%, while reducing the static memory footprint by 71.3%. Real-world manipulation experiments further confirm smooth, accurate manipulation where prior methods fail. Code is available at https://github.com/UCMP13753/Omega-QVLA.",
+      "analysis": {
+        "key_results": "在LIBERO上，将Pi 0.5和GR00T N1.5量化为W4A4，任务成功率分别为98.0%和87.8%，达到或超过FP16参考的97.1%和87.0%，同时静态内存占用减少71.3%。",
+        "limitations": "摘要未说明。",
+        "main_contribution": "首个无需训练的VLA模型全精度后训练量化框架，同时压缩语言主干和扩散动作头至W4A4，并证明均匀量化动作头的可行性。",
+        "method": "结合SVD-Hadamard复合旋转均衡逐通道权重能量并扩散残差激活异常值，以及逐步骤扩散变换器激活缩放量化以吸收动态范围漂移。",
+        "one_sentence_summary": "本文提出首个训练免费的后训练量化框架Ω-QVLA，将VLA模型的语言骨干和扩散动作头统一压缩为W4A4精度，实现了与FP16相当的任务成功率。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "本文直接以VLA模型为核心研究对象，提出针对VLA端到端量化的高效推理方法，对VLA的部署效率提升有直接贡献。",
+        "relevance_score": 10,
+        "tags": [
+          "Vision-Language",
+          "Model Quantization",
+          "Efficient Inference",
+          "Robot Manipulation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.LG"
+      ],
+      "arxiv_id": "2605.28803",
+      "authors": [
+        "Xinyu Wang",
+        "Mingze Li",
+        "Sicheng Lyu",
+        "Dongxiu Liu",
+        "Kaicheng Yang",
+        "Ziyu Zhao",
+        "Yufei Cui",
+        "Xiao-Wen Chang",
+        "Peng Lu"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-10T05:28:15.785272Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2605.28803/v2/fig1-panel1.png"
+            ],
+            "caption": "The overall quantization pipeline of our Ω \\Omega -QVLA , where RTN means round-to-nearest-neighbor.",
+            "image_urls": [
+              "https://arxiv.org/html/2605.28803v2/x1.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.28803v2#S2.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2605.28803/v2/fig2-panel1.png"
+            ],
+            "caption": "Per-channel distribution of weights (top) and activations (bottom) under four rotation settings. 𝐑 SVD \\mathbf{R}_{\\mathrm{SVD}} , adapted to 𝐖 \\mathbf{W} , equalizes weight row norms effectively (26 × \\times → \\to 6 × \\times , σ \\sigma : 9.9 → \\to 4.9), whereas the data-independent 𝐇 \\mathbf{H} provides limited improvement (19 × \\times , σ \\sigma =7.0). Conversely, 𝐇 \\mathbf{H} smooths activations (20 × \\times → \\to 1.5 × \\times ) via ∥ 𝐳𝐇 ∥ ∞ ≤ ∥ 𝐳 ∥ 2 / n \\lVert\\mathbf{z}\\mathbf{H}\\rVert_{\\infty}\\leq\\lVert\\mathbf{z}\\rVert_{2}/\\sqrt{n} , while 𝐑 SVD \\mathbf{R}_{\\mathrm{SVD}} , derived entirely from 𝐖 \\mathbf{W} , leaves activation outliers intact (20 × \\times → \\to 17 × \\times ). The composite 𝐑 SVD ​ 𝐇 \\mathbf{R}_{\\mathrm{SVD}}\\mathbf{H} inherits both strengths (weights: 6 × \\times , σ \\sigma =5.5; activations: 1.6 × \\times ). Note that randomized Hadamard 𝐇𝐃 \\mathbf{H}\\mathbf{D} ( 𝐃 = diag ​ ( ± 1 ) \\mathbf{D}=\\mathrm{diag}(\\pm 1) ) yields identical per-channel norms, since sign flips do not alter row or column norms.",
+            "image_urls": [
+              "https://arxiv.org/html/2605.28803v2/x2.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.28803v2#S4.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2605.28803v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "exact:post-training-quantization",
+        "composite:vision_language_robotics",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-10T05:28:15.785272Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-05-27T17:55:01Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2605.28803",
+        "code_url": "https://github.com/UCMP13753/Omega-QVLA",
+        "pdf_url": "https://arxiv.org/pdf/2605.28803",
+        "project_url": null
+      },
+      "title": "{\\Omega}-QVLA: Robust Quantization for Vision-Language-Action Models via Composite Rotation and Per-step Scaling",
+      "title_zh": "Ω-QVLA：通过复合旋转与逐步缩放实现视觉-语言-动作模型的鲁棒量化",
+      "updated_at": "2026-08-07T16:03:47Z",
       "version": 2
     },
     {
@@ -588,7 +682,7 @@
         "checked_at": "2026-08-06T07:02:24.946198Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2605.17160v4",
-        "recovery_checked_at": "2026-08-09T05:07:54.653207Z",
+        "recovery_checked_at": "2026-08-10T05:30:22.834307Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "html_unavailable"
@@ -1071,20 +1165,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 44,
-    "completion_tokens": 0,
-    "error_categories": {},
-    "failed": 0,
-    "fetched": 455,
-    "figure_available": 31,
-    "figure_cache_hits": 31,
+    "cache_hits": 0,
+    "completion_tokens": 8174,
+    "error_categories": {
+      "ValidationError": 3
+    },
+    "failed": 3,
+    "fetched": 381,
+    "figure_available": 19,
+    "figure_cache_hits": 0,
     "figure_failed": 0,
-    "figure_requests": 2,
-    "figure_unavailable": 2,
-    "model_calls": 0,
-    "prefiltered": 44,
-    "prompt_tokens": 0,
-    "published": 33,
-    "total_tokens": 0
+    "figure_requests": 22,
+    "figure_unavailable": 3,
+    "model_calls": 29,
+    "prefiltered": 29,
+    "prompt_tokens": 23033,
+    "published": 22,
+    "total_tokens": 31207
   }
 }
