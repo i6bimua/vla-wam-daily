@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-08T04:59:09.981798Z",
+  "generated_at": "2026-08-11T05:11:29.152139Z",
   "papers": [
     {
       "abstract": "Unlike text- or image-driven video generation, an interactive world model is driven by actions: the user acts, and the world responds. Two obstacles stand in the way of fair and comprehensive evaluation. First, models take actions in incompatible formats---captions, camera trajectories, action functions---so no shared protocol has been established. Second, while existing benchmarks have advanced world memory and visual quality, action following is reduced to trajectory or direction error, which collapses a whole path into one number: not how quickly the world reacts to a command switch, nor how cleanly it moves along the commanded axis. WorldMark removes both obstacles. Per-model adapters translate a shared WASD-style vocabulary into each model's native control format, so ten heterogeneous models receive semantically identical instructions across 500 standardized cases spanning styles, viewpoints, and difficulty tiers; a new model costs one adapter. On this common ground we characterize action dynamics through a control-systems lens---direction accuracy, direction purity, response latency, and motion stability, each resolved per axis---alongside suites for world memory and visual quality. Together they expose differences existing protocols cannot see: the fastest responders are often the least stable, a trade-off no single action metric captures; per-axis resolution reveals models that follow translation almost perfectly while barely responding to rotation; the model with the best perceptual and aesthetic quality ranks last in translational direction accuracy and latency; and stylized scenes cost every model global consistency while leaving action dynamics largely intact. We will release all data, evaluation code, and model outputs.",
@@ -524,24 +524,168 @@
       "title_zh": "VidNum：诊断视频基础数值推理中VLM失效模式的基准",
       "updated_at": "2026-07-29T07:08:51Z",
       "version": 5
+    },
+    {
+      "abstract": "Speculative decoding accelerates large language model inference by drafting multiple candidate tokens and verifying them in a single forward pass. Candidates are organized as a tree: deeper trees accept more tokens per step, but adding depth requires sacrificing breadth (fallback options) under a fixed verification budget. Existing training-free methods draft from a single token source and shape their trees without distinguishing candidate quality across origins. We observe that two common training-free token sources -- n-gram matches copied from the input context, and statistical predictions from prior forward passes -- differ sharply in acceptance rate (~6x median gap, range 2-18x across five models and five benchmarks). We prove that when such a quality gap exists, the optimal tree is anisotropic (asymmetric): reliable tokens should form a deep chain while unreliable tokens spread as wide branches, raising the depth ceiling of balanced trees. We realize this structure in GOOSE, a training-free framework that builds an adaptive spine tree: a deep chain of high-acceptance context-matched tokens with wide branches of low-acceptance alternatives at each node. The resulting tree provably accepts at least as many tokens per step as either source alone. On five LLMs (7B-33B) and five benchmarks, GOOSE achieves 1.9-4.3x lossless speedup, outperforming balanced-tree baselines by 12-33% under the same budget.",
+      "analysis": {
+        "key_results": "在五个7B-33B的LLM和五个基准测试上，GOOSE实现1.9-4.3倍无损加速，相同验证预算下比平衡树基线高出12-33%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出一种免训练推测解码框架GOOSE，通过自适应脊骨树结构（高接受率token形成深链，低接受率token形成宽分支）优化推测树形状，理论证明该结构在token源质量差异下能接受更多token。",
+        "method": "结合n-gram上下文匹配（高接受率）和先前前向传递的统计预测（低接受率）两种免费token源，构建各向异性推测树：可靠token构成深链，不可靠token作为每节点的宽分支。",
+        "one_sentence_summary": "提出GOOSE框架，利用上下文匹配和统计预测两种token源的接受率差异构建各向异性推测树，实现1.9-4.3倍无损加速，比平衡树基线快12-33%。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "本文专注于大型语言模型的推测解码加速，未涉及VLA（视觉-语言-动作）或世界模型；但其高效推理方法对机器人VLA模型部署有潜在借鉴价值。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "arxiv_id": "2604.02047",
+      "authors": [
+        "Tao Jin",
+        "Phuong Minh Nguyen",
+        "Naoya Inoue"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-11T05:11:29.152139Z",
+        "figures": [],
+        "html_url": "https://arxiv.org/html/2604.02047v2",
+        "recovery_checked_at": "2026-08-11T05:19:39.228029Z",
+        "recovery_status": "not_found",
+        "recovery_version": 3,
+        "status": "not_found"
+      },
+      "matched_rules": [
+        "exact:speculative-decoding",
+        "composite:speculative_generation"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-11T05:11:29.152139Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-04-02T13:48:42Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2604.02047",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2604.02047",
+        "project_url": null
+      },
+      "title": "Goose: Anisotropic Speculation Trees for Training-Free Speculative Decoding",
+      "title_zh": "Goose：一种用于免训练推测解码的各向异性推测树",
+      "updated_at": "2026-08-10T07:44:02Z",
+      "version": 2
+    },
+    {
+      "abstract": "Vision-based policies have achieved a good performance in robotic manipulation due to the accessibility and richness of visual observations. However, purely visual sensing becomes insufficient in contact-rich and force-sensitive tasks where force/torque (F/T) signals provide critical information about contact dynamics, alignment, and interaction quality. Although various strategies have been proposed to integrate vision and F/T signals, including auxiliary prediction objectives, mixture-of-experts architectures, and contact-aware gating mechanisms, a comparison of these approaches remains lacking. In this work, we provide a controlled comparison of different F/T-vision integration strategies within diffusion-based manipulation policies. In addition, we propose an adaptive integration strategy that ignores F/T signals during non-contact phases while adaptively leveraging both vision and torque information during contact. Experimental results demonstrate that our method outperforms the strongest baseline by 14% in success rate, highlighting the importance of contact-aware multimodal fusion for robotic manipulation.",
+      "analysis": {
+        "key_results": "所提方法比最强基线成功率高14%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出了一种自适应视觉-力矩融合策略，并在扩散策略框架下对多种融合方法进行了受控比较。",
+        "method": "自适应融合策略，在非接触阶段忽略力/力矩信号，接触阶段自适应地利用视觉和力矩信息。",
+        "one_sentence_summary": "提出一种自适应融合视觉与力/力矩信号的扩散策略，在非接触阶段忽略力矩信号，在接触阶段自适应利用两种模态，显著提升了接触密集型操作任务的成功率。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该工作直接改进视觉-语言-动作策略的多模态融合机制，属于VLA策略学习方法，对提升接触密集型机器人操作性能有直接贡献。",
+        "relevance_score": 9,
+        "tags": [
+          "Vision-Language",
+          "Robot Manipulation",
+          "Policy Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2604.01414",
+      "authors": [
+        "Jiuzhou Lei",
+        "Chang Liu",
+        "Yu She",
+        "Xiao Liang",
+        "Minghui Zheng"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-11T05:11:29.152139Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2604.01414/v2/fig1-panel1.png"
+            ],
+            "caption": "Contact-Aware Manipulation Challenges. The top row shows that relying solely on visual input leaves the policy contact-unaware, causing failures in relevant tasks. The middle row shows that naively fusing F/T signals with visual features can degrade policy accuracy during free-space motion. The bottom-left panel shows that the predicted torque guidance weight varies interpretably over inference steps, rising during contact phases and falling during free-space motion. We evaluate across three contact-rich tasks (right), and our method achieves 82% average success rate, outperforming all baselines by a substantial margin (bottom).",
+            "image_urls": [
+              "https://arxiv.org/html/2604.01414v2/x1.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2604.01414v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2604.01414/v2/fig2-panel1.png"
+            ],
+            "caption": "Overview of the Proposed Method. RGB images are encoded using ResNet, with each camera view processed by a separate encoder. Torque signals are encoded using an MLP. The resulting torque features are then passed through a contact-gated module, which modulates them based on contact status to produce contact-gated torque features. A scale predictor takes the concatenated vision and torque features as input and outputs a scalar weight that determines the relative influence of torque information. The final denoising noise ϵ ^ \\hat{\\epsilon} is obtained by blending these two predictions according to the predicted scale.",
+            "image_urls": [
+              "https://arxiv.org/html/2604.01414v2/images/Overview_of_the_Proposed_Method.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2604.01414v2#S2.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2604.01414v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-11T05:11:29.152139Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-04-01T21:23:41Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2604.01414",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2604.01414",
+        "project_url": null
+      },
+      "title": "Learning When to See and When to Feel: Adaptive Vision-Torque Fusion for Contact-Aware Manipulation",
+      "title_zh": "学习何时看何时感：面向接触感知操作的自适应视觉-力矩融合",
+      "updated_at": "2026-08-09T21:22:37Z",
+      "version": 2
     }
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 92,
-    "completion_tokens": 0,
-    "error_categories": {},
-    "failed": 0,
-    "fetched": 1102,
-    "figure_available": 66,
-    "figure_cache_hits": 66,
+    "cache_hits": 0,
+    "completion_tokens": 28556,
+    "error_categories": {
+      "ValidationError": 3
+    },
+    "failed": 3,
+    "fetched": 1341,
+    "figure_available": 51,
+    "figure_cache_hits": 0,
     "figure_failed": 0,
-    "figure_requests": 2,
-    "figure_unavailable": 2,
-    "model_calls": 0,
-    "prefiltered": 92,
-    "prompt_tokens": 0,
-    "published": 68,
-    "total_tokens": 0
+    "figure_requests": 57,
+    "figure_unavailable": 6,
+    "model_calls": 93,
+    "prefiltered": 93,
+    "prompt_tokens": 80579,
+    "published": 57,
+    "total_tokens": 109135
   }
 }

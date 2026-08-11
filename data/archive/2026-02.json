@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-10T05:28:15.785272Z",
+  "generated_at": "2026-08-11T05:11:29.152139Z",
   "papers": [
     {
       "abstract": "As the burgeoning power requirements of sophisticated neural architectures escalate, the information retrieval community has recognized ecological sustainability as a pivotal priority that necessitates a fundamental paradigm shift in model design. While contemporary neural rankers have attained unprecedented accuracy, the substantial environmental externalities associated with their computational intensity often remain overlooked in large-scale deployments. We present GaiaFlow, an innovative framework engineered to facilitate carbon-frugal search by operationalizing semantic-guided diffusion tuning. Our methodology orchestrates the convergence of retrieval-guided Langevin dynamics and a hardware-independent performance modeling strategy to optimize the trade-off between search precision and environmental preservation. By incorporating adaptive early exit protocols and precision-aware quantized inference, the proposed architecture significantly mitigates operational carbon footprints while maintaining robust retrieval quality across heterogeneous computing infrastructures. Extensive experimental evaluations demonstrate that GaiaFlow achieves a superior equilibrium between effectiveness and energy efficiency, offering a scalable and sustainable pathway for next-generation neural search systems.",
@@ -349,6 +349,94 @@
       "version": 3
     },
     {
+      "abstract": "Achieving reliable 4-bit attention is a prerequisite for end-to-end FP4 computation on emerging FP4-capable GPUs, yet attention remains the main obstacle due to FP4's tiny dynamic range and attention's heavy-tailed activations. This paper presents the first systematic study of 4-bit quantization-aware training (QAT) for attention. We find ``drop-in'' QAT -- naively combining an FP4 forward pass with high-precision Flash Attention (FA)-style backward pass -- leads to training instability. We identify two key principles for stable FP4 attention: (1) matching low-precision recomputation of attention scores in the backward pass and (2) resolving implicit precision assumptions in FA's gradient calculation. Based on these insights, we propose Attn-QAT and implement fused Triton kernels for training and FP4 inference kernels. Across diffusion and language models, Attn-QAT recovers the quality drop from FP4 attention without explicit outlier-mitigation heuristics used in prior FP4 attention, and delivers up to a 1.5x speedup on an RTX 5090 over SageAttention3 and up to a 1.74x speedup over FA4 on a GB300. Video demos can be found at https://drive.google.com/drive/folders/190F6xbBDUF2kGQYIcXBt3ehSYij5jlim?usp=sharing. Code can be found at https://haoailab.com/FastVideo/training/attn_qat/.",
+      "analysis": {
+        "key_results": "在扩散和语言模型上恢复FP4注意力造成的质量损失，并在RTX 5090上相比SageAttention3实现1.5倍加速，在GB300上相比FA4实现1.74倍加速。",
+        "limitations": "摘要未说明",
+        "main_contribution": "首次系统研究4比特量化感知训练在注意力上的应用，提出解决训练不稳定性的两项原则和Attn-QAT方法。",
+        "method": "提出Attn-QAT，并实现融合Triton内核用于训练和FP4推理，通过匹配反向传播的低精度注意力分数重计算和解决FlashAttention梯度中的隐式精度假设来保证稳定训练。",
+        "one_sentence_summary": "本文首次系统研究注意力的4比特量化感知训练，通过匹配反向传播的低精度重计算和解析梯度计算中的隐式精度假设，提出Attn-QAT方法，在扩散和语言模型上恢复精度并实现加速。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文专注于注意力机制的4比特量化训练和推理加速，未提及VLA、WAM或机器人策略模型，因此与本站主题无直接关系。",
+        "relevance_score": 7,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "arxiv_id": "2603.00040",
+      "authors": [
+        "Peiyuan Zhang",
+        "Matthew Noto",
+        "Wenxuan Tan",
+        "Chengquan Jiang",
+        "Will Lin",
+        "Wei Zhou",
+        "Hao Zhang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-11T05:11:29.152139Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2603.00040/v3/fig1-panel1.jpg"
+            ],
+            "caption": "Both NVFP4 attention and SageAttention3 suffer from a significant quality drop on Wan 2.1 14B. Our proposed method, Attn-QAT, recovers the quality drop by using quantization-aware training. Note that temporal inconsistency is hard to visualize in sampled frames. We attach video samples in Appendix A without cherry-picking to better showcase the superior quality of Attn-QAT.",
+            "image_urls": [
+              "https://arxiv.org/html/2603.00040v3/media/video_demo1.jpg"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2603.00040v3#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2603.00040/v3/fig2-panel1.png"
+            ],
+            "caption": "Win–Tie–Lose blind human evaluation on 99 randomly sampled VBench prompts for Wan 2.1 14B. Attn-QAT matches BF16 attention in perceived visual quality.",
+            "image_urls": [
+              "https://arxiv.org/html/2603.00040v3/media/human_eval.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2603.00040v3#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2603.00040v3",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:quantization-aware-training",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-11T05:11:29.152139Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-02-09T04:46:21Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2603.00040",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2603.00040",
+        "project_url": "https://drive.google.com/drive/folders/190F6xbBDUF2kGQYIcXBt3ehSYij5jlim?usp=sharing"
+      },
+      "title": "Attn-QAT: 4-Bit Attention With Quantization-Aware Training",
+      "title_zh": "Attn-QAT：面向4比特注意力的量化感知训练",
+      "updated_at": "2026-08-09T18:58:02Z",
+      "version": 3
+    },
+    {
       "abstract": "Large reasoning models (LRMs) achieve strong performance by producing long chains of thought, but their inference costs are high and often generate redundant reasoning. Small language models (SLMs) are far more efficient, yet struggle on multi-step reasoning tasks. A natural idea is to let a large model guide a small one at inference time as a mentor, yet existing collaboration methods often promote imitation, resulting in verbose reasoning without consistent error correction. We propose MentorCollab, an inference-time collaboration method in which an LRM selectively and sparsely guides an SLM, rather than taking over generation. At randomly sampled token positions, we probe for divergences between the two models and use a lightweight verifier to decide whether the SLM should follow a short lookahead segment from its mentor or continue on its own. Across 15 SLM--LRM pairs and 3 domains (math reasoning, general knowledge, and commonsense reasoning), our method improves performance in 12 settings, with average gains of 3.0% and up to 8.0%, while adopting only having 18.4% tokens generated by the expensive mentor model on average. We find that short segments and selective probing are sufficient for effective collaboration. Our results show that selective inference-time guidance restores large-model reasoning ability without substantial inference overhead.",
       "analysis": {
         "key_results": "在15组模型对和3个领域中，12个设置取得提升，平均提升3.0%，最高8.0%，大模型生成token占比仅18.4%。",
@@ -476,7 +564,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2602.04635v2",
-        "recovery_checked_at": "2026-08-10T23:31:21.948555Z",
+        "recovery_checked_at": "2026-08-11T05:19:39.228029Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -506,21 +594,21 @@
   "schema_version": "1",
   "stats": {
     "cache_hits": 0,
-    "completion_tokens": 8174,
+    "completion_tokens": 28556,
     "error_categories": {
       "ValidationError": 3
     },
     "failed": 3,
-    "fetched": 381,
-    "figure_available": 19,
+    "fetched": 1341,
+    "figure_available": 51,
     "figure_cache_hits": 0,
     "figure_failed": 0,
-    "figure_requests": 22,
-    "figure_unavailable": 3,
-    "model_calls": 29,
-    "prefiltered": 29,
-    "prompt_tokens": 23033,
-    "published": 22,
-    "total_tokens": 31207
+    "figure_requests": 57,
+    "figure_unavailable": 6,
+    "model_calls": 93,
+    "prefiltered": 93,
+    "prompt_tokens": 80579,
+    "published": 57,
+    "total_tokens": 109135
   }
 }

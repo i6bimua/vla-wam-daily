@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-10T05:28:15.785272Z",
+  "generated_at": "2026-08-11T05:11:29.152139Z",
   "papers": [
     {
       "abstract": "World-model-based autonomous driving endows the model with the ability to understand scene evolution. Yet this promise is undermined by the prevailing imagine-then-act paradigm, which allows errors from the more challenging visual generation stage to cascade into action planning. We introduce ForgeDrive, a unified autoregressive diffusion framework with visual-action cross-conditioning that closes this gap through act-then-imagine paradigm. ForgeDrive factorizes the future as a sequence of per-timestep frame-action pairs, intertwining each action with its corresponding visual observation. During training, we decouple the diffusion timesteps of the two modalities and introduce a UniDiffuser-style noise scheduler to get the ability to infer either modality from its counterpart and deepen understanding of relationships between images and actions. At inference, we propose a novel act-then-imagine inference paradigm, and find that at each step, action generation is a capability internalized during training, requiring no clean future frame as a prerequisite at inference time; instead, the generated action can improve the accuracy of future frame generation, which in turn enhances the quality of the next action. Additionally, we augment each step with future ego-status prediction, further sharpening planning ability. Extensive experiments on NAVSIM demonstrate that ForgeDrive not only unifies driving simulation, planning, and visual odometry into a single model, but also outperforms existing strong planners without any post-training strategy.",
@@ -1068,26 +1068,178 @@
       "title_zh": "基于特权传感器引导对比学习的点目标导航鲁棒场景迁移",
       "updated_at": "2026-08-06T16:08:56Z",
       "version": 2
+    },
+    {
+      "abstract": "Diffusion large language models (dLLMs) have recently emerged as a promising alternative to autoregressive (AR) LLMs, offering faster inference through parallel or blockwise decoding. However, their masked language modeling formulation remains incompatible with standard token-level speculative decoding, one of the most effective acceleration techniques for AR models. In AR decoding, the causal mask preserves temporally valid token-level contexts, enabling a target model to verify multiple drafted tokens in a single forward pass. In contrast, dLLMs rely on mask tokens and bidirectional attention, causing the effective context to change across denoising steps and preventing direct token-level speculative verification. To bridge this gap, we propose a simple but effective speculative decoding algorithm for diffusion language models, named SimSD, which mainly adopts a plug-and-play masking strategy that equips dLLMs with temporally valid token-level contexts for speculative decoding. Our method explicitly introduces reference tokens from draft-model predictions and designs an attention mask that regulates their interaction with current-step tokens, allowing dLLMs to compute valid logits for drafted tokens in a single forward pass. This restores the key verification ability provided by causal masking in AR models while preserving the parallel decoding advantages of dLLMs. The proposed method is training-free and can be flexibly integrated with other acceleration techniques such as KV cache and blockwise decoding. Experiments on SDAR-family dLLMs across four benchmarks show that our method achieves up to 7.46x higher decoding throughput while maintaining and even improving average generation quality.",
+      "analysis": {
+        "key_results": "在四个基准测试上的SDAR系列dLLM上，该方法实现高达7.46倍的解码吞吐量提升，同时保持甚至提高平均生成质量。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出SimSD，一种简单的推测解码算法，通过设计掩码策略，使扩散语言模型能够在单次前向传播中验证草稿令牌，填补了dLLM与标准推测解码不兼容的空缺。",
+        "method": "采用即插即用的掩码策略，引入参考令牌并设计注意力掩码以调节其与当前步令牌的交互，从而为扩散语言模型提供时间上有效的令牌级上下文，实现在单次前向传播中计算起草令牌的有效logits。",
+        "one_sentence_summary": "提出一种无需训练的推测解码算法SimSD，通过掩码策略为扩散语言模型恢复令牌级验证能力，在保持生成质量的同时实现高达7.46倍的解码吞吐量提升。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "本文专注于扩散语言模型的推测解码加速，不涉及视觉-语言-行动（VLA）模型或世界模型（WAM），无直接关系。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "arxiv_id": "2606.02544",
+      "authors": [
+        "Junxia Cui",
+        "Haotian Ye",
+        "Runchu Tian",
+        "Hongcan Guo",
+        "Jinya Jiang",
+        "Haoru Li",
+        "Chaojie Ren",
+        "Yiming Huang",
+        "Kaijie Zhu",
+        "Zhongkai Yu",
+        "Kun Zhou",
+        "and Jingbo Shang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-11T05:11:29.152139Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2606.02544/v2/fig1-panel1.png"
+            ],
+            "caption": "SimSD restores token-level speculative decoding for diffusion language models. Vanilla dLLMs cannot directly support speculative decoding because bidirectional attention breaks temporal token-level contexts. SimSD adopts a temporal causal mask for supporting standard speculative verification in a single forward pass, leading to faster decoding without hurting performance.",
+            "image_urls": [
+              "https://arxiv.org/html/2606.02544v2/figures/figure1_main.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2606.02544v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2606.02544/v2/fig2-panel1.png"
+            ],
+            "caption": "Token-level temporal causal attention. (a) A step map assigns each token a temporal decoding order. (b) The input is arranged as prompt, data, and mask tokens, with shared temporal labels and aligned positional encoding. (c) The attention mask enforces token-level temporal causality.",
+            "image_urls": [
+              "https://arxiv.org/html/2606.02544v2/x1.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2606.02544v2#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2606.02544v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:speculative-decoding",
+        "composite:speculative_generation",
+        "composite:draft_verification_decoding"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-11T05:11:29.152139Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-06-01T17:46:46Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2606.02544",
+        "code_url": "https://github.com/airevo2/SimSD-release",
+        "pdf_url": "https://arxiv.org/pdf/2606.02544",
+        "project_url": null
+      },
+      "title": "SimSD: Simple Speculative Decoding in Diffusion Language Models",
+      "title_zh": "SimSD: 扩散语言模型中的简易推测解码",
+      "updated_at": "2026-08-08T18:55:15Z",
+      "version": 2
+    },
+    {
+      "abstract": "Key-value (KV) cache quantization is widely used to reduce Large Language Model (LLM) inference memory, yet existing evaluations solely focus on measuring perplexity and accuracy without assessing the safety impact. In this study, we explore alignment preservation under KV cache quantization. Across eleven instruction-tuned models (3.8B-72B) and five benchmarks (1,894 prompts), we find that low-bit quantization can silently destroy safety alignment: Mistral-7B loses 15.2% of its refusals at only 1.03x perplexity, and no universal safe bit-width exists, with sharp model-specific phase transitions invisible to standard metrics. We identify that the root cause is geometric: safety features occupy a low-dimensional activation subspace 10^2-10^3x more vulnerable to quantization noise than the full representation space perplexity averages over. Inspired by this observation, we propose Per-Channel Reduction (PCR), a diagnostic that classifies each model into one of three mechanistic failure modes: outlier-crushes-safety, where safety lives in non-outlier channels collaterally damaged by outlier-driven scale factors; outlier-as-safety, where safety overlaps outlier channels and finer granularity cannot rescue it; and multi-layer dilution, where safety is distributed across many layers and per-layer fixes fail. PCR predicts the correct mitigation direction on all nine primary models and one held-out model from an independent family using 20 calibration prompts. PCR generalizes across unseen prompts, models, and production quantizers, including KIVI with up to 97.2% recovery, succeeding where attention-based allocation methods fail. The resulting training-free protocol, requiring approximately 35 GPU-minutes, recovers up to 97% of lost alignment at minimal memory overhead, addressing vulnerabilities confirmed in production vLLM serving with FP8 KV cache on NVIDIA GPUs.",
+      "analysis": {
+        "key_results": "低比特量化可在仅1.03倍困惑度下使Mistral-7B的拒绝率下降15.2%；PCR在所有9个主要模型和1个独立家族的留出模型上预测了正确的缓解方向，在包括KIVI在内的生产级量化器中恢复率高达97.2%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "揭示了KV缓存量化导致安全对齐崩溃的现象与根本原因（低维安全子空间对量化噪声更敏感），并提出无需训练的Per-Channel Reduction (PCR)诊断与恢复方案。",
+        "method": "Per-Channel Reduction (PCR)，一种基于校准提示的诊断方法，将模型分类为三种故障模式，并指导通用量化器中恢复对齐的缓解方向。",
+        "one_sentence_summary": "研究了KV缓存量化对LLM安全对齐的影响，发现低比特量化会悄悄破坏对齐，并提出诊断与缓解方法。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文研究的是通用大语言模型KV缓存量化对安全对齐的影响，属于模型量化方法范畴，未涉及VLA、WAM或机器人相关应用，但其量化安全维护方法若迁移到具身模型可能具有参考价值，目前无直接关系。",
+        "relevance_score": 7,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.ET"
+      ],
+      "arxiv_id": "2606.09864",
+      "authors": [
+        "Bruce Changlong Xu",
+        "Adarsh Kumarappan",
+        "Mu Zhou"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-11T05:11:29.152139Z",
+        "figures": [],
+        "html_url": "https://arxiv.org/html/2606.09864v2",
+        "recovery_checked_at": "2026-08-11T05:19:39.228029Z",
+        "recovery_status": "not_found",
+        "recovery_version": 3,
+        "status": "html_unavailable"
+      },
+      "matched_rules": [
+        "exact:low-bit-quantization",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-11T05:11:29.152139Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-06-01T02:02:20Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2606.09864",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2606.09864",
+        "project_url": null
+      },
+      "title": "Alignment Collapse Under KV Cache Quantization: Diagnosis and Mitigation",
+      "title_zh": "KV缓存量化下的安全对齐崩溃：诊断与缓解",
+      "updated_at": "2026-08-08T15:57:15Z",
+      "version": 2
     }
   ],
   "schema_version": "1",
   "stats": {
     "cache_hits": 0,
-    "completion_tokens": 8174,
+    "completion_tokens": 28556,
     "error_categories": {
       "ValidationError": 3
     },
     "failed": 3,
-    "fetched": 381,
-    "figure_available": 19,
+    "fetched": 1341,
+    "figure_available": 51,
     "figure_cache_hits": 0,
     "figure_failed": 0,
-    "figure_requests": 22,
-    "figure_unavailable": 3,
-    "model_calls": 29,
-    "prefiltered": 29,
-    "prompt_tokens": 23033,
-    "published": 22,
-    "total_tokens": 31207
+    "figure_requests": 57,
+    "figure_unavailable": 6,
+    "model_calls": 93,
+    "prefiltered": 93,
+    "prompt_tokens": 80579,
+    "published": 57,
+    "total_tokens": 109135
   }
 }
