@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-11T05:11:29.152139Z",
+  "generated_at": "2026-08-12T05:39:09.894473Z",
   "papers": [
     {
       "abstract": "Behavior cloning with high-capacity generative policies achieves strong imitation performance, but is often limited by demonstration coverage and distribution shift. Direct reinforcement learning fine-tuning can improve performance, but updating large action decoders is frequently unstable and sample inefficient. We propose Lagrangian Perturbation Diffusion Steering (LP-DS), a lightweight adaptation method that improves a frozen generative policy by learning a compact noise-space perturbation before decoding. LP-DS optimizes this perturbation with a Lagrangian trust-region objective, improving downstream value while constraining deviation from the latent prior. Across RoboMimic manipulation, OpenAI Gym locomotion, and Adroit dexterous manipulation benchmarks, LP-DS improves sample efficiency, success, and return while maintaining higher action-space entropy than unconstrained noise-space steering, with return improvements of up to 25% over prior baselines. Additional evaluations with flow-matching backbones, a large vision-language-action model, and physical Franka deployment show that LP-DS is not limited to compact diffusion policies or simulated benchmarks. Project page: https://sites.google.com/view/lp-ds/home.",
@@ -357,6 +357,100 @@
       "title_zh": "推测解码与多语言性的诅咒",
       "updated_at": "2026-08-04T17:55:16Z",
       "version": 2
+    },
+    {
+      "abstract": "Vision-Language-Action (VLA) models unify perception, reasoning, and control in a single policy, but their multi-billion-parameter backbones and diffusion-based action heads make on-device deployment prohibitively expensive. Low-bit post-training quantization (PTQ) is the natural remedy, yet the diffusion action head that emits continuous control signals is highly sensitive to it: a few weight and activation outliers are enough to destabilize the head, so prior work leaves it at full precision or falls back to mixed-precision schemes, and uniformly quantizing the whole model to low bit-width remains an open challenge. We present HoloQ-VLA, the first training-free PTQ framework that compresses both the language backbone and the entire diffusion action head to uniform W4A4 precision without mixed-precision allocation. Instead of trading weight quality against activation quality, HoloQ-VLA targets the two outlier sources with complementary transforms: a weight-adapted rotation composed with an activation-dispersing Hadamard transform, together with per-step scaling that absorbs the dynamic-range drift exhibited by the action head across denoising steps. On LIBERO, HoloQ-VLA compresses Pi-0.5 and GR00T-N1.5 to W4A4 with 98.0% and 87.8% task success rates, matching or exceeding their FP16 references of 97.1% and 87.0%, while reducing the static memory footprint by 74.2%. Real-world manipulation experiments further demonstrate that HoloQ-VLA maintains smooth and accurate control across diverse real-world scenarios.",
+      "analysis": {
+        "key_results": "在LIBERO上，压缩Pi-0.5和GR00T-N1.5至W4A4，任务成功率分别为98.0%和87.8%，达到或超过FP16基准（97.1%和87.0%），同时减少74.2%的静态内存占用。",
+        "limitations": "摘要未说明",
+        "main_contribution": "首个训练无关的后训练量化框架，能够将VLA模型（包括扩散动作头）统一量化为W4A4精度，无需混合精度分配。",
+        "method": "HoloQ-VLA采用权重自适应旋转结合激活分散Hadamard变换和每步缩放来应对离群值，吸收扩散动作头跨去噪步骤的动态范围漂移。",
+        "one_sentence_summary": "提出首个无需训练的W4A4统一量化框架HoloQ-VLA，将VLA模型的语言骨干和扩散动作头全部压缩至4比特，性能无损。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "论文直接针对VLA模型的高效部署问题，提出一种新的量化方法，使大型VLA策略可在设备端运行，与本站VLA主题高度相关。",
+        "relevance_score": 9,
+        "tags": [
+          "Efficient Inference",
+          "Model Quantization",
+          "Policy Learning",
+          "Robot Manipulation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.LG"
+      ],
+      "arxiv_id": "2605.28803",
+      "authors": [
+        "Xinyu Wang",
+        "Mingze Li",
+        "Sicheng Lyu",
+        "Dongxiu Liu",
+        "Kaicheng Yang",
+        "Ziyu Zhao",
+        "Yufei Cui",
+        "Xiao-Wen Chang",
+        "Peng Lu"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-12T05:39:09.894473Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2605.28803/v3/fig1-panel1.png"
+            ],
+            "caption": "Per-channel distribution of weights (top) and activations (bottom) under four rotation settings. 𝐑 SVD \\mathbf{R}_{\\mathrm{SVD}} , adapted to 𝐖 \\mathbf{W} , reduces the weight-row-norm spread substantially (26 × \\times → \\to 6 × \\times , σ \\sigma : 9.9 → \\to 4.9), whereas the data-independent 𝐇 \\mathbf{H} provides limited improvement (19 × \\times , σ \\sigma =7.0). Conversely, 𝐇 \\mathbf{H} smooths activations (20 × \\times → \\to 1.5 × \\times ) via incoherence ( | ( 𝐳𝐇 ) k | ≈ ∥ 𝐳 ∥ 2 / n \\lvert(\\mathbf{z}\\mathbf{H})_{k}\\rvert\\approx\\lVert\\mathbf{z}\\rVert_{2}/\\sqrt{n} ), while 𝐑 SVD \\mathbf{R}_{\\mathrm{SVD}} , derived entirely from 𝐖 \\mathbf{W} , leaves activation outliers intact (20 × \\times → \\to 17 × \\times ). The composite 𝐑 SVD ​ 𝐇 \\mathbf{R}_{\\mathrm{SVD}}\\mathbf{H} inherits both strengths (weights: 6 × \\times , σ \\sigma =5.5; activations: 1.6 × \\times ). These panels visualize the deterministic Hadamard 𝐇 C \\mathbf{H}_{C} ; the random signs 𝐃 \\mathbf{D} in the full transform 𝐃𝐇 C \\mathbf{D}\\mathbf{H}_{C} act as a worst-case incoherence safeguard against adversarially aligned inputs and are omitted here.",
+            "image_urls": [
+              "https://arxiv.org/html/2605.28803v3/x1.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.28803v3#Sx2.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2605.28803/v3/fig2-panel1.png"
+            ],
+            "caption": "Real-world bimanual manipulation on the same Pi-0.5 policy under different quantizers (progress score, %). HoloQ-VLA at W4A4 matches the FP16 reference (average 51.0 vs. 49.6) and far surpasses QuantVLA, even though QuantVLA runs at the more lenient W4A8 budget. Per-task scores are listed in Table 6 in the appendix subsection Real-World Manipulation Tasks .",
+            "image_urls": [
+              "https://arxiv.org/html/2605.28803v3/x2.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.28803v3#Sx5.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2605.28803v3",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "exact:post-training-quantization",
+        "composite:vision_language_robotics",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-12T05:39:09.894473Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-05-27T17:55:01Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2605.28803",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2605.28803",
+        "project_url": null
+      },
+      "title": "HoloQ-VLA: Uniform W4A4 Quantization of Vision-Language-Action Models",
+      "title_zh": "HoloQ-VLA：视觉-语言-动作模型的统一W4A4量化",
+      "updated_at": "2026-08-11T05:08:08Z",
+      "version": 3
     },
     {
       "abstract": "Vision-Language-Action (VLA) models unify perception, reasoning, and control within a single policy, yet their multi-billion-parameter backbones and diffusion-based action heads make on-device deployment prohibitively expensive. Prior quantization efforts offer only partial solutions, compressing the LLM backbone while leaving the DiT action head at full precision, or resorting to mixed-precision schemes, driven by the belief that uniformly quantizing the action head is inherently unstable. We challenge this assumption with Omega-QVLA, the first training-free post-training quantization framework that compresses both the language backbone and the entire diffusion action head of a VLA model to a uniform W4A4 precision, eliminating the need for mixed-precision allocation. Omega-QVLA combines a composite SVD-Hadamard rotation that equalizes per-channel weight energy while diffusing residual activation outliers with per-step DiT activation scaling quantization that absorbs dynamic-range drift across denoising steps. On LIBERO, Omega-QVLA compresses Pi 0.5 and GR00T N1.5 to W4A4 with 98.0% and 87.8% task success rates, matching or exceeding their FP16 references of 97.1% and 87.0%, while reducing the static memory footprint by 71.3%. Real-world manipulation experiments further confirm smooth, accurate manipulation where prior methods fail. Code is available at https://github.com/UCMP13753/Omega-QVLA.",
@@ -940,12 +1034,39 @@
       ],
       "figure_gallery": {
         "checked_at": "2026-08-06T07:02:24.946198Z",
-        "figures": [],
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2605.17160/v4/fig1-panel1.png"
+            ],
+            "caption": "CFQ pipeline. A teacher recourse action δ fp \\delta_{\\mathrm{fp}} is computed on the full-precision model using a small number of projected gradient steps and is treated as a constant via stop-gradient. The quantized model f q f_{q} is trained to preserve task accuracy and to keep x + δ fp x+\\delta_{\\mathrm{fp}} a valid counterfactual under quantization, while mixed-precision bit allocation and quantizer parameters are optimized under a bit budget. We do not claim a new recourse solver or a new quantizer; we introduce a deployment objective that makes recourse validity and recourse cost explicit constraints of quantization.",
+            "image_urls": [
+              "https://arxiv.org/html/2605.17160v4/fifi.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.17160v4#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2605.17160/v4/fig2-panel1.png"
+            ],
+            "caption": "Same accuracy, different recourse. Quantization can shift local decision geometry: a minimal actionable recourse δ f ⋆ \\delta_{f}^{\\star} that flips the full-precision model may fail for the quantized model, requiring a different or larger action δ f q ⋆ \\delta_{f_{q}}^{\\star} even when predictive accuracy is unchanged.",
+            "image_urls": [
+              "https://arxiv.org/html/2605.17160v4/fifi2.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.17160v4#S2.F2"
+          }
+        ],
         "html_url": "https://arxiv.org/html/2605.17160v4",
-        "recovery_checked_at": "2026-08-10T05:30:22.834307Z",
-        "recovery_status": "not_found",
+        "recovery_checked_at": "2026-08-12T05:42:59.386553Z",
+        "recovery_status": "available",
         "recovery_version": 3,
-        "status": "html_unavailable"
+        "status": "available"
       },
       "matched_rules": [
         "exact:model-quantization",
@@ -1510,22 +1631,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 0,
-    "completion_tokens": 28556,
+    "cache_hits": 65,
+    "completion_tokens": 15590,
     "error_categories": {
-      "ValidationError": 3
+      "ValidationError": 1
     },
-    "failed": 3,
-    "fetched": 1341,
-    "figure_available": 51,
-    "figure_cache_hits": 0,
+    "failed": 1,
+    "fetched": 1691,
+    "figure_available": 71,
+    "figure_cache_hits": 39,
     "figure_failed": 0,
-    "figure_requests": 57,
-    "figure_unavailable": 6,
-    "model_calls": 93,
-    "prefiltered": 93,
-    "prompt_tokens": 80579,
-    "published": 57,
-    "total_tokens": 109135
+    "figure_requests": 34,
+    "figure_unavailable": 2,
+    "model_calls": 50,
+    "prefiltered": 115,
+    "prompt_tokens": 43602,
+    "published": 73,
+    "total_tokens": 59192
   }
 }
