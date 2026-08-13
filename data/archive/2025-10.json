@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-07T23:29:03.649895Z",
+  "generated_at": "2026-08-13T05:41:39.833674Z",
   "papers": [
     {
       "abstract": "Does Chain-of-Thought (CoT) reasoning genuinely improve Vision Language Action (VLA) models, or does it merely add overhead? Existing CoT-VLA systems report limited and inconsistent gains, yet no prior work has rigorously diagnosed when and why CoT helps robots act. Through systematic experiments, we identify two necessary conditions that must be jointly satisfied for CoT to be effective in VLA: (1) Decoding Alignment: CoT and actions must be generated with modality-appropriate mechanisms; forcing both through a single autoregressive decoder is not merely suboptimal but actively harmful, degrading performance by 4.2 percentage points; (2) Causal Alignment: CoT must be causally linked to task success via outcome-based optimization; without it, supervised CoT is indistinguishable from no reasoning at all under action-execution-sensitive dynamics shift, exhibiting a 32.0 pp performance drop nearly identical to the 31.6 pp drop of a reasoning-free baseline. Guided by these findings, we build DeepThinkVLA: a hybrid-attention decoder satisfies Condition 1 by pairing causal attention for language with bidirectional attention for parallel action decoding, while a two-stage SFT-then-RL pipeline satisfies Condition 2 by aligning the full reasoning: action chain with sparse task-success rewards. DeepThinkVLA achieves 97.0\\% success on LIBERO, 79.0\\% robustness on LIBERO-Plus (vs. 61.6\\% for $\\pi_0$-FAST), and 59.3\\% success on RoboTwin 2.0, exceeding the strongest baseline by 21.7 points. Furthermore, real-robot experiments provide preliminary evidence for the physical applicability of our CoT data construction and hybrid architecture. Our codes are available at https://github.com/OpenBMB/DeepThinkVLA.",
@@ -92,6 +92,90 @@
       "version": 3
     },
     {
+      "abstract": "Low-Rank Adaptation (LoRA) has become a popular technique for parameter-efficient fine-tuning of large language models (LLMs). In many real-world scenarios, multiple adapters are loaded simultaneously to enable LLM customization for personalized user experiences or to support a diverse range of tasks. Although each adapter is lightweight in isolation, their aggregate cost becomes substantial at scale. To address this, we propose LoRAQuant, a mixed-precision post-training quantization method tailored to LoRA. Specifically, LoRAQuant reparameterizes each adapter by singular value decomposition (SVD) to concentrate the most important information into specific rows and columns. This makes it possible to quantize the important components to higher precision, while quantizing the rest to ultra-low bitwidth. We conduct comprehensive experiments with LLaMA 2-7B, LLaMA 2-13B, and Mistral 7B models on mathematical reasoning, coding, and summarization tasks. Results show that our LoRAQuant uses significantly lower bits than other quantization methods, but achieves comparable or even higher performance.",
+      "analysis": {
+        "key_results": "在数学推理、编程和摘要任务上，使用LLaMA 2-7B、LLaMA 2-13B和Mistral 7B模型，LoRAQuant使用显著更低的位宽，同时取得与其它量化方法相当甚至更高的性能。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出LoRAQuant，一种混合精度后训练量化方法，通过SVD重参数化将适配器中最重要的信息集中到特定行列，以对重要组件采用更高精度、其余部分采用超低位宽的量化。",
+        "method": "基于SVD的适配器重参数化与混合精度后训练量化。",
+        "one_sentence_summary": "提出LoRAQuant，一种针对LoRA适配器的混合精度后训练量化方法，通过SVD重参数化重要成分用高精度量化，其余部分用超低位宽量化。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文属于通用模型量化技术，未直接涉及VLA、WAM或机器人领域，但其高效推理方法可潜在应用于机器人策略模型的LoRA适配器压缩，为本站提供可借鉴的量化技术参考。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Model Quantization"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG"
+      ],
+      "arxiv_id": "2510.26690",
+      "authors": [
+        "Amir Reza Mirzaei",
+        "Yuqiao Wen",
+        "Yanshuai Cao",
+        "Lili Mou"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-13T05:41:39.833674Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2510.26690/v3/fig1-panel1.png"
+            ],
+            "caption": "Overview of our LoraQuant method.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2510.26690v3"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2510.26690/v3/fig2-panel1.png"
+            ],
+            "caption": "Com parison of sub-LoRA splitting strategies. Here, denotes the rank of the high-precision sub- h",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2510.26690v3"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2510.26690v3",
+        "recovery_checked_at": "2026-08-13T05:47:24.782959Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:post-training-quantization",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-13T05:41:39.833674Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2025-10-30T16:59:22Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2510.26690",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2510.26690",
+        "project_url": null
+      },
+      "title": "LoRAQuant: Mixed-Precision Quantization of LoRA to Ultra-Low Bits",
+      "title_zh": "LoRAQuant：面向LoRA的超低位混合精度量化方法",
+      "updated_at": "2026-08-12T04:10:15Z",
+      "version": 3
+    },
+    {
       "abstract": "Vision-Language-Action (VLA) models have shown strong manipulation capability when trained with large-scale imitation learning datasets. However, these datasets that predominantly consist of successful trajectories rarely provide the corrective supervision required when execution deviates from standard demonstrations. During deployment, these physical deviations lead to the distributional shift that drives policy to failure scenarios, yet missing failure recovery data prevents policy from correcting these execution deviations. To address this failure recovery problem, we propose a coverage-guided data augmentation framework RESample to actively supplement demonstration datasets for failure recovery. Specifically, to guide the augmentation and generate failure modes that possibly appear in the real world, RESample trains a conservative coverage function to identify failure cases that reside within the actual data distribution but are missing in the standard successful demonstrations. Guided by the evaluated coverage discrepancy, we perform exploratory sampling to actively sample exploration behaviors followed by recovery actions, extending the coverage of training data with failure recovery trajectories. With the augmented trajectory, the refined policy, which deviated in real settings, can recover from failure. Experiments on the LIBERO benchmark and real-world manipulation tasks show that RESample consistently improves policy success rates, achieving up to 12% absolute gain with no more than 20% additional samples.",
       "analysis": {
         "key_results": "在LIBERO基准和真实世界操作任务中，RESample将策略成功率提升最多12%，且仅需至多20%的额外样本。",
@@ -181,24 +265,126 @@
       "title_zh": "RESample：一种基于探索性采样的鲁棒数据增强框架用于机器人操作",
       "updated_at": "2026-08-05T02:51:23Z",
       "version": 4
+    },
+    {
+      "abstract": "Recent studies have demonstrated the potential of reinforcement learning (RL) to improve the task performance of vision-language-action (VLA) models through interaction. However, current efforts remain fragmented, lacking a unified platform for fair comparison across architectures and algorithms, as well as an efficient system design for scalable training. Therefore, we present RLinf-VLA, a unified and efficient framework for scalable RL training of VLA models. RLinf-VLA standardizes the integration of diverse VLA architectures, RL algorithms, and heterogeneous simulators through a unified interface, enabling extensibility and reproducibility. To improve efficiency, the framework adopts a flexible resource allocation architecture for rendering, inference, and training in RL pipelines. In particular, RLinf-VLA introduces a hybrid fine-grained pipeline allocation strategy that achieves a 1.61$\\times$-1.88$\\times$ training speedup on ManiSkill. Using this framework, RL-trained models achieve strong performance across embodied benchmarks, including 98.11% success on 130 LIBERO tasks, 97.66% success on 25 ManiSkill tasks, and 84.63% average success across 6 RoboTwin tasks. In addition, RLinf-VLA distills a set of effective practices for RL-based VLA training. We envision RLinf-VLA as a foundational framework for efficient, unified, and reproducible research in embodied intelligence.",
+      "analysis": {
+        "key_results": "在130个LIBERO任务上成功率达98.11%，25个ManiSkill任务上成功率达97.66%，6个RoboTwin任务上平均成功率达84.63%，并在ManiSkill上实现1.61-1.88倍训练加速。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出RLinf-VLA统一高效框架，标准化多种VLA架构、RL算法和异构模拟器的集成，并引入混合细粒度流水线分配策略实现1.61-1.88倍训练加速。",
+        "method": "统一接口集成、资源分配架构、混合细粒度流水线分配策略，在ManiSkill、LIBERO和RoboTwin上进行RL训练。",
+        "one_sentence_summary": "提出统一高效的框架RLinf-VLA，用于可扩展地强化学习训练VLA模型，并通过混合细粒度流水线分配实现训练加速。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "论文直接关注VLA模型的高效强化学习训练，涉及视觉-语言-动作策略学习，与VLA主题高度相关；高效训练框架的设计对机器人动作世界模型训练也有方法学参考价值。",
+        "relevance_score": 9,
+        "tags": [
+          "Robot Learning",
+          "Policy Learning",
+          "Efficient Inference",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2510.06710",
+      "authors": [
+        "Hongzhi Zang",
+        "Mingjie Wei",
+        "Si Xu",
+        "Yongji Wu",
+        "Zhen Guo",
+        "Yuanqing Wang",
+        "Hao Lin",
+        "Peihong Wang",
+        "Liangzhi Shi",
+        "Yuqing Xie",
+        "Zhexuan Xu",
+        "Zhihao Liu",
+        "Kang Chen",
+        "Wenhao Tang",
+        "Quanlu Zhang",
+        "Weinan Zhang",
+        "Chao Yu",
+        "Yu Wang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-13T05:41:39.833674Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2510.06710/v3/fig1-panel1.png"
+            ],
+            "caption": "Pipeline of Reinforcement Learning for VLA models",
+            "image_urls": [
+              "https://arxiv.org/html/2510.06710v3/figures/rollout.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2510.06710v3#S3.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2510.06710/v3/fig2-panel1.png"
+            ],
+            "caption": "Collocated Mode.",
+            "image_urls": [
+              "https://arxiv.org/html/2510.06710v3/figures/gpu-alloc/shared.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2510.06710v3#S4.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2510.06710v3",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-13T05:41:39.833674Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2025-10-08T07:05:13Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2510.06710",
+        "code_url": "https://github.com/RLinf/RLinf",
+        "pdf_url": "https://arxiv.org/pdf/2510.06710",
+        "project_url": null
+      },
+      "title": "RLinf-VLA: A Unified and Efficient Framework for Reinforcement Learning of Vision-Language-Action Models",
+      "title_zh": "RLinf-VLA：面向视觉-语言-动作模型强化学习的统一高效框架",
+      "updated_at": "2026-08-12T08:36:04Z",
+      "version": 3
     }
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 103,
-    "completion_tokens": 0,
-    "error_categories": {},
-    "failed": 0,
-    "fetched": 1227,
-    "figure_available": 75,
-    "figure_cache_hits": 77,
+    "cache_hits": 81,
+    "completion_tokens": 14736,
+    "error_categories": {
+      "ValidationError": 1
+    },
+    "failed": 1,
+    "fetched": 1817,
+    "figure_available": 78,
+    "figure_cache_hits": 50,
     "figure_failed": 0,
-    "figure_requests": 0,
-    "figure_unavailable": 2,
-    "model_calls": 0,
-    "prefiltered": 103,
-    "prompt_tokens": 0,
-    "published": 77,
-    "total_tokens": 0
+    "figure_requests": 40,
+    "figure_unavailable": 12,
+    "model_calls": 45,
+    "prefiltered": 126,
+    "prompt_tokens": 39675,
+    "published": 90,
+    "total_tokens": 54411
   }
 }

@@ -1,6 +1,91 @@
 {
-  "generated_at": "2026-08-12T05:39:09.894473Z",
+  "generated_at": "2026-08-13T05:41:39.833674Z",
   "papers": [
+    {
+      "abstract": "Vision-language models (VLMs) have recently emerged as a promising paradigm for end-to-end autonomous driving, enabling agents to map multimodal inputs and high-level navigation instructions directly to executable trajectories. However, in practice, these models exhibit a persistent command-following gap: predicted trajectories often show weak sensitivity to navigation commands, resulting in incorrect behavior at critical decision points. We identify this issue as a form of conditional policy collapse, where regression-based training under multimodal trajectory distributions encourages the model to rely on dominant visual priors while marginalizing the language-conditioned signal. To address this issue, we introduce a principled formulation of classifier-free guidance (CFG) for regression-based vision-language driving. We show that CFG can be interpreted as isolating the instruction-induced residual in the action space by contrasting conditional and unconditional predictions, thereby explicitly amplifying the effect of the navigation command at inference time. However, a standard two-pass CFG introduces prohibitive latency for real-time control and produces noisy instance-level guidance directions. Building on a mean-shift interpretation of CFG, we propose Latent-Centroid Steering (LCS), a single-pass guidance mechanism that replaces instance-level residuals with class-level latent shifts. By projecting conditional representations toward precomputed command-specific centroids, LCS performs class-level latent steering based on cluster geometry that is both more stable and computationally efficient. We demonstrate that LCS reduces inference latency by approximately 50% while achieving stronger command adherence and improved driving performance on both closed-loop (Bench2Drive) and open-loop (nuScenes) benchmarks. Code will be released.",
+      "analysis": {
+        "key_results": "在Bench2Drive（闭环）和nuScenes（开环）上，降低约50%推理延迟，同时提升指令服从性和驾驶性能。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出Latent-Centroid Steering，一种单遍分类器无关引导机制，通过类级潜质心替代实例级残差，实现稳定且低延迟的指令服从增强。",
+        "method": "基于均值漂移解释的分类器无关引导，将条件表示向预计算指令特定质心投影，进行类级潜变量引导。",
+        "one_sentence_summary": "针对视觉语言驾驶模型中导航指令服从不足的问题，提出单遍潜质心引导方法，以稳定且高效地放大指令影响。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该工作面向视觉语言驾驶模型，属于VLA范畴，通过改进推理时的引导机制提升指令跟随能力，同时引入高效推理方法（单遍、延迟降低50%），对VLA的高效部署和可控性有直接参考价值。",
+        "relevance_score": 6,
+        "tags": [
+          "Efficient Inference",
+          "Robot Learning",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.RO"
+      ],
+      "arxiv_id": "2608.00237",
+      "authors": [
+        "Meibo Hu",
+        "Jiamian Wang",
+        "Pichao Wang",
+        "Zhiqiang Tao"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-13T05:41:39.833674Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2608.00237/v2/fig1-panel1.png"
+            ],
+            "caption": "Overview of Latent-Centroid Steering (LCS). Stage I : The model is trained with conditional dropout, where the navigation command is randomly replaced with a null token with probability p drop p_{\\text{drop}} . Stage II : Command-specific centroids μ c \\mu_{c} and the global centroid μ g \\mu_{g} are computed offline from latent features, yielding a precomputed shift table { δ c } \\{\\delta_{c}\\} . Stage III : At inference, LCS applies the shift vector δ c \\delta_{c} to the conditional latent 𝐳 c \\mathbf{z}_{c} in a single forward pass, steering the prediction toward the intended command without requiring an additional unconditional pass.",
+            "image_urls": [
+              "https://arxiv.org/html/2608.00237v2/framework2_v3.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2608.00237v2#S2.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2608.00237/v2/fig2-panel1.png"
+            ],
+            "caption": "Visualization of command-conditioned latent features by t-SNE and the command distribution.",
+            "image_urls": [
+              "https://arxiv.org/html/2608.00237v2/t-sne_v1.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2608.00237v2#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2608.00237v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-13T05:41:39.833674Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-07-31T19:32:28Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2608.00237",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2608.00237",
+        "project_url": null
+      },
+      "title": "Latent-Centroid Steering: Single-Pass Classifier-Free Guidance for Command-Aligned Autonomous Driving",
+      "title_zh": "潜质心引导：单遍分类器无关引导用于命令对齐的自主驾驶",
+      "updated_at": "2026-08-12T17:41:48Z",
+      "version": 2
+    },
     {
       "abstract": "Deploying large language models in realistic server environments poses challenges, as the system needs to provide high-quality responses with low latency. Quantization is a common approach to reduce the memory footprint and improve inference efficiency, yet its impact on latency and throughput is rarely evaluated under controlled, orchestration-level workloads. In this work we study the quantization trade-offs of two translation model families, EuroLLM \\citep{martins2025eurollm} and Hy-MT2 \\citep{zheng2026hy} across five models ranging from 1.7B to 22B for efficient deployment on a single A100 or H100 GPU. We demonstrate that combining a document-chunking strategy with W4A8 or W8A8 quantization improves the latency-throughput Pareto-curve under a wide range of workloads. Furthermore, since standard machine translation (MT) benchmarks rely on isolated sentences and fail to capture long-context dynamics, we introduce a document-level evaluation from WMT24++ to assess how text chunking strategies affect translation quality under quantization. Our results reveal that standard segment-level evaluation can fail to predict the interaction between quantization and long-context document translation. While Hy-MT2 remains robust under quantization, EuroLLM shows strong sensitivity and translation quality collapses rapidly for all considered quantization formats. Overall, our experiments show that the trade-off between inference efficiency and translation quality depends not only on the quantization format, but also on the choice of text chunking strategy.",
       "analysis": {
@@ -411,7 +496,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.28624v1",
-        "recovery_checked_at": "2026-08-12T05:42:59.386553Z",
+        "recovery_checked_at": "2026-08-13T05:47:24.782959Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -573,7 +658,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.28589v1",
-        "recovery_checked_at": "2026-08-12T05:42:59.386553Z",
+        "recovery_checked_at": "2026-08-13T05:47:24.782959Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -721,7 +806,7 @@
         "checked_at": "2026-08-01T23:53:18.181573Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2607.28415v1",
-        "recovery_checked_at": "2026-08-12T05:42:59.386553Z",
+        "recovery_checked_at": "2026-08-13T05:47:24.782959Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -1311,7 +1396,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.28226v1",
-        "recovery_checked_at": "2026-08-12T05:42:59.386553Z",
+        "recovery_checked_at": "2026-08-13T05:47:24.782959Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -3596,16 +3681,29 @@
             ],
             "caption": "See2Think versus prior visual-reasoning benchmarks. Prior benchmarks mainly evaluate final answers or visual-trace quality. See2Think diagnoses action relevance, render faithfulness, and feedback uptake. Controlled interventions test whether models rely on the returned visual state.",
             "image_urls": [
-              null
+              "https://arxiv.org/html/2607.26769v1/overview_main.png"
             ],
             "label": "Figure 1",
             "number": 1,
-            "source": "arxiv_source",
-            "source_url": "https://arxiv.org/e-print/2607.26769v1"
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2607.26769v1#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2607.26769/v1/fig2-panel1.png"
+            ],
+            "caption": "Overview of See2ThinkBench. Representative examples from 12 task categories spanning three visual reasoning levels: 2D structured reasoning, 3D scene reasoning, and real-world visual reasoning.",
+            "image_urls": [
+              "https://arxiv.org/html/2607.26769v1/benchmark_examples.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2607.26769v1#S2.F2"
           }
         ],
         "html_url": "https://arxiv.org/html/2607.26769v1",
-        "recovery_checked_at": "2026-08-12T05:42:59.386553Z",
+        "recovery_checked_at": "2026-08-13T05:47:24.782959Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -3674,7 +3772,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.27269v1",
-        "recovery_checked_at": "2026-08-12T05:42:59.386553Z",
+        "recovery_checked_at": "2026-08-13T05:47:24.782959Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -4186,33 +4284,13 @@
             "cached_image_paths": [
               "/figures/2607.26579/v1/fig1-panel1.jpg",
               "/figures/2607.26579/v1/fig1-panel2.jpg",
-              "/figures/2607.26579/v1/fig1-panel3.jpg",
-              "/figures/2607.26579/v1/fig1-panel4.jpg",
-              "/figures/2607.26579/v1/fig1-panel5.jpg",
-              "/figures/2607.26579/v1/fig1-panel6.jpg",
-              "/figures/2607.26579/v1/fig1-panel7.jpg",
-              "/figures/2607.26579/v1/fig1-panel8.jpg",
-              "/figures/2607.26579/v1/fig1-panel9.jpg",
-              "/figures/2607.26579/v1/fig1-panel10.jpg",
-              "/figures/2607.26579/v1/fig1-panel11.jpg",
-              "/figures/2607.26579/v1/fig1-panel12.jpg",
-              "/figures/2607.26579/v1/fig1-panel13.jpg"
+              "/figures/2607.26579/v1/fig1-panel3.jpg"
             ],
             "caption": "Closed-loop deployment with Contact Flow. On the left, a single RGBD view instantiates a symbolic twin simulator in which a π 0.5 \\pi_{0.5} policy proposes an end-effector trajectory. On the right, our world model imagines the rollout conditioned on the initial frame and Contact Flow from that trajectory, showing the real rollout above and the simulated rollout below.",
             "image_urls": [
               "https://arxiv.org/html/2607.26579v1/figures/sim_robomme_crop.jpg",
-              "https://arxiv.org/html/2607.26579v1/x1.jpg",
-              "https://arxiv.org/html/2607.26579v1/x2.jpg",
-              "https://arxiv.org/html/2607.26579v1/x3.jpg",
-              "https://arxiv.org/html/2607.26579v1/x4.jpg",
-              "https://arxiv.org/html/2607.26579v1/x5.jpg",
-              "https://arxiv.org/html/2607.26579v1/x6.jpg",
-              "https://arxiv.org/html/2607.26579v1/x7.jpg",
-              "https://arxiv.org/html/2607.26579v1/x8.jpg",
-              "https://arxiv.org/html/2607.26579v1/x9.jpg",
-              "https://arxiv.org/html/2607.26579v1/x10.jpg",
-              "https://arxiv.org/html/2607.26579v1/x11.jpg",
-              "https://arxiv.org/html/2607.26579v1/x12.jpg"
+              "https://arxiv.org/html/2607.26579v1/figures/rollout_droid_14b.jpg",
+              "https://arxiv.org/html/2607.26579v1/figures/rollout_ctrlnet14b_scen3.jpg"
             ],
             "label": "Figure 1",
             "number": 1,
@@ -4221,7 +4299,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.26579v1",
-        "recovery_checked_at": "2026-08-12T05:42:59.386553Z",
+        "recovery_checked_at": "2026-08-13T05:47:24.782959Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -4742,7 +4820,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.26055v1",
-        "recovery_checked_at": "2026-08-12T05:42:59.386553Z",
+        "recovery_checked_at": "2026-08-13T05:47:24.782959Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -7700,6 +7778,96 @@
       "version": 2
     },
     {
+      "abstract": "Vision-language models (VLMs) can describe a scene, but can they act well within one? We study whether VLMs can make sound strategic decisions, using soccer as an objective testbed with quantifiably-valued actions. We introduce SportD, a dataset and evaluation consisting of 1415 decision scenarios across professional men's and women's soccer games, where a VLM observes the seconds before a decision and chooses the next action. Models only select the optimal action around 30% of the time, even less frequently than humans do. Furthermore, they exhibit a clear preference for safer actions, favoring lower-variance, lower-value choices that also make less physical progress toward goal. Frontier VLMs are better at estimating whether an action will succeed, placing the highest-success-probability action among their top choices in 83-92% of cases. Yet VLMs systematically conflate likelihood with value, assigning higher value to actions that are more likely to succeed (Spearman corr. 0.30 to +0.52), despite no such relationship in the ground truth (Spearman corr. -0.08). The conservatism therefore reflects a mis-calibration of value. SportD opens a new direction for rigorously evaluating physical strategic decision-making in VLMs, showing that careful decomposition of their choices can reveal the mechanisms underlying systematic biases such as risk aversion.",
+      "analysis": {
+        "key_results": "模型仅约30%的时间选择最优动作，低于人类；83-92%的情况下将最高成功概率动作纳入前几个选择；模型将可能性与价值混淆，价值判断与实际价值无显著相关（Spearman相关系数-0.08）。",
+        "limitations": "摘要未说明",
+        "main_contribution": "构建了SportD数据集，包含1415个专业足球比赛决策场景，用于评估视觉语言模型在物理策略决策中的表现，并系统分析了模型的风险厌恶等系统偏差。",
+        "method": "利用视觉语言模型观察决策前数秒的视频片段，选择下一步动作；通过量化动作价值，比较模型与人类决策，分析动作选择、成功概率估计与价值判断的相关性。",
+        "one_sentence_summary": "本文通过专业足球决策场景数据集SportD评估视觉语言模型在物理环境中的策略决策能力，发现模型倾向于选择安全但价值较低的动作，并存在价值校准偏差。",
+        "primary_topic": "Dataset",
+        "relation_to_vla_wam": "本文不直接涉及VLA或世界模型，但为物理环境中的视觉-语言决策提供了评估基准，对机器人策略学习中的决策评估与偏差分析具有方法借鉴价值。",
+        "relevance_score": 6,
+        "tags": [
+          "Evaluation",
+          "Vision-Language",
+          "Robot Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.AI",
+        "cs.CV"
+      ],
+      "arxiv_id": "2607.14616",
+      "authors": [
+        "Jasin Cekinmez",
+        "Addison J. Wu",
+        "Haotian Xia",
+        "Kyumin Andrew Shim",
+        "Anay Putty",
+        "Jinglin Xiao",
+        "Zhuohan Liu",
+        "Leo Liu",
+        "Weining Shen"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-13T05:41:39.833674Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2607.14616/v3/fig1-panel1.png"
+            ],
+            "caption": "The SportD task. From the run-up clip, decision frame, and top-down map (lettered circles for players, a gold star for the player on the ball, an arrow for the attacking direction), the VLM chooses one action: a pass to a lettered teammate or a shot. Bottom right: the three VLMs’ and the real player’s choices, green if optimal and red otherwise. Here one VLM, GPT 5.6 Sol, finds the optimal pass; the others, and the player (who shot), do not.",
+            "image_urls": [
+              "https://arxiv.org/html/2607.14616v3/core.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2607.14616v3#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2607.14616/v3/fig2-panel1.png"
+            ],
+            "caption": "Rank-percentile accuracy: fraction of events on which the chosen action falls within the X% top of the ranked action set. The real player attains a higher adjusted accuracy than every VLM at every threshold. The comparison is purely ordinal.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2607.14616v3"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2607.14616v3",
+        "recovery_checked_at": "2026-08-13T05:47:24.782959Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-13T05:41:39.833674Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-07-16T06:30:26Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2607.14616",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2607.14616",
+        "project_url": null
+      },
+      "title": "SportD: How do VLMs physically strategize?",
+      "title_zh": "SportD：视觉语言模型如何进行物理策略决策？",
+      "updated_at": "2026-08-12T06:26:54Z",
+      "version": 3
+    },
+    {
       "abstract": "Vision-Language-Action (VLA) models have achieved impressive performance on diverse embodied tasks. However, deploying VLA models on low-power onboard devices, such as the Jetson Orin, remains challenging due to their high computational complexity, which leads to substantial inference latency and low control frequency. Asynchronous inference can partially mask this latency by parallelizing action execution and subsequent inference, but it introduces two critical issues: perception-execution misalignment and long reaction time. In this paper, we propose Jetson-PI, a method for efficient VLA deployment on onboard devices via Foresight-Aligned Asynchronous Correction. To address misalignment, we train a lightweight future correction module that predicts future environment representation conditioned on committed actions, enabling the action expert to directly predict actions from the future time step. To reduce reaction time, we introduce confidence-based scheduling optimization that adaptively balances VLM and action expert invocations, complemented by system-level accelerations including CUDA graph reuse, GPU-resident intermediate buffering, and flow unrolling. Extensive experiments demonstrate that Jetson-PI achieves 8.66x and 5.41x improvements in control frequency compared with naive PyTorch and vla.cpp on NVIDIA Jetson Orin, while outperforming VLASH by 14.8\\% in average success rate on the LIBERO benchmark. The code of our asynchronous algorithm is available on https://github.com/PKU-SEC-Lab/Jetson-PI, and our efficient llama.cpp-based inference engine is available on https://github.com/PKU-SEC-Lab/Jetson-PI-Edge.",
       "analysis": {
         "key_results": "在NVIDIA Jetson Orin上，控制频率较native PyTorch提升8.66倍，较vla.cpp提升5.41倍；LIBERO基准平均成功率比VLASH提升14.8%。",
@@ -7916,7 +8084,7 @@
         "checked_at": "2026-07-31T03:15:22.466924Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2607.10137v2",
-        "recovery_checked_at": "2026-08-12T05:42:59.386553Z",
+        "recovery_checked_at": "2026-08-13T05:47:24.782959Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "html_unavailable"
@@ -7941,6 +8109,97 @@
       "title": "RDQ: Residual Distribution Quantization for Large Language Models",
       "title_zh": "RDQ：面向大语言模型的残差分布量化",
       "updated_at": "2026-07-28T14:40:18Z",
+      "version": 2
+    },
+    {
+      "abstract": "Exploration is essential to RL since a policy cannot improve by repeatedly sampling the behaviors it already prefers. Standard methods inject stochasticity in the action space, but such jitter only yields rollouts close to the original. Escaping a weak policy often requires global perturbations that action noise cannot produce. Large language models (LLMs) and vision-language-action (VLA) models offer a pathway: they condition the policy on a natural language prompt, and since the rollout follows from it, modifying the prompt induces global changes. The challenge is finding prompts that induce useful global changes. With a weak policy that rarely succeeds, reward is too sparse to select on. Our idea is to refine prompts from the rollouts themselves: a vision-language model (VLM) reasons over the rollout video, diagnoses how the policy responded, and rewrites the prompt to elicit better behavior next time. This procedure resembles posterior sampling, a classical RL exploration framework, at the level of prompts: the VLM maintains an implicit distribution over useful prompts and updates it from observed rollouts. We call this strategy Prompt-Driven Exploration (PDE). Across manipulation and reasoning tasks, PDE enables RL to learn successful policies even from zero-reward starts, and improves sample efficiency more broadly. Our website is available at https://xinyunsunshine.github.io/prompt-rl.",
+      "analysis": {
+        "key_results": "在操作和推理任务中，PDE 使 RL 即使在零奖励启动下也能学习到成功策略，并普遍提高了样本效率。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出 Prompt-Driven Exploration (PDE)，利用 VLM 根据 rollout 结果迭代优化提示，实现类似后验采样的全局探索，使 RL 能从零奖励开始学习成功策略。",
+        "method": "使用 VLM 观察 rollout 视频，诊断策略行为，并重写提示作为下一轮策略条件，从而在提示层面进行全局探索。",
+        "one_sentence_summary": "本文提出了一种通过视觉语言模型分析 rollout 视频并重写自然语言提示，以在弱策略和稀疏奖励下实现全局探索的方法。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该工作直接使用 VLA 模型作为策略，并通过调整提示来改进探索，对 VLA 与机器人学习有直接贡献，但未涉及世界模型或工作记忆（WAM）。",
+        "relevance_score": 8,
+        "tags": [
+          "Robot Learning",
+          "Robot Manipulation",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "arxiv_id": "2607.08837",
+      "authors": [
+        "Sunshine Jiang",
+        "John Marangola",
+        "David Zhang",
+        "Raghuram Kowdeed",
+        "Ruiyang Luo",
+        "Nitish Dashora",
+        "Richard Li",
+        "Pulkit Agrawal",
+        "Zhang-Wei Hong"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-13T05:41:39.833674Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2607.08837/v2/fig1-panel1.png"
+            ],
+            "caption": "Left: Given the prompt “put the green container on the bottom rack,” the VLA policy picks up the container but fails to place it fully on the rack, causing it to fall off the edge (top row). Rephrasing the prompt as “put the green container completely on the bottom rack” leads the same policy to succeed, without any weight updates (bottom row). Right: RL with our prompt-driven exploration (PDE) improves the success rate from 10 % 10\\% to 50 % 50\\% , whereas PPO with standard action-noise exploration ( 42 ) remains near zero.",
+            "image_urls": [
+              "https://arxiv.org/html/2607.08837v2/teaser-realworld-archive.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2607.08837v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2607.08837/v2/fig2-panel1.png"
+            ],
+            "caption": "Overview of our method. A VLM defines a prompt sampler ρ ( ⋅ ∣ g , ℋ ) \\rho(\\cdot\\mid g,\\mathcal{H}) over candidate prompts for task g g , given its canonical prompt p g p_{g} and previous rollout feedback. Prompts sampled from ρ \\rho are executed by the VLA policy π θ \\pi_{\\theta} . The resulting trajectories and rewards are added to the history, allowing ρ \\rho to propose prompts that better elicit rollouts completing the task g g ( green arrow , “Update Prompt Posterior”). Finally, π θ \\pi_{\\theta} is fine-tuned with RL on the collected rollouts ( blue arrow , “RL Update”).",
+            "image_urls": [
+              "https://arxiv.org/html/2607.08837v2/pipeline-archive.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2607.08837v2#S4.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2607.08837v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-13T05:41:39.833674Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-07-09T18:00:24Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2607.08837",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2607.08837",
+        "project_url": "https://xinyunsunshine.github.io/prompt-rl"
+      },
+      "title": "Prompt-Driven Exploration",
+      "title_zh": "基于提示驱动的探索方法",
+      "updated_at": "2026-08-12T00:00:42Z",
       "version": 2
     },
     {
@@ -8692,22 +8951,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 65,
-    "completion_tokens": 15590,
+    "cache_hits": 81,
+    "completion_tokens": 14736,
     "error_categories": {
       "ValidationError": 1
     },
     "failed": 1,
-    "fetched": 1691,
-    "figure_available": 71,
-    "figure_cache_hits": 39,
+    "fetched": 1817,
+    "figure_available": 78,
+    "figure_cache_hits": 50,
     "figure_failed": 0,
-    "figure_requests": 34,
-    "figure_unavailable": 2,
-    "model_calls": 50,
-    "prefiltered": 115,
-    "prompt_tokens": 43602,
-    "published": 73,
-    "total_tokens": 59192
+    "figure_requests": 40,
+    "figure_unavailable": 12,
+    "model_calls": 45,
+    "prefiltered": 126,
+    "prompt_tokens": 39675,
+    "published": 90,
+    "total_tokens": 54411
   }
 }

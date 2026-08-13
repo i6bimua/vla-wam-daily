@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-12T05:39:09.894473Z",
+  "generated_at": "2026-08-13T05:41:39.833674Z",
   "papers": [
     {
       "abstract": "Behavior cloning with high-capacity generative policies achieves strong imitation performance, but is often limited by demonstration coverage and distribution shift. Direct reinforcement learning fine-tuning can improve performance, but updating large action decoders is frequently unstable and sample inefficient. We propose Lagrangian Perturbation Diffusion Steering (LP-DS), a lightweight adaptation method that improves a frozen generative policy by learning a compact noise-space perturbation before decoding. LP-DS optimizes this perturbation with a Lagrangian trust-region objective, improving downstream value while constraining deviation from the latent prior. Across RoboMimic manipulation, OpenAI Gym locomotion, and Adroit dexterous manipulation benchmarks, LP-DS improves sample efficiency, success, and return while maintaining higher action-space entropy than unconstrained noise-space steering, with return improvements of up to 25% over prior baselines. Additional evaluations with flow-matching backbones, a large vision-language-action model, and physical Franka deployment show that LP-DS is not limited to compact diffusion policies or simulated benchmarks. Project page: https://sites.google.com/view/lp-ds/home.",
@@ -1371,6 +1371,93 @@
       "version": 3
     },
     {
+      "abstract": "Why does full-pipeline FP4 training of large language models often diverge, even when forward activations and activation gradients remain stable? We address this question through a controlled study of MXFP4 quantization in transformer training, progressively enabling FP4 across forward propagation (Fprop), activation gradients (Dgrad), and weight gradients (Wgrad) while holding all other factors fixed. In full pretraining of Llama 3.1-8B on the C4 dataset, we observe that quantizing Wgrad is the primary driver of convergence degradation, whereas FP4 in Fprop and Dgrad alone introduces only modest additional token requirements. To interpret this behavior, we evaluate both structured and stochastic interventions under a controlled experimental setting. We find that stochastic rounding and randomized Hadamard rotations fail to stabilize training once Wgrad is quantized, whereas deterministic Hadamard rotations consistently restore stable optimization. These results suggest that FP4 training instability is driven by structured micro-scaling errors along sensitive gradient paths, rather than by insufficient stochasticity. We run experiments with native MXFP4 support on AMD Instinct MI355X GPUs, enabling controlled investigation of these effects without reliance on software emulation.",
+      "analysis": {
+        "key_results": "量化权重梯度是收敛退化的主因；FP4仅在前向和激活梯度引入适度额外token；确定性Hadamard旋转能恢复稳定优化，而随机方法不行；FP4训练不稳定源于梯度敏感路径上的结构化微缩放误差。",
+        "limitations": "摘要未说明",
+        "main_contribution": "通过受控实验确定了FP4训练中量化权重梯度（Wgrad）是收敛退化的主要驱动因素，并展示了确定性Hadamard旋转可稳定训练，而随机舍入和随机Hadamard旋转则不能。",
+        "method": "受控实验：在Llama 3.1-8B预训练中逐步启用FP4于前向传播、激活梯度和权重梯度，并对比结构化与随机干预（随机舍入、随机/确定性Hadamard旋转）的效果；使用AMD MI355X GPU原生MXFP4支持。",
+        "one_sentence_summary": "该论文通过MXFP4量化控制研究，揭示了FP4训练不稳定的主要原因是权重梯度量化引起的结构化微缩放误差，并证明确定性Hadamard旋转可恢复稳定优化。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文专注于FP4量化训练大语言模型，不直接涉及VLA、WAM或机器人，但模型量化效率主题对VLA/WAM在资源受限环境的部署和训练具有潜在方法论价值。",
+        "relevance_score": 7,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "arxiv_id": "2605.09825",
+      "authors": [
+        "Musa Cim",
+        "Sarthak Arora",
+        "Poovaiah Palangappa",
+        "Miro Hodak",
+        "Ravi Dwivedula",
+        "Meena Arunachalam",
+        "Mahmut Taylan Kandemir"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-13T05:41:39.833674Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2605.09825/v4/fig1-panel1.png"
+            ],
+            "caption": "Validation perplexity vs. training tokens for Llama 3.1–8B under MLPerf pretraining on C4 dataset. We compare FP8, full-pipeline MXFP4 (Fprop + Dgrad + Wgrad; no stabilizer), and full-pipeline MXFP4 + deterministic Hadamard ( H 16 H_{16} ). MXFP4 + deterministic Hadamard closely tracks FP8, while full-pipeline MXFP4 without stabilization converges more slowly and is less stable.",
+            "image_urls": [
+              "https://arxiv.org/html/2605.09825v4/convergence_curves.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.09825v4#S3.F2.fig1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2605.09825/v4/fig2-panel1.png"
+            ],
+            "caption": "Zoomed-in view of later training (from Figure 2 ). The MLPerf target is perplexity 3.3. Deterministic Hadamard ( H 16 H_{16} ) maintains tight alignment with the FP8 baseline compared to the unstabilized MXFP4 run.",
+            "image_urls": [
+              "https://arxiv.org/html/2605.09825v4/convergence_zoom.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.09825v4#S3.F2.fig2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2605.09825v4",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-13T05:41:39.833674Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-05-11T00:04:07Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2605.09825",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2605.09825",
+        "project_url": null
+      },
+      "title": "Pretraining large language models with MXFP4 on Native FP4 Hardware",
+      "title_zh": "原生FP4硬件上使用MXFP4预训练大语言模型",
+      "updated_at": "2026-08-12T13:15:17Z",
+      "version": 4
+    },
+    {
       "abstract": "State-of-the-art model-based Reinforcement Learning (RL) approaches either use gradient-free, population-based methods for planning, learned policy networks, or a combination of policy networks and planning. Hybrid approaches that combine Model Predictive Control (MPC) with a learned model and a policy prior to leverage the advantages of both paradigms have shown promising results. However, these approaches typically rely on gradient-free optimization methods, which can be computationally expensive for high-dimensional control tasks. While gradient-based methods are a promising alternative, recent works have empirically shown that gradient-based methods often perform worse than their gradient-free counterparts. We propose Dream-MPC, a novel approach that generates few candidate trajectories from a rolled-out policy and optimizes each trajectory by gradient ascent using a learned world model, uncertainty regularization and amortization of optimization iterations over time by reusing previously optimized actions. Our results on 24 continuous control tasks show that Dream-MPC can significantly improve the performance of the underlying policy and can outperform gradient-free MPC and state-of-the-art baselines. Code and videos are available at https://dream-mpc.github.io.",
       "analysis": {
         "key_results": "在24个连续控制任务上，Dream-MPC显著提升底层策略性能，并优于无梯度MPC与现有基线。",
@@ -1631,22 +1718,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 65,
-    "completion_tokens": 15590,
+    "cache_hits": 81,
+    "completion_tokens": 14736,
     "error_categories": {
       "ValidationError": 1
     },
     "failed": 1,
-    "fetched": 1691,
-    "figure_available": 71,
-    "figure_cache_hits": 39,
+    "fetched": 1817,
+    "figure_available": 78,
+    "figure_cache_hits": 50,
     "figure_failed": 0,
-    "figure_requests": 34,
-    "figure_unavailable": 2,
-    "model_calls": 50,
-    "prefiltered": 115,
-    "prompt_tokens": 43602,
-    "published": 73,
-    "total_tokens": 59192
+    "figure_requests": 40,
+    "figure_unavailable": 12,
+    "model_calls": 45,
+    "prefiltered": 126,
+    "prompt_tokens": 39675,
+    "published": 90,
+    "total_tokens": 54411
   }
 }
