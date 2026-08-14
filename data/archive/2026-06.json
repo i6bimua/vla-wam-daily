@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-13T05:41:39.833674Z",
+  "generated_at": "2026-08-14T05:39:18.670795Z",
   "papers": [
     {
       "abstract": "World-model-based autonomous driving endows the model with the ability to understand scene evolution. Yet this promise is undermined by the prevailing imagine-then-act paradigm, which allows errors from the more challenging visual generation stage to cascade into action planning. We introduce ForgeDrive, a unified autoregressive diffusion framework with visual-action cross-conditioning that closes this gap through act-then-imagine paradigm. ForgeDrive factorizes the future as a sequence of per-timestep frame-action pairs, intertwining each action with its corresponding visual observation. During training, we decouple the diffusion timesteps of the two modalities and introduce a UniDiffuser-style noise scheduler to get the ability to infer either modality from its counterpart and deepen understanding of relationships between images and actions. At inference, we propose a novel act-then-imagine inference paradigm, and find that at each step, action generation is a capability internalized during training, requiring no clean future frame as a prerequisite at inference time; instead, the generated action can improve the accuracy of future frame generation, which in turn enhances the quality of the next action. Additionally, we augment each step with future ego-status prediction, further sharpening planning ability. Extensive experiments on NAVSIM demonstrate that ForgeDrive not only unifies driving simulation, planning, and visual odometry into a single model, but also outperforms existing strong planners without any post-training strategy.",
@@ -91,6 +91,91 @@
       "title": "ForgeDrive: Bidirectional Cross-Conditioning for Unified Visual-Action Generation in Autonomous Driving",
       "title_zh": "ForgeDrive：面向自动驾驶统一视觉-动作生成的双向交叉条件化方法",
       "updated_at": "2026-07-28T07:16:13Z",
+      "version": 2
+    },
+    {
+      "abstract": "Visual shifts can cause a vision-language-action policy to fail after initially plausible behavior. We ask whether OpenVLA's internal activations contain signals associated with the steps before failure. We freeze the policy, record one MLP activation per LIBERO-10 step, and fit two linear monitors. Occlusion reduces task success from $57\\%$ to $17\\%$. Within failed matched-reset trajectories, a layer-16 logistic probe attains AUROC $0.972$ and AUPRC $0.352$, whereas action disagreement attains AUROC $0.496$. Without refitting, the occlusion-trained probe reaches AUROC $0.689$ on failed camera-jitter episodes. In a calibration check, however, the same layer-16 monitor averages 3.32 warning onsets per clean episode. This contrast shows that strong retrospective discrimination does not imply operationally quiet warning behavior. Because fitting and evaluation share tasks, resets, and seed, these results establish retrospective separability rather than prediction on independent episodes.",
+      "analysis": {
+        "key_results": "遮挡使任务成功率从 57% 降至 17%；层 16 逻辑探针在失败轨迹上 AUROC 0.972、AUPRC 0.352，而动作分歧 AUROC 0.496；遮挡训练探针在相机抖动失败片段上 AUROC 0.689；同一监控器在干净片段上平均 3.32 次预警。",
+        "limitations": "拟合与评估共享任务、重置和随机种子，因此结果仅表明回顾性可分性，而非对独立片段的预测能力。",
+        "main_contribution": "发现 OpenVLA 内部激活中存在与失败相关的可分离信号：通过冻结策略和拟合线性探针，在遮挡导致失败的轨迹中实现高 AUROC，但该信号在干净轨迹上产生大量误报，且泛化能力有限。",
+        "method": "冻结 OpenVLA 策略，逐步骤记录一层 MLP 激活，拟合两个线性监控器（逻辑回归探针），并在 LIBERO-10 基准上分析遮挡和相机抖动两种视觉偏移。",
+        "one_sentence_summary": "本文探究在视觉分布偏移导致 OpenVLA 策略失败之前，其内部激活中是否存在与失败相关的早期预警信号。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "本文直接以视觉-语言-动作模型 OpenVLA 为研究对象，分析其内部表征与失败预测，属于 VLA 可解释性与可靠性范畴，为 VLA 在视觉分布偏移下的行为监控提供启示。",
+        "relevance_score": 9,
+        "tags": [
+          "Vision-Language",
+          "Robot Learning",
+          "Evaluation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.AI",
+        "cs.RO"
+      ],
+      "arxiv_id": "2606.29699",
+      "authors": [
+        "Dipesh Tharu Mahato",
+        "Rachel Ren"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-14T05:39:18.670795Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2606.29699/v2/fig1-panel1.png"
+            ],
+            "caption": "OpenVLA rollout and monitoring pipeline. Blue arrows trace one closed-loop policy step, green dashed arrows trace the offline fitting path, and the red hook records the input to one MLP down projection. The bottom row separates the current analysis of matched-reset trajectories from deployment validation.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2606.29699v2"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2606.29699/v2/fig2-panel1.png"
+            ],
+            "caption": "Layer-wise discrimination under occlusion. Each panel reports one metric, so AUROC and AUPRC retain separate scales. Circles show the mean-direction monitor; squares show logistic regression. Horizontal segments show the difference between monitors at each layer. The dashed AUROC line marks the action-disagreement baseline ( 0.496 0.496 ). The matched-reset trajectories share task, reset, and seed.",
+            "image_urls": [
+              "https://arxiv.org/html/2606.29699v2/figures/occluded_layer_performance.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2606.29699v2#S5.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2606.29699v2",
+        "recovery_checked_at": "2026-08-14T05:43:01.295563Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-14T05:39:18.670795Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-06-29T02:07:17Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2606.29699",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2606.29699",
+        "project_url": null
+      },
+      "title": "Early Warning Signals for OpenVLA Failure under Visual Distribution Shift",
+      "title_zh": "视觉分布偏移下 OpenVLA 失败的早期预警信号",
+      "updated_at": "2026-08-13T02:29:35Z",
       "version": 2
     },
     {
@@ -1162,6 +1247,70 @@
       "version": 2
     },
     {
+      "abstract": "On-policy self-distillation (OPSD) has emerged as an efficient post-training paradigm by using a teacher conditioned on privileged information to provide dense token-level supervision. Prior work has shown that OPSD can collapse in verifiable reasoning tasks, while safety alignment differs in that it is guided by high-level constitutions rather than explicit target answers. However, pilot studies reveals that safety OPSD nonetheless suffers from severe collapse, where constitutional conditioning contracts the teacher distribution toward short and overly conservative responses and Reverse KL further amplifies this contraction into reduced expressiveness. We formalize this effect as geometric leakage under safety boundaries in a non-orthogonal semantic space, where safety pressure transfers into the expressiveness dimension. Based on this analysis, we propose Constitutional On-Policy Safety Distillation (COPSD), which first calibrates the teacher through a Cross-SFT cold-start and then performs constitution-conditioned on-policy distillation. Experiments across 3 multimodal large language models (MLLMs) on 12 safety and general benchmarks show that COPSD improves both safety and helpfulness over baselines while reducing the safety tax on general reasoning.",
+      "analysis": {
+        "key_results": "在3个多模态大模型、12个安全与通用基准上，COPSD在安全性和有用性上均优于基线，同时降低了对通用推理的‘安全税’。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出Constitutional On-Policy Safe Distillation (COPSD)方法，通过Cross-SFT冷启动校准教师模型，再进行宪法条件在策略蒸馏，以缓解安全对齐中的模型坍缩问题。",
+        "method": "Cross-SFT冷启动校准教师模型，再进行宪法条件在策略蒸馏。",
+        "one_sentence_summary": "提出COPSD方法，通过Cross-SFT冷启动和宪法条件在策略蒸馏，缓解安全对齐中的坍缩问题，提升多模态大模型安全性与有用性。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该工作聚焦于多模态大模型的安全对齐蒸馏，虽然涉及视觉-语言模型与策略学习概念，但并未直接涉及机器人VLA或世界模型，与本站主题关联较弱。其方法论可能对在策略蒸馏改进机器人策略学习有借鉴价值。",
+        "relevance_score": 6,
+        "tags": [
+          "Vision-Language",
+          "Policy Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "arxiv_id": "2606.03089",
+      "authors": [
+        "Ming Wen",
+        "Yuxuan Liu",
+        "Kun Yang",
+        "Yunhao Feng",
+        "Zhuoer Xu",
+        "Yuhao Sun",
+        "Shiwen Cui",
+        "Xiang Zheng",
+        "Yi Liu",
+        "Xingjun Ma",
+        "Yu-Gang Jiang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-14T05:39:18.670795Z",
+        "figures": [],
+        "html_url": "https://arxiv.org/html/2606.03089v3",
+        "recovery_checked_at": "2026-08-14T05:43:01.295563Z",
+        "recovery_status": "not_found",
+        "recovery_version": 3,
+        "status": "not_found"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-14T05:39:18.670795Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-06-02T03:17:56Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2606.03089",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2606.03089",
+        "project_url": null
+      },
+      "title": "Constitutional On-Policy Safe Distillation",
+      "title_zh": "宪法式在策略安全蒸馏",
+      "updated_at": "2026-08-13T08:19:05Z",
+      "version": 3
+    },
+    {
       "abstract": "Diffusion large language models (dLLMs) have recently emerged as a promising alternative to autoregressive (AR) LLMs, offering faster inference through parallel or blockwise decoding. However, their masked language modeling formulation remains incompatible with standard token-level speculative decoding, one of the most effective acceleration techniques for AR models. In AR decoding, the causal mask preserves temporally valid token-level contexts, enabling a target model to verify multiple drafted tokens in a single forward pass. In contrast, dLLMs rely on mask tokens and bidirectional attention, causing the effective context to change across denoising steps and preventing direct token-level speculative verification. To bridge this gap, we propose a simple but effective speculative decoding algorithm for diffusion language models, named SimSD, which mainly adopts a plug-and-play masking strategy that equips dLLMs with temporally valid token-level contexts for speculative decoding. Our method explicitly introduces reference tokens from draft-model predictions and designs an attention mask that regulates their interaction with current-step tokens, allowing dLLMs to compute valid logits for drafted tokens in a single forward pass. This restores the key verification ability provided by causal masking in AR models while preserving the parallel decoding advantages of dLLMs. The proposed method is training-free and can be flexibly integrated with other acceleration techniques such as KV cache and blockwise decoding. Experiments on SDAR-family dLLMs across four benchmarks show that our method achieves up to 7.46x higher decoding throughput while maintaining and even improving average generation quality.",
       "analysis": {
         "key_results": "在四个基准测试上的SDAR系列dLLM上，该方法实现高达7.46倍的解码吞吐量提升，同时保持甚至提高平均生成质量。",
@@ -1316,22 +1465,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 81,
-    "completion_tokens": 14736,
+    "cache_hits": 64,
+    "completion_tokens": 14728,
     "error_categories": {
       "ValidationError": 1
     },
     "failed": 1,
-    "fetched": 1817,
-    "figure_available": 78,
-    "figure_cache_hits": 50,
+    "fetched": 1690,
+    "figure_available": 80,
+    "figure_cache_hits": 53,
     "figure_failed": 0,
-    "figure_requests": 40,
-    "figure_unavailable": 12,
+    "figure_requests": 35,
+    "figure_unavailable": 8,
     "model_calls": 45,
-    "prefiltered": 126,
-    "prompt_tokens": 39675,
-    "published": 90,
-    "total_tokens": 54411
+    "prefiltered": 109,
+    "prompt_tokens": 38793,
+    "published": 88,
+    "total_tokens": 53521
   }
 }
