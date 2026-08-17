@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-16T04:38:08.575451Z",
+  "generated_at": "2026-08-17T04:43:48.944667Z",
   "papers": [
     {
       "abstract": "Unlike text- or image-driven video generation, an interactive world model is driven by actions: the user acts, and the world responds. Two obstacles stand in the way of fair and comprehensive evaluation. First, models take actions in incompatible formats---captions, camera trajectories, action functions---so no shared protocol has been established. Second, while existing benchmarks have advanced world memory and visual quality, action following is reduced to trajectory or direction error, which collapses a whole path into one number: not how quickly the world reacts to a command switch, nor how cleanly it moves along the commanded axis. WorldMark removes both obstacles. Per-model adapters translate a shared WASD-style vocabulary into each model's native control format, so ten heterogeneous models receive semantically identical instructions across 500 standardized cases spanning styles, viewpoints, and difficulty tiers; a new model costs one adapter. On this common ground we characterize action dynamics through a control-systems lens---direction accuracy, direction purity, response latency, and motion stability, each resolved per axis---alongside suites for world memory and visual quality. Together they expose differences existing protocols cannot see: the fastest responders are often the least stable, a trade-off no single action metric captures; per-axis resolution reveals models that follow translation almost perfectly while barely responding to rotation; the model with the best perceptual and aesthetic quality ranks last in translational direction accuracy and latency; and stylized scenes cost every model global consistency while leaving action dynamics largely intact. We will release all data, evaluation code, and model outputs.",
@@ -442,6 +442,182 @@
       "version": 2
     },
     {
+      "abstract": "Visual Retrieval-Augmented Generation (VRAG) empowers Vision-Language Models to retrieve and reason over visually rich documents. To tackle complex queries requiring multi-step reasoning, agentic VRAG systems interleave reasoning with iterative retrieval. However, existing agentic VRAG faces two critical bottlenecks. (1) Visual Evidence Sparsity: key evidence is scattered across pages yet processed in isolation, hindering cross-page reasoning; moreover, fine-grained intra-image evidence often requires precise visual actions, whose misuse degrades retrieval quality; (2) Search Drift in Long Horizons: the accumulation of visual tokens across retrieved pages dilutes context and causes cognitive overload, leading agents to deviate from their search objective. To address these challenges, we propose VISOR (Visual Retrieval-Augmented Generation via Iterative Search and Over-horizon Reasoning), a unified single-agent framework. VISOR features a structured Evidence Space for progressive cross-page reasoning, coupled with a Visual Action Evaluation and Correction mechanism to manage visual actions. Additionally, we introduce a Dynamic Trajectory with Sliding Window and Intent Injection to mitigate search drift. They anchor the evidence space while discarding earlier raw interactions, preventing context from being overwhelmed by visual tokens. We train VISOR using a Group Relative Policy Optimization-based Reinforcement Learning (GRPO-based RL) pipeline with state masking and credit assignment tailored for dynamic context reconstruction. Extensive experiments on ViDoSeek, SlideVQA, and MMLongBench demonstrate that VISOR achieves state-of-the-art performance while maintaining reasonable and controllable computational costs for long-horizon visual reasoning tasks. The source code is available at https://github.com/syc1336/VISOR.",
+      "analysis": {
+        "key_results": "在ViDoSeek、SlideVQA和MMLongBench上达到最先进性能，同时保持合理可控的计算成本。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出VISOR框架，包含结构化证据空间、视觉动作评估与修正机制、动态轨迹滑动窗口与意图注入，以及基于GRPO的强化学习训练流程，在长视距视觉推理任务上实现最先进性能。",
+        "method": "结构化证据空间支持渐进式跨页推理；视觉动作评估与修正机制管理精细视觉动作；动态轨迹滑动窗口与意图注入缓解搜索漂移；使用GRPO-based RL与状态掩码和信用分配进行训练。",
+        "one_sentence_summary": "VISOR提出一个统一的单智能体框架，通过结构化证据空间、视觉动作评估修正和动态轨迹机制，解决智能体视觉检索增强生成中的视觉证据稀疏和长视距搜索漂移问题。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "无直接关系。本文专注于视觉检索增强生成的效率与推理优化，未涉及VLA、世界模型或机器人动作预测。",
+        "relevance_score": 6,
+        "tags": [
+          "Efficient Inference",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "arxiv_id": "2604.09508",
+      "authors": [
+        "Yucheng Shen",
+        "Jiulong Wu",
+        "Jizhou Huang",
+        "Dawei Yin",
+        "Lingyong Yan",
+        "Min Cao"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-17T04:43:48.944667Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2604.09508/v2/fig1-panel1.png"
+            ],
+            "caption": "Two critical bottlenecks in agentic VRAG: (Top) Visual Evidence Sparsity , with relevant clues scattered across pages or small image regions; (Bottom) Long-Horizon Search Drift , where growing visual context obscures prior evidence and the original goal.",
+            "image_urls": [
+              "https://arxiv.org/html/2604.09508v2/Main.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2604.09508v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2604.09508/v2/fig2-panel1.png"
+            ],
+            "caption": "Overview of VISOR . At each step i i , the agent produces a ⟨ \\langle think ⟩ \\rangle … ⟨ \\langle action ⟩ \\rangle response. Evidence extracted from the reasoning trace is accumulated in a structured Evidence Collection space ℰ \\mathcal{E} . The action space comprises three operations: search , crop , and answer . The agent loop context is reconstructed at each turn: the user query and ℰ \\mathcal{E} are always pinned at the top, while only the last W W turns of raw interactions are retained via a Sliding Window ; each turn’s observation also includes an Intent Injection prompt to re-anchor the agent’s focus.",
+            "image_urls": [
+              "https://arxiv.org/html/2604.09508v2/overview.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2604.09508v2#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2604.09508v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-17T04:43:48.944667Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-04-10T17:25:34Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2604.09508",
+        "code_url": "https://github.com/syc1336/VISOR",
+        "pdf_url": "https://arxiv.org/pdf/2604.09508",
+        "project_url": null
+      },
+      "title": "VISOR: Agentic Visual Retrieval-Augmented Generation via Iterative Search and Over-horizon Reasoning",
+      "title_zh": "VISOR：基于迭代检索与超视距推理的智能体视觉检索增强生成",
+      "updated_at": "2026-08-14T07:23:24Z",
+      "version": 2
+    },
+    {
+      "abstract": "Recent advances in Multimodal Large Language Models (MLLMs) have created new opportunities for facial expression recognition (FER), moving it beyond pure label prediction toward reasoning-based affect understanding. However, existing MLLM-based FER methods still follow a passive paradigm: they rely on externally prepared facial inputs and perform single-pass reasoning over fixed visual evidence, without the capability for active facial perception. To address this limitation, we propose ActFER, an agentic framework that reformulates FER as active visual evidence acquisition followed by multimodal reasoning. Specifically, ActFER dynamically invokes tools for face detection and alignment, selectively zooms into informative local regions, and reasons over facial Action Units (AUs) and emotions through a visual Chain-of-Thought. To realize such behavior, we further develop Utility-Calibrated GRPO (UC-GRPO), a reinforcement learning algorithm tailored to agentic FER. UC-GRPO uses AU-grounded multi-level verifiable rewards to densify supervision, query-conditional contrastive utility estimation to enable sample-aware dynamic credit assignment for local inspection, and emotion-aware EMA calibration to reduce noisy utility estimates while capturing emotion-wise inspection tendencies. This algorithm enables ActFER to learn both when local inspection is beneficial and how to reason over the acquired evidence. Comprehensive experiments show that ActFER trained with UC-GRPO consistently outperforms passive MLLM-based FER baselines and substantially improves AU prediction accuracy.",
+      "analysis": {
+        "key_results": "在综合实验中，ActFER结合UC-GRPO一致优于被动MLLM-based FER基线，并大幅提高AU预测准确率。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出ActFER框架，将FER重新定义为主动视觉证据获取与多模态推理，并开发UC-GRPO强化学习算法以训练智能体何时及如何进行局部检查。",
+        "method": "ActFER动态调用人脸检测和对齐工具，选择性放大信息丰富的局部区域，并通过视觉思维链推理面部动作单元和情绪；使用UC-GRPO算法进行强化学习训练。",
+        "one_sentence_summary": "ActFER提出一个智能体框架，通过主动工具使用和视觉思维链将面部表情识别重构为主动视觉证据获取后多模态推理的任务。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该工作属于视觉-语言智能体，利用工具使用和主动感知策略，尽管面向面部表情识别而非机器人操作，但其主动感知和工具调用机制对VLA或机器人策略学习具有方法论参考价值。",
+        "relevance_score": 6,
+        "tags": [
+          "Vision-Language",
+          "Policy Learning",
+          "Robot Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV"
+      ],
+      "arxiv_id": "2604.08990",
+      "authors": [
+        "Shifeng Liu",
+        "Zhengye Zhang",
+        "Sirui Zhao",
+        "Xinglong Mao",
+        "Zhehan Kan",
+        "Zhixiang Wei",
+        "Shiwei Wu",
+        "Chaoyou Fu",
+        "Tong Xu",
+        "Enhong Chen"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-17T04:43:48.944667Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2604.08990/v2/fig1-panel1.png"
+            ],
+            "caption": "Comparison of FER paradigms. Previous methods rely on passive reasoning over fixed inputs, while ActFER performs tool-augmented agentic inspection. A comparison figure contrasting three paradigms for facial expression recognition. On the left, traditional FER models consume preprocessed face images and output emotion labels. In the middle, MLLM-based FER models take preprocessed faces and perform text-based chain-of-thought reasoning before predicting emotions, reflecting external preprocessing, fixed visual evidence, and single-pass passive reasoning. On the right, ActFER starts from raw images, invokes a tool library for face detection, alignment, and adaptive ROI zooming with an explicit decision of whether and where to zoom, performs multimodal CoT reasoning with AU analysis, and then outputs the final emotion answer, reflecting active internal preprocessing, adaptive local inspection, and tool-augmented agentic reasoning.",
+            "image_urls": [
+              "https://arxiv.org/html/2604.08990v2/teaser-lsf-0323.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2604.08990v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2604.08990/v2/fig2-panel1.png"
+            ],
+            "caption": "Overall architecture of ActFER. The agent combines tool-augmented visual reasoning, perceptual tools, FACS-grounded hierarchical inference, and two-stage SFT+UC-GRPO optimization. Overall ActFER agent showing the input image, perceptual tool layer, FACS-grounded reasoning process, and two-stage training pipeline.",
+            "image_urls": [
+              "https://arxiv.org/html/2604.08990v2/framework_0402.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2604.08990v2#S1.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2604.08990v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-17T04:43:48.944667Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-04-10T05:53:19Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2604.08990",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2604.08990",
+        "project_url": null
+      },
+      "title": "ActFER: Agentic Facial Expression Recognition via Active Tool-Augmented Visual Reasoning",
+      "title_zh": "ActFER: 基于主动工具增强视觉推理的智能体面部表情识别",
+      "updated_at": "2026-08-14T13:45:39Z",
+      "version": 2
+    },
+    {
       "abstract": "While artificial intelligence has mastered structured games like chess and Go, vision-language agents still struggle in visually-driven 3D games without access to game states. Existing game environments typically evaluate a fixed agent configuration, rather than an agent's ability to improve its configuration across consecutive episodes of the same task---a paradigm known as test-time learning (TTL). Furthermore, current TTL methods typically optimize single modalities---such as text prompts or actions---in isolation, ignoring the synergy between perception, reasoning, and control. To bridge these gaps, we first introduce \\textbf{PokeGym}, a long-horizon benchmark built upon the 3D open-world game Pok\\'emon Legends: Z-A, where agents act from visual observations without access to game states, designed to evaluate an agent's ability to learn and adapt across consecutive episodes of the task. To tackle this challenging environment, we propose Graph-Guided Evolutionary Multimodal Agent Configuration (\\textbf{G-EvoMAC}), a graph-guided framework that jointly optimizes visual perception, strategy, and action set synergistically. Extensive experiments show that G-EvoMAC achieves a 60.18\\% average success rate on PokeGym, outperforming the strongest baseline by over 11 percentage points, validating the power of cross-modal co-evolution.",
       "analysis": {
         "key_results": "在PokeGym上G-EvoMAC平均成功率60.18%，超过最强基线11个百分点以上。",
@@ -837,7 +1013,7 @@
         "checked_at": "2026-08-13T05:41:39.833674Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2604.02047v2",
-        "recovery_checked_at": "2026-08-16T04:38:17.404713Z",
+        "recovery_checked_at": "2026-08-17T04:52:17.234998Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -952,20 +1128,20 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 33,
-    "completion_tokens": 0,
+    "cache_hits": 0,
+    "completion_tokens": 10443,
     "error_categories": {},
     "failed": 0,
-    "fetched": 441,
-    "figure_available": 27,
-    "figure_cache_hits": 28,
+    "fetched": 337,
+    "figure_available": 20,
+    "figure_cache_hits": 0,
     "figure_failed": 0,
-    "figure_requests": 0,
-    "figure_unavailable": 1,
-    "model_calls": 0,
-    "prefiltered": 33,
-    "prompt_tokens": 0,
-    "published": 28,
-    "total_tokens": 0
+    "figure_requests": 26,
+    "figure_unavailable": 6,
+    "model_calls": 32,
+    "prefiltered": 32,
+    "prompt_tokens": 28604,
+    "published": 26,
+    "total_tokens": 39047
   }
 }
