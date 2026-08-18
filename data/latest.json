@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-18T04:37:16.595066Z",
+  "generated_at": "2026-08-18T23:17:21.801275Z",
   "papers": [
     {
       "abstract": "Long-horizon robot manipulation chains many contact-rich skills into one multi-stage task. Vision-language-action (VLA) models increasingly master the individual skills, yet the chain still fails: errors compound beyond the policy's ability to correct, and one subtask silently constrains the next. A promising recipe freezes the VLA and puts an LLM agent in charge: it plans in language, moves in free space with analytic primitives, invokes the VLA only for contact-rich segments, and writes adaptation into language memory. Applied to long horizons, it breaks twice. (1) Competence comes from whole-task exploration at test time, whose cost is multiplicative in stages: if one stage needs T episodes, a K-stage task needs about T^K, and a failure does not reveal which stage caused it. (2) It has no representation of transitions: the VLA primitive carries an exit but no entry condition, so a subtask can succeed in a form its successor cannot use. We present BATON. Against (1), BATON makes the subtask the unit of exploration: each is explored in the cheap short-horizon regime and its solution stored in memory; a long-horizon trajectory is then composed from these solutions rather than discovered whole. Cost becomes additive (T*K) and every failure is attributed to a single stage. Against (2), BATON equips exploration with a transition-aware memory. Within a subtask, a verifier agent governs the invocation transition: the VLA is called only after the wrist view confirms the scene is ready. Across subtasks, a handoff transition restores an entry state disturbed by the predecessor's residue, and a lookahead transition selects the strategy whose outcome the successor can inherit. No parameters are updated. On the long-horizon benchmark RoboMemArena, BATON improves task success by 11.6% and cumulative success by 14.9% over the SoTA.",
@@ -48,7 +48,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16889v1",
-        "recovery_checked_at": "2026-08-18T04:42:31.660894Z",
+        "recovery_checked_at": "2026-08-18T23:17:44.774931Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -233,7 +233,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16843v1",
-        "recovery_checked_at": "2026-08-18T04:42:31.660894Z",
+        "recovery_checked_at": "2026-08-18T23:17:44.774931Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -662,7 +662,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16686v1",
-        "recovery_checked_at": "2026-08-18T04:42:31.660894Z",
+        "recovery_checked_at": "2026-08-18T23:17:44.774931Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1184,7 +1184,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16263v1",
-        "recovery_checked_at": "2026-08-18T04:42:31.660894Z",
+        "recovery_checked_at": "2026-08-18T23:17:44.774931Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -2573,7 +2573,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.15574v1",
-        "recovery_checked_at": "2026-08-18T04:42:31.660894Z",
+        "recovery_checked_at": "2026-08-18T23:17:44.774931Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -3003,656 +3003,94 @@
       "version": 1
     },
     {
-      "abstract": "Multimodal bird's-eye-view (BEV) perception combines LiDAR depth accuracy with dense camera semantics, but its high computational cost and imperfect sensing conditions make real-time deployment challenging. Existing methods largely compress individual detectors and overlook three opportunities: structured sparsity within camera and LiDAR inputs, timing misalignment between modalities, and the fact that many detected objects do not affect the planner's immediate action. We present MM-BEV, a real-time multimodal BEV system guided by a simple principle: compute where and when it matters. MM-BEV divides perception into mandatory work for safety-critical objects within braking distance of the ego vehicle and with short time-to-collision (TTC), and optional work for less urgent regions. It prioritizes mandatory work and reduces or sheds optional work under tight compute budgets. MM-BEV integrates four mechanisms: (1) a criticality-ranked temporal ROI selector based on motion-extrapolated detections from prior frames; (2) sparse, ROI-aware feature extraction using shared-shape camera crops at context-adaptive resolution and ROI-aware LiDAR voxelization; (3) a latency-aware coordinator that adapts LiDAR sweeps, image resolution, and keyframes according to scene dynamics and TTC; and (4) an asynchronous scheduler that decouples sensing from inference and skips stale frames. On nuScenes, MM-BEV reduces inference latency by 1.96x and end-to-end latency by 2.93x, with no loss in geometry-critical recall and only a 0.2 percentage-point drop in safety-critical recall. On a Clearpath Husky A300 equipped with an Ouster-128 LiDAR, BEV cameras, and a Jetson AGX Orin, MM-BEV further reduces mean latency by 2.11x, demonstrating its potential for real-world autonomous systems.",
+      "abstract": "Quantized Vision-Language-Action (VLA) models expose a weight-fault surface: Rowhammer-style faults can corrupt deployed INT8 bits. We present the first bit-flip attack on a VLA: a few gradient-selected flips reduce closed-loop success to $0\\%$, while hundreds of random flips are harmless. Across four model variants spanning three action-head families, damaging bits concentrate in a few action-generating layers, but the empirical budget depends sharply on the head: direct regression and token policies fall in $1$--$5$ flips, whereas the evaluated flow-matching policies require ${\\sim}100$--$300$. Our fixed-direction manifold-escape loss cuts \\pizero{}'s budget from ${\\sim}1000$ to ${\\sim}100$ flips, and a matched five-direction sweep shows that the attack is not specific to an all-positive direction. On a direct head, protecting $3.1\\%$ of weights preserves $60\\%$ success at $K{=}100$, and protecting $5.3\\%$ moves the open-loop break threshold from 3 to 100 flips. Finally, task-calibrated emulated $K{=}100$ flips yield $0/20$ real-robot successes, versus $14/20$ clean and $16/20$ global-random. Weight integrity is therefore a security boundary for embodied foundation models. Code is included as ancillary material.",
       "analysis": {
-        "key_results": "在nuScenes上，推理延迟降低1.96倍，端到端延迟降低2.93倍，几何关键召回无损失，安全关键召回仅下降0.2个百分点；在Clearpath Husky A300上，平均延迟降低2.11倍。",
+        "key_results": "在四种模型变体中，直接回归和令牌策略在1到5次翻转内失效，而流匹配策略需要约100到300次翻转；保护3.1%的权重可在100次翻转时保持60%成功率，保护5.3%可将开环击穿阈值从3次翻转移到100次。",
         "limitations": "摘要未说明",
-        "main_contribution": "提出MM-BEV系统，根据安全性和时间紧迫性划分感知任务为强制和可选部分，并通过四个机制实现自适应计算，在保持安全性关键召回率的前提下显著降低推理和端到端延迟。",
-        "method": "MM-BEV集成四个机制：基于运动外推检测的临界性排序时序ROI选择器、共享形状相机裁剪和ROI感知LiDAR体素化、根据场景动态和碰撞时间自适应调整LiDAR扫描、图像分辨率和关键帧的延迟感知协调器，以及解耦感知与推理并跳过陈旧帧的异步调度器。",
-        "one_sentence_summary": "本文提出MM-BEV，一种实时多模态BEV感知系统，通过计算关键时空区域（即安全关键且时间紧迫的目标）来降低延迟。",
-        "primary_topic": "Speculative Decoding",
-        "relation_to_vla_wam": "本文针对自动驾驶感知系统的实时性优化，不属于VLA或WAM范畴，但所提出的基于重要性的自适应计算和调度思想对机器人系统中高效推理具有一定的参考价值。",
-        "relevance_score": 6,
-        "tags": [
-          "Efficient Inference",
-          "Robot Learning",
-          "Robot Manipulation"
-        ]
-      },
-      "arxiv_categories": [
-        "cs.RO",
-        "cs.CV",
-        "cs.DC",
-        "cs.SY",
-        "eess.SY"
-      ],
-      "arxiv_id": "2608.15437",
-      "authors": [
-        "Liangkai Liu",
-        "Kang G. Shin"
-      ],
-      "figure_gallery": {
-        "checked_at": "2026-08-18T04:37:16.595066Z",
-        "figures": [
-          {
-            "cached_image_paths": [
-              "/figures/2608.15437/v1/fig1-panel1.png"
-            ],
-            "caption": "End-to-end pipeline for BEV perception.",
-            "image_urls": [
-              "https://arxiv.org/html/2608.15437v1/BEV-pipeline.png"
-            ],
-            "label": "Figure 1",
-            "number": 1,
-            "source": "arxiv_html",
-            "source_url": "https://arxiv.org/html/2608.15437v1#S2.F1"
-          },
-          {
-            "cached_image_paths": [
-              "/figures/2608.15437/v1/fig2-panel1.png"
-            ],
-            "caption": "Object-presence probability heatmaps across the six nuScenes cameras. Dark areas indicate regions with low per-region probability P ¯ \\bar{P} ; percentages (if shown) denote the share of regions with P ¯ < 0.1 \\bar{P}<0.1 .",
-            "image_urls": [
-              "https://arxiv.org/html/2608.15437v1/probability_map_coarse.png"
-            ],
-            "label": "Figure 2",
-            "number": 2,
-            "source": "arxiv_html",
-            "source_url": "https://arxiv.org/html/2608.15437v1#S3.F2"
-          }
-        ],
-        "html_url": "https://arxiv.org/html/2608.15437v1",
-        "recovery_checked_at": null,
-        "recovery_status": "available",
-        "recovery_version": 0,
-        "status": "available"
-      },
-      "matched_rules": [
-        "composite:vision_language_robotics"
-      ],
-      "provenance": {
-        "analysis_scope": "title_and_abstract",
-        "analyzed_at": "2026-08-18T04:37:16.595066Z",
-        "model": "deepseek-v4-pro",
-        "prompt_version": "2"
-      },
-      "published_at": "2026-08-15T22:42:47Z",
-      "resources": {
-        "arxiv_url": "https://arxiv.org/abs/2608.15437",
-        "code_url": null,
-        "pdf_url": "https://arxiv.org/pdf/2608.15437",
-        "project_url": null
-      },
-      "title": "MM-BEV: Enhancing Timeliness by Computing Where and When it Matters",
-      "title_zh": "MM-BEV：通过计算关键时空区域提升实时性",
-      "updated_at": "2026-08-15T22:42:47Z",
-      "version": 1
-    },
-    {
-      "abstract": "Sparse mixture-of-experts (MoE) language models reduce arithmetic by activating only a small subset of experts per token, yet deployment still requires storing and moving the full expert bank. We present ExactMoE, an inference design that applies symmetric group-128 four-bit weight quantization only to routed experts, stores those experts in kernel-native MARLIN form in pinned host memory, and executes all selected experts through a configurable GPU-resident slot cache and fused grouped MoE kernels. The router, attention, embeddings, normalization layers, and language-model head remain in BF16. \"Exact\" refers to complete expert availability and an unchanged top-k routing procedure: no expert is pruned, substituted, or forced to execute on the CPU. It does not imply numerical identity with the BF16 model. On OLMoE-1B-7B-0924-Instruct, evaluated on a single NVIDIA L4, a 16-slot configuration reduces peak reserved GPU memory from 14.168 to 1.836 GiB (87.04%) while retaining 81.85% of BF16 decode throughput. A fully resident 64-slot configuration reaches 31.923 tokens/s versus 21.662 tokens/s for BF16 while reserving 4.061 GiB. Across 12,450 zero-shot multiple-choice questions, ExactMoE obtains 70.3534% normalized accuracy versus 70.8996% for BF16, retaining 99.23% of the baseline accuracy. In a matched 16-token ablation, fused grouped execution is 1.97x as fast as a sequential W4 reference. These results identify a practical memory-transfer-throughput frontier for complete-expert MoE inference.",
-      "analysis": {
-        "key_results": "在OLMoE-1B-7B-0924-Instruct上，单张L4 GPU下，16槽配置峰值GPU内存从14.168降至1.836 GiB（87.04%降幅），保留81.85%的BF16解码吞吐；64槽常驻配置达31.923 tokens/s（BF16为21.662），内存4.061 GiB；在12,450道零样本多选题上归一化准确率70.3534% vs BF16 70.8996%（保留99.23%）；匹配的16 token消融中，融合分组执行速度是顺序W4参考的1.97倍。",
-        "limitations": "摘要未说明",
-        "main_contribution": "提出ExactMoE推理设计，对稀疏MoE语言模型的路由专家进行W4权重量化，并将其存储在主机内存中，通过GPU槽缓存和融合内核执行，实现内存大幅降低且保持完整专家可用性。",
-        "method": "对称组128四位权重量化仅应用于路由专家，存储为MARLIN格式于固定主机内存，GPU驻留槽缓存与融合分组MoE内核执行，其余组件保持BF16。",
-        "one_sentence_summary": "ExactMoE通过仅对路由专家进行对称组128四位权重量化，结合GPU驻留槽缓存和融合分组MoE内核，在完整保留专家的前提下大幅降低MoE模型推理的内存占用并提升吞吐。",
-        "primary_topic": "Quantization",
-        "relation_to_vla_wam": "该论文专注于通用稀疏MoE语言模型的量化推理，未直接涉及VLA、WAM或机器人领域，但所提出的内存高效量化与专家调度技术可为大规模视觉-语言-动作模型或机器人世界模型的高效部署提供参考。",
-        "relevance_score": 8,
-        "tags": [
-          "Efficient Inference",
-          "Model Quantization"
-        ]
-      },
-      "arxiv_categories": [
-        "cs.LG"
-      ],
-      "arxiv_id": "2608.15383",
-      "authors": [
-        "Amjad Saab"
-      ],
-      "figure_gallery": {
-        "checked_at": "2026-08-18T04:37:16.595066Z",
-        "figures": [
-          {
-            "cached_image_paths": [
-              "/figures/2608.15383/v1/fig1-panel1.png"
-            ],
-            "caption": "Overview of ExactMoE . Routed expert projections are quantized and packed once into the representation consumed by MARLIN. During inference, the original BF16 router selects experts, tokens are grouped by selected expert, and active experts execute in cache-sized fused waves. The pinned host pool retains every packed expert; GPU cache misses transfer packed weights and scales without FP16 expert materialization.",
-            "image_urls": [
-              "https://arxiv.org/html/2608.15383v1/method_overview.png"
-            ],
-            "label": "Figure 1",
-            "number": 1,
-            "source": "arxiv_html",
-            "source_url": "https://arxiv.org/html/2608.15383v1#S1.F1"
-          },
-          {
-            "cached_image_paths": [
-              "/figures/2608.15383/v1/fig2-panel1.png"
-            ],
-            "caption": "Measured OLMoE capacity frontier from the archived Colab run. Larger caches reduce expert transfers and improve decode throughput at the cost of additional GPU memory. Dashed lines show the matched BF16 reference. Capacity 64 is fully resident; its zero hit rate in raw counters means cache lookup accounting is bypassed, not that experts are absent.",
-            "image_urls": [
-              null
-            ],
-            "label": "Figure 2",
-            "number": 2,
-            "source": "arxiv_pdf",
-            "source_url": "https://arxiv.org/pdf/2608.15383v1"
-          }
-        ],
-        "html_url": "https://arxiv.org/html/2608.15383v1",
-        "recovery_checked_at": "2026-08-18T04:42:31.660894Z",
-        "recovery_status": "available",
-        "recovery_version": 3,
-        "status": "available"
-      },
-      "matched_rules": [
-        "composite:model_quantization"
-      ],
-      "provenance": {
-        "analysis_scope": "title_and_abstract",
-        "analyzed_at": "2026-08-18T04:37:16.595066Z",
-        "model": "deepseek-v4-pro",
-        "prompt_version": "2"
-      },
-      "published_at": "2026-08-15T19:26:07Z",
-      "resources": {
-        "arxiv_url": "https://arxiv.org/abs/2608.15383",
-        "code_url": null,
-        "pdf_url": "https://arxiv.org/pdf/2608.15383",
-        "project_url": null
-      },
-      "title": "Every Expert Counts: ExactMoE for Memory-Efficient W4A16 Inference",
-      "title_zh": "每个专家都重要：面向内存高效W4A16推理的ExactMoE",
-      "updated_at": "2026-08-15T19:26:07Z",
-      "version": 1
-    },
-    {
-      "abstract": "Parameter-efficient fine-tuning (PEFT) is a natural way to adapt pretrained vision-language-action (VLA) policies, but most adapter designs apply temporally static updates throughout a control rollout, overlooking the phase-dependent nature of continuous-action manipulation. Such policies traverse distinct regimes, including approach, contact transition, grasping, transport, and placement, each requiring different adaptation behaviors. We propose \\textbf{PhaseLoRA}, a lightweight LoRA parameterization that conditions adaptation at each action-chunk prediction step using two weakly supervised descriptors: fine-control tendency and event/boundary intensity. PhaseLoRA modulates the LoRA left factor in the action expert, allowing the effective low-rank update direction to vary over time while keeping the backbone largely frozen. On LIBERO, PhaseLoRA improves average success rate by 12.2 points over a matched-parameter high-rank LoRA baseline and outperforms stronger LoRA variants. Ablations show that random temporal modulation and scalar gating do not reproduce the performance of the full model, while update-direction analyses reveal structured temporal variation associated with the predicted control descriptors. These results establish within-trajectory conditioning as an effective lightweight PEFT axis for continuous-action VLA policies.",
-      "analysis": {
-        "key_results": "在LIBERO上，PhaseLoRA比匹配参数的高秩LoRA基线平均成功率提高12.2个百分点，并优于更强的LoRA变体。消融实验表明随机时间调制和标量门控无法复现完整模型性能，更新方向分析揭示了与预测控制描述符相关的结构化时间变化。",
-        "limitations": "摘要未说明",
-        "main_contribution": "提出PhaseLoRA，一种轻量级LoRA参数化方法，利用两个弱监督描述符（精细控制倾向和事件/边界强度）在每个动作块预测步骤调节适配，使有效的低秩更新方向随时间变化，同时保持骨干网络大部分冻结。",
-        "method": "PhaseLoRA在动作专家中调制LoRA左因子，使用弱监督描述符：精细控制倾向和事件/边界强度，对每个动作块预测步骤进行条件化。",
-        "one_sentence_summary": "提出PhaseLoRA，通过弱监督控制描述符动态调制LoRA更新方向，使低秩适配随时间变化，从而提升连续动作VLA策略的微调效果。",
+        "main_contribution": "首次对视觉-语言-动作模型实施位翻转攻击，证明少量梯度选择的位翻转即可将闭环成功率降至0%，并揭示了不同动作头架构对攻击预算的显著影响。",
+        "method": "作者使用梯度选择的位翻转攻击量化视觉-语言-动作模型，并提出一种固定方向流形逃逸损失，以降低攻击所需的位翻转次数。",
+        "one_sentence_summary": "该论文首次展示了针对量化视觉-语言-动作模型的位翻转攻击，揭示了动作生成层中的权重完整性是具身基础模型的安全边界。",
         "primary_topic": "VLA",
-        "relation_to_vla_wam": "该论文直接针对视觉-语言-动作（VLA）策略的参数高效微调，提出一种时间条件化的LoRA适配方法，显著提升连续动作操作任务的成功率，属于VLA领域的高效推理和策略学习创新。",
+        "relation_to_vla_wam": "论文直接以视觉-语言-动作模型为研究对象，重点探讨模型量化带来的权重完整性安全风险，与VLA主题高度相关。",
         "relevance_score": 9,
-        "tags": [
-          "Efficient Inference",
-          "Policy Learning",
-          "Robot Manipulation",
-          "Vision-Language"
-        ]
-      },
-      "arxiv_categories": [
-        "cs.RO",
-        "cs.AI"
-      ],
-      "arxiv_id": "2608.15285",
-      "authors": [
-        "Yufei Guo",
-        "Yinan Wu",
-        "Haoran Duan",
-        "Guiguang Ding",
-        "Jungong Han"
-      ],
-      "figure_gallery": {
-        "checked_at": "2026-08-18T04:37:16.595066Z",
-        "figures": [
-          {
-            "cached_image_paths": [
-              "/figures/2608.15285/v1/fig1-panel1.png"
-            ],
-            "caption": "Motivation for within-trajectory control-regime conditioning. A single manipulation rollout can traverse different control regimes, including approach, grasp, transport, and precise placement. We summarize these variations with two continuous descriptors: fine-control tendency P P and event/boundary intensity E E . PhaseLoRA uses these descriptors to modulate the LoRA left factor, B ⁡ ( P , E ) = B 0 + P ⋅ B P + E ⋅ B E + P ​ E ⋅ B P ​ E B(P,E)=B_{0}+P\\!\\cdot\\!B_{P}+E\\!\\cdot\\!B_{E}+PE\\!\\cdot\\!B_{PE} , so the effective low-rank update can vary across control steps instead of remaining static throughout the rollout.",
-            "image_urls": [
-              "https://arxiv.org/html/2608.15285v1/figures/figure_intro.png"
-            ],
-            "label": "Figure 1",
-            "number": 1,
-            "source": "arxiv_html",
-            "source_url": "https://arxiv.org/html/2608.15285v1#S1.F1"
-          },
-          {
-            "cached_image_paths": [
-              "/figures/2608.15285/v1/fig2-panel1.png"
-            ],
-            "caption": "Overview of PhaseLoRA. A lightweight router predicts fine-control tendency P ^ t \\hat{P}_{t} and event/boundary intensity E ^ t \\hat{E}_{t} from the current policy context. These descriptors modulate the action-expert LoRA update through shared, descriptor-specific, and interaction components, yielding control-regime-dependent low-rank corrections within a rollout. The router is trained with weak proxy targets derived from trajectory statistics.",
-            "image_urls": [
-              "https://arxiv.org/html/2608.15285v1/figures/figure_method_revise2.png"
-            ],
-            "label": "Figure 2",
-            "number": 2,
-            "source": "arxiv_html",
-            "source_url": "https://arxiv.org/html/2608.15285v1#S3.F2"
-          }
-        ],
-        "html_url": "https://arxiv.org/html/2608.15285v1",
-        "recovery_checked_at": null,
-        "recovery_status": "available",
-        "recovery_version": 0,
-        "status": "available"
-      },
-      "matched_rules": [
-        "exact:vision-language-action",
-        "composite:vision_language_robotics"
-      ],
-      "provenance": {
-        "analysis_scope": "title_and_abstract",
-        "analyzed_at": "2026-08-18T04:37:16.595066Z",
-        "model": "deepseek-v4-pro",
-        "prompt_version": "2"
-      },
-      "published_at": "2026-08-15T15:32:08Z",
-      "resources": {
-        "arxiv_url": "https://arxiv.org/abs/2608.15285",
-        "code_url": null,
-        "pdf_url": "https://arxiv.org/pdf/2608.15285",
-        "project_url": null
-      },
-      "title": "PhaseLoRA: Control-Regime-Conditioned Low-Rank Adaptation for Continuous-Action Vision-Language-Action Policies",
-      "title_zh": "PhaseLoRA：用于连续动作视觉-语言-动作策略的控制状态条件低秩适配",
-      "updated_at": "2026-08-15T15:32:08Z",
-      "version": 1
-    },
-    {
-      "abstract": "Long-horizon robot policies require compact access to recent observations and reusable experience without expanding the vision-language-action (VLA) context. We introduce Remember Smarter (RS), a plug-and-play module with complementary visual-history and hyperbolic experience-memory branches. Its visual branch compresses multi-view patch histories using bidirectional spatial Mamba and causal temporal Mamba, then exposes the resulting memory to action-facing hidden states through residual cross-attention while leaving the VLM visual-token stream unchanged. Its experience branch stores successful final-layer VLM states in a Poincare VAE space, organizes them hierarchically, and asynchronously converts retrieved experience into geodesic prompt tokens without blocking action inference. When adapted to pi0, RS increases total success on LIBERO-Plus from 53.6% to 70.6% and achieves substantial performance gains in real-robot experiments designed to evaluate memory retention and experience utilization.",
-      "analysis": {
-        "key_results": "在LIBERO-Plus上，将pi0的总成功率从53.6%提升至70.6%；在评估记忆保持和经验利用的实体机器人实验中取得显著性能提升。",
-        "limitations": "摘要未说明",
-        "main_contribution": "提出记住更聪明 (RS)，一个包含互补视觉历史压缩分支和双曲经验记忆分支的插件式模块，可在不扩展VLA上下文的情况下提升长时程机器人策略。",
-        "method": "视觉分支使用双向空间Mamba和因果时间Mamba压缩多视角历史块，通过残差交叉注意力将记忆暴露给动作隐状态；经验分支将成功的VLM最终层状态存储在Poincare VAE空间中，并异步转换为测地提示令牌。",
-        "one_sentence_summary": "提出一种即插即用的记忆模块，通过视觉历史压缩和双曲经验记忆提升长时程机器人VLA策略的性能。",
-        "primary_topic": "VLA",
-        "relation_to_vla_wam": "该研究直接面向VLA策略的上下文压缩和记忆机制，属于VLA高效推理与学习能力增强，对本站VLA主题具有高度相关性。",
-        "relevance_score": 9,
-        "tags": [
-          "Vision-Language",
-          "Efficient Inference",
-          "Robot Learning",
-          "Policy Learning"
-        ]
-      },
-      "arxiv_categories": [
-        "cs.RO"
-      ],
-      "arxiv_id": "2608.15269",
-      "authors": [
-        "Dai Zhou",
-        "Jiexi Yan",
-        "Tong Li",
-        "Yuxuan Wang",
-        "Cheng Deng"
-      ],
-      "figure_gallery": {
-        "checked_at": "2026-08-18T04:37:16.595066Z",
-        "figures": [
-          {
-            "cached_image_paths": [
-              "/figures/2608.15269/v1/fig1-panel1.png"
-            ],
-            "caption": "High-level concept of Remember Smarter. The fine-grained branch compresses multi-view visual patch history, while the coarse-grained branch retrieves structured hyperbolic experience.",
-            "image_urls": [
-              "https://arxiv.org/html/2608.15269v1/Remember_Smarter.png"
-            ],
-            "label": "Figure 1",
-            "number": 1,
-            "source": "arxiv_html",
-            "source_url": "https://arxiv.org/html/2608.15269v1#S0.F1"
-          },
-          {
-            "cached_image_paths": [
-              "/figures/2608.15269/v1/fig2-panel1.png"
-            ],
-            "caption": "Mamba-compressed visual-history pipeline. Historical multi-view patch features are extracted by the shared visual encoder and mapped into a unified feature space by a lightweight adapter. Each frame is encoded through bidirectional spatial scans and learned-query pooling, after which causal temporal Mamba layers recurrently aggregate the per-view history. The resulting visual-history representations provide the keys and values for residual cross-attention, while the final hidden representations used for action prediction provide the queries. The enhanced hidden representations are then passed to the action head.",
-            "image_urls": [
-              "https://arxiv.org/html/2608.15269v1/mamba_compressed.png"
-            ],
-            "label": "Figure 2",
-            "number": 2,
-            "source": "arxiv_html",
-            "source_url": "https://arxiv.org/html/2608.15269v1#S4.F2"
-          }
-        ],
-        "html_url": "https://arxiv.org/html/2608.15269v1",
-        "recovery_checked_at": null,
-        "recovery_status": "available",
-        "recovery_version": 0,
-        "status": "available"
-      },
-      "matched_rules": [
-        "exact:vision-language-action",
-        "composite:vision_language_robotics"
-      ],
-      "provenance": {
-        "analysis_scope": "title_and_abstract",
-        "analyzed_at": "2026-08-18T04:37:16.595066Z",
-        "model": "deepseek-v4-pro",
-        "prompt_version": "2"
-      },
-      "published_at": "2026-08-15T15:13:33Z",
-      "resources": {
-        "arxiv_url": "https://arxiv.org/abs/2608.15269",
-        "code_url": null,
-        "pdf_url": "https://arxiv.org/pdf/2608.15269",
-        "project_url": null
-      },
-      "title": "Remember Smarter: Visual History Compressor and Hyperbolic Experience Space for Robotic Memory",
-      "title_zh": "更聪明地记忆：面向机器人记忆的视觉历史压缩器与双曲经验空间",
-      "updated_at": "2026-08-15T15:13:33Z",
-      "version": 1
-    },
-    {
-      "abstract": "Bangla-English tutoring requires more than producing a correct translation: learners also need explanations of grammar differences, awareness of their likely errors, and targeted practice. We present TRACE-BN, a curriculum-guided dataset of structured tutoring traces for Bangla-speaking learners of English at the CEFR A1-A2 level. Each trace combines word-level glosses, literal and natural translations, Bangla grammar explanations, a plausible learner error, and a targeted practice question with its answer. The traces are generated by Gemini 3.5 Flash Lite as the teacher model from NCTB Classes 9-10 English curriculum units, then filtered for structural validity, script integrity, and semantic duplication. We transfer the resulting structured tutoring behavior to Qwen3-0.6B using LoRA with 4-bit quantization for resource-constrained offline deployment. On held-out inputs, schema validity increases from 85.4% to 95.8%, while, against teacher-model references, chrF++ improves from 15.28 to 34.77 and BLEU from 4.52 to 21.03. Field-level evaluation by two independent judges shows improvements across translation, grammar explanation, learner-error diagnosis, and practice alignment, while a human audit supports the quality of the supervision data. The results show that curriculum-guided structured supervision can transfer multi-component tutoring behavior to a sub-1B model under these resource constraints. The dataset, model checkpoints, and code are publicly available at https://huggingface.co/datasets/RaiyanKhaan/Trace-BN",
-      "analysis": {
-        "key_results": "在保留输入上，模式有效性从85.4%提升至95.8%；与教师模型参考相比，chrF++从15.28提升至34.77，BLEU从4.52提升至21.03。两位独立评审的字段级评估显示翻译、语法解释、错误诊断和练习对齐均有提升。",
-        "limitations": "摘要未说明",
-        "main_contribution": "提出了TRACE-BN课程引导数据集，并展示了通过LoRA与4-bit量化将结构化辅导行为迁移到Qwen3-0.6B模型，在资源受限离线环境下实现多组件辅导。",
-        "method": "使用Gemini 3.5 Flash Lite生成结构化辅导轨迹，经过结构有效性、脚本完整性和语义去重筛选，再通过LoRA配合4-bit量化在Qwen3-0.6B上进行微调。",
-        "one_sentence_summary": "该论文构建了面向孟加拉语英语学习者的辅导数据集，并利用4位量化和LoRA将辅导行为迁移到资源受限的0.6B模型上。",
-        "primary_topic": "Quantization",
-        "relation_to_vla_wam": "本文主要关注低资源语言辅导任务中的模型量化与高效微调，与VLA（视觉-语言-动作）或WAM（世界-动作模型）无直接关系，但其中的4-bit量化与LoRA方法可迁移用于机器人策略的高效训练与部署。",
-        "relevance_score": 7,
         "tags": [
           "Model Quantization",
-          "Efficient Inference"
-        ]
-      },
-      "arxiv_categories": [
-        "cs.CL"
-      ],
-      "arxiv_id": "2608.15223",
-      "authors": [
-        "Khan Raiyan Ibne Reza",
-        "Sanjana Aktar Maria",
-        "Mohammad Tushar Abdullah",
-        "Asfee Bhuiyan Leen",
-        "Sumaiya Tabassum Nimi"
-      ],
-      "figure_gallery": {
-        "checked_at": "2026-08-18T04:37:16.595066Z",
-        "figures": [
-          {
-            "cached_image_paths": [
-              "/figures/2608.15223/v1/fig1-panel1.jpg"
-            ],
-            "caption": "TRACE-BN construction and adaptation pipeline. Curriculum-guided Bangla inputs are used to obtain teacher-generated tutoring traces, which are filtered into TRACE-BN and used to adapt Qwen3-0.6B with LoRA.",
-            "image_urls": [
-              "https://arxiv.org/html/2608.15223v1/figure_1.jpg"
-            ],
-            "label": "Figure 1",
-            "number": 1,
-            "source": "arxiv_html",
-            "source_url": "https://arxiv.org/html/2608.15223v1#S2.F1"
-          },
-          {
-            "cached_image_paths": [
-              "/figures/2608.15223/v1/fig2-panel1.jpg"
-            ],
-            "caption": "Example TRACE-BN tutoring trace. A Bangla learner input is mapped to word-level glosses, literal and natural English, a Bangla contrastive explanation, a common learner error, and a short practice exercise with its answer.",
-            "image_urls": [
-              "https://arxiv.org/html/2608.15223v1/figure_2.jpg"
-            ],
-            "label": "Figure 2",
-            "number": 2,
-            "source": "arxiv_html",
-            "source_url": "https://arxiv.org/html/2608.15223v1#S3.F2"
-          }
-        ],
-        "html_url": "https://arxiv.org/html/2608.15223v1",
-        "recovery_checked_at": null,
-        "recovery_status": "available",
-        "recovery_version": 0,
-        "status": "available"
-      },
-      "matched_rules": [
-        "composite:model_quantization"
-      ],
-      "provenance": {
-        "analysis_scope": "title_and_abstract",
-        "analyzed_at": "2026-08-18T04:37:16.595066Z",
-        "model": "deepseek-v4-pro",
-        "prompt_version": "2"
-      },
-      "published_at": "2026-08-15T13:19:17Z",
-      "resources": {
-        "arxiv_url": "https://arxiv.org/abs/2608.15223",
-        "code_url": null,
-        "pdf_url": "https://arxiv.org/pdf/2608.15223",
-        "project_url": "https://huggingface.co/datasets/RaiyanKhaan/Trace-BN"
-      },
-      "title": "TRACE-BN: Transferring Bangla-English Tutoring Behavior to a Sub-1B Offline Language Model",
-      "title_zh": "TRACE-BN：将孟加拉语-英语辅导行为迁移至亚十亿参数离线语言模型",
-      "updated_at": "2026-08-15T13:19:17Z",
-      "version": 1
-    },
-    {
-      "abstract": "Diffusion-based methods have dominated the HOI generation, as they enable critical contact fusions or signals to guide the diffusion process. However, they often result in high artifacts and unstable interaction quality due to error accumulation during iterative denoising. In this work, we propose HOIMask, the first generative masked framework for modeling HOI motion in discrete space. HOIMask first encodes both motion sequences and contact-aware signals into discrete 2D human and object token maps via HOI Vector Quantization (VQ), preserving fine-grained spatial-temporal structure beyond conventional 1D representations. On this basis, a generative masked modeling framework is employed to jointly capture human-object interaction dynamics, leveraging a transformer architecture designed to model complex spatial-temporal and interaction dependencies. To generate more coherent and physically plausible motions, we further introduce a novel contact-aware reconstruction guidance in discrete space during inference, which fuses contact signals to optimize HOI tokens that forces the generated motion with higher spatio-temporal consistency. With craftily designed motion interaction tokens, dedicated architecture and guidance strategy, HOIMask outperforms state-of-the-art diffusion-based methods, generating more realistic and semantically aligned HOI motions. Please refer to https://jyhflash.github.io/HOIMask/ for more results.",
-      "analysis": {
-        "key_results": "HOIMask 优于现有基于扩散的方法，生成更逼真且语义对齐的人-物交互运动。",
-        "limitations": "摘要未说明",
-        "main_contribution": "提出首个在离散空间建模人-物交互运动的生成式掩码框架 HOIMask，并引入了接触感知重构引导。",
-        "method": "HOIMask 使用 HOI 向量量化将运动序列和接触信号编码为离散 2D 人类和物体 token 图，并采用生成式掩码建模和 transformer 架构；推理时利用接触感知重构引导优化 HOI token。",
-        "one_sentence_summary": "HOIMask 通过向量量化与生成式掩码建模，在离散空间生成人-物交互运动。",
-        "primary_topic": "Quantization",
-        "relation_to_vla_wam": "该工作聚焦于人-物交互运动生成，使用了向量量化技术，与 VLA（视觉-语言-动作）或世界-动作模型（WAM）无直接关系，但其 2D 离散 token 表示和生成式掩码建模思路可能对高效动作表示有一定潜在启发。",
-        "relevance_score": 6,
-        "tags": [
-          "Efficient Inference",
+          "Robot Learning",
           "Vision-Language"
         ]
       },
       "arxiv_categories": [
-        "cs.CV"
+        "cs.CR",
+        "cs.AI"
       ],
-      "arxiv_id": "2608.15141",
+      "arxiv_id": "2608.15475",
       "authors": [
-        "Yihong Ji",
-        "Jinsong Zhang",
-        "He Hu",
-        "Hongbo Xu"
+        "Yudong Gao",
+        "Linghan Chen",
+        "Wenhan Wu",
+        "Mia Zhou",
+        "Jiyao Wang",
+        "Kaiyan Ji",
+        "Mingyu Guo",
+        "Honglong Chen"
       ],
       "figure_gallery": {
-        "checked_at": "2026-08-18T04:37:16.595066Z",
+        "checked_at": "2026-08-18T23:17:21.801275Z",
         "figures": [
           {
             "cached_image_paths": [
-              "/figures/2608.15141/v1/fig1-panel1.png"
+              "/figures/2608.15475/v1/fig1-panel1.png"
             ],
-            "caption": "HOIMask is a generative masked model to synthesis high fidelity Human-Object Interaction (HOI) motion from text description and object geometry. (a) Achieving accurate spatial and temporal coordination with our proposed HOI VQ-VAE and HOI-Mask Transformer, and (b) guiding the model to generate more rational interaction through Contact-aware Reconstruction Guidance.",
+            "caption": "Fixed-direction insight. Across ten rerankings it is never less coherent than energy (7 higher, 3 ties) and lowers π 0 \\pi_{0} ’s empirical collapse budget 10 × 10\\times .",
             "image_urls": [
-              "https://arxiv.org/html/2608.15141v1/teaser28.png"
+              "https://arxiv.org/html/2608.15475v1/bfa_figures/fig1_multiseed_insight.png"
             ],
             "label": "Figure 1",
             "number": 1,
             "source": "arxiv_html",
-            "source_url": "https://arxiv.org/html/2608.15141v1#S0.F1"
+            "source_url": "https://arxiv.org/html/2608.15475v1#S1.F1"
           },
           {
             "cached_image_paths": [
-              "/figures/2608.15141/v1/fig2-panel1.png"
+              "/figures/2608.15475/v1/fig2-panel1.png"
             ],
-            "caption": "Overview of HOIMask . (a) During training, HOI motions first are quantized via HVQ and OVQ into 2D HOI tokens, which are partially masked and predicted by the HOI-Mask Transformer. During inference, the HOI tokens are optimized with contact-aware reconstruction guidance to generate more physically plausible interactions through HOI-Decoder. (b) The HOI-Mask Transformer incorporates spatial-temporal attention and human/object-centric attention to model fine-grained spatio-temporal dependencies.",
+            "caption": "Fixed-direction manifold-escape attack. The displayed L = − a ⋅ u L=-a\\cdot u is gradient-equivalent to the centered loss in Eq. ( 3 ). A bit score s = g ​ Δ s=g\\Delta predicts its first-order loss change; ranking uses the corresponding gain G = − s G=-s and discovers high-leverage layers without an architectural prior.",
             "image_urls": [
-              "https://arxiv.org/html/2608.15141v1/overview16.png"
+              "https://arxiv.org/html/2608.15475v1/bfa_figures/fig_method_ppt_method_steps_crop.png"
             ],
             "label": "Figure 2",
             "number": 2,
             "source": "arxiv_html",
-            "source_url": "https://arxiv.org/html/2608.15141v1#S3.F2"
+            "source_url": "https://arxiv.org/html/2608.15475v1#S4.F2"
           }
         ],
-        "html_url": "https://arxiv.org/html/2608.15141v1",
+        "html_url": "https://arxiv.org/html/2608.15475v1",
         "recovery_checked_at": null,
         "recovery_status": "available",
         "recovery_version": 0,
         "status": "available"
       },
       "matched_rules": [
-        "composite:model_quantization"
-      ],
-      "provenance": {
-        "analysis_scope": "title_and_abstract",
-        "analyzed_at": "2026-08-18T04:37:16.595066Z",
-        "model": "deepseek-v4-pro",
-        "prompt_version": "2"
-      },
-      "published_at": "2026-08-15T09:32:17Z",
-      "resources": {
-        "arxiv_url": "https://arxiv.org/abs/2608.15141",
-        "code_url": null,
-        "pdf_url": "https://arxiv.org/pdf/2608.15141",
-        "project_url": "https://jyhflash.github.io/HOIMask/"
-      },
-      "title": "HOIMask: Towards Generative Masked Modeling for Human Object Interaction Generation",
-      "title_zh": "HOIMask：面向人-物交互生成式掩码建模",
-      "updated_at": "2026-08-15T09:32:17Z",
-      "version": 1
-    },
-    {
-      "abstract": "Flow-based Vision-Language-Action (VLA) models are now widely used for continuous robotic manipulation, and online reinforcement learning (RL) is emerging as a key technique for adapting them to new tasks. Existing RL methods typically inject stochasticity inside the denoising chain, often through isotropic or temporally independent noise. However, effective robot exploration calls for structured noise: temporally smooth and scaled differently across action groups. We show that simply switching the in-chain noise to a structured form does not suffice: noise added at an intermediate flow time can be weakened by the remaining denoising steps before execution, a phenomenon we call \\emph{Structured Noise Dilution}. We propose \\textbf{StructRL}, which avoids dilution by relocating policy stochasticity to the action space via three coupled choices: (i) a deterministic ODE decoder, (ii) structured noise injected directly in the action space, and (iii) last-step replay, where policy-gradient updates avoid assigning likelihoods to intermediate denoising states. This keeps structured exploration tied to the executed action while providing a tractable training signal for the flow decoder. Across three flow-based VLA models on multiple simulated manipulation benchmarks and two real-world tasks, StructRL improves exploration efficiency and OOD performance over prior in-chain baselines, demonstrating the effectiveness of structured action-space exploration for adapting flow-based VLA with RL. \\textbf{Project page:} https://flyfaerss.github.io/structrl/",
-      "analysis": {
-        "key_results": "在三个基于流的VLA模型、多个仿真操作基准和两个真实世界任务上，StructRL相比先前链内基线提升了探索效率和OOD性能。",
-        "limitations": "摘要未说明",
-        "main_contribution": "提出StructRL方法，通过确定性ODE解码器、在动作空间注入结构化噪声以及最后一步重放三个耦合设计，避免结构化噪声稀释，提升流式VLA模型在线RL的探索效率和OOD性能。",
-        "method": "StructRL包含三个核心设计：确定性ODE解码器、在动作空间直接注入结构化噪声，以及最后一步重放（策略梯度更新不涉及中间去噪状态）。",
-        "one_sentence_summary": "提出StructRL，通过将策略随机性移至动作空间以避免结构化噪声在去噪链中被稀释，提升基于流的VLA模型在线强化学习的探索效率和OOD性能。",
-        "primary_topic": "VLA",
-        "relation_to_vla_wam": "论文以基于流的视觉-语言-动作(VLA)模型为中心，研究在线强化学习适应时的探索效率问题，通过结构化动作空间探索提升VLA策略性能，与VLA主题高度相关。",
-        "relevance_score": 9,
-        "tags": [
-          "Policy Learning",
-          "Robot Manipulation",
-          "Efficient Inference",
-          "Robot Learning"
-        ]
-      },
-      "arxiv_categories": [
-        "cs.RO"
-      ],
-      "arxiv_id": "2608.15139",
-      "authors": [
-        "Jiarui Yang",
-        "Bin Zhu",
-        "Jingjing Chen",
-        "Na Zou",
-        "Yanwei Fu",
-        "Jianggang Zhu",
-        "Yu-Gang Jiang"
-      ],
-      "figure_gallery": {
-        "checked_at": "2026-08-18T04:37:16.595066Z",
-        "figures": [
-          {
-            "cached_image_paths": [
-              "/figures/2608.15139/v1/fig1-panel1.png"
-            ],
-            "caption": "Structured exploration for flow-based VLA-RL. (a) Robot exploration benefits from smooth action chunks and group-aware noise scales. (b) In-chain noise can lose its intended structure during the remaining denoising steps. (c) StructRL keeps denoising deterministic and applies structured noise directly in the action space.",
-            "image_urls": [
-              "https://arxiv.org/html/2608.15139v1/motivation.png"
-            ],
-            "label": "Figure 1",
-            "number": 1,
-            "source": "arxiv_html",
-            "source_url": "https://arxiv.org/html/2608.15139v1#S1.F1"
-          }
-        ],
-        "html_url": "https://arxiv.org/html/2608.15139v1",
-        "recovery_checked_at": "2026-08-18T04:42:31.660894Z",
-        "recovery_status": "available",
-        "recovery_version": 3,
-        "status": "available"
-      },
-      "matched_rules": [
         "exact:vision-language-action",
-        "composite:vision_language_robotics"
-      ],
-      "provenance": {
-        "analysis_scope": "title_and_abstract",
-        "analyzed_at": "2026-08-18T04:37:16.595066Z",
-        "model": "deepseek-v4-pro",
-        "prompt_version": "2"
-      },
-      "published_at": "2026-08-15T09:31:29Z",
-      "resources": {
-        "arxiv_url": "https://arxiv.org/abs/2608.15139",
-        "code_url": null,
-        "pdf_url": "https://arxiv.org/pdf/2608.15139",
-        "project_url": "https://flyfaerss.github.io/structrl/"
-      },
-      "title": "StructRL: Structured Action-Space Exploration for Flow-Based VLAs",
-      "title_zh": "StructRL：面向基于流模型的视觉-语言-动作策略的结构化动作空间探索",
-      "updated_at": "2026-08-15T09:31:29Z",
-      "version": 1
-    },
-    {
-      "abstract": "Analytical models of peak VRAM consumption for LLM inference decompose memory into weight-storage, KV-cache, and activation terms parameterized by step count, tool invocations, and context expansion. We evaluate this decomposition empirically within a strictly scoped measurement study: a LangGraph-based CUDA-kernel-synthesis agent (AgentK), a 4-bit quantization family (Q4 K M), a single NVIDIA H100 GPU, and four LLM backbones across 1,920 trajectories. Focusing on peak-memory forecasting behavior, we report two primary observations. First, closed-form analytical models achieve competitive accuracy when provided with two empirical constants: loaded-weight VRAM and a fixed activation-memory overhead. Supplied with live GPU readings and ground-truth trajectory parameters, the closed-form model matches or outperforms the best learned baseline on three of the four backbones (test MAPE 2.2-4.4% vs. 3.4-6.5%, p = 0.76). The exception is the smallest backbone (Phi-4-mini), where minimal VRAM variance (CV 0.3%) causes dynamic modeling to underperform simple regression. Second, compile success strictly bifurcates by backbone capacity (from 5.7% for Phi-4-mini to 62.0% for Qwen2.5-Coder-14B), demonstrating that functional code synthesis remains constrained by intrinsic LLM capabilities rather than available memory. Furthermore, because overall peak-memory variance is remarkably low across all backbones (CV 0.3-9.4%), learned prompt-feature regression offers statistically insignificant improvements over a constant-mean baseline. Consequently, we find no justification for deploying complex predictive VRAM models in highly quantized, weight-dominated regimes. We release the evaluated corpus and anonymized framework to support replication.",
-      "analysis": {
-        "key_results": "闭式模型在三个主干上测试MAPE为2.2-4.4%，优于最佳学习基线3.4-6.5%（p=0.76）；整体峰值显存变异系数仅0.3-9.4%，学习特征回归相比常数均值无统计显著提升；编译成功率按主干容量从5.7%到62.0%分化。",
-        "limitations": "仅适用于高度量化、权重存储主导且显存方差极低的场景；对小容量主干（Phi-4-mini）动态建模不适用；未泛化到非量化或更大规模模型。",
-        "main_contribution": "提出一个解析的峰值显存消耗分解模型，并在1920条轨迹上评估其预测精度，发现闭式模型配合两个经验常数即可匹敌学习基线，且量化权重重主导场景下无需复杂预测模型。",
-        "method": "将峰值显存分解为权重存储、KV缓存和激活项，使用基于LangGraph的CUDA内核合成智能体、Q4_K_M量化、单张H100 GPU、四个LLM主干，收集1920条轨迹进行实证测量。",
-        "one_sentence_summary": "研究在4位量化LLM智能体代码合成工作负载中峰值显存消耗的解析模型与经验测量，发现简单模型在权重量主导、低方差场景下已足够。",
-        "primary_topic": "Speculative Decoding",
-        "relation_to_vla_wam": "该研究主要关注量化LLM智能体的显存预测，与VLA或WAM无直接关系，但其量化推理与高效部署方法可能对资源受限的机器人模型部署具有间接参考价值。",
-        "relevance_score": 7,
-        "tags": [
-          "Efficient Inference",
-          "Model Quantization"
-        ]
-      },
-      "arxiv_categories": [
-        "cs.AI",
-        "cs.DC",
-        "cs.LG"
-      ],
-      "arxiv_id": "2608.15117",
-      "authors": [
-        "Anubhab Banerjee"
-      ],
-      "figure_gallery": {
-        "checked_at": "2026-08-18T04:37:16.595066Z",
-        "figures": [
-          {
-            "cached_image_paths": [
-              "/figures/2608.15117/v1/fig2-panel1.png"
-            ],
-            "caption": "AgentK end-to-end control flow. Solid arrows represent the forward pipeline; the dashed arrow denotes the out-of-scope short-circuit exit; the red arrow highlights the compiler-diagnostic feedback edge, taken on every retry_budget compile failure until the",
-            "image_urls": [
-              null
-            ],
-            "label": "Figure 2",
-            "number": 2,
-            "source": "arxiv_pdf",
-            "source_url": "https://arxiv.org/pdf/2608.15117v1"
-          }
-        ],
-        "html_url": "https://arxiv.org/html/2608.15117v1",
-        "recovery_checked_at": "2026-08-18T04:42:31.660894Z",
-        "recovery_status": "not_found",
-        "recovery_version": 3,
-        "status": "available"
-      },
-      "matched_rules": [
+        "composite:vision_language_robotics",
         "composite:model_quantization"
       ],
       "provenance": {
         "analysis_scope": "title_and_abstract",
-        "analyzed_at": "2026-08-18T04:37:16.595066Z",
+        "analyzed_at": "2026-08-18T23:17:21.801275Z",
         "model": "deepseek-v4-pro",
         "prompt_version": "2"
       },
-      "published_at": "2026-08-15T08:39:43Z",
+      "published_at": "2026-08-16T01:44:09Z",
       "resources": {
-        "arxiv_url": "https://arxiv.org/abs/2608.15117",
+        "arxiv_url": "https://arxiv.org/abs/2608.15475",
         "code_url": null,
-        "pdf_url": "https://arxiv.org/pdf/2608.15117",
+        "pdf_url": "https://arxiv.org/pdf/2608.15475",
         "project_url": null
       },
-      "title": "Anatomy of a Quantized Agent: VRAM Stability and Forecasting in Code-Synthesis Agentic Workloads",
-      "title_zh": "量化智能体的剖析：代码合成智能体工作负载中的显存稳定性与预测",
-      "updated_at": "2026-08-15T08:39:43Z",
+      "title": "Bit-Flip Attacks on Vision-Language-Action Models: Action-Decoding Architecture Shapes the Vulnerability",
+      "title_zh": "视觉-语言-动作模型的位翻转攻击：动作解码架构塑造漏洞",
+      "updated_at": "2026-08-16T01:44:09Z",
       "version": 1
     },
     {
@@ -3922,89 +3360,88 @@
       "version": 2
     },
     {
-      "abstract": "Latent world models support efficient model-predictive control by optimizing future control sequences in latent space and replanning in a receding-horizon manner. However, existing latent predictors often lack stable long-horizon rollout ability, and prediction accuracy alone does not ensure that rollouts remain responsive to the actions being planned. We identify Context Collapse, a failure mode in which autoregressive latent predictors maintain high similarity to future states while producing nearly indistinguishable futures under different action sequences. To address this issue, we propose ActSWM, an action-sensitive latent world model grounded in a transition-separation principle: a planning-useful latent dynamics model should keep alternative-action futures distinguishable and make the action associated with each local transition recoverable. Under this principle, action sensitivity is enforced as a constraint on latent rollouts rather than treated only as an auxiliary prediction target, encouraging predicted futures to preserve action-dependent differences over long horizons. Across step-drift analysis, closed-loop Minecraft planning, and cross-game local action recovery, ActSWM preserves larger action-dependent rollout gaps than existing baselines, improves task success in long-horizon interactive settings, and enables world-model-based action recovery from offline gameplay videos.",
+      "abstract": "Vision-and-Language Navigation in Continuous Environments (VLN-CE) requires agents to follow natural-language instructions in unseen scenes. While Large Models (LMs) have advanced VLN-CE, their performance remains severely degraded by real-world visual corruptions, a critical yet underexplored domain constraint. We introduce Temporal Conditional Flow Decorruptor (FlowDec), a novel image restoration framework tailored for LM-based VLN-CE. FlowDec integrates a hybrid temporal conditioning strategy to align the generative flow path with historical context and employs action-centroid guided filtering to dynamically assess and integrate outputs. Extensive experiments demonstrate that FlowDec outperforms state-of-the-art decorruption methods in both navigation accuracy and generation latency. Our approach establishes a robust, efficient paradigm for resilient embodied navigation in unpredictable real-world conditions.",
       "analysis": {
-        "key_results": "在漂移分析、闭环Minecraft规划、跨游戏局部动作恢复中，ActSWM相比基线保持更大的动作相关轨迹间隔，提升长时程交互任务成功率，并能从离线游戏视频中恢复动作。",
+        "key_results": "在导航准确率和生成延迟方面优于最先进的去污染方法。",
         "limitations": "摘要未说明",
-        "main_contribution": "提出ActSWM，一个基于转移分离原理的动作敏感隐式世界模型，通过强制动作敏感约束使不同动作序列的未来轨迹保持可区分，并支持从离线视频中恢复动作。",
-        "method": "在潜在轨迹上施加动作敏感约束，使不同动作的未来状态保持可区分，并保证局部转移关联的动作可恢复；通过转移分离原理设计模型。",
-        "one_sentence_summary": "针对隐式世界模型中上下文坍缩问题，提出动作敏感世界模型ActSWM，通过约束潜在轨迹的动作可分性提升长时程规划能力。",
-        "primary_topic": "World Model",
-        "relation_to_vla_wam": "该工作核心是世界模型改进，提升长时程规划中的动作敏感性和可预测性，与WAM主题高度相关，尤其在机器人动作-世界建模中，保持不同动作下未来状态的可区分性是关键。",
-        "relevance_score": 8,
+        "main_contribution": "提出FlowDec框架，将混合时序条件策略与动作质心引导滤波相结合，用于LM基VLN-CE的图像去污染。",
+        "method": "时序条件流去污染器（FlowDec），结合历史上下文的生成流对齐与动作质心引导的动态输出过滤。",
+        "one_sentence_summary": "提出FlowDec图像修复框架，通过时序条件流与动作质心引导滤波提升VLN-CE在真实视觉污染下的导航鲁棒性与效率。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该论文面向视觉语言导航（VLN-CE），属于视觉-语言-行动（VLA）范畴，关注真实视觉污染下的鲁棒性与推理效率，与本站主题有直接关联，但未涉及世界模型或动作-世界建模。",
+        "relevance_score": 7,
         "tags": [
-          "World Modeling",
-          "Policy Learning"
+          "Vision-Language",
+          "Robot Learning",
+          "Efficient Inference",
+          "Robot Manipulation",
+          "Generalist Robotics"
         ]
       },
       "arxiv_categories": [
-        "cs.RO"
+        "cs.CV"
       ],
-      "arxiv_id": "2607.26712",
+      "arxiv_id": "2606.22424",
       "authors": [
-        "Zhenfeng Gan",
-        "ZiTong Zeng",
-        "Jiajun Cheng",
-        "Yeke Song",
-        "Yongyi Tang",
-        "Xueqian Wang"
+        "Yufei Zhang",
+        "Changhao Chen"
       ],
       "figure_gallery": {
-        "checked_at": "2026-08-18T04:37:16.595066Z",
+        "checked_at": "2026-08-18T23:17:21.801275Z",
         "figures": [
           {
             "cached_image_paths": [
-              "/figures/2607.26712/v2/fig1-panel1.png"
+              "/figures/2606.22424/v3/fig1-panel1.png"
             ],
-            "caption": "Overview of ActSWM. Latent world models can suffer from context collapse, where long-horizon rollouts match plausible futures but become insensitive to action inputs. ActSWM addresses this by enforcing action-sensitive latent rollouts, leading to larger action gaps, stronger closed-loop planning, and larger CEM-over-random gaps in cross-game local action recovery.",
+            "caption": "LM-based VLN models suffer from corruption despite their strong generalization ability, while FlowDec can effectively alleviate the influence from corruption. The experiment is conducted on R2R-CE dataset using NaVid [ 48 ] as backbone.",
             "image_urls": [
-              "https://arxiv.org/html/2607.26712v2/Figures/overview.png"
+              "https://arxiv.org/html/2606.22424v3/fig1.png"
             ],
             "label": "Figure 1",
             "number": 1,
             "source": "arxiv_html",
-            "source_url": "https://arxiv.org/html/2607.26712v2#S0.F1"
+            "source_url": "https://arxiv.org/html/2606.22424v3#S1.F1"
           },
           {
             "cached_image_paths": [
-              "/figures/2607.26712/v2/fig2-panel1.png"
+              "/figures/2606.22424/v3/fig2-panel1.png"
             ],
-            "caption": "ActSWM framework. ActSWM combines JEPA-based latent prediction, multi-step rollout training, an action-sensitivity hinge loss, and a fixed action readout to learn action-sensitive latent dynamics.",
+            "caption": "Overview of training phase. (A) Model utilizes three types of conditions for training. The proportion of c 1 \\textbf{c}_{1} remains constant, while c 3 \\textbf{c}_{3} gradually replaces c 2 \\textbf{c}_{2} as the number of epochs increases. (B) Ground-truth image pairs are used to construct action centroids, which capture expected latent differentials per atomic action.",
             "image_urls": [
-              "https://arxiv.org/html/2607.26712v2/Figures/actswm_2_01_2.png"
+              "https://arxiv.org/html/2606.22424v3/fig2.png"
             ],
             "label": "Figure 2",
             "number": 2,
             "source": "arxiv_html",
-            "source_url": "https://arxiv.org/html/2607.26712v2#Sx3.F2"
+            "source_url": "https://arxiv.org/html/2606.22424v3#S3.F2"
           }
         ],
-        "html_url": "https://arxiv.org/html/2607.26712v2",
+        "html_url": "https://arxiv.org/html/2606.22424v3",
         "recovery_checked_at": null,
         "recovery_status": "available",
         "recovery_version": 0,
         "status": "available"
       },
       "matched_rules": [
-        "composite:world_video_robotics"
+        "composite:vision_language_robotics"
       ],
       "provenance": {
         "analysis_scope": "title_and_abstract",
-        "analyzed_at": "2026-08-18T04:37:16.595066Z",
+        "analyzed_at": "2026-08-18T23:17:21.801275Z",
         "model": "deepseek-v4-pro",
         "prompt_version": "2"
       },
-      "published_at": "2026-07-29T09:55:54Z",
+      "published_at": "2026-06-21T10:24:16Z",
       "resources": {
-        "arxiv_url": "https://arxiv.org/abs/2607.26712",
+        "arxiv_url": "https://arxiv.org/abs/2606.22424",
         "code_url": null,
-        "pdf_url": "https://arxiv.org/pdf/2607.26712",
+        "pdf_url": "https://arxiv.org/pdf/2606.22424",
         "project_url": null
       },
-      "title": "ActSWM: Action-Sensitive World Models for Long-Horizon Planning in Open-World Games",
-      "title_zh": "ActSWM：面向开放世界游戏长时程规划的动作敏感世界模型",
-      "updated_at": "2026-08-15T15:27:12Z",
-      "version": 2
+      "title": "FlowDec: Temporal Conditional Flow Decorruptor for Robust Continuous Vision-Language Navigation",
+      "title_zh": "FlowDec：面向连续视觉语言导航鲁棒性的时序条件流去污染器",
+      "updated_at": "2026-08-17T08:21:55Z",
+      "version": 3
     },
     {
       "abstract": "Task-success confidence estimation for Vision-Language-Action (VLA) models provides a crucial task-level signal for monitoring manipulation in open-world environments and supporting downstream decision-making. Existing methods typically construct task-success confidence from action-token probabilities. However, such probabilities are not naturally available in flow-matching policies, limiting their applicability to mainstream flow-matching VLAs. To address this issue, we propose VLAConf, a two-stage representation-level confidence framework that operates on frozen pretrained VLA representations. A step-conditioned Coin-Flip Network learns an uncalibrated inverse success-support score from successful demonstrations, while a low-capacity calibrator fitted on outcome-labeled successful and failed rollouts maps the aggregated score to task-success probability. Experimental results on the LIBERO benchmark demonstrate that VLAConf improves online task-success confidence estimation over alternative approaches. We further demonstrate its utility in selective expert assistance, where confidence-triggered handoffs improve task success over no intervention. Its applicability is also evaluated in real-robot experiments. To access the source code and supplementary videos, visit https://sites.google.com/view/vlaconf.",
@@ -4180,96 +3617,6 @@
       "title_zh": "RT-Lynx：为扩散模型在正确位置实现GEMM稀疏化",
       "updated_at": "2026-08-17T08:10:10Z",
       "version": 3
-    },
-    {
-      "abstract": "Chunked vision-language-action (VLA) policies predict multi-step robot controls, conditioning each update on the current visual observation alone. Yet robot actions cause contact, occlusion, and object motion, and the geometry that later decisions depend on can change before the next visual update arrives. Spatial VLAs improve current-frame geometry. Temporal VLAs aggregate past frames. Neither maintains an action-updated scene prior across chunks. We argue for a persistent action-updated scene state across control calls, and introduce EvoScene-VLA. Its recurrent scene prefix carries a geometry-aware scene state across chunks. At each vision-language model (VLM) call, the VLM combines scene information from the current observation with the action-updated prior from the previous chunk; the action decoder outputs both the next action chunk and a compact scene update. This update becomes the next prior, which the VLM corrects against the new observation when the next call arrives. Each control call therefore starts from a scene prior that reflects both recent actions and fresh visual evidence. During training, \\textbf{Scene Predictor} supplies future scene-token targets, and Geometric Anchor aligns scene slots with frozen depth and 3D teachers. We discard both modules at deployment. On 31 RoboTwin tasks, EvoScene-VLA raises average success from 87.2% to 89.1% in fixed evaluation and from 86.1% to 88.5% in randomized evaluation. On the Galaxea R1-Lite real robot, EvoScene-VLA outperforms all baselines.",
-      "analysis": {
-        "key_results": "在31个RoboTwin任务中，固定评估平均成功率从87.2%提升至89.1%，随机评估从86.1%提升至88.5%。在Galaxea R1-Lite真实机器人上，EvoScene-VLA优于所有基线。",
-        "limitations": "摘要未说明",
-        "main_contribution": "提出一种在动作解码器中维护跨控制调用持续、动作更新场景状态的VLA策略架构（EvoScene-VLA），通过循环场景前缀、场景预测器和几何锚定模块实现。",
-        "method": "在VLM调用时，将当前观测的场景信息与上一块动作更新后的先验结合；动作解码器输出下一动作块和一个紧凑的场景更新，该更新成为下一先验。训练时使用场景预测器提供未来场景token目标，几何锚定与冻结深度和3D教师对齐场景slot；部署时丢弃这些模块。",
-        "one_sentence_summary": "提出EvoScene-VLA，一种在动作解码器中维护跨控制调用持续场景状态的视觉-语言-动作策略，以改进块式机器人控制。",
-        "primary_topic": "VLA",
-        "relation_to_vla_wam": "该论文直接针对VLA策略的核心挑战：跨控制调用维护动作更新的场景状态，这相当于在VLA内部构建一个隐式的、持续演化的世界模型（场景信念），与WAM的理念高度一致。它通过循环场景前缀和场景更新机制，使VLA能够以前后一致的方式推理动态环境，对VLA和世界模型研究均具有重要意义。",
-        "relevance_score": 10,
-        "tags": [
-          "Action Prediction",
-          "Vision-Language",
-          "Robot Manipulation",
-          "Policy Learning",
-          "Robot Learning"
-        ]
-      },
-      "arxiv_categories": [
-        "cs.RO",
-        "cs.AI"
-      ],
-      "arxiv_id": "2605.21862",
-      "authors": [
-        "Chushan Zhang",
-        "Ruihan Lu",
-        "Jinguang Tong",
-        "Xuesong Li",
-        "Yikai Wang",
-        "Hongdong Li"
-      ],
-      "figure_gallery": {
-        "checked_at": "2026-08-18T04:37:16.595066Z",
-        "figures": [
-          {
-            "cached_image_paths": [
-              "/figures/2605.21862/v2/fig1-panel1.png"
-            ],
-            "caption": "Qualitative analysis of chunked-control failures. During one action chunk, the scene can drift from the planning observation, so an action-only baseline commits to a stale target. In three RoboTwin tasks (microwave handle, block stacking, cabinet placement), the baseline follows this stale target and stalls mid-chunk ( ✘ ). EvoScene-VLA carries an action-updated scene prior into the chunk, so each predicted action uses the scene state for its own step and completes the rollout ( ✔ ).",
-            "image_urls": [
-              "https://arxiv.org/html/2605.21862v2/roll-out.png"
-            ],
-            "label": "Figure 1",
-            "number": 1,
-            "source": "arxiv_html",
-            "source_url": "https://arxiv.org/html/2605.21862v2#S1.F1"
-          },
-          {
-            "cached_image_paths": [
-              "/figures/2605.21862/v2/fig2-panel1.png"
-            ],
-            "caption": "Pipeline Overview. The policy receives multi-view images, an instruction, and the robot state. The VLM prefix contains image and language tokens, per-view observation slots, and recurrent prior slots. An asymmetric attention mask lets observation slots read the current views and lets prior slots absorb this evidence while preserving the pretrained image and language pathways. During training, Geometric Anchor grounds the scene slots with Monocular Depth Teacher and 3D-foundation-model features, and Scene Predictor supplies future scene-token targets to train the action expert. At inference, the action expert denoises the actions and matched scene tokens together in the flow-matching sampling. The scene token at the executed step becomes the prior for the next VLM call, so each action chunk starts from an action-updated, observation-corrected scene prior.",
-            "image_urls": [
-              "https://arxiv.org/html/2605.21862v2/evoscene_pipeline.png"
-            ],
-            "label": "Figure 2",
-            "number": 2,
-            "source": "arxiv_html",
-            "source_url": "https://arxiv.org/html/2605.21862v2#S3.F2"
-          }
-        ],
-        "html_url": "https://arxiv.org/html/2605.21862v2",
-        "recovery_checked_at": null,
-        "recovery_status": "available",
-        "recovery_version": 0,
-        "status": "available"
-      },
-      "matched_rules": [
-        "exact:vision-language-action",
-        "composite:vision_language_robotics"
-      ],
-      "provenance": {
-        "analysis_scope": "title_and_abstract",
-        "analyzed_at": "2026-08-18T04:37:16.595066Z",
-        "model": "deepseek-v4-pro",
-        "prompt_version": "2"
-      },
-      "published_at": "2026-05-21T01:19:17Z",
-      "resources": {
-        "arxiv_url": "https://arxiv.org/abs/2605.21862",
-        "code_url": null,
-        "pdf_url": "https://arxiv.org/pdf/2605.21862",
-        "project_url": null
-      },
-      "title": "EvoScene-VLA: Evolving Scene Beliefs Inside the Action Decoder for Chunked Robot Control",
-      "title_zh": "EvoScene-VLA：在动作解码器中演化场景信念的块式机器人控制",
-      "updated_at": "2026-08-15T07:42:38Z",
-      "version": 2
     },
     {
       "abstract": "Humanoid robots promise general-purpose assistance, yet real-world humanoid loco-manipulation remains challenging because it requires whole-body stability, end-effector dexterity, and contact-aware interaction under frequent contact changes. In this work, we study dexterous, contact-rich humanoid loco-manipulation. We first develop an RL-based lower-body controller that serves as the stability backbone for whole-body execution during complex manipulation. Building on this controller, we develop a VR-based whole-body humanoid data collection system that integrates dexterous hands and tactile sensing for contact-rich manipulation. We then propose Humanoid Transformer with Touch Dreaming (HTD), a multimodal encoder-decoder Transformer that models touch as a core modality alongside multi-view vision and proprioception. HTD is trained in a single stage with behavioral cloning augmented by touch dreaming: in addition to predicting action chunks, the policy predicts future hand-joint forces and future tactile latents, with tactile-latent targets provided by an exponential moving average target encoder without requiring a separate tactile pretraining stage. This encourages the policy to learn contact-aware representations for dexterous manipulation. Across five real-world contact-rich tasks, HTD achieves a 90.9% relative improvement in average success rate over the stronger baseline for each task. Ablation results further show that latent-space tactile prediction is more effective than raw tactile prediction, yielding a 30% relative gain in success rate. These results demonstrate that our touch-dreaming-enhanced learning system enables versatile, high-dexterity humanoid manipulation in the real world. More information and open-source materials are available at humanoid-touch-dream.github.io.",
@@ -4454,180 +3801,6 @@
       "version": 2
     },
     {
-      "abstract": "Recent work on robot manipulation has advanced policy generalization to novel scenarios. However, it is often difficult to characterize how different evaluation settings actually represent generalization from the training distribution of a given policy. To work towards more precise evaluation of generalization in robotics, we propose RADAR, a scalable framework for directly comparing test-time evaluation tasks to policy training data, to determine what form of policy generalization is required. RADAR consists of a two-stage pipeline: first, retrieval using generalist policy embeddings identifies which training examples are relevant for a given evaluation task. Next, vision-language models (VLMs) analyze the evaluation task against the retrieved data, outputting interpretable analysis on how they compare along a variety of axes, and an overall classification of what type of policy generalization is required. Through controlled experiments, we demonstrate that VLMs are effective at analyzing data for generalization, and that our retrieval step effectively identifies examples needed to make accurate classifications with respect to the training data. Furthermore, we scale RADAR to large-scale datasets, where we observe agreement with human-defined benchmark conditions from prior work. We provide demonstrations at radar-analysis.github.io.",
-      "analysis": {
-        "key_results": "视觉语言模型能有效分析泛化数据；检索步骤能有效识别做出准确分类所需的示例；在扩展至大规模数据集时与先前工作的人工定义基准条件一致。",
-        "limitations": "摘要未说明",
-        "main_contribution": "提出RADAR，一个可扩展的框架，用于将测试时评估任务与策略训练数据直接比较，以确定所需的策略泛化形式。",
-        "method": "两阶段方法：首先使用通用策略嵌入进行检索以识别相关训练示例，然后视觉语言模型分析评估任务与检索到的数据，输出可解释的比较并分类所需的泛化类型。",
-        "one_sentence_summary": "提出了RADAR框架，通过检索相关训练示例并利用视觉语言模型将评估任务与训练数据比较，从而分类所需的策略泛化类型。",
-        "primary_topic": "Dataset",
-        "relation_to_vla_wam": "该工作关注机器人操作策略的泛化评估，提供数据集分析工具；它不直接涉及视觉语言动作模型或世界模型，但对评估VLA泛化性具有方法论参考价值。",
-        "relevance_score": 6,
-        "tags": [
-          "Evaluation",
-          "Vision-Language",
-          "Data"
-        ]
-      },
-      "arxiv_categories": [
-        "cs.RO"
-      ],
-      "arxiv_id": "2603.11426",
-      "authors": [
-        "Jensen Gao",
-        "Dorsa Sadigh",
-        "Sandy Huang",
-        "Dhruv Shah"
-      ],
-      "figure_gallery": {
-        "checked_at": "2026-08-18T04:37:16.595066Z",
-        "figures": [
-          {
-            "cached_image_paths": [
-              "/figures/2603.11426/v3/fig1-panel1.png"
-            ],
-            "caption": "We outline the two-stage pipeline of RADAR. Given an evaluation task, we first identify relevant examples from training data using nearest neighbors with embeddings from a generalist robot policy. Next, we use vision-language models to analyze the evaluation task against the retrieved examples to categorize what generalization it represents w.r.t. the training data: in-distribution (ID) , visual , or behavioral .",
-            "image_urls": [
-              "https://arxiv.org/html/2603.11426v3/radar_main_fig.png"
-            ],
-            "label": "Figure 1",
-            "number": 1,
-            "source": "arxiv_html",
-            "source_url": "https://arxiv.org/html/2603.11426v3#S2.F1"
-          },
-          {
-            "cached_image_paths": [
-              "/figures/2603.11426/v3/fig2-panel1.png"
-            ],
-            "caption": "(Left) Test example τ test \\tau^{\\text{test}} for the task “put the lemon on the plate” . (Right) If d ∗ d^{*} (e.g., minor lighting change) is found in 𝒟 \\mathcal{D} , then τ test \\tau^{\\text{test}} is in-distribution (ID) . Otherwise, if d v d^{v} (e.g., distractor objects) is found in 𝒟 \\mathcal{D} , then this is visual generalization. If neither case applies, then all d ∈ 𝒟 d\\in\\mathcal{D} involve different optimal behavior than τ test \\tau^{\\text{test}} (e.g., changed object poses), and this is behavioral generalization.",
-            "image_urls": [
-              "https://arxiv.org/html/2603.11426v3/gen_examples.png"
-            ],
-            "label": "Figure 2",
-            "number": 2,
-            "source": "arxiv_html",
-            "source_url": "https://arxiv.org/html/2603.11426v3#S3.F2"
-          }
-        ],
-        "html_url": "https://arxiv.org/html/2603.11426v3",
-        "recovery_checked_at": null,
-        "recovery_status": "available",
-        "recovery_version": 0,
-        "status": "available"
-      },
-      "matched_rules": [
-        "composite:vision_language_robotics"
-      ],
-      "provenance": {
-        "analysis_scope": "title_and_abstract",
-        "analyzed_at": "2026-08-18T04:37:16.595066Z",
-        "model": "deepseek-v4-pro",
-        "prompt_version": "2"
-      },
-      "published_at": "2026-03-12T01:33:06Z",
-      "resources": {
-        "arxiv_url": "https://arxiv.org/abs/2603.11426",
-        "code_url": null,
-        "pdf_url": "https://arxiv.org/pdf/2603.11426",
-        "project_url": null
-      },
-      "title": "Grounding Robot Generalization in Training Data via Retrieval-Augmented VLMs",
-      "title_zh": "通过检索增强的视觉语言模型将机器人泛化建立于训练数据之上",
-      "updated_at": "2026-08-15T18:48:58Z",
-      "version": 3
-    },
-    {
-      "abstract": "Active perception - the ability of a robot to proactively select viewpoints to acquire task-relevant information - is essential for robust operation in real-world environments. However, existing approaches are typically limited to fixed objectives or constrained settings, and struggle to generalize to open-ended perception intents specified in natural language. We propose I-Perceive, a foundation model for language-conditioned active perception in large-scale indoor environments. Given a query image, a set of context images, and a natural language instruction, I-Perceive predicts a 6D camera pose that fulfills the specified perception intent. The model integrates a vision-language pathway for semantic grounding with a geometric reasoning pathway for multi-view 3D understanding, connected via multi-layer semantic fusion to enable language-conditioned geometric reasoning. To support scalable training, we construct a large-scale dataset of language-viewpoint pairs from both real-world scene-scanning data and simulated environments using an automated pipeline. Extensive experiments demonstrate that I-Perceive significantly outperforms strong baselines on prediction accuracy, viewpoint feasibility, and instructions alignment. The model exhibits strong zero-shot generalization to unseen scenes and instructions, and enables closed-loop active perception, progressively refining viewpoints over sequential interactions.",
-      "analysis": {
-        "key_results": "在预测精度、视点可行性和指令对齐方面显著优于强基线；具有对未知场景和指令的零样本泛化能力，并支持闭环主动感知。",
-        "limitations": "摘要未说明",
-        "main_contribution": "提出 I-Perceive 基础模型，用于语言条件下的主动感知，能够根据查询图像、上下文图像和自然语言指令预测 6D 相机姿态。",
-        "method": "集成视觉-语言通路和几何推理通路，通过多层语义融合实现语言条件下的几何推理；构建大规模语言-视点数据集训练。",
-        "one_sentence_summary": "提出基础模型 I-Perceive，根据语言指令预测 6D 相机姿态，实现大规模室内环境中的主动感知。",
-        "primary_topic": "VLA",
-        "relation_to_vla_wam": "该工作属于视觉-语言-动作模型在主动感知任务中的应用，核心是语言条件下的动作（视点姿态）预测，与 VLA 的研究主题高度相关；但未涉及世界建模。",
-        "relevance_score": 8,
-        "tags": [
-          "Vision-Language",
-          "Robot Learning",
-          "Action Prediction"
-        ]
-      },
-      "arxiv_categories": [
-        "cs.RO"
-      ],
-      "arxiv_id": "2603.00600",
-      "authors": [
-        "Yongxi Huang",
-        "Zhuohang Wang",
-        "Wenjing Tang",
-        "Xinyu He",
-        "Cewu Lu",
-        "Panpan Cai"
-      ],
-      "figure_gallery": {
-        "checked_at": "2026-08-18T04:37:16.595066Z",
-        "figures": [
-          {
-            "cached_image_paths": [
-              "/figures/2603.00600/v2/fig1-panel1.png"
-            ],
-            "caption": "I-Perceive is a foundation model for vision-language active perception. Given context images and a natural language instruction, the model predicts a target camera pose that fulfills the observation intent. By fusing VLM semantic features into a geometric backbone, I-Perceive demonstrates strong zero-shot generalization to unseen real-world environments.",
-            "image_urls": [
-              "https://arxiv.org/html/2603.00600v2/images/overview7.png"
-            ],
-            "label": "Figure 1",
-            "number": 1,
-            "source": "arxiv_html",
-            "source_url": "https://arxiv.org/html/2603.00600v2#S1.F1"
-          },
-          {
-            "cached_image_paths": [
-              "/figures/2603.00600/v2/fig2-panel1.png",
-              "/figures/2603.00600/v2/fig2-panel2.png",
-              "/figures/2603.00600/v2/fig2-panel3.png"
-            ],
-            "caption": "Left: A zoom-in view of I-Perceive’s geometric-reasoning pathway. Right: Qualitative results of I-Perceive.",
-            "image_urls": [
-              "https://arxiv.org/html/2603.00600v2/images/model_arch5.png",
-              "https://arxiv.org/html/2603.00600v2/images/res_hssd3.png",
-              "https://arxiv.org/html/2603.00600v2/images/res_replica3.png"
-            ],
-            "label": "Figure 2",
-            "number": 2,
-            "source": "arxiv_html",
-            "source_url": "https://arxiv.org/html/2603.00600v2#S4.F2"
-          }
-        ],
-        "html_url": "https://arxiv.org/html/2603.00600v2",
-        "recovery_checked_at": null,
-        "recovery_status": "available",
-        "recovery_version": 0,
-        "status": "available"
-      },
-      "matched_rules": [
-        "composite:vision_language_robotics"
-      ],
-      "provenance": {
-        "analysis_scope": "title_and_abstract",
-        "analyzed_at": "2026-08-18T04:37:16.595066Z",
-        "model": "deepseek-v4-pro",
-        "prompt_version": "2"
-      },
-      "published_at": "2026-02-28T11:38:56Z",
-      "resources": {
-        "arxiv_url": "https://arxiv.org/abs/2603.00600",
-        "code_url": null,
-        "pdf_url": "https://arxiv.org/pdf/2603.00600",
-        "project_url": null
-      },
-      "title": "I-Perceive: A Foundation Model for Active Perception with Language Instructions",
-      "title_zh": "I-Perceive：面向语言指令主动感知的基础模型",
-      "updated_at": "2026-08-15T07:45:02Z",
-      "version": 2
-    },
-    {
       "abstract": "Bimanual dexterous manipulation relies on integrating multimodal inputs to perform complex real-world tasks. To address the challenges of effectively combining these modalities, we propose DECO, a decoupled multimodal diffusion transformer that disentangles vision, proprioception, and tactile signals through specialized conditioning pathways, enabling structured and controllable integration of multimodal inputs, with a lightweight adapter for parameter-efficient injection of additional signals. Alongside DECO, we release DECO-50 dataset for bimanual dexterous manipulation with tactile sensing, consisting of 50 hours of data and over 5M frames, collected via teleoperation on real dual-arm robots. We train DECO on DECO-50 and conduct extensive real-world evaluation with over 2,000 robot rollouts. Experimental results show that DECO achieves the best performance across all tasks, with a 72.25% average success rate and a 21% improvement over the baseline. Moreover, the tactile adapter brings an additional 10.25% average success rate across all tasks and a 20% gain on complex contact-rich tasks while tuning less than 10% of the model parameters.",
       "analysis": {
         "key_results": "在2000+次真实机器人rollouts中，DECO平均成功率为72.25%，比基线提升21%；触觉适配器在所有任务上带来额外10.25%的平均成功率提升，在复杂接触丰富型任务上提升20%，且仅需调整不到10%的模型参数。",
@@ -4709,192 +3882,6 @@
       "title_zh": "DECO：面向双手灵巧操作的双模态解耦扩散Transformer及即插式触觉适配器",
       "updated_at": "2026-08-17T05:46:30Z",
       "version": 4
-    },
-    {
-      "abstract": "Recent advances in vision, language, and multimodal learning have significantly accelerated progress in robotic foundation models, with robotic manipulation remaining one of the most challenging embodied tasks. Its difficulty lies in integrating perception, semantic understanding, task reasoning, physically grounded action generation, and reliable execution. This survey examines robotic manipulation from an algorithmic perspective and organizes recent learning-based approaches through a unified abstraction of high-level planning and low-level action modeling. At the high level, we extend the classical notion of task planning to include reasoning over language, code, affordances, geometric constraints, and 3D representations. At the low level, we present a learning-paradigm-oriented taxonomy of learning-based action models, covering input modeling, latent learning, and policy learning. Within this abstraction, foundation models contribute either by generating structured planning artifacts that are instantiated as constraints or latent inputs for downstream action generation, or by directly modeling executable actions and trajectories. Finally, we summarize open challenges and future directions related to scalability, generalization, data efficiency, multimodal physical interaction, and safety. Together, this survey provides a structured view of the design space and emerging trends in foundation models for robotic manipulation.",
-      "analysis": {
-        "key_results": "摘要未说明",
-        "limitations": "摘要未说明",
-        "main_contribution": "提出一个统一抽象，将高层任务规划扩展为包含语言、代码、可供性、几何约束和3D表示的推理，并对低层动作模型按学习范式分类，系统总结基础模型在机器人操作中的设计空间与趋势。",
-        "method": "综述与算法视角的分类框架",
-        "one_sentence_summary": "这篇综述从规划与学习的角度，系统梳理了基础模型在机器人操作中的最新进展，提出了高层规划与低层动作建模的统一抽象框架。",
-        "primary_topic": "VLA",
-        "relation_to_vla_wam": "该综述直接关注视觉-语言-动作（VLA）及基础模型在机器人操作中的应用，对本站的VLA和机器人学习主题具有高度相关性，但不涉及世界模型或高效推理的专门讨论。",
-        "relevance_score": 8,
-        "tags": [
-          "Vision-Language",
-          "Robot Manipulation",
-          "Policy Learning",
-          "Generalist Robotics"
-        ]
-      },
-      "arxiv_categories": [
-        "cs.RO"
-      ],
-      "arxiv_id": "2512.22983",
-      "authors": [
-        "Shuanghao Bai",
-        "Wenxuan Song",
-        "Jiayi Chen",
-        "Yuheng Ji",
-        "Zhide Zhong",
-        "Jin Yang",
-        "Han Zhao",
-        "Wanqi Zhou",
-        "Zhe Li",
-        "Pengxiang Ding",
-        "Cheng Chi",
-        "Chang Xu",
-        "Xiaolong Zheng",
-        "Donglin Wang",
-        "Haoang Li",
-        "Shanghang Zhang",
-        "Badong Chen"
-      ],
-      "figure_gallery": {
-        "checked_at": "2026-08-18T04:37:16.595066Z",
-        "figures": [
-          {
-            "cached_image_paths": [
-              "/figures/2512.22983/v2/fig1-panel1.png"
-            ],
-            "caption": "Representative robotic manipulation scenarios spanning diverse manipulation settings, including basic manipulation [ 170 ] , dexterous manipulation [ 142 ] , deformable object manipulation [ 130 ] , and embodied manipulation such as mobile [ 196 ] , quadrupedal [ 68 ] , and humanoid manipulation [ 43 ] .",
-            "image_urls": [
-              "https://arxiv.org/html/2512.22983v2/manipulation_tasks.png"
-            ],
-            "label": "Figure 1",
-            "number": 1,
-            "source": "arxiv_html",
-            "source_url": "https://arxiv.org/html/2512.22983v2#S1.F1"
-          },
-          {
-            "cached_image_paths": [
-              "/figures/2512.22983/v2/fig2-panel1.png"
-            ],
-            "caption": "Overview of the proposed taxonomy for foundation-model-based scene representations provide spatial structure and geometric",
-            "image_urls": [
-              null
-            ],
-            "label": "Figure 2",
-            "number": 2,
-            "source": "arxiv_pdf",
-            "source_url": "https://arxiv.org/pdf/2512.22983v2"
-          }
-        ],
-        "html_url": "https://arxiv.org/html/2512.22983v2",
-        "recovery_checked_at": "2026-08-18T04:42:31.660894Z",
-        "recovery_status": "available",
-        "recovery_version": 3,
-        "status": "available"
-      },
-      "matched_rules": [
-        "composite:vision_language_robotics"
-      ],
-      "provenance": {
-        "analysis_scope": "title_and_abstract",
-        "analyzed_at": "2026-08-18T04:37:16.595066Z",
-        "model": "deepseek-v4-pro",
-        "prompt_version": "2"
-      },
-      "published_at": "2025-12-28T16:05:38Z",
-      "resources": {
-        "arxiv_url": "https://arxiv.org/abs/2512.22983",
-        "code_url": null,
-        "pdf_url": "https://arxiv.org/pdf/2512.22983",
-        "project_url": null
-      },
-      "title": "Embodied Robot Manipulation in the Era of Foundation Models: Planning and Learning Perspectives",
-      "title_zh": "基础模型时代的具身机器人操作：规划与学习视角综述",
-      "updated_at": "2026-08-15T11:07:27Z",
-      "version": 2
-    },
-    {
-      "abstract": "Embodied intelligence has witnessed remarkable progress in recent years, driven by advances in computer vision, natural language processing, and the rise of large-scale multimodal models. Among its core challenges, robot manipulation stands out as a fundamental yet intricate problem, requiring the seamless integration of perception, planning, and control to enable interaction within diverse and unstructured environments. This survey presents a comprehensive overview of robotic manipulation, encompassing foundational background, task-organized benchmarks and datasets, and a unified taxonomy of existing methods. We extend the classical division between high-level planning and low-level control by broadening high-level planning to include language, code, motion, affordance, and 3D representations, while introducing a new taxonomy of low-level learning-based control grounded in training paradigms such as input modeling, latent learning, and policy learning. Furthermore, we provide the first dedicated taxonomy of key bottlenecks, focusing on data collection, utilization, and generalization, and conclude with an extensive review of real-world applications. Compared with prior surveys, our work offers both a broader scope and deeper insight, serving as an accessible roadmap for newcomers and a structured reference for experienced researchers. All related resources, including research papers, open-source datasets, and projects, are curated for the community at https://github.com/BaiShuanghao/Awesome-Robotics-Manipulation.",
-      "analysis": {
-        "key_results": "摘要未说明",
-        "limitations": "摘要未说明",
-        "main_contribution": "首次提出针对机器人操控的关键瓶颈（数据收集、利用与泛化）的专用分类，并对底层学习控制进行了新的分类（输入建模、潜在学习、策略学习）。",
-        "method": "系统综述与分类法构建，涵盖基准/数据集、高层规划（语言、代码、运动、可供性、3D表示）与底层学习控制的统一分类。",
-        "one_sentence_summary": "该综述系统梳理了机器人操控的基准、数据集、方法分类（高层规划与底层控制）及数据收集、利用和泛化等关键瓶颈，并提供资源列表。",
-        "primary_topic": "VLA",
-        "relation_to_vla_wam": "工作围绕机器人操控展开，高层规划部分涵盖语言与视觉语言模型，底层控制部分涉及策略学习，与VLA及机器人动作预测高度相关，但不涉及世界模型或高效推理。",
-        "relevance_score": 9,
-        "tags": [
-          "Robot Manipulation",
-          "Vision-Language",
-          "Policy Learning",
-          "Data",
-          "Evaluation",
-          "Robot Learning"
-        ]
-      },
-      "arxiv_categories": [
-        "cs.RO"
-      ],
-      "arxiv_id": "2510.10903",
-      "authors": [
-        "Shuanghao Bai",
-        "Wenxuan Song",
-        "Jiayi Chen",
-        "Yuheng Ji",
-        "Zhide Zhong",
-        "Jin Yang",
-        "Han Zhao",
-        "Wanqi Zhou",
-        "Wei Zhao",
-        "Zhe Li",
-        "Pengxiang Ding",
-        "Cheng Chi",
-        "Haoang Li",
-        "Chang Xu",
-        "Xiaolong Zheng",
-        "Donglin Wang",
-        "Shanghang Zhang",
-        "Badong Chen"
-      ],
-      "figure_gallery": {
-        "checked_at": "2026-08-18T04:37:16.595066Z",
-        "figures": [
-          {
-            "cached_image_paths": [
-              "/figures/2510.10903/v2/fig2-panel1.png"
-            ],
-            "caption": "Overview of hardware platforms.",
-            "image_urls": [
-              "https://arxiv.org/html/2510.10903v2/hardware.png"
-            ],
-            "label": "Figure 2",
-            "number": 2,
-            "source": "arxiv_html",
-            "source_url": "https://arxiv.org/html/2510.10903v2#S2.F2"
-          }
-        ],
-        "html_url": "https://arxiv.org/html/2510.10903v2",
-        "recovery_checked_at": "2026-08-18T04:42:31.660894Z",
-        "recovery_status": "not_found",
-        "recovery_version": 3,
-        "status": "available"
-      },
-      "matched_rules": [
-        "composite:vision_language_robotics"
-      ],
-      "provenance": {
-        "analysis_scope": "title_and_abstract",
-        "analyzed_at": "2026-08-18T04:37:16.595066Z",
-        "model": "deepseek-v4-pro",
-        "prompt_version": "2"
-      },
-      "published_at": "2025-10-13T01:59:27Z",
-      "resources": {
-        "arxiv_url": "https://arxiv.org/abs/2510.10903",
-        "code_url": "https://github.com/BaiShuanghao/Awesome-Robotics-Manipulation",
-        "pdf_url": "https://arxiv.org/pdf/2510.10903",
-        "project_url": null
-      },
-      "title": "Towards a Unified Understanding of Robot Manipulation: A Comprehensive Survey",
-      "title_zh": "迈向机器人操控统一理解：一项全面综述",
-      "updated_at": "2026-08-15T10:43:36Z",
-      "version": 2
     },
     {
       "abstract": "The performance of unified multimodal models for image generation and editing is fundamentally constrained by the quality and comprehensiveness of their training data. While existing datasets have covered basic tasks like style transfer and simple object manipulation, they often lack the systematic structure and challenging scenarios required for real-world applications. To address this bottleneck, we introduce OpenGPT-4o-Image, a large-scale dataset constructed using a novel methodology that combines hierarchical task taxonomy with automated data generation. Our taxonomy not only includes fundamental capabilities such as text rendering and style control but also introduces highly practical yet challenging categories like scientific imagery for chemistry illustrations and complex instruction editing requiring simultaneous execution of multiple operations. Through an automated pipeline leveraging structured resource pools and GPT-4o, we generate 80k high-quality instruction-image pairs with controlled diversity, covering 11 major domains and 51 subtasks. Extensive experiments show that fine-tuning leading models on our dataset achieves significant performance gains across multiple benchmarks, with improvements of up to 18\\% on editing tasks (UniWorld-V1 on ImgEdit-Bench) and 13% on generation tasks (Harmon on GenEval). Our work demonstrates that systematic data construction is key to advancing multimodal AI capabilities.",
@@ -5242,22 +4229,20 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 0,
-    "completion_tokens": 25068,
-    "error_categories": {
-      "ValidationError": 2
-    },
-    "failed": 2,
-    "fetched": 1118,
-    "figure_available": 50,
-    "figure_cache_hits": 0,
+    "cache_hits": 59,
+    "completion_tokens": 611,
+    "error_categories": {},
+    "failed": 0,
+    "fetched": 852,
+    "figure_available": 48,
+    "figure_cache_hits": 47,
     "figure_failed": 0,
-    "figure_requests": 61,
-    "figure_unavailable": 11,
-    "model_calls": 78,
-    "prefiltered": 78,
-    "prompt_tokens": 67337,
-    "published": 61,
-    "total_tokens": 92405
+    "figure_requests": 2,
+    "figure_unavailable": 1,
+    "model_calls": 2,
+    "prefiltered": 61,
+    "prompt_tokens": 1701,
+    "published": 49,
+    "total_tokens": 2312
   }
 }
