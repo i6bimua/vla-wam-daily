@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-19T23:18:58.211982Z",
+  "generated_at": "2026-08-20T04:39:27.276412Z",
   "papers": [
     {
       "abstract": "Unlike text- or image-driven video generation, an interactive world model is driven by actions: the user acts, and the world responds. Two obstacles stand in the way of fair and comprehensive evaluation. First, models take actions in incompatible formats---captions, camera trajectories, action functions---so no shared protocol has been established. Second, while existing benchmarks have advanced world memory and visual quality, action following is reduced to trajectory or direction error, which collapses a whole path into one number: not how quickly the world reacts to a command switch, nor how cleanly it moves along the commanded axis. WorldMark removes both obstacles. Per-model adapters translate a shared WASD-style vocabulary into each model's native control format, so ten heterogeneous models receive semantically identical instructions across 500 standardized cases spanning styles, viewpoints, and difficulty tiers; a new model costs one adapter. On this common ground we characterize action dynamics through a control-systems lens---direction accuracy, direction purity, response latency, and motion stability, each resolved per axis---alongside suites for world memory and visual quality. Together they expose differences existing protocols cannot see: the fastest responders are often the least stable, a trade-off no single action metric captures; per-axis resolution reveals models that follow translation almost perfectly while barely responding to rotation; the model with the best perceptual and aesthetic quality ranks last in translational direction accuracy and latency; and stylized scenes cost every model global consistency while leaving action dynamics largely intact. We will release all data, evaluation code, and model outputs.",
@@ -90,6 +90,174 @@
       "title_zh": "WorldMark：面向交互式视频世界模型的统一基准测试套件",
       "updated_at": "2026-08-05T09:10:15Z",
       "version": 2
+    },
+    {
+      "abstract": "Vision-language models benefit from high-resolution images, but the increase in visual-token count incurs high compute overhead. Humans resolve this tension via foveation: a coarse view guides \"where to look\", while selectively acquired high-acuity evidence refines \"what to think\". We introduce Foveated Reasoner, an autoregressive vision-language framework that unifies foveation and reasoning within a single decoding trajectory. Starting from a low-resolution view, the model triggers foveation only when needed, retrieves high-resolution evidence from selected regions, and injects it back into the same decoding trajectory. We train the method with a two-stage pipeline: coldstart supervision to bootstrap foveation behavior, followed by reinforcement learning to jointly improve evidence acquisition and task accuracy while discouraging trivial \"see-everything\" solutions. Experiments show that the method learns effective foveation policies and achieves stronger accuracy under tight visual-token budgets across multiple vision-language benchmarks.",
+      "analysis": {
+        "key_results": "在多个视觉语言基准上，该方法学习到有效的注视策略，并在严格视觉token预算下取得更高的准确率。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出Foveated Reasoner框架，将注视机制与推理统一在单个自回归解码轨迹中，并使用两阶段训练（冷启动监督+强化学习）优化证据获取策略。",
+        "method": "冷启动监督预训练注视行为，再通过强化学习联合优化证据获取和任务准确率，抑制“查看全部”行为。",
+        "one_sentence_summary": "提出一种通过注视机制动态获取高分辨率视觉证据，在有限视觉token预算下提升视觉语言模型推理效率与准确性的框架。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "本文针对视觉语言模型的高效推理，通过类似动作决策的注视策略动态选择视觉证据，与VLA中的高效感知和动作决策有方法上的类比，但未直接涉及机器人操作或世界模型。",
+        "relevance_score": 6,
+        "tags": [
+          "Efficient Inference",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV"
+      ],
+      "arxiv_id": "2604.21079",
+      "authors": [
+        "Juhong Min",
+        "Lazar Valkov",
+        "Vitali Petsiuk",
+        "Hossein Souri",
+        "Deen Dayal Mohan"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-20T04:39:27.276412Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2604.21079/v2/fig1-panel1.png"
+            ],
+            "caption": "Overview of prior visual focusing methods: (a) multi-pass (left) and (b) text-grounded (right). Given original high-res image (middle), both methods take downsampled image 𝐈 ′ \\mathbf{I}^{\\prime} and progressively acquire task-relevant visual evidence from 𝐈 \\mathbf{I} .",
+            "image_urls": [
+              "https://arxiv.org/html/2604.21079v2/method_comparison2.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2604.21079v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2604.21079/v2/fig2-panel1.png"
+            ],
+            "caption": "The autoregressive pipeline of the proposed approach where T = | 𝐲 | T=|\\mathbf{y}| .",
+            "image_urls": [
+              "https://arxiv.org/html/2604.21079v2/overall_pipeline.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2604.21079v2#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2604.21079v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-20T04:39:27.276412Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-04-22T20:44:24Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2604.21079",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2604.21079",
+        "project_url": null
+      },
+      "title": "Foveated Reasoning: Stateful, Action-based Visual Focusing for Vision-Language Models",
+      "title_zh": "注视推理：面向视觉语言模型的具状态、基于动作的视觉聚焦",
+      "updated_at": "2026-08-18T21:11:53Z",
+      "version": 2
+    },
+    {
+      "abstract": "Motion planning for autonomous vehicles often requires satisfying multiple conditionally conflicting specifications. In situations where not all specifications can be met simultaneously, minimum-violation motion planning maintains system operation by minimizing violations of specifications in accordance with their priorities. Signal temporal logic (STL) provides a formal language for rigorously defining these specifications and enables the quantitative evaluation of their violations. However, a total ordering of specifications yields a lexicographic optimization problem, which is typically computationally expensive to solve using standard methods. We address this problem by discretizing the multi-objective lexicographic optimization problem via non-uniform quantization and transforming it into a single-objective optimization problem using bit-shifting. Specifically, we extend a deterministic model predictive path integral (MPPI) solver to efficiently solve optimization problems without quadratic input cost. Additionally, a novel predicate robustness measure that combines spatial and temporal violations is introduced. Our results show that the proposed method offers an interpretable and scalable solution for lexicographic STL minimum-violation motion planning using a single-objective solver.",
+      "analysis": {
+        "key_results": "摘要未说明具体数值结果；仅表示为字典序STL最小违反运动规划提供了可解释且可扩展的单目标求解方案。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出一种通过非均匀量化和位移变换将字典序多目标优化转化为单目标优化，并用扩展的确定性模型预测路径积分求解器高效求解的方法，同时引入时空结合的谓词鲁棒性度量。",
+        "method": "非均匀量化离散化多目标字典序优化问题，利用位移变换转化为单目标优化，扩展了无需二次输入代价的确定性模型预测路径积分求解器，并提出时空复合谓词鲁棒性度量。",
+        "one_sentence_summary": "针对自动驾驶中多目标冲突约束，提出基于非均匀量化和位移变换的单目标优化方法实现字典序最小违反运动规划。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "无直接关系，但方法涉及模型量化技术，对本站主题中的模型量化在机器人策略中的高效推理可能提供方法借鉴。",
+        "relevance_score": 6,
+        "tags": [
+          "Efficient Inference",
+          "Robot Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2604.20428",
+      "authors": [
+        "Patrick Halder",
+        "Lothar Kiltz",
+        "Hannes Homburger",
+        "Johannes Reuter",
+        "Matthias Althoff"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-20T04:39:27.276412Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2604.20428/v3/fig1-panel1.png"
+            ],
+            "caption": "An overtaking scenario involving a broken-down vehicle and five y ,y ,y ,y y example trajectories:",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2604.20428v3"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2604.20428/v3/fig2-panel1.png"
+            ],
+            "caption": "Overview of the motion planning framework. Figure derived from [126, Fig. 4].",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2604.20428v3"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2604.20428v3",
+        "recovery_checked_at": "2026-08-20T04:42:03.442264Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-20T04:39:27.276412Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-04-22T10:49:09Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2604.20428",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2604.20428",
+        "project_url": null
+      },
+      "title": "Lexicographic Minimum-Violation Motion Planning using Signal Temporal Logic",
+      "title_zh": "使用信号时序逻辑的字典序最小违反运动规划",
+      "updated_at": "2026-08-19T11:14:37Z",
+      "version": 3
     },
     {
       "abstract": "Bimanual mobile manipulation requires a seamless integration between high-level semantic reasoning and safe, compliant physical interaction - a challenge that end-to-end models approach opaquely and classical controllers lack the context to address. This paper presents GenerativeMPC, a hierarchical cyber-physical framework that explicitly bridges semantic scene understanding with physical control parameters for bimanual mobile manipulators. The system utilizes a Vision-Language Model with Retrieval-Augmented Generation (VLM-RAG) to translate visual and linguistic context into grounded control constraints, specifically outputting dynamic velocity limits and safety margins for a Whole-Body Model Predictive Controller (MPC). Simultaneously, the VLM-RAG module modulates virtual stiffness and damping gains for a unified impedance-admittance controller, enabling context-aware compliance during human-robot interaction. Our framework leverages an experience-driven vector database to ensure consistent parameter grounding without retraining. Experimental results in MuJoCo, IsaacSim, and on a physical bimanual platform confirm a 60% speed reduction near humans and safe, socially-aware navigation and manipulation through semantic-to-physical parameter grounding. This work advances the field of human-centric cybernetics by grounding large-scale cognitive models into predictable, high-frequency physical control loops.",
@@ -1396,20 +1564,20 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 79,
-    "completion_tokens": 299,
+    "cache_hits": 72,
+    "completion_tokens": 10751,
     "error_categories": {},
     "failed": 0,
-    "fetched": 1148,
-    "figure_available": 66,
-    "figure_cache_hits": 66,
+    "fetched": 1570,
+    "figure_available": 79,
+    "figure_cache_hits": 61,
     "figure_failed": 0,
-    "figure_requests": 1,
-    "figure_unavailable": 1,
-    "model_calls": 1,
-    "prefiltered": 80,
-    "prompt_tokens": 884,
-    "published": 67,
-    "total_tokens": 1183
+    "figure_requests": 28,
+    "figure_unavailable": 10,
+    "model_calls": 33,
+    "prefiltered": 105,
+    "prompt_tokens": 29402,
+    "published": 89,
+    "total_tokens": 40153
   }
 }
