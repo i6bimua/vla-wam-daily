@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-18T04:37:16.595066Z",
+  "generated_at": "2026-08-21T04:40:28.268336Z",
   "papers": [
     {
       "abstract": "Vision-Language-Action (VLA) models that encode actions using a discrete tokenization scheme have been widely adopted for robotic manipulation, but existing decoding paradigms remain fundamentally limited. Whether actions are decoded sequentially by autoregressive VLAs or in parallel by discrete diffusion VLAs, once a token is generated, it is typically fixed and cannot be revised in subsequent iterations. Consequently, early token errors cannot be effectively corrected later. We propose DFM-VLA, a discrete flow matching VLA that iteratively refines action tokens. DFM-VLA models a token-level probability velocity field that dynamically updates the full action sequence across refinement iterations. We investigate two approaches to constructing the velocity field: an auxiliary velocity-head formulation and an embedding-guided formulation. To further improve prediction accuracy, we introduce a metric-aligned action tokenizer (MAAT) tailored to the coarse-to-fine nature of DFM, together with a two-stage decoding strategy. Extensive experiments on CALVIN, LIBERO, LIBERO-Plus, and real-world manipulation tasks demonstrate the effectiveness of our approach. Our project is available at https://chris1220313648.github.io/DFM-VLA/.",
@@ -566,6 +566,79 @@
       "version": 3
     },
     {
+      "abstract": "Autonomous aerial vehicles (AAVs) enable data collection for sixth-generation Internet-of-Things networks, but their trajectories couple nonlinear wireless rates with long-horizon service progress. This paper views the evolution of AAV kinematics, channel state, and user backlog as a structured differentiable world model and develops Learn for Variation (L4V) to exploit that model efficiently. L4V replaces a discontinuous completion-time objective with a cumulative-backlog surrogate, unrolls the mission dynamics, and propagates pathwise sensitivities to a neural policy through the discrete adjoint recursion. The resulting derivative is exact conditional on a fixed exogenous-noise realization; stochastic expected-objective optimization still requires sampling. We show that the structured adjoint grows at most polynomially with the horizon and establish a stationary-point rate for fixed-step full-gradient descent under standard smoothness assumptions. The framework also learns shared OFDMA allocation under reparameterized shadowing and Rician fading, while distributional pretraining amortizes model-based optimization into forward-only deployment on unseen layouts. Paired stress tests cover channel-generator mismatch, noisy partial observations, a fixed-resource two-AAV extension, and a circular no-fly region. Code and configurations are available at https://github.com/UNIC-Lab/L4V-AAV. Against genetic-algorithm, DQN, A2C, DDPG, and differentiable model-predictive-control implementations, L4V reduces mission time by up to $65\\%$, executes a default mission in $53$ ms, and completes all $60$ frozen-policy tests after pretraining on $1{,}600$ layouts.",
+      "analysis": {
+        "key_results": "与遗传算法、DQN、A2C、DDPG和可微分模型预测控制相比，L4V将任务时间最多缩短65%，默认任务执行时间为53毫秒，在1600个布局上预训练后完成了所有60个冻结策略测试。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出了L4V框架，通过可微分无线世界模型和离散伴随递归来精确计算路径灵敏度，并用累积积压代理替代不连续完成时间目标，实现了高效的AAV轨迹学习。",
+        "method": "L4V利用结构化可微分世界模型对AAV运动学、信道状态和用户积压进行建模，通过离散伴随递归传播路径灵敏度至神经策略，并使用累积积压代理目标进行优化。",
+        "one_sentence_summary": "该论文提出了一种利用结构化可微分世界模型进行自主飞行器轨迹学习的方法，以高效优化通信服务时间。",
+        "primary_topic": "World Model",
+        "relation_to_vla_wam": "该论文涉及世界模型（World Model）在自主系统控制中的应用，但与VLA（视觉-语言-动作）或面向机器人操作的世界模型无直接关系，属于无线通信背景下基于可微分世界模型的策略优化。",
+        "relevance_score": 6,
+        "tags": [
+          "World Modeling",
+          "Simulation"
+        ]
+      },
+      "arxiv_categories": [
+        "eess.SY",
+        "cs.LG",
+        "cs.SY"
+      ],
+      "arxiv_id": "2603.18853",
+      "authors": [
+        "Xiucheng Wang",
+        "Zhenye Chen",
+        "Nan Cheng",
+        "Zhisheng Yin",
+        "Xuemin Shen"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-21T04:40:28.268336Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2603.18853/v3/fig1-panel1.png"
+            ],
+            "caption": "The L4V framework. Each blue transition block is one step of the structured wireless world model. The forward pass (black) unrolls the AAV trajectory and accumulates ℒ \\mathcal{L} ; the backward pass (red) implements the discrete adjoint and propagates exact conditional pathwise gradients ∇ θ ℒ \\nabla_{\\theta}\\mathcal{L} to the policy parameters.",
+            "image_urls": [
+              "https://arxiv.org/html/2603.18853v3/system.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2603.18853v3#S4.F1"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2603.18853v3",
+        "recovery_checked_at": "2026-08-21T04:43:40.823741Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-21T04:40:28.268336Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-03-19T12:57:42Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2603.18853",
+        "code_url": "https://github.com/UNIC-Lab/L4V-AAV",
+        "pdf_url": "https://arxiv.org/pdf/2603.18853",
+        "project_url": null
+      },
+      "title": "Learn for Variation: Efficient AAV Trajectory Learning through a Differentiable Wireless World Model",
+      "title_zh": "学习变化：通过可微分无线世界模型实现高效AAV轨迹学习",
+      "updated_at": "2026-08-20T07:35:28Z",
+      "version": 3
+    },
+    {
       "abstract": "Tactile sensing is a crucial capability for Vision-Language-Action (VLA) architectures, as it enables dexterous and safe manipulation in contact-rich tasks. However, reliance on dedicated tactile hardware increases cost and reduces reproducibility across robotic platforms. We argue that tactile-aware manipulation can be learned offline and deployed without direct haptic feedback at inference. To this end, we present HapticVLA, which proceeds in two tightly coupled stages: Safety-Aware Reward-Weighted Flow Matching (SA-RWFM) and Tactile Distillation (TD). SA-RWFM trains a flow-matching action expert that incorporates precomputed, safety-aware tactile rewards penalizing excessive grasping force and suboptimal grasping trajectories. TD further transfers this tactile-aware capability into a conventional VLA: we distill a compact tactile token from the SA-RWFM teacher and train a student VLA to predict that token from vision and state modalities, enabling tactile-aware action generation at inference without requiring on-board tactile sensors. This design preserves contact-rich tactile-aware reasoning within VLA while removing the need for on-board tactile sensors during deployment. On real-world experiments, HapticVLA achieves a mean success rate of 86.7%, consistently outperforming baseline VLAs - including versions provided with direct tactile feedback during inference.",
       "analysis": {
         "key_results": "真实世界实验中平均成功率达86.7%，持续优于基线VLA，包括在推理时提供直接触觉反馈的版本。",
@@ -1091,22 +1164,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 0,
-    "completion_tokens": 25068,
+    "cache_hits": 53,
+    "completion_tokens": 12960,
     "error_categories": {
-      "ValidationError": 2
+      "ValidationError": 1
     },
-    "failed": 2,
-    "fetched": 1118,
-    "figure_available": 50,
-    "figure_cache_hits": 0,
+    "failed": 1,
+    "fetched": 1407,
+    "figure_available": 67,
+    "figure_cache_hits": 43,
     "figure_failed": 0,
-    "figure_requests": 61,
-    "figure_unavailable": 11,
-    "model_calls": 78,
-    "prefiltered": 78,
-    "prompt_tokens": 67337,
-    "published": 61,
-    "total_tokens": 92405
+    "figure_requests": 33,
+    "figure_unavailable": 9,
+    "model_calls": 40,
+    "prefiltered": 93,
+    "prompt_tokens": 34867,
+    "published": 76,
+    "total_tokens": 47827
   }
 }

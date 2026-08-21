@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-20T23:21:05.904751Z",
+  "generated_at": "2026-08-21T04:40:28.268336Z",
   "papers": [
     {
       "abstract": "Behavior cloning with high-capacity generative policies achieves strong imitation performance, but is often limited by demonstration coverage and distribution shift. Direct reinforcement learning fine-tuning can improve performance, but updating large action decoders is frequently unstable and sample inefficient. We propose Lagrangian Perturbation Diffusion Steering (LP-DS), a lightweight adaptation method that improves a frozen generative policy by learning a compact noise-space perturbation before decoding. LP-DS optimizes this perturbation with a Lagrangian trust-region objective, improving downstream value while constraining deviation from the latent prior. Across RoboMimic manipulation, OpenAI Gym locomotion, and Adroit dexterous manipulation benchmarks, LP-DS improves sample efficiency, success, and return while maintaining higher action-space entropy than unconstrained noise-space steering, with return improvements of up to 25% over prior baselines. Additional evaluations with flow-matching backbones, a large vision-language-action model, and physical Franka deployment show that LP-DS is not limited to compact diffusion policies or simulated benchmarks. Project page: https://sites.google.com/view/lp-ds/home.",
@@ -1080,6 +1080,93 @@
       "title": "EXPO-FT: Sample-Efficient Reinforcement Learning Finetuning for Vision-Language-Action Models",
       "title_zh": "EXPO-FT：面向视觉-语言-动作模型的高采样效率强化学习微调",
       "updated_at": "2026-08-17T22:23:14Z",
+      "version": 2
+    },
+    {
+      "abstract": "RequestRouter is a lightweight request-boundary controller for reducing the latency and energy cost of single-GPU large language model inference. Rather than serving all requests with one static configuration, the system uses cheap request-level features to select one fixed inference mode per request, including FP16, quantized inference, speculative decoding, prefix caching, continuous batching, and hybrid modes such as GPTQ plus prefix caching and INT8 plus continuous batching. We evaluate RequestRouter using an 8B instruction-tuned language model served through vLLM on NVIDIA A100 GPUs. Across the full-scale A100 evaluation--26,500 fixed-mode evaluations followed by 3,500 online-controller evaluations, for 30,000 measured inference executions in total--the controller achieves a 2.10x mean latency speedup over FP16 and a 0.48x energy ratio on deployment-style workloads. A smaller matched evaluation with repeated measurements provides a controlled statistical check of this result: RequestRouter retains a 1.93x latency speedup (95% CI: 1.88--1.98x) and a 0.523 energy ratio (95% CI: 0.506--0.540), showing that the gains persist under a more tightly controlled protocol. On a separate expanded automatic benchmark evaluation, the routed policy retains 99.6% of FP16 macro accuracy. A 100,000-call CPU microbenchmark measures only 0.00475 ms mean routing overhead (0.00532 ms p99). Thus, simple request-aware routing can recover substantial serving efficiency without retraining or modifying the underlying LLM.",
+      "analysis": {
+        "key_results": "在NVIDIA A100 GPU上使用8B指令微调模型通过vLLM服务进行的全规模评估中，控制器在部署式负载上实现了2.10倍的平均延迟加速（相对于FP16）和0.48倍的能耗比；更严格匹配的重复测量评估中，延迟加速为1.93倍（95% CI: 1.88–1.98），能耗比为0.523（95% CI: 0.506–0.540）；在独立扩展自动基准评估中，路由策略保留了FP16宏精度的99.6%；100,000次调用的CPU微基准测试中平均路由开销为0.00475毫秒（p99为0.00532毫秒）。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出了RequestRouter，一种基于请求级特征的轻量级请求边界控制器，在不重新训练或修改底层LLM的情况下，通过动态选择推理模式实现单GPU LLM推理的高效服务。",
+        "method": "使用廉价的请求级特征为每个请求选择一个固定的推理模式，包括FP16、量化推理、推测解码、前缀缓存、连续批处理以及GPTQ+前缀缓存和INT8+连续批处理等混合模式。",
+        "one_sentence_summary": "RequestRouter是一种轻量级请求边界控制器，通过为每个请求选择固定推理模式（如FP16、量化、推测解码、前缀缓存、连续批处理及其混合模式）来降低单GPU大语言模型推理的延迟和能耗。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "本文专注于独立的高效推理技术（推测解码与量化），没有直接涉及VLA、世界模型或机器人动作生成。然而，其请求级路由方法可潜在应用于机器人策略推理服务，以提高效率，但摘要中没有明确讨论这一适用性。",
+        "relevance_score": 8,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding",
+          "Model Quantization"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.CL",
+        "cs.PF"
+      ],
+      "arxiv_id": "2605.23057",
+      "authors": [
+        "Aman Sunesh",
+        "Ali Alshehhi",
+        "and Hivansh Dhakne"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-21T04:40:28.268336Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2605.23057/v2/fig1-panel1.png"
+            ],
+            "caption": "Held-out latency comparison between Reque-",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2605.23057v2"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2605.23057/v2/fig2-panel1.png"
+            ],
+            "caption": "Same-environment CPU routing overhead. Across 100,000 routing decisions, the rule controller requires 0.00475 ms/request on average (SD: 0.00092 ms; p95: 0.00500 ms; p99: 0.00532 ms), compared with 4.49 ms for logistic regression, 4.56 ms for a decision tree, and 20.90 ms for a random forest. The logarithmic scale highlights the orders-of-magnitude difference in routing cost.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_source",
+            "source_url": "https://arxiv.org/e-print/2605.23057v2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2605.23057v2",
+        "recovery_checked_at": "2026-08-21T04:43:40.823741Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:speculative-decoding",
+        "composite:speculative_generation",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-21T04:40:28.268336Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-05-21T21:46:57Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2605.23057",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2605.23057",
+        "project_url": null
+      },
+      "title": "RequestRouter: Request-Boundary Routing for Efficient Single-GPU LLM Inference",
+      "title_zh": "RequestRouter：面向单GPU大语言模型推理的请求边界路由",
+      "updated_at": "2026-08-19T11:24:04Z",
       "version": 2
     },
     {
@@ -2339,20 +2426,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 61,
-    "completion_tokens": 0,
-    "error_categories": {},
-    "failed": 0,
-    "fetched": 1024,
-    "figure_available": 48,
-    "figure_cache_hits": 51,
+    "cache_hits": 53,
+    "completion_tokens": 12960,
+    "error_categories": {
+      "ValidationError": 1
+    },
+    "failed": 1,
+    "fetched": 1407,
+    "figure_available": 67,
+    "figure_cache_hits": 43,
     "figure_failed": 0,
-    "figure_requests": 0,
-    "figure_unavailable": 3,
-    "model_calls": 0,
-    "prefiltered": 61,
-    "prompt_tokens": 0,
-    "published": 51,
-    "total_tokens": 0
+    "figure_requests": 33,
+    "figure_unavailable": 9,
+    "model_calls": 40,
+    "prefiltered": 93,
+    "prompt_tokens": 34867,
+    "published": 76,
+    "total_tokens": 47827
   }
 }
