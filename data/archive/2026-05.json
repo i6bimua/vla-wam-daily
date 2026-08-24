@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-22T04:35:08.395518Z",
+  "generated_at": "2026-08-24T04:47:52.628466Z",
   "papers": [
     {
       "abstract": "Behavior cloning with high-capacity generative policies achieves strong imitation performance, but is often limited by demonstration coverage and distribution shift. Direct reinforcement learning fine-tuning can improve performance, but updating large action decoders is frequently unstable and sample inefficient. We propose Lagrangian Perturbation Diffusion Steering (LP-DS), a lightweight adaptation method that improves a frozen generative policy by learning a compact noise-space perturbation before decoding. LP-DS optimizes this perturbation with a Lagrangian trust-region objective, improving downstream value while constraining deviation from the latent prior. Across RoboMimic manipulation, OpenAI Gym locomotion, and Adroit dexterous manipulation benchmarks, LP-DS improves sample efficiency, success, and return while maintaining higher action-space entropy than unconstrained noise-space steering, with return improvements of up to 25% over prior baselines. Additional evaluations with flow-matching backbones, a large vision-language-action model, and physical Franka deployment show that LP-DS is not limited to compact diffusion policies or simulated benchmarks. Project page: https://sites.google.com/view/lp-ds/home.",
@@ -1892,6 +1892,92 @@
       "version": 3
     },
     {
+      "abstract": "The quadratic complexity of attention imposes severe memory and computational bottlenecks on Large Language Model (LLM) inference. This challenge is particularly acute for emerging agentic applications that require processing multi-million token sequences. We propose STS, a sparse attention mechanism that requires no model retraining. STS leverages the key insight that tokens identified as important by a smaller draft model are highly predictive of important tokens for a larger target model. By integrating into speculative decoding frameworks, STS repurposes the draft model's attention scores to dynamically construct a token-and-head-wise sparsity mask. This mask effectively prunes the expensive attention computation in the target LLM. Our evaluation shows that STS achieves a 2.67x speedup operating at approximately 90% sparsity on representative benchmark NarrativeQA, maintaining negligible accuracy degradation compared to dense attention. STS establishes a new state-of-the-art on the sparsity-accuracy trade-off, outperforming prior techniques by enabling higher sparsity levels for a given accuracy budget.",
+      "analysis": {
+        "key_results": "在NarrativeQA基准上实现2.67倍加速和约90%的稀疏度，与稠密注意力相比精度损失可忽略，并在稀疏度-精度权衡上达到新的最优。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出STS稀疏注意力机制，无需重新训练模型，通过重用推测解码中草稿模型的注意力分数动态构建token和头维度的稀疏掩码，有效减少目标LLM的注意力计算。",
+        "method": "利用草稿模型标记重要token的注意力分数来预测目标模型的重要token，将其集成到推测解码框架中，动态生成稀疏掩码以剪枝目标LLM的注意力计算。",
+        "one_sentence_summary": "STS提出一种免重训练的稀疏注意力机制，利用推测解码中的草稿模型注意力分数动态剪枝目标LLM的注意力计算，在NarrativeQA上达到2.67倍加速和约90%稀疏度，精度损失可忽略。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "本文聚焦于LLM推理加速的稀疏注意力与推测解码，无直接涉及VLA或WAM；但其高效推理方法可能对机器人策略等长序列模型具有借鉴价值。",
+        "relevance_score": 8,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.CL"
+      ],
+      "arxiv_id": "2605.15508",
+      "authors": [
+        "Jiangnan Yu",
+        "Ceyu Xu",
+        "Yongji Wu",
+        "Yuan Xie"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-24T04:47:52.628466Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2605.15508/v3/fig1-panel1.png"
+            ],
+            "caption": "A taxonomy of methods for reducing the computation cost of dense attention: (a) Linear Attention, (b) Token Pruning, and (c) Token Sparsity.",
+            "image_urls": [
+              "https://arxiv.org/html/2605.15508v3/linear_prune_sparsity.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.15508v3#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2605.15508/v3/fig2-panel1.png"
+            ],
+            "caption": "STS vs. Other Token Sparsity Works. The key difference is what “proxy” is used for selecting the important tokens.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2605.15508v3"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2605.15508v3",
+        "recovery_checked_at": "2026-08-24T04:50:09.834603Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:speculative-decoding",
+        "composite:speculative_generation",
+        "composite:draft_verification_decoding"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-24T04:47:52.628466Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-05-15T01:05:37Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2605.15508",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2605.15508",
+        "project_url": null
+      },
+      "title": "STS: Efficient Sparse Attention with Speculative Token Sparsity",
+      "title_zh": "STS：基于推测性token稀疏的高效稀疏注意力",
+      "updated_at": "2026-08-21T09:27:00Z",
+      "version": 3
+    },
+    {
       "abstract": "Agentic modeling aims to transform LLMs into autonomous agents capable of solving complex tasks through planning, reasoning, tool use, and multi-turn interaction with external environments. We present Orchard, an open-source framework for scalable agentic modeling. At its core is Orchard Env, a lightweight Kubernetes-native environment service that provides reusable primitives for sandbox lifecycle management across task domains, agent harnesses, and training stages. On top of Orchard Env, we build three agentic modeling recipes. Orchard-SWE targets software engineering agents. We introduce credit-assignment supervised fine-tuning and a progression of RL signals: Balanced Adaptive Rollout (BAR) for sparse-reward optimization, on-policy distillation (OPD) and rubric-based process reward (RPR) for dense supervision, and historical experience distillation, which compresses rollouts from prior experiments into a compact value model for inference-time reranking. Built on the Qwen3.5-35B-A3B backbone, Orchard-SWE reaches 69.7% with RPR-based RL and 73.0% with value-model reranking on SWE-bench Verified, setting a new state of the art among open-source methods while approaching frontier systems over 10x larger. Orchard-GUI trains a 4B vision-language computer-use agent using only 0.4K distilled trajectories and 2.2K open-ended tasks, achieving 68.4% average success across WebVoyager, Online-Mind2Web, and DeepShop, making it the strongest open-source model while remaining competitive with proprietary systems. Orchard-Claw targets personal assistant agents. Trained with only 0.2K synthetic tasks, it achieves 59.6% pass@3 on Claw-Eval and 73.9% when paired with the stronger ZeroClaw harness. Collectively, these results demonstrate that a lightweight, open, harness-agnostic environment layer enables reusable agentic data, training recipes, and evaluation protocols across domains.",
       "analysis": {
         "key_results": "Orchard-SWE在SWE-bench Verified上达到69.7%（RPR-based RL）和73.0%（value-model reranking），开源SOTA；Orchard-GUI在WebVoyager、Online-Mind2Web、DeepShop上平均成功率68.4%，开源最强；Orchard-Claw在Claw-Eval上pass@3为59.6%，配合ZeroClaw harness达73.9%。",
@@ -2426,20 +2512,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 57,
-    "completion_tokens": 380,
-    "error_categories": {},
-    "failed": 0,
-    "fetched": 858,
-    "figure_available": 42,
-    "figure_cache_hits": 45,
+    "cache_hits": 0,
+    "completion_tokens": 8093,
+    "error_categories": {
+      "ValidationError": 1
+    },
+    "failed": 1,
+    "fetched": 367,
+    "figure_available": 18,
+    "figure_cache_hits": 0,
     "figure_failed": 0,
-    "figure_requests": 1,
-    "figure_unavailable": 4,
-    "model_calls": 1,
-    "prefiltered": 58,
-    "prompt_tokens": 943,
-    "published": 46,
-    "total_tokens": 1323
+    "figure_requests": 25,
+    "figure_unavailable": 7,
+    "model_calls": 26,
+    "prefiltered": 26,
+    "prompt_tokens": 21627,
+    "published": 25,
+    "total_tokens": 29720
   }
 }
