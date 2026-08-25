@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-22T04:35:08.395518Z",
+  "generated_at": "2026-08-25T04:40:41.852701Z",
   "papers": [
     {
       "abstract": "Unlike text- or image-driven video generation, an interactive world model is driven by actions: the user acts, and the world responds. Two obstacles stand in the way of fair and comprehensive evaluation. First, models take actions in incompatible formats---captions, camera trajectories, action functions---so no shared protocol has been established. Second, while existing benchmarks have advanced world memory and visual quality, action following is reduced to trajectory or direction error, which collapses a whole path into one number: not how quickly the world reacts to a command switch, nor how cleanly it moves along the commanded axis. WorldMark removes both obstacles. Per-model adapters translate a shared WASD-style vocabulary into each model's native control format, so ten heterogeneous models receive semantically identical instructions across 500 standardized cases spanning styles, viewpoints, and difficulty tiers; a new model costs one adapter. On this common ground we characterize action dynamics through a control-systems lens---direction accuracy, direction purity, response latency, and motion stability, each resolved per axis---alongside suites for world memory and visual quality. Together they expose differences existing protocols cannot see: the fastest responders are often the least stable, a trade-off no single action metric captures; per-axis resolution reveals models that follow translation almost perfectly while barely responding to rotation; the model with the best perceptual and aesthetic quality ranks last in translational direction accuracy and latency; and stylized scenes cost every model global consistency while leaving action dynamics largely intact. We will release all data, evaluation code, and model outputs.",
@@ -788,6 +788,90 @@
       "version": 2
     },
     {
+      "abstract": "Trajectory prediction is a key component of autonomous driving systems because future motions directly affect collision checking, behavior planning, and control. The task remains challenging under dense interactions, heterogeneous behaviors, multimodal futures, and limited on-board computation. Existing graph, attention, and generative predictors improve interaction reasoning or uncertainty modeling, but their high-capacity designs are often costly for real-time deployment. Lightweight predictors and conventional distillation reduce inference cost, yet usually rely on static imitation and do not explicitly correct safety-relevant teacher bias. This paper proposes \\textbf{MAVEN-T}, a reinforced heterogeneous distillation framework for real-time multi-agent trajectory prediction. A high-capacity teacher models directed local interactions with a surround-aware graph encoder, combines efficient temporal filtering with shifted-window spatial attention, and decodes maneuver-specific futures through a sparse Mixture-of-Experts head. A compact GRU--Squeeze-and-Excitation student with a Low-Rank Adapted policy head is trained by feature-, attention-, and semantic-level distillation. To align prediction with downstream behavior, the student is further refined by Proximal Policy Optimization rewards for collision avoidance, comfort, and progress, while a complexity-aware curriculum and Elastic Weight Consolidation stabilize stage-wise training. Experiments on NGSIM, HighD, MoCAD, Argoverse~2, and the Waymo Open Motion Dataset evaluate accuracy, efficiency, generalization, robustness, and closed-loop safety. The student achieves 6.2$\\times$ parameter compression, 3.7$\\times$ inference acceleration, and 14.6,ms latency on an NVIDIA Jetson AGX Orin while maintaining competitive accuracy.",
+      "analysis": {
+        "key_results": "在多个数据集上验证：学生模型实现6.2倍参数压缩、3.7倍推理加速、在Jetson AGX Orin上14.6ms延迟，同时保持竞争精度。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出MAVEN-T框架，结合异构蒸馏和强化学习微调，使轻量级学生模型在保持竞争力的同时显著减少参数和推理时间。",
+        "method": "高能力教师模型使用环绕感知图编码器、时序滤波、移位窗口空间注意力和稀疏专家混合头；学生模型为紧凑的GRU-Squeeze-and-Excitation结构，通过特征、注意力和语义级蒸馏训练，并用PPO奖励和课程学习、弹性权重巩固进行安全对齐。",
+        "one_sentence_summary": "提出一个用强化异构蒸馏提升实时多智能体轨迹预测的框架，在边缘设备上实现高压缩和低延迟。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "该工作专注于自动驾驶中的轨迹预测与模型压缩，未直接涉及VLA、世界模型或机器人操作策略，但与边缘端实时推理和策略学习中的效率优化有一定方法学关联。",
+        "relevance_score": 6,
+        "tags": [
+          "Efficient Inference",
+          "Robot Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.AI",
+        "cs.LG"
+      ],
+      "arxiv_id": "2604.10169",
+      "authors": [
+        "Wenchang Duan",
+        "Zhenguo Gao",
+        "Jinguo Xian",
+        "Yi Shi"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-25T04:40:41.852701Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2604.10169/v4/fig1-panel1.png"
+            ],
+            "caption": "Novelty comparison between generic policy distillation with PPO and MAVEN-T. Generic policy distillation transfers action-policy behavior and uses environment rewards during policy distillation. MAVEN-T transfers a multimodal trajectory predictor through feature, attention, and semantic alignment, and then applies PPO as a task-level refinement driven by safety, comfort, and progress rewards in traffic scenes.",
+            "image_urls": [
+              "https://arxiv.org/html/2604.10169v4/novelty_comparison.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2604.10169v4#S0.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2604.10169/v4/fig2-panel1.png"
+            ],
+            "caption": "Overview of MAVEN-T. The teacher (top) uses a Surround-Aware GATv2 encoder, a hybrid Mamba–shifted-window block, and a sparse Mixture-of-Experts decoder for accurate interaction reasoning. The student (bottom) uses a GRU–Squeeze-and-Excitation encoder and a Low-Rank Adapted policy head for on-device inference. Multi-granular distillation transfers feature, attention, and semantic knowledge; PPO then refines the student with safety, comfort, and progress rewards under a complexity-aware curriculum.",
+            "image_urls": [
+              "https://arxiv.org/html/2604.10169v4/figures/architecture.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2604.10169v4#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2604.10169v4",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-25T04:40:41.852701Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-04-11T11:34:13Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2604.10169",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2604.10169",
+        "project_url": null
+      },
+      "title": "MAVEN-T: Reinforced Heterogeneous Distillation for Real-Time Multi-Agent Trajectory Prediction",
+      "title_zh": "MAVEN-T：面向实时多智能体轨迹预测的强化异构蒸馏框架",
+      "updated_at": "2026-08-24T09:09:20Z",
+      "version": 4
+    },
+    {
       "abstract": "Visual Retrieval-Augmented Generation (VRAG) empowers Vision-Language Models to retrieve and reason over visually rich documents. To tackle complex queries requiring multi-step reasoning, agentic VRAG systems interleave reasoning with iterative retrieval. However, existing agentic VRAG faces two critical bottlenecks. (1) Visual Evidence Sparsity: key evidence is scattered across pages yet processed in isolation, hindering cross-page reasoning; moreover, fine-grained intra-image evidence often requires precise visual actions, whose misuse degrades retrieval quality; (2) Search Drift in Long Horizons: the accumulation of visual tokens across retrieved pages dilutes context and causes cognitive overload, leading agents to deviate from their search objective. To address these challenges, we propose VISOR (Visual Retrieval-Augmented Generation via Iterative Search and Over-horizon Reasoning), a unified single-agent framework. VISOR features a structured Evidence Space for progressive cross-page reasoning, coupled with a Visual Action Evaluation and Correction mechanism to manage visual actions. Additionally, we introduce a Dynamic Trajectory with Sliding Window and Intent Injection to mitigate search drift. They anchor the evidence space while discarding earlier raw interactions, preventing context from being overwhelmed by visual tokens. We train VISOR using a Group Relative Policy Optimization-based Reinforcement Learning (GRPO-based RL) pipeline with state masking and credit assignment tailored for dynamic context reconstruction. Extensive experiments on ViDoSeek, SlideVQA, and MMLongBench demonstrate that VISOR achieves state-of-the-art performance while maintaining reasonable and controllable computational costs for long-horizon visual reasoning tasks. The source code is available at https://github.com/syc1336/VISOR.",
       "analysis": {
         "key_results": "在ViDoSeek、SlideVQA和MMLongBench上达到最先进性能，同时保持合理可控的计算成本。",
@@ -1564,20 +1648,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 57,
-    "completion_tokens": 380,
-    "error_categories": {},
-    "failed": 0,
-    "fetched": 858,
-    "figure_available": 42,
-    "figure_cache_hits": 45,
+    "cache_hits": 0,
+    "completion_tokens": 28515,
+    "error_categories": {
+      "ValidationError": 1
+    },
+    "failed": 1,
+    "fetched": 1137,
+    "figure_available": 51,
+    "figure_cache_hits": 0,
     "figure_failed": 0,
-    "figure_requests": 1,
-    "figure_unavailable": 4,
-    "model_calls": 1,
-    "prefiltered": 58,
-    "prompt_tokens": 943,
-    "published": 46,
-    "total_tokens": 1323
+    "figure_requests": 67,
+    "figure_unavailable": 16,
+    "model_calls": 86,
+    "prefiltered": 86,
+    "prompt_tokens": 75962,
+    "published": 67,
+    "total_tokens": 104477
   }
 }
