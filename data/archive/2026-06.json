@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-25T23:21:02.170505Z",
+  "generated_at": "2026-08-26T04:41:26.872513Z",
   "papers": [
     {
       "abstract": "World-model-based autonomous driving endows the model with the ability to understand scene evolution. Yet this promise is undermined by the prevailing imagine-then-act paradigm, which allows errors from the more challenging visual generation stage to cascade into action planning. We introduce ForgeDrive, a unified autoregressive diffusion framework with visual-action cross-conditioning that closes this gap through act-then-imagine paradigm. ForgeDrive factorizes the future as a sequence of per-timestep frame-action pairs, intertwining each action with its corresponding visual observation. During training, we decouple the diffusion timesteps of the two modalities and introduce a UniDiffuser-style noise scheduler to get the ability to infer either modality from its counterpart and deepen understanding of relationships between images and actions. At inference, we propose a novel act-then-imagine inference paradigm, and find that at each step, action generation is a capability internalized during training, requiring no clean future frame as a prerequisite at inference time; instead, the generated action can improve the accuracy of future frame generation, which in turn enhances the quality of the next action. Additionally, we augment each step with future ego-status prediction, further sharpening planning ability. Extensive experiments on NAVSIM demonstrate that ForgeDrive not only unifies driving simulation, planning, and visual odometry into a single model, but also outperforms existing strong planners without any post-training strategy.",
@@ -684,6 +684,80 @@
       "version": 2
     },
     {
+      "abstract": "Unified multimodal models (UMMs) interleave generated ''visual thoughts'' (VTs) with text reasoning to improve spatial tasks. This incurs roughly an order-of-magnitude inference cost from multi-step diffusion. We find this cost yields limited direct benefit. On ThinkMorph, removing or noising VTs barely changes accuracy across nine benchmarks. Once rendered, attention concentrates on the VT regardless of content. Yet a KL diagnostic shows that conditioning on a privileged VT trace shifts the model's completion distribution. This suggests the generation pathway encodes useful reasoning beyond the rendered pixels. Motivated by this gap, we propose Visual On-Policy Self-Distillation(Visual-OPSD). Teacher and student share identical weights but differ in context: the teacher sees privileged VTs while the student sees only the question. Token-level JSD distillation on on-policy student trajectories transfers the teacher's reasoning to a text-only student. Across nine benchmarks, Visual-OPSD improves over its generative teacher by $+3.40$pp with $14.3\\times$ speedup (10.0s vs. 142.8s per sample) and outperforms same-scale VLMs by $+63.83$pp on VSP. A Gaussian-noise control ($+0.40$pp vs. $+10.28$pp for real VTs) and $58.4\\%$ closure of the KL gap confirm that gains come from the semantic content of the generation pathway.",
+      "analysis": {
+        "key_results": "在九个基准上比生成式教师提高+3.40个百分点，推理时间从142.8s降至10.0s（14.3倍加速）；在VSP上超过同规模VLM达+63.83个百分点；高斯噪声控制（+0.40pp vs 真实VT的+10.28pp）和58.4%的KL差距闭合表明增益来自生成路径的语义内容。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出Visual On-Policy Self-Distillation(Visual-OPSD)，教师和学生共享权重，教师使用特权视觉思维、学生仅用文本，通过token级JSD蒸馏将生成路径中的推理知识迁移到仅文本学生，从而以极低成本实现高效推理。",
+        "method": "教师和学生权重相同，但教师上下文包含特权视觉思维，学生仅看到问题；在在线策略学生轨迹上进行token级JSD蒸馏。",
+        "one_sentence_summary": "提出Visual-OPSD，通过在策略自蒸馏将统一多模态模型中生成式视觉思维的知识迁移到纯文本学生，在保持准确率的同时实现约14.3倍加速。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "该文关注统一多模态模型的推理效率，通过消除视觉思维生成实现加速，属于独立的高效推理技术；未直接涉及VLA、世界动作模型或机器人策略，但对多模态模型推理优化有方法学参考价值。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Vision-Language",
+          "Speculative Decoding"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV"
+      ],
+      "arxiv_id": "2606.18974",
+      "authors": [
+        "Pengyu Li",
+        "Zhitao Gao",
+        "Lingling Zhang",
+        "Muye Huang",
+        "Yuanming Li",
+        "Fangzhi Xu",
+        "Jun Liu"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-26T04:41:26.872513Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2606.18974/v3/fig2-panel1.png"
+            ],
+            "caption": "Prior interleaved visual CoT vs. Visual-OPSD. (Top) Previous methods iterate generate-then-reason , rendering each visual thought (VT) via 50-step diffusion at high latency and cost. (Bottom) Visual-OPSD distills the generation pathway into a text-only student via cross-modal on-policy self-distillation, yielding + 3.40 +3.40 pp accuracy at 14.3 × 14.3\\times speedup with no image generation at inference.",
+            "image_urls": [
+              "https://arxiv.org/html/2606.18974v3/Visual-OPSD-compare.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2606.18974v3#S0.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2606.18974v3",
+        "recovery_checked_at": "2026-08-26T04:45:15.468709Z",
+        "recovery_status": "not_found",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-26T04:41:26.872513Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-06-17T11:59:15Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2606.18974",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2606.18974",
+        "project_url": null
+      },
+      "title": "Visual-OPSD: Cross-Modal On-Policy Self-Distillation for Efficient Unified Multimodal Reasoning",
+      "title_zh": "Visual-OPSD：面向高效统一多模态推理的跨模态在线策略自蒸馏",
+      "updated_at": "2026-08-25T11:02:31Z",
+      "version": 3
+    },
+    {
       "abstract": "Embodied Foundation Models (EFMs) integrate multimodal understanding, future-state reasoning, and executable robot actions. Yet their safety alignment for human-injury prevention remains underexplored, primarily because real-world data of robots harming humans or creating hazardous household situations cannot be safely or ethically collected. To address this challenge, we propose a safety-critical data construction pipeline for human-injury prevention in EFMs.Starting from real DROID observations, our construction pipeline proceeds through scene understanding, hazard-aware image editing, temporal prompt generation, and single-pass rollout synthesis. The temporal prompts specify the expected scene evolution, while Wan2.7 synthesizes realistic robotic rollouts from the edited hazardous states in a single pass. Using this pipeline, we construct ROBOSHACKLES, a 10,000-clip robotic video dataset derived from real DROID observations, spanning two direct-harm and four indirect-harm categories. To ensure dataset quality, we assess task completion and visual quality with automatic metrics, and evaluate six representative EFMs under a refusal-based safety criterion. Results show that all evaluated models produce unsafe actions in the tested safety-critical scenarios, yielding a 100% unsafe action generation rate. ROBOSHACKLES serves as a scalable benchmark and training resource for refusal learning and hazard anticipation before robot action execution.The dataset is publicly available at https://huggingface.co/datasets/YZW00/RoboShackles.",
       "analysis": {
         "key_results": "在拒绝式安全准则下评估了六个代表性具身基础模型，所有模型在测试的安全关键场景中都产生了不安全动作，不安全动作生成率为100%。",
@@ -818,7 +892,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.18250v2",
-        "recovery_checked_at": "2026-08-25T23:21:24.376075Z",
+        "recovery_checked_at": "2026-08-26T04:45:15.468709Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -934,6 +1008,63 @@
       "title": "MuseVLA: An Adaptive Multimodal Sensing Vision-Language-Action Model for Robotic Manipulation",
       "title_zh": "MuseVLA：一种用于机器人操作的自适应多模态感知视觉-语言-动作模型",
       "updated_at": "2026-08-12T12:13:59Z",
+      "version": 2
+    },
+    {
+      "abstract": "Fine-tuning a vision-language-action model (VLA-JEPA) on a single GPU should be simple: load a pretrained checkpoint, run training, deploy. There is a hidden danger. Run the same fine-tuning code thirteen times -- same data, same architecture, different random seed -- and twelve runs produce a robot succeeding 91--94% of the time, while one run silently degrades to 65.2%: a 29 pp gap with no error message, no warning, and no way to predict which seed will fail. We call this the seed lottery. We trace the cause to output collapse: the action predictor quietly learns to produce nearly identical outputs regardless of what the robot sees. Existing weight-level methods (L2, EWC) are structurally blind to this collapse -- they penalize weight changes, but collapse occurs in directions weights can move freely without affecting outputs, a gap we formalize via the Jacobian null-space. Across 7 methods x up to 13 seeds x 3 LIBERO benchmarks, three output-level regularizers -- VICReg (n=12 seeds), Dropout (n=4), and a halved learning rate (n=5) -- each eliminate every catastrophic seed (0/21 combined collapses vs. 1/13 Baseline; F(12,11)=28.7, p<0.001), while weight-level methods (L2, EWC) preserve the lottery. The simplest fix is changing one number in your optimizer config.",
+      "analysis": {
+        "key_results": "在7种方法×多达13个种子×3个LIBERO基准的实验中，输出级正则化（VICReg、Dropout、半学习率）共消除所有灾难性种子（0/21次坍塌），而基线为1/13，权重级方法（L2、EWC）仍出现坍塌；统计检验F(12,11)=28.7, p<0.001。",
+        "limitations": "摘要未说明",
+        "main_contribution": "识别并定义VLA微调中的“种子彩票”问题：相同数据和架构下，不同随机种子可能导致成功率从91-94%骤降至65.2%，并归因于动作预测器的输出坍塌；证明输出级正则化（如VICReg、Dropout、降低学习率）可消除此问题，而权重级正则化无效。",
+        "method": "通过实验复现（13次种子运行）、Jacobian零空间分析解释权重级方法失效原因，并对比7种方法在3个LIBERO基准上的表现，提出输出级正则化方案。",
+        "one_sentence_summary": "该论文揭示了VLA-JEPA在单GPU微调中因随机种子不同而偶尔出现输出坍塌现象（种子彩票），并提出输出级正则化可以有效消除该问题。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "本文直接聚焦于视觉-语言-动作模型（VLA）的微调稳定性，针对动作预测输出坍塌问题提出正则化方法，对VLA训练可靠性具有直接指导意义。",
+        "relevance_score": 9,
+        "tags": [
+          "Action Prediction",
+          "Efficient Inference",
+          "Robot Learning",
+          "Policy Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2606.13856",
+      "authors": [
+        "Jeffrin Sam",
+        "Dzmitry Tsetserukou"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-26T04:41:26.872513Z",
+        "figures": [],
+        "html_url": "https://arxiv.org/html/2606.13856v2",
+        "recovery_checked_at": "2026-08-26T04:45:15.468709Z",
+        "recovery_status": "not_found",
+        "recovery_version": 3,
+        "status": "html_unavailable"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-26T04:41:26.872513Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-06-11T19:33:11Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2606.13856",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2606.13856",
+        "project_url": null
+      },
+      "title": "Output-Level Regularization Eliminates the Seed Lottery in Single-GPU VLA Fine-Tuning",
+      "title_zh": "输出级正则化消除单GPU视觉-语言-动作模型微调中的种子彩票问题",
+      "updated_at": "2026-08-25T06:54:20Z",
       "version": 2
     },
     {
@@ -1382,6 +1513,90 @@
     {
       "abstract": "While data-intensive deep reinforcement learning can optimize complex control policies, scientific control design in physical systems fundamentally requires an interpretable chain of reasoning that connects physical evidence to structured control architectures. Here, we present a self-evolving scientific agent workflow, driven by large language models and iterative code generation, that automates controller construction while preserving strict interpretability and rigorous physical reasoning. Instead of adjusting weights, the agent deploys candidate whitebox controllers into physical simulations, actively diagnoses dynamic behaviors from multimodal evidence, and translates these observations into progressive source-code refinements. We demonstrate this framework on a highly non-linear fluid-structure interaction problem: an underactuated, two-joint dogfish swimmer tasked with spatial target reaching in an unsteady flow using only joint angular accelerations. Starting from a target-blind propulsive seed, the agent autonomously designs and refines a unified controller that reaches a target embedded in an unsteady four-cylinder wake. Without retraining, retuning or case-specific branching, the retained controller achieves target capture across the full generalization test matrix, spanning variations in target position, rear-row geometry, cylinder count and inflow speed. The auditable evolution log reveals an emergent control architecture built upon travelling-wave propulsion, body-frame bearing guidance, phase-selective steering, corrective burst and adaptive relief. Our results show that an autonomous scientific agent can successfully transform accumulated physical evidence into a robust, mathematically readable control policy, while maintaining a fully traceable process of scientific control design.",
       "analysis": {
+        "key_results": "在非定常四圆柱尾流中的目标到达任务上，控制器无需重训练或重新调参即可在目标位置、后行几何、圆柱数和入流速度的变化下实现目标捕获。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出一个自进化科学代理工作流，通过大语言模型和迭代代码生成，在物理仿真中自动构建并优化具有严格可解释性和物理推理的白盒控制器。",
+        "method": "使用大语言模型驱动的代理，在仿真中部署白盒控制器、诊断动态行为，并将多模态观测转化为源代码迭代改进。",
+        "one_sentence_summary": "本文提出一种由大语言模型驱动的自进化科学代理工作流，在物理仿真中自动构建并迭代优化白盒控制器，用于非定常流中的鱼形机器人目标到达任务。",
+        "primary_topic": "World Model",
+        "relation_to_vla_wam": "该工作不直接涉及VLA或WAM，但展示了在物理仿真环境中自动化设计可解释机器人控制策略的方法，对机器人世界模型和控制策略的可解释性研究具有潜在的方法论价值。",
+        "relevance_score": 6,
+        "tags": [
+          "Robot Learning",
+          "Simulation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.AI",
+        "physics.flu-dyn"
+      ],
+      "arxiv_id": "2606.08405",
+      "authors": [
+        "Boai Sun",
+        "Wenjin Guo",
+        "Zongmin Yu",
+        "Liu Yang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-26T04:41:26.872513Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2606.08405/v3/fig1-panel1.png"
+            ],
+            "caption": "Self-evolving scientific agent workflow. A parent policy and parent agents are sampled from their respective ranked populations. Reference policies, reference agents, the Knowledge Shelf, and the task environment form the shared context supplied to parallel scientific agent workspaces. Each workspace returns a child agent and a child source policy. The child policy is evaluated through the fixed CFD interface, which returns a simulation score and a multimodal log. These evaluated policies, updated agent logs, and updated agent scores are then used to expand both populations for the next evolutionary iteration.",
+            "image_urls": [
+              "https://arxiv.org/html/2606.08405v3/figure_01_scientific_agent_framework.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2606.08405v3#S2.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2606.08405/v3/fig2-panel1.png"
+            ],
+            "caption": "Evolutionary acceleration of target capture in an unsteady wake. a , Navigation scores with and without the Knowledge Shelf. b , Target-reach times under both conditions. c , Trajectories of the Seed, Iteration-6 and Iteration-19 policies. d , Corresponding final-state vorticity fields; both evolved policies capture the target, whereas the Seed exits the domain.",
+            "image_urls": [
+              "https://arxiv.org/html/2606.08405v3/figure_02_evolution_target_capture.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2606.08405v3#S2.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2606.08405v3",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-26T04:41:26.872513Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-06-07T01:59:11Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2606.08405",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2606.08405",
+        "project_url": null
+      },
+      "title": "Self-Evolving Scientific Agent Designs Physically-Reasoned Whitebox Fluid Control",
+      "title_zh": "自进化科学代理设计基于物理推理的白盒流体控制",
+      "updated_at": "2026-08-25T02:41:19Z",
+      "version": 3
+    },
+    {
+      "abstract": "While data-intensive deep reinforcement learning can optimize complex control policies, scientific control design in physical systems fundamentally requires an interpretable chain of reasoning that connects physical evidence to structured control architectures. Here, we present a self-evolving scientific agent workflow, driven by large language models and iterative code generation, that automates controller construction while preserving strict interpretability and rigorous physical reasoning. Instead of adjusting weights, the agent deploys candidate whitebox controllers into physical simulations, actively diagnoses dynamic behaviors from multimodal evidence, and translates these observations into progressive source-code refinements. We demonstrate this framework on a highly non-linear fluid-structure interaction problem: an underactuated, two-joint dogfish swimmer tasked with spatial target reaching in an unsteady flow using only joint angular accelerations. Starting from a target-blind propulsive seed, the agent autonomously designs and refines a unified controller that reaches a target embedded in an unsteady four-cylinder wake. Without retraining, retuning or case-specific branching, the retained controller achieves target capture across the full generalization test matrix, spanning variations in target position, rear-row geometry, cylinder count and inflow speed. The auditable evolution log reveals an emergent control architecture built upon travelling-wave propulsion, body-frame bearing guidance, phase-selective steering, corrective burst and adaptive relief. Our results show that an autonomous scientific agent can successfully transform accumulated physical evidence into a robust, mathematically readable control policy, while maintaining a fully traceable process of scientific control design.",
+      "analysis": {
         "key_results": "该代理自主设计并优化的控制器在非定常四圆柱尾流中实现了目标捕获，并且在目标位置、后排几何形状、圆柱数量及入流速度变化的完整泛化测试矩阵中均成功。",
         "limitations": "摘要未说明",
         "main_contribution": "提出并验证了一种自进化科学代理工作流，能够自动构建具有严格可解释性和物理推理的控制器。",
@@ -1694,7 +1909,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.06837v2",
-        "recovery_checked_at": "2026-08-25T23:21:24.376075Z",
+        "recovery_checked_at": "2026-08-26T04:45:15.468709Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -2142,6 +2357,91 @@
       "version": 2
     },
     {
+      "abstract": "What formal languages can a recurrent neural language model recognize? Formal results in the literature conflict: some authors report Turing-completeness, while others show equivalence to regular languages. The reason for this discrepancy is that the underlying arithmetic model differs. The paper develops a unified algebraic account of the expressivity of recurrent neural networks, starting with a formal account of various arithmetic models. This account reduces expressivity to an algebraic question, e.g., whether a network's syntactic monoid divides a certain wreath product. As a case study, the paper revisits diagonal state-space models: the same architecture cannot implement an even-modulus counter once floating-point recurrences are enforced, yet realizes every even-modulus counter under unsigned-integer quantization.",
+      "analysis": {
+        "key_results": "对角状态空间模型在浮点递归约束下无法实现偶数模计数器，但在无符号整数量化下可以实现所有偶数模计数器。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出了一个统一的代数框架来分析循环神经网络的表达能力，将表达能力问题归结为代数学问题（如句法幺半群是否可除某花环积），并以此澄清文献中关于RNN计算能力矛盾的原因。",
+        "method": "代数方法：建立不同算术模型的形式化描述，将RNN的表达能力问题转化为句法幺半群与特定花环积之间的可除性问题，并以对角状态空间模型为案例进行分析。",
+        "one_sentence_summary": "通过代数框架统一分析循环神经网络在不同算术模型下的形式语言表达能力，并以对角状态空间模型为例展示量化与浮点约束对表达能力的影响。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文研究循环语言模型的表达能力与量化算术模型的关系，未直接涉及VLA、WAM或机器人动作-世界建模。其方法对量化与低精度推理有一定理论参考价值，但与本站主题的直接关联较弱。",
+        "relevance_score": 6,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.FL",
+        "cs.CL",
+        "cs.LG"
+      ],
+      "arxiv_id": "2606.01765",
+      "authors": [
+        "Franz Nowak",
+        "Ryan Cotterell",
+        "Reda Boumasmoud"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-26T04:41:26.872513Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2606.01765/v3/fig1-panel1.png"
+            ],
+            "caption": "Abstraction of a deep RNN (left) to an algebraic RNN (center) to a wreath product of transformation monoids.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2606.01765v3"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2606.01765/v3/fig2-panel1.png"
+            ],
+            "caption": "A structural perspective: from continuous idealizations",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2606.01765v3"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2606.01765v3",
+        "recovery_checked_at": "2026-08-26T04:45:15.468709Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:integer-quantization",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-26T04:41:26.872513Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-06-01T06:47:58Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2606.01765",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2606.01765",
+        "project_url": null
+      },
+      "title": "An Algebraic View of the Expressivity of Recurrent Language Models",
+      "title_zh": "循环语言模型表达能力的代数视角",
+      "updated_at": "2026-08-25T13:09:26Z",
+      "version": 3
+    },
+    {
       "abstract": "Key-value (KV) cache quantization is widely used to reduce Large Language Model (LLM) inference memory, yet existing evaluations solely focus on measuring perplexity and accuracy without assessing the safety impact. In this study, we explore alignment preservation under KV cache quantization. Across eleven instruction-tuned models (3.8B-72B) and five benchmarks (1,894 prompts), we find that low-bit quantization can silently destroy safety alignment: Mistral-7B loses 15.2% of its refusals at only 1.03x perplexity, and no universal safe bit-width exists, with sharp model-specific phase transitions invisible to standard metrics. We identify that the root cause is geometric: safety features occupy a low-dimensional activation subspace 10^2-10^3x more vulnerable to quantization noise than the full representation space perplexity averages over. Inspired by this observation, we propose Per-Channel Reduction (PCR), a diagnostic that classifies each model into one of three mechanistic failure modes: outlier-crushes-safety, where safety lives in non-outlier channels collaterally damaged by outlier-driven scale factors; outlier-as-safety, where safety overlaps outlier channels and finer granularity cannot rescue it; and multi-layer dilution, where safety is distributed across many layers and per-layer fixes fail. PCR predicts the correct mitigation direction on all nine primary models and one held-out model from an independent family using 20 calibration prompts. PCR generalizes across unseen prompts, models, and production quantizers, including KIVI with up to 97.2% recovery, succeeding where attention-based allocation methods fail. The resulting training-free protocol, requiring approximately 35 GPU-minutes, recovers up to 97% of lost alignment at minimal memory overhead, addressing vulnerabilities confirmed in production vLLM serving with FP8 KV cache on NVIDIA GPUs.",
       "analysis": {
         "key_results": "低比特量化可在仅1.03倍困惑度下使Mistral-7B的拒绝率下降15.2%；PCR在所有9个主要模型和1个独立家族的留出模型上预测了正确的缓解方向，在包括KIVI在内的生产级量化器中恢复率高达97.2%。",
@@ -2202,20 +2502,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 67,
-    "completion_tokens": 252,
-    "error_categories": {},
-    "failed": 0,
-    "fetched": 865,
-    "figure_available": 54,
-    "figure_cache_hits": 55,
+    "cache_hits": 59,
+    "completion_tokens": 16957,
+    "error_categories": {
+      "ValidationError": 1
+    },
+    "failed": 1,
+    "fetched": 1536,
+    "figure_available": 76,
+    "figure_cache_hits": 48,
     "figure_failed": 0,
-    "figure_requests": 1,
-    "figure_unavailable": 2,
-    "model_calls": 1,
-    "prefiltered": 68,
-    "prompt_tokens": 854,
-    "published": 56,
-    "total_tokens": 1106
+    "figure_requests": 42,
+    "figure_unavailable": 14,
+    "model_calls": 52,
+    "prefiltered": 111,
+    "prompt_tokens": 45555,
+    "published": 90,
+    "total_tokens": 62512
   }
 }

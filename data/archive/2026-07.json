@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-25T23:21:02.170505Z",
+  "generated_at": "2026-08-26T04:41:26.872513Z",
   "papers": [
     {
       "abstract": "Vision-language models (VLMs) have recently emerged as a promising paradigm for end-to-end autonomous driving, enabling agents to map multimodal inputs and high-level navigation instructions directly to executable trajectories. However, in practice, these models exhibit a persistent command-following gap: predicted trajectories often show weak sensitivity to navigation commands, resulting in incorrect behavior at critical decision points. We identify this issue as a form of conditional policy collapse, where regression-based training under multimodal trajectory distributions encourages the model to rely on dominant visual priors while marginalizing the language-conditioned signal. To address this issue, we introduce a principled formulation of classifier-free guidance (CFG) for regression-based vision-language driving. We show that CFG can be interpreted as isolating the instruction-induced residual in the action space by contrasting conditional and unconditional predictions, thereby explicitly amplifying the effect of the navigation command at inference time. However, a standard two-pass CFG introduces prohibitive latency for real-time control and produces noisy instance-level guidance directions. Building on a mean-shift interpretation of CFG, we propose Latent-Centroid Steering (LCS), a single-pass guidance mechanism that replaces instance-level residuals with class-level latent shifts. By projecting conditional representations toward precomputed command-specific centroids, LCS performs class-level latent steering based on cluster geometry that is both more stable and computationally efficient. We demonstrate that LCS reduces inference latency by approximately 50% while achieving stronger command adherence and improved driving performance on both closed-loop (Bench2Drive) and open-loop (nuScenes) benchmarks. Code will be released.",
@@ -341,6 +341,77 @@
       "version": 2
     },
     {
+      "abstract": "We address the challenge of securely and efficiently outsourcing AI computations from a trusted but computationally weak client to an untrusted but powerful server, in the setting where the client holds both the input and the model, and the server must learn neither. We present MOSAIC, whose core is a novel matrix-multiplication masking protocol that scales to far larger matrices than prior work, enabling the safe outsourcing of modern workloads such as large transformer inference. By introducing small amounts of noise to the multiplication result and thereby relaxing correctness, MOSAIC achieves optimal asymptotic client overhead and concrete runtimes orders of magnitude faster than prior work. Its security reduces to the decisional LWE and LPN assumptions. Because this noise accumulates across the many layers of a transformer, a key technical challenge is bounding error growth; MOSAIC addresses this with an error-scaling mechanism based on random Hadamard rotations. On large 70B transformer models, MOSAIC's perplexity is comparable to popular quantization approaches and even matches full-precision BF16 inference on HumanEval. Finally, we present an end-to-end implementation showing how ideas like MOSAIC can promise a path towards large-scale confidential AI in modern data centers. Non-confidential inference is already distributed across phase (prefill/decode), layer, and time to maximize utilization of heterogeneous hardware, using RDMA-like networking to move activations, cached KV values, and weights across nodes. MOSAIC enables scaling of confidential compute by keeping the trusted computing base (TCB) small and outsourcing the bulk of the AI computation to untrusted accelerators.",
+      "analysis": {
+        "key_results": "在70B transformer模型上，MOSAIC的困惑度与主流量化方法相当，在HumanEval上甚至匹配全精度BF16推理；具体运行时或加速数据摘要未说明。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出MOSAIC协议，通过带噪声的矩阵乘法掩码，实现安全外包大规模transformer推理，客户端开销渐近最优且比先前工作快数个数量级。",
+        "method": "引入少量噪声到乘法结果并放宽正确性要求，结合基于LWE/LPN假设的安全归约，并利用随机Hadamard旋转的误差缩放机制控制误差增长。",
+        "one_sentence_summary": "本文提出基于噪声掩码的安全外包计算协议MOSAIC，在大规模transformer推理中实现高效且保护隐私的AI计算。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文聚焦安全多方计算与模型量化结合的高效推理技术，不涉及VLA、WAM或机器人操纵；但其噪声插入与误差控制思路可为机器人模型在资源受限或隐私敏感环境下的部署提供借鉴。",
+        "relevance_score": 6,
+        "tags": [
+          "Efficient Inference",
+          "Model Quantization"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "arxiv_id": "2607.29221",
+      "authors": [
+        "James Hsin-yu Chiang",
+        "Sheila Zingg",
+        "Kari Kostiainen",
+        "Srdjan Capkun"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-26T04:41:26.872513Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2607.29221/v2/fig1-panel1.png"
+            ],
+            "caption": "Secure, confidential forward pass for a single transformer layer. The trusted client (left) performs all non-linear C operations (attention scores, activations, normalization) locally. All weight matrix multiplications are outsourced to the untrusted GPU (right) via Π , which exchanges only masked activations and results at runtime. G",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2607.29221v2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2607.29221v2",
+        "recovery_checked_at": "2026-08-26T04:45:15.468709Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-26T04:41:26.872513Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-07-31T09:53:51Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2607.29221",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2607.29221",
+        "project_url": null
+      },
+      "title": "MOSAIC: Masked Outsourcing of Secure AI Computations",
+      "title_zh": "MOSAIC：安全AI计算外包的掩码矩阵乘法协议",
+      "updated_at": "2026-08-25T15:57:55Z",
+      "version": 2
+    },
+    {
       "abstract": "Multi-robot systems, particularly heterogeneous robot swarms, can improve the efficiency of complex task execution through parallel collaboration and complementary capabilities. However, conventional rule-based methods rely on predefined task models and specialized decision making programs, making it difficult to understand complex semantic instructions and coordinate heterogeneous robots. LLMs introduce strong language understanding and task reasoning capabilities, allowing multi-robot systems to interpret instructions, decompose tasks, and assign roles according to task semantics. VLMs further incorporate visual perception, enabling robots to reason about objects, regions, and spatial relationships in physical environments. Nevertheless, existing LLM/VLM based methods often depend on known maps, centralized and synchronized decision making, limiting their generalization to heterogeneous robots and unseen tasks. We therefore propose a framework that combines decentralized asynchronous reasoning, lightweight information sharing, capability aware collaboration, and a unified action interface, enabling general purpose VLMs to generate robot specific actions executed by learning free experts without task or robot specific training. Experiments across diverse scenarios and multiple VLMs show success rates above 70\\%, with completion time reduced by up to 55.8\\% relative to the geometric greedy baseline.",
       "analysis": {
         "key_results": "在多种场景和多个VLM上的实验显示成功率超过70%，完成时间相比几何贪婪基线最多减少55.8%。",
@@ -579,7 +650,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.28624v1",
-        "recovery_checked_at": "2026-08-25T23:21:24.376075Z",
+        "recovery_checked_at": "2026-08-26T04:45:15.468709Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -741,7 +812,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.28589v1",
-        "recovery_checked_at": "2026-08-25T23:21:24.376075Z",
+        "recovery_checked_at": "2026-08-26T04:45:15.468709Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1648,7 +1719,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.28226v1",
-        "recovery_checked_at": "2026-08-25T23:21:24.376075Z",
+        "recovery_checked_at": "2026-08-26T04:45:15.468709Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -4114,7 +4185,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.27269v1",
-        "recovery_checked_at": "2026-08-25T23:21:24.376075Z",
+        "recovery_checked_at": "2026-08-26T04:45:15.468709Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -4726,7 +4797,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.26579v1",
-        "recovery_checked_at": "2026-08-25T23:21:24.376075Z",
+        "recovery_checked_at": "2026-08-26T04:45:15.468709Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -5247,7 +5318,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.26055v1",
-        "recovery_checked_at": "2026-08-25T23:21:24.376075Z",
+        "recovery_checked_at": "2026-08-26T04:45:15.468709Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -8759,10 +8830,10 @@
         "Volker Schulz"
       ],
       "figure_gallery": {
-        "checked_at": "2026-08-25T04:40:41.852701Z",
+        "checked_at": "2026-08-26T04:41:26.872513Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2607.12550v3",
-        "recovery_checked_at": "2026-08-25T04:47:06.903570Z",
+        "recovery_checked_at": "2026-08-26T04:45:15.468709Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -10291,20 +10362,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 67,
-    "completion_tokens": 252,
-    "error_categories": {},
-    "failed": 0,
-    "fetched": 865,
-    "figure_available": 54,
-    "figure_cache_hits": 55,
+    "cache_hits": 59,
+    "completion_tokens": 16957,
+    "error_categories": {
+      "ValidationError": 1
+    },
+    "failed": 1,
+    "fetched": 1536,
+    "figure_available": 76,
+    "figure_cache_hits": 48,
     "figure_failed": 0,
-    "figure_requests": 1,
-    "figure_unavailable": 2,
-    "model_calls": 1,
-    "prefiltered": 68,
-    "prompt_tokens": 854,
-    "published": 56,
-    "total_tokens": 1106
+    "figure_requests": 42,
+    "figure_unavailable": 14,
+    "model_calls": 52,
+    "prefiltered": 111,
+    "prompt_tokens": 45555,
+    "published": 90,
+    "total_tokens": 62512
   }
 }
