@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-16T04:38:08.575451Z",
+  "generated_at": "2026-08-27T04:11:46.258254Z",
   "papers": [
     {
       "abstract": "World models simulate environmental dynamics to enable embodied agents to plan and reason about future states. While real-world perception is inherently multimodal, existing approaches focus primarily on visual observations, leaving crucial spatial and temporal acoustic cues underexplored. In this work, we present a unified formulation of Audio-Visual World Models (AVWM), casting multimodal environment simulation under action control as a partially observable Markov decision process with synchronized audio-visual observations. As a foundational benchmark, we construct AVW-4k, comprising 30 hours of action-annotated binaural audio-visual trajectories across 76 indoor environments. To capture these physically grounded multisensory dynamics, we propose AV-CDiT (Audio-Visual Conditional Diffusion Transformer), featuring a novel modality expert architecture that balances visual and auditory learning, optimized via a three-stage training strategy. Extensive experiments demonstrate that AV-CDiT achieves high-fidelity prediction across both visual and auditory modalities. Furthermore, we validate its practical utility in embodied navigation, showing that AVWM significantly enhances a pretrained agent in continuous audio-visual navigation tasks.",
@@ -178,6 +178,79 @@
       "version": 2
     },
     {
+      "abstract": "Recently, Reinforcement Learning with Verifiable Rewards (RLVR) has emerged as an effective approach to incentivizing reasoning capability in Large Multimodal Models (LMMs), while the underlying mechanisms behind this post-training paradigm are poorly understood. We begin by exploring how input activations are affected by RLVR through the perspective of logit lens. Our systematic investigations across multiple post-trained LMMs suggest that RLVR shifts low-entropy activations unexpectedly, while high-entropy ones are less affected. We further demonstrate that such phenomena are associated with LMM reasoning by controlled experiments, suggesting a potentially beneficial role of modulating low-entropy activations. To this end, we propose Activation Replay, a novel simple yet effective training-free approach that boosts multimodal reasoning of post-trained LMMs without requiring expensive policy optimization. Our design involves manipulation of visual tokens at test time, replaying low-entropy activations from the input context of base LMMs to regulating the RLVR counterparts. Activation Replay triggers better reasoning across diverse scenarios, including mathematics, o3-like visual agents, and video reasoning. We further show that Activation Replay boosts Pass@K and mitigates narrower reasoning coverage of RLVR. Our design is compared against alternative choices, such as replaying high-entropy activations instead of low-entropy ones, or direct cross-model intervention instead of manipulating input tokens, demonstrating the superiority of our implementation. Code is publicly available at https://github.com/latentcraft/replay.",
+      "analysis": {
+        "key_results": "Activation Replay在数学、o3类视觉代理和视频推理等场景中提升了推理性能，并提升了Pass@K，缓解了RLVR的推理覆盖范围窄的问题。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出Activation Replay，一种无需训练的方法，通过重放基础LMM输入上下文中的低熵激活来调节RLVR对应模型，从而提升多模态推理。",
+        "method": "在测试时操纵视觉token，从基础LMM的输入上下文中重放低熵激活，以调控RLVR模型的输出。",
+        "one_sentence_summary": "论文提出了一种无需训练、通过重放低熵激活来提升大型多模态模型推理性能的方法，并揭示了RLVR对模型激活的影响机制。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "该论文专注于大型多模态模型的推理增强，未直接涉及VLA、WAM或机器人动作-世界建模；其方法论可能对通用多模态模型的效率优化有参考价值，但与本站主题无直接关系。",
+        "relevance_score": 6,
+        "tags": [
+          "Efficient Inference",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV"
+      ],
+      "arxiv_id": "2511.19972",
+      "authors": [
+        "Yun Xing",
+        "Xiaobin Hu",
+        "Qingdong He",
+        "Jiangning Zhang",
+        "Shuicheng Yan",
+        "Shijian Lu",
+        "Yu-Gang Jiang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-27T04:11:46.258254Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2511.19972/v4/fig1-panel1.png"
+            ],
+            "caption": "Case Study on Mathematical Reasoning.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2511.19972v4"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2511.19972v4",
+        "recovery_checked_at": "2026-08-27T04:16:13.591190Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-27T04:11:46.258254Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2025-11-25T06:31:57Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2511.19972",
+        "code_url": "https://github.com/latentcraft/replay",
+        "pdf_url": "https://arxiv.org/pdf/2511.19972",
+        "project_url": null
+      },
+      "title": "Boosting Reasoning in Large Multimodal Models via Activation Replay",
+      "title_zh": "通过激活重放提升大型多模态模型推理能力",
+      "updated_at": "2026-08-26T10:14:21Z",
+      "version": 4
+    },
+    {
       "abstract": "Diffusion-based large language models (dLLMs) have recently gained significant attention for their exceptional performance and inherent potential for parallel decoding. Existing frameworks further enhance its inference efficiency by enabling KV caching. However, its bidirectional attention mechanism necessitates periodic cache refreshes that interleave prefill and decoding phases, both contributing substantial inference cost and constraining achievable speedup. Inspired by the heterogeneous arithmetic intensity of the prefill and decoding phases, we propose ODB-dLLM, a framework that orchestrates dual-boundaries to accelerate dLLM inference. In the prefill phase, we find that the predefined fixed response length introduces heavy yet redundant computational overhead, which affects efficiency. To alleviate this, ODB-dLLM incorporates an adaptive length prediction mechanism that progressively reduces prefill overhead and unnecessary computation. In the decoding phase, we analyze the computational characteristics of dLLMs and propose a dLLM-specific jump-share speculative decoding method to enhance efficiency by reducing the number of decoding iterations. Experimental results demonstrate that ODB-dLLM achieves 46-162x and 2.63-6.30x speedups over the baseline dLLM and Fast-dLLM, respectively, while simultaneously mitigating the accuracy degradation in existing acceleration frameworks.",
       "analysis": {
         "key_results": "在基线 dLLM 和 Fast-dLLM 上分别实现 46-162 倍和 2.63-6.30 倍加速，同时降低现有加速框架的精度退化。",
@@ -312,7 +385,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2511.18191v2",
-        "recovery_checked_at": "2026-08-26T04:45:15.468709Z",
+        "recovery_checked_at": "2026-08-27T04:16:13.591190Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -459,20 +532,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 33,
-    "completion_tokens": 0,
-    "error_categories": {},
-    "failed": 0,
-    "fetched": 441,
-    "figure_available": 27,
-    "figure_cache_hits": 28,
+    "cache_hits": 81,
+    "completion_tokens": 19176,
+    "error_categories": {
+      "ValidationError": 2
+    },
+    "failed": 2,
+    "fetched": 1888,
+    "figure_available": 97,
+    "figure_cache_hits": 63,
     "figure_failed": 0,
-    "figure_requests": 0,
-    "figure_unavailable": 1,
-    "model_calls": 0,
-    "prefiltered": 33,
-    "prompt_tokens": 0,
-    "published": 28,
-    "total_tokens": 0
+    "figure_requests": 47,
+    "figure_unavailable": 13,
+    "model_calls": 60,
+    "prefiltered": 141,
+    "prompt_tokens": 51749,
+    "published": 110,
+    "total_tokens": 70925
   }
 }

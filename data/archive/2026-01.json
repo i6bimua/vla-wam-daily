@@ -1,6 +1,98 @@
 {
-  "generated_at": "2026-08-26T04:41:26.872513Z",
+  "generated_at": "2026-08-27T04:11:46.258254Z",
   "papers": [
+    {
+      "abstract": "Vision-Language-Action (VLA) models have demonstrated remarkable generalization capabilities in robotic manipulation tasks, yet their substantial computational overhead remains a critical obstacle to real-world deployment. Improving inference efficiency is therefore essential for practical robotic applications. Existing acceleration methods often rely on heuristic or static strategies--such as rule-based token caching or pruning--that are decoupled from task objectives and fail to adapt to dynamic scene changes. In this work, we reformulate inference acceleration as a learnable policy optimization problem and propose a novel framework that integrates a dynamic, task-aware decision-making process directly into the VLA model. At its core are two lightweight, cooperative modules: a Cached Token Selector, which determines which tokens should be reused, and a Cache Ratio Predictor, which controls how many tokens to reuse. Training these modules is non-trivial due to their discrete decisions. We address this by adopting a differentiable relaxation that allows gradient-based end-to-end optimization. Extensive experiments on the LIBERO and SIMPLER benchmarks, as well as real-robot evaluations, show that our method achieves a 1.76x wall-clock inference speedup while simultaneously improving the average success rate by 1.9 percentage points (from 75.0% to 76.9%) on LIBERO and by 5.0 percentage points on real-world tasks, significantly outperforming existing baselines. This work highlights the potential of learning task-aware computational allocation policies, paving the way for VLA models that are both powerful and efficient.",
+      "analysis": {
+        "key_results": "在LIBERO和SIMPLER基准及真实机器人评估中，实现了1.76倍墙钟推理加速；LIBERO平均成功率从75.0%提升到76.9%（+1.9个百分点），真实世界任务成功率提升5.0个百分点，显著优于现有基线。",
+        "limitations": "摘要未说明",
+        "main_contribution": "将VLA模型推理加速重构为可学习的策略优化问题，并提出集成了缓存令牌选择器和缓存比例预测器的动态任务感知框架，通过可微松弛实现端到端梯度优化。",
+        "method": "在VLA模型中集成两个轻量级协作模块：缓存令牌选择器（决定重用哪些令牌）和缓存比例预测器（控制重用令牌数量），采用可微松弛将离散决策转化为可梯度优化的连续表示。",
+        "one_sentence_summary": "该论文提出一种动态任务感知的视觉令牌缓存方法，通过学习缓存令牌选择器和缓存比例预测器来加速视觉-语言-动作（VLA）模型推理，同时提升任务成功率。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该论文直接针对VLA模型在机器人操作任务中的推理效率问题，提出自适应视觉令牌缓存加速方法，在不牺牲甚至提升任务成功率的情况下显著降低计算开销，与VLA高效推理主题高度相关。",
+        "relevance_score": 10,
+        "tags": [
+          "Robot Manipulation",
+          "Efficient Inference",
+          "Action Prediction",
+          "Policy Learning",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2602.00686",
+      "authors": [
+        "Yujie Wei",
+        "Jiahan Fan",
+        "Jiyu Guo",
+        "Ruichen Zhen",
+        "Rui Shao",
+        "Xiu Su",
+        "Zeke Xie",
+        "Hongxun Yao",
+        "Shuo Yang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-27T04:11:46.258254Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2602.00686/v2/fig1-panel1.png"
+            ],
+            "caption": "Our learnable caching (LAC) outperforms rule-based baselines in both efficiency and performance. (a) Rule-based selectors are decoupled from the task objective. They often rely on proxies, but where the model attends is not necessarily what the task requires . This leads to suboptimal, task-agnostic caching (20% cache ratio). (b) Our selector is optimized with direct task gradients ( ∇ ℒ VLA \\nabla\\mathcal{L}_{\\text{VLA}} ), ensuring its decisions align with actual task requirements. This enables a more aggressive adaptive caching strategy, leading to a much higher cache ratio (40%) and greater efficiency, while simultaneously improving the success rate.",
+            "image_urls": [
+              "https://arxiv.org/html/2602.00686v2/fig1.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2602.00686v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2602.00686/v2/fig2-panel1.png"
+            ],
+            "caption": "Overview of the two-stage training framework for LAC. Stage I: Initialization. The Cached Token Selector is initially pretrained to align with the VLA’s internal attention map, providing a stable and informative initialization. Stage II: Joint Optimization. Following this, the Cached Token Selector and Cache Ratio Predictor are jointly optimized with the VLA backbone held frozen. The selector learns token-level saliency for dynamic reuse, while the predictor estimates the optimal cache ratio from a discrete set. Gradients from the task loss ℒ VLA \\mathcal{L}_{\\text{VLA}} are backpropagated through both modules via the differentiable selection mechanism, enabling end-to-end policy learning for adaptive computation.",
+            "image_urls": [
+              "https://arxiv.org/html/2602.00686v2/framework.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2602.00686v2#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2602.00686v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-27T04:11:46.258254Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-01-31T12:12:51Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2602.00686",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2602.00686",
+        "project_url": null
+      },
+      "title": "Learning to Accelerate Vision-Language-Action Models through Adaptive Visual Token Caching",
+      "title_zh": "通过自适应视觉令牌缓存学习加速视觉-语言-动作模型",
+      "updated_at": "2026-08-26T04:24:45Z",
+      "version": 2
+    },
     {
       "abstract": "Bimanual manipulation in cluttered scenes requires policies that remain stable under occlusions, viewpoint changes and scene variations. Existing vision-language-action models often lack such robustness because (i) multi-view features are fused via view-agnostic token concatenation, yielding limited cross-view spatial representations, and (ii) language is injected as global conditioning, resulting in coarse instruction grounding. In this paper, we introduce PEAfowl, a perception-enhanced multi-view VLA policy for bimanual manipulation. For spatial perception, PEAfowl predicts per-token depth distributions, performs differentiable 3D lifting, and aggregates local cross-view neighbors to form geometrically grounded, cross-view aligned representations. For language utilization, we propose to replace global conditioning with a Perceiver-style text-aware readout over frozen CLIP visual features, enabling iterative evidence accumulation. To better exploit commodity RGB-D sensing despite noisy and incomplete depth, PEAfowl's depth-distribution lifting naturally supports training-only depth distillation, where a pretrained depth teacher supervises the depth-distribution head to inject refined geometric priors without adding inference overhead. On RoboTwin 2.0 under domain-randomized setting, PEAfowl improves the strongest baseline by 23.0 pp in success rate, and physical experiments further demonstrate improved performance on the evaluated real-robot tasks. Project website: https://peafowlvla.github.io/.",
       "analysis": {
@@ -319,7 +411,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2601.06519v2",
-        "recovery_checked_at": "2026-08-26T04:45:15.468709Z",
+        "recovery_checked_at": "2026-08-27T04:16:13.591190Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -479,7 +571,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2601.02295v2",
-        "recovery_checked_at": "2026-08-25T23:21:24.376075Z",
+        "recovery_checked_at": "2026-08-27T04:16:13.591190Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -612,6 +704,95 @@
     {
       "abstract": "Quantization is widely used to accelerate inference and streamline the deployment of large language models (LLMs), yet its effects on self-explanations (SEs) remain unexplored. SEs, generated by LLMs to justify their own outputs, require reasoning about the model's own decision-making process, a capability that may exhibit particular sensitivity to quantization. As SEs are increasingly relied upon for transparency in high-stakes applications, understanding whether and to what extent quantization degrades SE quality and faithfulness is critical. To address this gap, we examine two types of SEs: natural language explanations (NLEs) and counterfactual examples, generated by LLMs quantized using three common techniques at distinct bit widths. Our findings indicate that quantization typically leads to moderate declines in both SE quality (up to 4.4%) and faithfulness (up to 3.9%). The user study further demonstrates that quantization considerably diminishes both the coherence and trustworthiness of SEs (by up to 8.5%). Compared to smaller models, larger models show limited resilience to quantization in terms of SE quality but maintain more faithfulness. Moreover, no quantization technique consistently excels across task accuracy, SE quality, and faithfulness. Because quantization's impact varies considerably by context and can be sizable in specific cases, we recommend validating SE quality for the intended use case. Despite these sometimes considerable drops, quantization remains an effective compression technique when its impact on SEs is properly validated.",
       "analysis": {
+        "key_results": "量化导致自我解释质量下降最多4.4%，忠实度下降最多3.9%；用户研究表明量化显著降低解释的连贯性和可信度（最多8.5%）；较大模型在解释质量上对量化的鲁棒性有限，但在忠实度上保持得更好；没有任何量化技术能在任务准确率、解释质量和忠实度上同时最佳。",
+        "limitations": "摘要未说明",
+        "main_contribution": "首次系统地评估量化对LLM自我解释的影响，通过三种量化技术和多种位宽揭示量化通常导致解释质量和忠实度中等程度下降，并建议在使用前验证自我解释质量。",
+        "method": "对三种常见量化技术在不同位宽下的LLM生成的两种自我解释（自然语言解释和反事实示例）进行自动评估和用户研究。",
+        "one_sentence_summary": "研究量化对大型语言模型自我解释（自然语言解释与反事实示例）的质量和忠实度的影响。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "与VLA/WAM无直接关系。研究聚焦于LLM量化对自我解释的影响，属于独立的模型量化研究，对VLA或机器人世界模型没有明确的方法学贡献。",
+        "relevance_score": 7,
+        "tags": [
+          "Model Quantization",
+          "Evaluation",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CL",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "arxiv_id": "2601.00282",
+      "authors": [
+        "Qianli Wang",
+        "Nils Feldhus",
+        "Pepa Atanasova",
+        "Fedor Splitt",
+        "Simon Ostermann",
+        "Sebastian M\\\"oller",
+        "Vera Schmitt"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-27T04:11:46.258254Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2601.00282/v3/fig1-panel1.png"
+            ],
+            "caption": "Example effects of quantization on two types of self-explanations, natural language explanations ( left ) and counterfactual examples ( right ), across different models and quantization methods. Natural language explanations are rated by ➀ human annotators in terms of perceived trustworthiness and coherence (§ 5.2 ); ➁ LLM-as-a-Judge evaluation (§ 5.3 ); ➂ faithfulness test by Biasing Feature Turpin et al. (2023) and CC-SHAP Parcalabescu and Frank (2024) (§ 5.1.1 ), while counterfactual examples are evaluated on edit distance and label flip rate (§ 5.1.2 ).",
+            "image_urls": [
+              "https://arxiv.org/html/2601.00282v3/Figure1_v3.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2601.00282v3#S0.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2601.00282/v3/fig2-panel1.png"
+            ],
+            "caption": "Averaged drop in self-explanation quality and faithfulness with confidence intervals, as assessed by various automatic evaluation metrics (§ 4.1 ), human and LLM-as-a-Judge evaluation dimensions (§ 4.3.1 ), and faithfulness metrics (§ 4.2 ).",
+            "image_urls": [
+              "https://arxiv.org/html/2601.00282v3/figure/human_vs_automatic_3.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2601.00282v3#S5.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2601.00282v3",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-27T04:11:46.258254Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-01-01T09:50:01Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2601.00282",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2601.00282",
+        "project_url": null
+      },
+      "title": "Can Large Language Models Still Explain Themselves? Investigating the Impact of Quantization on Self-Explanations",
+      "title_zh": "大型语言模型量化后还能自我解释吗？探究量化对自我解释的影响",
+      "updated_at": "2026-08-26T08:36:46Z",
+      "version": 3
+    },
+    {
+      "abstract": "Quantization is widely used to accelerate inference and streamline the deployment of large language models (LLMs), yet its effects on self-explanations (SEs) remain unexplored. SEs, generated by LLMs to justify their own outputs, require reasoning about the model's own decision-making process, a capability that may exhibit particular sensitivity to quantization. As SEs are increasingly relied upon for transparency in high-stakes applications, understanding whether and to what extent quantization degrades SE quality and faithfulness is critical. To address this gap, we examine two types of SEs: natural language explanations (NLEs) and counterfactual examples, generated by LLMs quantized using three common techniques at distinct bit widths. Our findings indicate that quantization typically leads to moderate declines in both SE quality (up to 4.4%) and faithfulness (up to 3.9%). The user study further demonstrates that quantization considerably diminishes both the coherence and trustworthiness of SEs (by up to 8.5%). Compared to smaller models, larger models show limited resilience to quantization in terms of SE quality but maintain more faithfulness. Moreover, no quantization technique consistently excels across task accuracy, SE quality, and faithfulness. Because quantization's impact varies considerably by context and can be sizable in specific cases, we recommend validating SE quality for the intended use case. Despite these sometimes considerable drops, quantization remains an effective compression technique when its impact on SEs is properly validated.",
+      "analysis": {
         "key_results": "量化通常导致自我解释质量下降最高4.4%，忠实度下降最高3.9%；用户研究中连贯性和可信度下降最高8.5%；较大模型在解释质量上对量化缺乏弹性但在忠实度上保持更好；没有量化技术在所有指标上一致领先。",
         "limitations": "摘要未说明",
         "main_contribution": "系统评估了量化对LLM自我解释质量和忠实度的影响，并提供了在任务准确性、解释质量和忠实度方面没有量化技术能同时最优的实证发现。",
@@ -700,22 +881,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 59,
-    "completion_tokens": 16957,
+    "cache_hits": 81,
+    "completion_tokens": 19176,
     "error_categories": {
-      "ValidationError": 1
+      "ValidationError": 2
     },
-    "failed": 1,
-    "fetched": 1536,
-    "figure_available": 76,
-    "figure_cache_hits": 48,
+    "failed": 2,
+    "fetched": 1888,
+    "figure_available": 97,
+    "figure_cache_hits": 63,
     "figure_failed": 0,
-    "figure_requests": 42,
-    "figure_unavailable": 14,
-    "model_calls": 52,
-    "prefiltered": 111,
-    "prompt_tokens": 45555,
-    "published": 90,
-    "total_tokens": 62512
+    "figure_requests": 47,
+    "figure_unavailable": 13,
+    "model_calls": 60,
+    "prefiltered": 141,
+    "prompt_tokens": 51749,
+    "published": 110,
+    "total_tokens": 70925
   }
 }
