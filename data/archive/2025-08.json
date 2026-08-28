@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-27T04:11:46.258254Z",
+  "generated_at": "2026-08-28T06:28:28.076086Z",
   "papers": [
     {
       "abstract": "Test-time scaling strategies for Large Language Models predominantly rely on either reinforcement learning with sparse outcome rewards or search-based methods guided by static Process Reward Models. However, outcome-based RL often suffers from training instability and sample inefficiency, while static PRMs require expensive step-wise supervision and are susceptible to reward hacking due to distributional shifts. In this paper, we introduce AIRL-S, a unified framework that integrates Adversarial Inverse Reinforcement Learning with Group Relative Policy Optimization. By inferring a dense, step-wise reward model directly from reference trajectories, AIRL-S eliminates the dependency on labeled process data and uses the same learned PRM as both a training signal and a verifier for search-based TTS. Extensive evaluations across eight benchmarks in mathematics, science, and code generation demonstrate that our policy model improves average performance by 9\\% over the base model, matching GPT-4o. We further analyze how the AIRL and GRPO objectives complement each other and how the learned PRM transfers across generators and search algorithms, establishing a robust and cost-effective methodology for scaling test-time computation in complex reasoning tasks.",
@@ -269,6 +269,64 @@
       "version": 2
     },
     {
+      "abstract": "The advent of ultra-low-bit LLM models, approaching the perplexity and task accuracy of their full precision counterparts, is ushering in a new era of LLM inference. While these advances promise models that are cost-effective regarding latency, memory, throughput, and energy consumption, the efficiency of runtimes for deploying ultra-low-bit models remains under-explored. In this work, we take a bottom-up approach: we first implement 2-bit microkernels for modern CPUs, achieving close-to-roofline performance. We integrate these microkernels into LLM inference pipelines and present end-to-end results with 2-bit models, outperforming the state-of-the-art (SOTA) bitnet.cpp runtime by 2.2$\\times$, and deliver up to 7$\\times$ speedup compared to 16-bit inference. We extend this work to Intel Xe2 GPUs where we implement mixed-precision, 2-bit kernels, and show their performance to be close-to-optimal. We integrated the GPU kernels in the vLLM framework and evaluated end-to-end inference for a range of models and Xe2 GPUs. We obtain up to 6.7$\\times$ speedup compared to the 16-bit pipeline, pushing the envelope of LLM inference.",
+      "analysis": {
+        "key_results": "CPU端2位推理比SOTA bitnet.cpp快2.2倍，比16位推理快7倍；GPU端比16位推理快6.7倍。",
+        "limitations": "摘要未说明",
+        "main_contribution": "实现了2比特微内核并集成到推理管线，在CPU上比SOTA bitnet.cpp快2.2倍，比16位推理快7倍；在Intel Xe2 GPU上实现混合精度2比特内核并集成到vLLM，比16位推理快6.7倍。",
+        "method": "从底层微内核实现出发，优化超低比特（2-bit）计算内核，集成到CPU推理管线和GPU的vLLM框架。",
+        "one_sentence_summary": "本文从底层微内核到端到端推理系统，全面探索了超低比特LLM在CPU和GPU上的高效部署，实现了显著加速。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "该工作专注于LLM推理的量化加速，未涉及视觉-语言-动作模型或机器人世界模型，因此与VLA/WAM无直接关系。但其高效的2-bit量化推理技术可能为在资源受限的机器人平台上部署LLM组件提供参考。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Model Quantization"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.AI",
+        "cs.LG",
+        "cs.PF"
+      ],
+      "arxiv_id": "2508.06753",
+      "authors": [
+        "Evangelos Georganas",
+        "Dhiraj Kalamkar",
+        "Alexander Heinecke",
+        "Pradeep Dubey"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-28T06:28:28.076086Z",
+        "figures": [],
+        "html_url": "https://arxiv.org/html/2508.06753v3",
+        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_status": "not_found",
+        "recovery_version": 3,
+        "status": "not_found"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-28T06:28:28.076086Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2025-08-08T23:33:38Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2508.06753",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2508.06753",
+        "project_url": null
+      },
+      "title": "Pushing the Envelope of LLM Inference with Ultra-Low-Bit Quantized Models",
+      "title_zh": "基于超低比特量化模型推进LLM推理性能极限",
+      "updated_at": "2026-08-27T04:29:21Z",
+      "version": 3
+    },
+    {
       "abstract": "Large language models represent significant investments in computation, data, and engineering expertise, making them extraordinarily valuable intellectual assets. Nevertheless, these AI assets remain vulnerable to unauthorized redistribution and commercial exploitation through fine-tuning or black-box deployment. Current fingerprinting approaches face a fundamental trade-off: intrinsic methods require full parameter access, while backdoor-based techniques employ statistically anomalous triggers easily detected and filtered by adversaries. To address these limitations, we introduce FPEdit, a novel framework that leverages knowledge editing to inject semantically coherent natural language fingerprints through sparse, targeted modifications to model weights. Our approach introduces Promote-Suppress Value Vector Optimization, which simultaneously enhances target token likelihood while suppressing competing tokens, ensuring robust fingerprint integration without degrading core model functionality. Extensive experiments show that FPEdit achieves 94-100% fingerprint retention under both full-parameter fine-tuning and parameter-efficient adaptation, while preserving performance on downstream benchmarks. Moreover, FPEdit remains robust under quantization, pruning, and stochastic decoding, and can embed 10 fingerprint pairs into LLaMA2-7B in under 2 minutes using less than 30 GB of GPU memory, which represents a substantial reduction in resource requirements. These advances establish FPEdit as the first fingerprinting approach to simultaneously achieve robustness against adaptation, resistance to detection, and preservation of model utility, thereby providing a minimally invasive solution for reliable provenance verification of large language models in adversarial deployment scenarios.",
       "analysis": {
         "key_results": "在完全微调和参数高效适配下保持94-100%指纹保留率；对量化、剪枝、随机解码鲁棒；可在2分钟内用<30GB GPU内存向LLaMA2-7B嵌入10对指纹。",
@@ -355,22 +413,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 81,
-    "completion_tokens": 19176,
+    "cache_hits": 84,
+    "completion_tokens": 17414,
     "error_categories": {
-      "ValidationError": 2
+      "ValidationError": 1
     },
-    "failed": 2,
-    "fetched": 1888,
-    "figure_available": 97,
-    "figure_cache_hits": 63,
+    "failed": 1,
+    "fetched": 1800,
+    "figure_available": 93,
+    "figure_cache_hits": 62,
     "figure_failed": 0,
-    "figure_requests": 47,
+    "figure_requests": 44,
     "figure_unavailable": 13,
-    "model_calls": 60,
-    "prefiltered": 141,
-    "prompt_tokens": 51749,
-    "published": 110,
-    "total_tokens": 70925
+    "model_calls": 54,
+    "prefiltered": 138,
+    "prompt_tokens": 46994,
+    "published": 106,
+    "total_tokens": 64408
   }
 }
