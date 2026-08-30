@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-28T06:28:28.076086Z",
+  "generated_at": "2026-08-30T09:49:00.165694Z",
   "papers": [
     {
       "abstract": "Vision-Language-Action (VLA) models are increasingly promising for robotic manipulation, yet their real-world deployment remains bottlenecked by high inference latency and unstable asynchronous execution. This challenge is particularly pronounced in flow-matching-based VLA models, where action decoding requires multiple iterative steps conditioned on the VLM context. While efficient inference methods improve control frequency and asynchronous methods reduce execution idle time, existing approaches often fail to jointly achieve low-latency inference and accurate, temporally consistent asynchronous execution. We introduce \\textbf{FlashVLA}, a streaming action decoding framework that addresses both challenges in a unified formulation. FlashVLA maintains a streaming action buffer with multiple chunks at different noise levels and decodes them using chunk-wise causal attention. This design allows FlashVLA to produce one executable action chunk per inference step. Moreover, its chunk-wise autoregressive formulation implicitly preserves action continuity, enabling smooth asynchronous execution without extra future-state conditioning. Across extensive simulated and real-world experiments, FlashVLA substantially improves inference speed while maintaining strong task performance. It can achieve $\\geq$30\\,Hz control frequency on a single GPU with smooth asynchronous inference in real-world deployment.",
@@ -87,6 +87,101 @@
       "title": "FlashVLA: Streaming Action Decoding for Fast and Asynchronous VLA Inference",
       "title_zh": "FlashVLA：面向快速异步VLA推理的流式动作解码",
       "updated_at": "2026-08-27T17:19:29Z",
+      "version": 1
+    },
+    {
+      "abstract": "Recent video generation models are increasingly framed as world models. Many physical processes can unfold in more than one valid way. Therefore, a world model should reproduce not only a plausible trajectory, but also the distribution of possible behaviors under the same initial observation and action. We call this distribution-level requirement probabilistic alignment. However, existing evaluations largely assess individual-video plausibility and do not test whether repeated generations recover the correct distribution. This raises a central question: how far are current video generators from probabilistically aligned world modeling? To answer it, we formalize probabilistic alignment as a distributional criterion for world models and introduce PAWBench, a benchmark for evaluating video generators as stochastic samplers of world dynamics. We further introduce PAWEval, an outcome-level protocol that converts repeated video rollouts into empirical distributions over possible physical behaviors. Across 50 scenarios and eleven current systems, no model consistently matches the reference probabilities while recovering the range of valid behaviors. Having established this gap, we test whether language prompts, initial noise sampling, or model training can reshape the model's predictive distribution. We believe our work can serve as a foundation for future efforts to move towards probabilistically aligned world modeling.",
+      "analysis": {
+        "key_results": "在50个场景和11个系统上，没有模型能同时匹配参考概率并恢复有效行为范围；语言提示、初始噪声采样和模型训练能够重塑预测分布。",
+        "limitations": "摘要未说明",
+        "main_contribution": "将概率对齐形式化为世界模型的分布判据，并引入PAWBench基准与PAWEval协议来评估视频生成器作为世界动力学采样器的能力。",
+        "method": "通过PAWBench基准，使用PAWEval协议将重复视频推演转换为可能物理行为的经验分布，并测试语言提示、噪声采样和模型训练对预测分布的影响。",
+        "one_sentence_summary": "本文提出PAWBench基准和PAWEval协议，用于评估视频生成模型作为世界动力学随机采样器的概率对齐程度，并发现现有模型在分布级建模上存在显著差距。",
+        "primary_topic": "World Model",
+        "relation_to_vla_wam": "该工作直接针对世界模型（WAM）的概率对齐评估，与本站主题高度相关；虽不直接涉及VLA或机器人动作，但为机器人世界建模提供了重要的评估基准与分布级视角。",
+        "relevance_score": 8,
+        "tags": [
+          "World Modeling",
+          "Video Generation",
+          "Evaluation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "arxiv_id": "2608.27345",
+      "authors": [
+        "Yuandong Pu",
+        "Le Zhuo",
+        "Sayak Paul",
+        "Gabriel Jorge Menezes",
+        "Avram {\\DJ}or{\\dj}evi\\'c",
+        "Shiyang Li",
+        "Yifan Zhou",
+        "Bin Fu",
+        "Wenlong Zhang",
+        "Junjun He",
+        "Yu Qiao",
+        "Yihao Liu",
+        "Jingbo Xing",
+        "Xi Chen"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-30T09:49:00.165694Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2608.27345/v1/fig1-panel1.png"
+            ],
+            "caption": "One plausible future is not enough. A single rollout from a video generation model can appear physically plausible, yet repeated rollouts from the same initial observation and action may reveal a probabilistically unaligned world: outcomes concentrate on a narrow subset of futures instead of matching the valid stochastic support. PAWBench evaluates this induced distribution or support over repeated futures, rather than judging a model by one sampled video.",
+            "image_urls": [
+              "https://arxiv.org/html/2608.27345v1/one_plausible_future.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2608.27345v1#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2608.27345/v1/fig2-panel1.png"
+            ],
+            "caption": "PAWBench scenario taxonomy. PAWBench covers eight mechanism groups under fixed initial observations and actions. PAW-Calibration contains calibrated probability scenarios with analytically specified reference distributions, while PAW-Coverage contains complex stochastic interactions evaluated by valid-support coverage. Each scenario fixes the source image and action prompt, then scores repeated model rollouts by their terminal outcomes.",
+            "image_urls": [
+              "https://arxiv.org/html/2608.27345v1/scenario_taxonomy.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2608.27345v1#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2608.27345v1",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-30T09:49:00.165694Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-08-27T16:46:38Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2608.27345",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2608.27345",
+        "project_url": null
+      },
+      "title": "PAWBench: How Far Are We from Probabilistically Aligned World Modeling?",
+      "title_zh": "PAWBench：我们距离概率对齐的世界模型还有多远？",
+      "updated_at": "2026-08-27T16:46:38Z",
       "version": 1
     },
     {
@@ -676,7 +771,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.26821v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -754,7 +849,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.26788v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -998,7 +1093,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.26659v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1330,7 +1425,7 @@
         "checked_at": "2026-08-28T06:28:28.076086Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.26493v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -2085,7 +2180,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.26013v2",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -2159,7 +2254,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.26004v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -2320,7 +2415,7 @@
         "checked_at": "2026-08-28T06:28:28.076086Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.25956v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -2860,10 +2955,10 @@
         "Christophe Cerisara"
       ],
       "figure_gallery": {
-        "checked_at": "2026-08-28T06:28:28.076086Z",
+        "checked_at": "2026-08-30T09:49:00.165694Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.25677v2",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -2921,7 +3016,7 @@
         "checked_at": "2026-08-27T04:11:46.258254Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.25677v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -3242,7 +3337,7 @@
         "checked_at": "2026-08-28T06:28:28.076086Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.25539v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -3401,7 +3496,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.26214v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -3471,7 +3566,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.25428v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -3630,7 +3725,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.25395v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -4138,7 +4233,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.25188v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -4221,7 +4316,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.25053v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -4456,7 +4551,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.24855v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -4701,7 +4796,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.24658v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -5046,7 +5141,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.24411v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -5543,7 +5638,7 @@
         "checked_at": "2026-08-28T06:28:28.076086Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.24173v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -5951,7 +6046,7 @@
         "checked_at": "2026-08-26T04:41:26.872513Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.24070v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "html_unavailable"
@@ -6200,7 +6295,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.24040v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -6273,7 +6368,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.24004v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -6516,7 +6611,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.23843v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -7666,7 +7761,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.23200v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -7838,7 +7933,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.23144v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -8087,7 +8182,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.23018v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -8774,7 +8869,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.22926v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -8850,7 +8945,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.22883v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -9114,7 +9209,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.22788v2",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -9200,7 +9295,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.22788v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -9274,7 +9369,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.22761v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -9347,7 +9442,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.22758v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -9505,7 +9600,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.22472v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -9666,7 +9761,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.22421v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -10154,10 +10249,10 @@
         "Zhiwei Yu"
       ],
       "figure_gallery": {
-        "checked_at": "2026-08-28T06:28:28.076086Z",
+        "checked_at": "2026-08-30T09:49:00.165694Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.22294v2",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -10381,7 +10476,7 @@
         "checked_at": "2026-08-25T04:40:41.852701Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.22197v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -10437,7 +10532,7 @@
         "checked_at": "2026-08-25T04:40:41.852701Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.22110v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "html_unavailable"
@@ -10975,7 +11070,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.21883v2",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -11044,7 +11139,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.21883v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -11104,7 +11199,7 @@
         "checked_at": "2026-08-25T04:40:41.852701Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.21869v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "html_unavailable"
@@ -11529,7 +11624,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.21134v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -11870,7 +11965,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.20975v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -12127,7 +12222,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.20953v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -12186,7 +12281,7 @@
         "checked_at": "2026-08-24T04:47:52.628466Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.20936v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -12598,7 +12693,7 @@
         "checked_at": "2026-08-24T04:47:52.628466Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.20763v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -13389,7 +13484,7 @@
         "checked_at": "2026-08-22T23:15:48.929532Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.20065v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -13554,7 +13649,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.19891v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -13627,7 +13722,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.19804v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -13860,7 +13955,7 @@
         "checked_at": "2026-08-22T23:15:48.929532Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.19758v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -14367,7 +14462,7 @@
         "checked_at": "2026-08-21T04:40:28.268336Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.19492v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -14513,7 +14608,7 @@
         "checked_at": "2026-08-21T04:40:28.268336Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.19147v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -14587,7 +14682,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.19066v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -15011,7 +15106,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.18669v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -15254,7 +15349,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.18627v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -15570,7 +15665,7 @@
         "checked_at": "2026-08-21T04:40:28.268336Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.18410v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -16653,7 +16748,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.17496v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -16712,7 +16807,7 @@
         "checked_at": "2026-08-21T04:40:28.268336Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.17484v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -17063,7 +17158,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.18183v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -17133,7 +17228,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.18182v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -17211,7 +17306,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.17423v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -17285,7 +17380,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.17336v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -17359,7 +17454,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.17209v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -17517,7 +17612,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.17162v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -17760,7 +17855,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.17095v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -17918,7 +18013,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16889v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -18026,7 +18121,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16885v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -18103,7 +18198,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16843v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -18178,7 +18273,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16978v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -18353,7 +18448,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16794v2",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -18427,7 +18522,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16794v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -18681,7 +18776,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16686v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -19203,7 +19298,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16263v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -19279,7 +19374,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16234v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -19772,7 +19867,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16003v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -20604,7 +20699,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.15602v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -20674,7 +20769,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.15574v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -20731,7 +20826,7 @@
         "checked_at": "2026-08-19T04:39:25.480905Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.15567v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -21751,7 +21846,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.15139v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -21821,7 +21916,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.15117v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -22250,7 +22345,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.14420v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -22409,7 +22504,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.14191v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -22479,7 +22574,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.14149v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -23090,7 +23185,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.14016v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -23326,7 +23421,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.13756v2",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -23959,7 +24054,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.13505v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -25364,7 +25459,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.12860v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -25792,7 +25887,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.12695v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -25848,7 +25943,7 @@
         "checked_at": "2026-08-15T23:15:45.718160Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.12655v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -25993,7 +26088,7 @@
         "checked_at": "2026-08-14T05:39:18.670795Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.12515v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -26670,7 +26765,7 @@
         "checked_at": "2026-08-14T23:16:53.230596Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.12026v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -26826,7 +26921,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.11981v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -26879,7 +26974,7 @@
         "checked_at": "2026-08-14T23:16:53.230596Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.11797v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -26948,7 +27043,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.11786v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -27102,7 +27197,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.11770v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -27658,7 +27753,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.11588v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -30820,7 +30915,7 @@
         "checked_at": "2026-08-17T04:43:48.944667Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.09706v2",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -30978,7 +31073,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.09595v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -33813,7 +33908,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.08081v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -35737,7 +35832,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.06564v3",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -36251,7 +36346,7 @@
         "checked_at": "2026-08-09T05:07:43.295216Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.06291v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -37195,7 +37290,7 @@
         "checked_at": "2026-08-09T05:07:43.295216Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.05823v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -39301,7 +39396,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.04768v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -40062,7 +40157,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.04488v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -40320,7 +40415,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.04425v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -40812,7 +40907,7 @@
         "checked_at": "2026-08-06T07:02:24.946198Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.03938v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -41138,7 +41233,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.03854v3",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -41206,7 +41301,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.03854v2",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -41275,7 +41370,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.03854v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -41627,7 +41722,7 @@
         "checked_at": "2026-08-17T04:43:48.944667Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.03682v3",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -42857,7 +42952,7 @@
         "checked_at": "2026-08-06T07:02:24.946198Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.04048v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -43450,7 +43545,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.03052v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -45486,7 +45581,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.01851v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -47211,7 +47306,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.07557v2",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -48088,7 +48183,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.01013v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -48156,7 +48251,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.00860v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -48224,7 +48319,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.00859v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -48452,7 +48547,7 @@
         "checked_at": "2026-08-04T05:18:35.763554Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.00737v1",
-        "recovery_checked_at": "2026-08-28T06:32:44.955228Z",
+        "recovery_checked_at": "2026-08-30T09:49:21.461895Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -49177,22 +49272,20 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 84,
-    "completion_tokens": 17414,
-    "error_categories": {
-      "ValidationError": 1
-    },
-    "failed": 1,
-    "fetched": 1800,
-    "figure_available": 93,
-    "figure_cache_hits": 62,
+    "cache_hits": 25,
+    "completion_tokens": 310,
+    "error_categories": {},
+    "failed": 0,
+    "fetched": 301,
+    "figure_available": 20,
+    "figure_cache_hits": 19,
     "figure_failed": 0,
-    "figure_requests": 44,
-    "figure_unavailable": 13,
-    "model_calls": 54,
-    "prefiltered": 138,
-    "prompt_tokens": 46994,
-    "published": 106,
-    "total_tokens": 64408
+    "figure_requests": 3,
+    "figure_unavailable": 2,
+    "model_calls": 1,
+    "prefiltered": 26,
+    "prompt_tokens": 846,
+    "published": 22,
+    "total_tokens": 1156
   }
 }
