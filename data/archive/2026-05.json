@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-30T09:49:00.165694Z",
+  "generated_at": "2026-08-31T01:03:11.208431Z",
   "papers": [
     {
       "abstract": "Behavior cloning with high-capacity generative policies achieves strong imitation performance, but is often limited by demonstration coverage and distribution shift. Direct reinforcement learning fine-tuning can improve performance, but updating large action decoders is frequently unstable and sample inefficient. We propose Lagrangian Perturbation Diffusion Steering (LP-DS), a lightweight adaptation method that improves a frozen generative policy by learning a compact noise-space perturbation before decoding. LP-DS optimizes this perturbation with a Lagrangian trust-region objective, improving downstream value while constraining deviation from the latent prior. Across RoboMimic manipulation, OpenAI Gym locomotion, and Adroit dexterous manipulation benchmarks, LP-DS improves sample efficiency, success, and return while maintaining higher action-space entropy than unconstrained noise-space steering, with return improvements of up to 25% over prior baselines. Additional evaluations with flow-matching backbones, a large vision-language-action model, and physical Franka deployment show that LP-DS is not limited to compact diffusion policies or simulated benchmarks. Project page: https://sites.google.com/view/lp-ds/home.",
@@ -635,6 +635,83 @@
       "title": "Speculative Decoding and the Curse of Multilinguality",
       "title_zh": "推测解码与多语言性的诅咒",
       "updated_at": "2026-08-04T17:55:16Z",
+      "version": 2
+    },
+    {
+      "abstract": "Speculative decoding accelerates large language model inference through a draft-then-verify paradigm. Building on this, tree-structured methods improve inference by organizing proposals into multiple candidate paths, increasing the accepted length. However, existing tree-structured methods use a single drafter for all drafting steps, creating a dilemma: a smaller drafter is fast but yields lower-quality trees, whereas a larger drafter improves tree quality but suffers from high latency. To address this, we propose TreeGraft, a multi-drafter framework in which drafters of different costs jointly construct a shared draft tree. TreeGraft uses the stronger drafter to rescore candidates by updating scores assigned by the weaker drafter, reselect grafting positions, and recover promising paths left unexplored. It also integrates stronger drafter expansions non-destructively, preserving existing branches that may still be accepted by the target model. Together, these designs improve the quality of the shared draft tree. To control the drafting cost, TreeGraft introduces a lightweight scheduler distilled from an offline value system to decide when to call the stronger drafter. Across 10 model pairs and 6 benchmarks, TreeGraft outperforms the better of the two fixed single-drafter endpoint strategies by 15.1% on average, reaching a maximum gain of 26.6%. Our code is available at https://github.com/fjm9933/TreeGraft.",
+      "analysis": {
+        "key_results": "在10对模型和6个基准上，TreeGraft 平均优于两种固定单草稿器端点策略中较好者15.1%，最大提升26.6%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出 TreeGraft，一个多草稿器框架，利用不同成本的草稿器联合构建共享草稿树，并通过重打分、嫁接位置重选、路径恢复和成本调度来提升草稿树质量与推理效率。",
+        "method": "多草稿器联合构建共享草稿树；强草稿器对弱草稿器的候选打分进行更新并重选嫁接位置；集成强草稿器扩展且不破坏已有的可能被接受的候选路径；通过从离线价值系统蒸馏得到的轻量调度器决定何时调用强草稿器以控制成本。",
+        "one_sentence_summary": "TreeGraft 提出一种多草稿器框架，通过强弱草稿器联合构建共享草稿树来提升树型推测解码的接受长度与推理速度。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "本文为独立的推测解码加速方法，不直接涉及 VLA 或 WAM；但其高效推理思想可潜在用于机器人策略模型或世界模型的加速部署。",
+        "relevance_score": 8,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CL"
+      ],
+      "arxiv_id": "2608.26112",
+      "authors": [
+        "Jiaming Fan",
+        "Daming Cao",
+        "Canchen Huang",
+        "Jiale Fu",
+        "Jin Zhang",
+        "Junjie Gao",
+        "Kai Yang",
+        "Xiangzhong Luo",
+        "Xu Yang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-08-31T01:03:11.208431Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2608.26112/v2/fig2-panel1.png"
+            ],
+            "caption": "Illustration of expanded grafting-position selection under a middle–small–middle schedule. (1) (3) Panels and show that middle drafter steps reconsider earlier nodes in the shared tree, while (2) panel shows that the small drafter step only expands nodes generated in the previous step.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2608.26112v2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2608.26112v2",
+        "recovery_checked_at": "2026-08-31T01:05:16.933178Z",
+        "recovery_status": "not_found",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:speculative-decoding",
+        "composite:speculative_generation",
+        "composite:draft_verification_decoding"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-08-31T01:03:11.208431Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-05-28T17:52:11Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2608.26112",
+        "code_url": "https://github.com/fjm9933/TreeGraft",
+        "pdf_url": "https://arxiv.org/pdf/2608.26112",
+        "project_url": null
+      },
+      "title": "TreeGraft: Adaptive Multi-Drafter Grafting for Tree-Based Speculative Decoding",
+      "title_zh": "TreeGraft：面向树型推测解码的自适应多草稿器嫁接方法",
+      "updated_at": "2026-08-28T04:00:32Z",
       "version": 2
     },
     {
@@ -3149,20 +3226,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 25,
-    "completion_tokens": 310,
-    "error_categories": {},
-    "failed": 0,
-    "fetched": 301,
-    "figure_available": 20,
-    "figure_cache_hits": 19,
+    "cache_hits": 0,
+    "completion_tokens": 8565,
+    "error_categories": {
+      "ValidationError": 1
+    },
+    "failed": 1,
+    "fetched": 442,
+    "figure_available": 18,
+    "figure_cache_hits": 0,
     "figure_failed": 0,
-    "figure_requests": 3,
-    "figure_unavailable": 2,
-    "model_calls": 1,
-    "prefiltered": 26,
-    "prompt_tokens": 846,
+    "figure_requests": 22,
+    "figure_unavailable": 4,
+    "model_calls": 27,
+    "prefiltered": 27,
+    "prompt_tokens": 22732,
     "published": 22,
-    "total_tokens": 1156
+    "total_tokens": 31297
   }
 }
