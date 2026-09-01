@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-21T04:40:28.268336Z",
+  "generated_at": "2026-09-01T09:15:42.159658Z",
   "papers": [
     {
       "abstract": "Does Chain-of-Thought (CoT) reasoning genuinely improve Vision Language Action (VLA) models, or does it merely add overhead? Existing CoT-VLA systems report limited and inconsistent gains, yet no prior work has rigorously diagnosed when and why CoT helps robots act. Through systematic experiments, we identify two necessary conditions that must be jointly satisfied for CoT to be effective in VLA: (1) Decoding Alignment: CoT and actions must be generated with modality-appropriate mechanisms; forcing both through a single autoregressive decoder is not merely suboptimal but actively harmful, degrading performance by 4.2 percentage points; (2) Causal Alignment: CoT must be causally linked to task success via outcome-based optimization; without it, supervised CoT is indistinguishable from no reasoning at all under action-execution-sensitive dynamics shift, exhibiting a 32.0 pp performance drop nearly identical to the 31.6 pp drop of a reasoning-free baseline. Guided by these findings, we build DeepThinkVLA: a hybrid-attention decoder satisfies Condition 1 by pairing causal attention for language with bidirectional attention for parallel action decoding, while a two-stage SFT-then-RL pipeline satisfies Condition 2 by aligning the full reasoning: action chain with sparse task-success rewards. DeepThinkVLA achieves 97.0\\% success on LIBERO, 79.0\\% robustness on LIBERO-Plus (vs. 61.6\\% for $\\pi_0$-FAST), and 59.3\\% success on RoboTwin 2.0, exceeding the strongest baseline by 21.7 points. Furthermore, real-robot experiments provide preliminary evidence for the physical applicability of our CoT data construction and hybrid architecture. Our codes are available at https://github.com/OpenBMB/DeepThinkVLA.",
@@ -174,6 +174,80 @@
       "title_zh": "LoRAQuant：面向LoRA的超低位混合精度量化方法",
       "updated_at": "2026-08-12T04:10:15Z",
       "version": 3
+    },
+    {
+      "abstract": "Inference optimizations are routinely evaluated by throughput alone, without verifying output correctness. We conduct a forensic analysis of batch speculative decoding and find that several widely-used implementations silently produce corrupted outputs (repetitive tokens, <unk> symbols) while reporting competitive speed; failures invisible to metrics like ROUGE. We trace the root cause to the ragged tensor problem: variable token acceptance desynchronizes position IDs, attention masks, and KV-cache across a batch. We formalize the synchronization invariants (rectangular alignment and position-ID contiguity) that valid batched inference must preserve and show that maintaining them incurs superlinear alignment overhead under contiguous layouts. EQSPEC enforces the invariants without custom kernels; EXSPEC schedules same-length sequences to bypass realignment. On SpecBench across three model families, EXSPEC reaches 3 x throughput at batch size 8 with 95% exact match to standard decoding; residual divergence traces to floating-point non-determinism, not synchronization error. Code:https://github.com/eBay/spec_dec",
+      "analysis": {
+        "key_results": "在SpecBench上跨三个模型系列，EXSPEC在批量大小为8时达到3倍吞吐量，与标准解码的精确匹配率为95%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "对批量推测解码中的不规则张量问题进行系统诊断，形式化同步不变量，并提出EQSPEC和EXSPEC两种方法来保证正确性并提升吞吐量。",
+        "method": "EQSPEC在不使用自定义内核的情况下强制同步不变量；EXSPEC通过调度相同长度的序列来绕过重新对齐。",
+        "one_sentence_summary": "该论文对批量推测解码进行了正确性取证分析，发现广泛使用的实现在报告竞争性速度的同时可能静默产生损坏输出，并提出了EQSPEC和EXSPEC两种解决方案。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "该论文专注于推测解码的效率与正确性，属于独立的高效推理主题，未直接涉及VLA、WAM或机器人动作世界模型，因此与本站主题无直接关系。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "arxiv_id": "2510.22876",
+      "authors": [
+        "Ranran Haoran Zhang",
+        "Soumik Dey",
+        "Ashirbad Mishra",
+        "Hansi Wu",
+        "Binbin Li",
+        "and Rui Zhang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-01T09:15:42.159658Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2510.22876/v4/fig2-panel1.png"
+            ],
+            "caption": "The ragged tensor problem in batch speculative decoding. Differing numbers of accepted draft tokens across sequences in the same batch lead to ragged-shaped input IDs tensors and KV-cache that disrupt subsequent batch operations.",
+            "image_urls": [
+              "https://arxiv.org/html/2510.22876v4/batch_spec_intro.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2510.22876v4#S2.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2510.22876v4",
+        "recovery_checked_at": "2026-09-01T09:18:38.735227Z",
+        "recovery_status": "not_found",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:speculative-decoding",
+        "composite:speculative_generation"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-01T09:15:42.159658Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2025-10-26T23:59:23Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2510.22876",
+        "code_url": "https://github.com/eBay/spec_dec",
+        "pdf_url": "https://arxiv.org/pdf/2510.22876",
+        "project_url": null
+      },
+      "title": "Correctness Forensics for Batch Speculative Decoding: Diagnosing the Ragged Tensor Problem",
+      "title_zh": "批量推测解码的正确性取证：诊断不规则张量问题",
+      "updated_at": "2026-08-31T04:52:47Z",
+      "version": 4
     },
     {
       "abstract": "Vision-Language-Action (VLA) models have shown strong manipulation capability when trained with large-scale imitation learning datasets. However, these datasets that predominantly consist of successful trajectories rarely provide the corrective supervision required when execution deviates from standard demonstrations. During deployment, these physical deviations lead to the distributional shift that drives policy to failure scenarios, yet missing failure recovery data prevents policy from correcting these execution deviations. To address this failure recovery problem, we propose a coverage-guided data augmentation framework RESample to actively supplement demonstration datasets for failure recovery. Specifically, to guide the augmentation and generate failure modes that possibly appear in the real world, RESample trains a conservative coverage function to identify failure cases that reside within the actual data distribution but are missing in the standard successful demonstrations. Guided by the evaluated coverage discrepancy, we perform exploratory sampling to actively sample exploration behaviors followed by recovery actions, extending the coverage of training data with failure recovery trajectories. With the augmented trajectory, the refined policy, which deviated in real settings, can recover from failure. Experiments on the LIBERO benchmark and real-world manipulation tasks show that RESample consistently improves policy success rates, achieving up to 12% absolute gain with no more than 20% additional samples.",
@@ -554,22 +628,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 53,
-    "completion_tokens": 12960,
+    "cache_hits": 55,
+    "completion_tokens": 12164,
     "error_categories": {
-      "ValidationError": 1
+      "ValidationError": 2
     },
-    "failed": 1,
-    "fetched": 1407,
-    "figure_available": 67,
-    "figure_cache_hits": 43,
+    "failed": 2,
+    "fetched": 1478,
+    "figure_available": 65,
+    "figure_cache_hits": 45,
     "figure_failed": 0,
-    "figure_requests": 33,
-    "figure_unavailable": 9,
+    "figure_requests": 32,
+    "figure_unavailable": 12,
     "model_calls": 40,
-    "prefiltered": 93,
-    "prompt_tokens": 34867,
-    "published": 76,
-    "total_tokens": 47827
+    "prefiltered": 95,
+    "prompt_tokens": 33303,
+    "published": 77,
+    "total_tokens": 45467
   }
 }
