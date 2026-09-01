@@ -1,6 +1,100 @@
 {
-  "generated_at": "2026-08-28T06:28:28.076086Z",
+  "generated_at": "2026-09-01T01:34:00.334373Z",
   "papers": [
+    {
+      "abstract": "Flow-based vision-language-action (VLA) policies offer strong expressivity for action generation, but suffer from a fundamental inefficiency: multi-step inference is required to recover action structure from uninformative Gaussian noise, leading to a poor efficiency-quality trade-off under real-time constraints. We address this issue by rethinking the role of the starting point in generative action modeling. Instead of shortening the sampling trajectory, we propose CF-VLA, a coarse-to-fine two-stage formulation that restructures action generation into a coarse initialization step that constructs an action-aware starting point, followed by a single-step local refinement that corrects residual errors. Concretely, the coarse stage learns a conditional posterior over endpoint velocity to transform Gaussian noise into a structured initialization, while the fine stage performs a fixed-time refinement from this initialization. To stabilize training, we introduce a stepwise strategy that first learns a controlled coarse predictor and then performs joint optimization. Experiments on CALVIN and LIBERO show that our method establishes a strong efficiency-performance frontier under low-NFE (Number of Function Evaluations) regimes: it consistently outperforms existing NFE=2 methods, matches or surpasses the NFE=10 $\\pi_{0.5}$ baseline on several metrics, reduces action sampling latency by 75.4%, and achieves the best average real-robot success rate of 83.0%, outperforming MIP by 19.5 points and $\\pi_{0.5}$ by 4.0 points. These results suggest that structured, coarse-to-fine generation enables both strong performance and efficient inference. Our code is available at https://github.com/EmbodiedAI-RoboTron/CF-VLA.",
+      "analysis": {
+        "key_results": "在CALVIN和LIBERO上，CF-VLA在低NFE下优于现有NFE=2方法，在多个指标上匹配或超越NFE=10的π0.5基线，动作采样延迟降低75.4%，平均真实机器人成功率达到83.0%，比MIP高19.5个百分点，比π0.5高4.0个百分点。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出CF-VLA，一种由粗到细的两阶段动作生成方法，将动作生成重构为粗略初始化加单步局部细化，以解决流匹配VLA策略在低NFE下效率-质量权衡不佳的问题。",
+        "method": "使用条件后验分布学习端点速度的粗阶段，将高斯噪声转化为结构化的动作感知初始化；细阶段进行固定时间的单步局部细化；采用分步训练策略先训练粗预测器再进行联合优化。",
+        "one_sentence_summary": "提出CF-VLA，一种由粗到细的两阶段生成框架，通过构建动作感知起始点来改进流匹配VLA策略的低NFE效率，从而在保持性能的同时大幅提升推理速度。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "本文直接针对VLA（视觉-语言-动作）策略的推理效率问题，通过改进动作生成过程实现高效推理，与本站VLA主题高度相关。",
+        "relevance_score": 9,
+        "tags": [
+          "Efficient Inference",
+          "Policy Learning",
+          "Robot Learning",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "arxiv_id": "2604.24622",
+      "authors": [
+        "Fan Du",
+        "Feng Yan",
+        "Jianxiong Wu",
+        "Xinrun Xu",
+        "Weiye Zhang",
+        "Weinong Wang",
+        "Yu Guo",
+        "Bin Qian",
+        "Zhihai He",
+        "Fei Wang",
+        "Heng Yang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-01T01:34:00.334373Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2604.24622/v3/fig1-panel1.png"
+            ],
+            "caption": "Teaser of CF-VLA. Standard flow matching requires multiple iterative steps to recover action structure from uninformative Gaussian noise. CF-VLA instead adopts a coarse-to-fine two-step process: a coarse stage constructs an action-prior-guided (AP-guided) noise initialization, followed by a single-step refinement. This design achieves a stronger efficiency–performance frontier across CALVIN, LIBERO, and real-robot settings, reducing action sampling latency by 73.2%. A teaser figure of CF-VLA across CALVIN, LIBERO, and real-robot settings. The left column shows representative tasks from the three evaluation domains. The upper middle panel illustrates standard flow matching iteratively refining from Gaussian noise over many steps. The lower middle panel shows the proposed coarse-to-fine design, which first uses a KL-supervised coarse stage to transform Gaussian noise into action-prior-guided (AP-guided) noise initialization and then uses a fine stage to recover the final action in one step. The right panel summarizes the resulting latency reductions and performance gains.",
+            "image_urls": [
+              "https://arxiv.org/html/2604.24622v3/1.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2604.24622v3#S0.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2604.24622/v3/fig2-panel1.png"
+            ],
+            "caption": "Overview of CF-VLA. CF-VLA adopts a two-phase training strategy. Phase I is a stability-oriented warm-up stage that shapes endpoint velocity and variance prediction and trains the refinement branch on a controlled proxy input, avoiding unreliable coarse outputs at the beginning of optimization. Phase II then performs full joint optimization of the final coarse-to-fine mechanism: KL-supervised endpoint posterior matching transforms pure Gaussian noise into an AP-guided initialization, and a single-step refinement branch performs local correction to recover the target action. This two-phase design enables stable training and efficient two-step generation. A method overview of CF-VLA. A VLM backbone provides conditioning features to a shared action expert. The diagram contains two training phases. Phase I serves as a stabilization phase, where the endpoint branch learns a stable velocity and variance representation together with a controlled refinement proxy to provide reliable coarse outputs. Phase II then performs coarse-to-fine generation, where the endpoint branch predicts a posterior matched by KL divergence to produce AP-guided noise initialization, and the fine branch predicts a mean-squared-error-supervised update that maps the local neighborhood induced by this AP-guided initialization onto the ground-truth action manifold.",
+            "image_urls": [
+              "https://arxiv.org/html/2604.24622v3/3.1.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2604.24622v3#S2.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2604.24622v3",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-01T01:34:00.334373Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-04-27T15:51:40Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2604.24622",
+        "code_url": "https://github.com/EmbodiedAI-RoboTron/CF-VLA",
+        "pdf_url": "https://arxiv.org/pdf/2604.24622",
+        "project_url": null
+      },
+      "title": "CF-VLA: Efficient Coarse-to-Fine Action Generation for Vision-Language-Action Policies",
+      "title_zh": "CF-VLA：面向视觉-语言-动作策略的高效由粗到细动作生成",
+      "updated_at": "2026-08-30T18:14:48Z",
+      "version": 3
+    },
     {
       "abstract": "Vision-Language-Action (VLA) models are emerging as a unified substrate for embodied intelligence. This shift raises a new class of safety challenges, stemming from the embodied nature of VLA systems, including irreversible physical consequences, a multimodal attack surface across vision, language, and state, real-time latency constraints on defense, error propagation over long-horizon trajectories, and vulnerabilities in the data supply chain. Yet the literature remains fragmented across robotic learning, adversarial machine learning, AI alignment, and autonomous systems safety. This survey provides a unified and up-to-date overview of safety in Vision-Language-Action models. We organize the field along two parallel timing axes, attack timing (training-time vs. inference-time and defense timing (training-time vs. inference-time, linking each class of threat to the stage at which it can be mitigated. We first define the scope of VLA safety, distinguishing it from text-only LLM safety and classical robotic safety, and review the foundations of VLA models, including architectures, training paradigms, and inference mechanisms. We then examine the literature through four lenses: Attacks, Defenses, Evaluation, and Deployment. We survey training-time threats such as data poisoning and backdoors, as well as inference-time attacks including adversarial patches, cross-modal perturbations, semantic jailbreaks, and freezing attacks. We review training-time and runtime defenses, analyze existing benchmarks and metrics, and discuss safety challenges across six deployment domains. Finally, we highlight key open problems, including certified robustness for embodied trajectories, physically realizable defenses, safety-aware training, unified runtime safety architectures, and standardized evaluation.",
       "analysis": {
@@ -1492,6 +1586,96 @@
       "version": 5
     },
     {
+      "abstract": "Diffusion policies effectively model multimodal action distributions for robotic manipulation, but their iterative denoising requires tens to hundreds of network function evaluations (NFEs) for each control prediction, limiting their applicability to high-frequency closed-loop control and online reinforcement learning (RL). We present a two-stage framework for native one-step generative policies that transfers iterative refinement from inference to training. First, Drift-Based Policy (DBP) uses a fixed-point drifting objective to internalize corrective dynamics into the model parameters, producing multimodal action chunks with a single network evaluation by design. Second, Drift-Based Policy Optimization (DBPO) augments the pretrained backbone with a stochastic interface that provides exact conditional rollout likelihoods for PPO-style on-policy updates while preserving 1-NFE deployment. On the 12-task Diffusion Policy suite, DBP improves the average success rate from 0.79 to 0.83 while reducing inference from 100 NFEs to 1. Across 37 point-cloud manipulation tasks, DBP achieves an average success rate of 88.4%, surpassing the leading 1-NFE baseline OMP at 82.3%. DBPO further improves pretrained one-step policies through stable online fine-tuning on RoboMimic and D4RL. On a physical dual-arm UR5 platform, DBP achieves 123/150 successes (82%) with an average end-to-end latency of 9.5 ms, compared with MP1's 89/150 successes (59%) under the same setup. Code is available at https://github.com/YuxuanGao0822/DBPO.",
+      "analysis": {
+        "key_results": "在12任务Diffusion Policy套件上，DBP平均成功率从0.79提高到0.83，推理从100 NFE降至1；在37个点云操作任务上平均成功率88.4%，超过领先的1-NFE基线OMP（82.3%）；DBPO在RoboMimic和D4RL上进一步稳定在线微调；在双机械臂UR5平台上，DBP达到82%成功率，平均端到端延迟9.5ms。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出原生一步生成式策略框架：漂移策略（DBP）通过定点漂移目标将修正动态内部化到模型参数中，实现单次网络评估生成多模态动作块；漂移策略优化（DBPO）在保持1-NFE部署的同时提供精确条件概率用于PPO在线更新。",
+        "method": "Drift-Based Policy (DBP)（基于漂移的策略）和Drift-Based Policy Optimization (DBPO)（基于漂移的策略优化），通过训练阶段内部化迭代精化，推理时单次网络评估（1 NFE）。",
+        "one_sentence_summary": "提出两阶段框架，将扩散策略的迭代去噪从推理阶段转移到训练阶段，实现单次网络评估生成动作的一步生成式策略，并支持在线强化学习。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该工作专注于机器人操作策略的推理效率，通过将扩散策略转化为一步生成模型，直接服务于机器人视觉-语言-动作（VLA）策略的高频闭环控制和在线强化学习，具有高度相关性。",
+        "relevance_score": 9,
+        "tags": [
+          "Efficient Inference",
+          "Policy Learning",
+          "Robot Manipulation",
+          "Action Prediction"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2604.03540",
+      "authors": [
+        "Yuxuan Gao",
+        "Yedong Shen",
+        "Shiqi Zhang",
+        "Wenhao Yu",
+        "Yifan Duan",
+        "Jia pan",
+        "Jiajia Wu",
+        "Jiajun Deng",
+        "Yanyong Zhang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-01T01:34:00.334373Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2604.03540/v4/fig1-panel1.png"
+            ],
+            "caption": "Generative policy paradigms for robot control. (a) Multi-step diffusion policies rely on iterative denoising at inference. (b) One-step mean-flow policies generate actions in one pass with auxiliary corrections. (c) Drift-Based Policy internalizes attraction-repulsion refinement during training, yielding a native one-step generator. (d) Our method achieves the best average success rate and control frequency on Adroit and MetaWorld against established generative baselines.",
+            "image_urls": [
+              "https://arxiv.org/html/2604.03540v4/intro_final.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2604.03540v4#S0.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2604.03540/v4/fig2-panel1.png"
+            ],
+            "caption": "Two-stage Drift-Based Policy framework. Stage 1 learns a native one-step generator offline via attraction-repulsion refinement during training. Stage 2 fine-tunes a stochastic actor initialized from the pretrained backbone with on-policy PPO and anchor regularization, while deployment remains one-step (1-NFE).",
+            "image_urls": [
+              "https://arxiv.org/html/2604.03540v4/framework_final.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2604.03540v4#S4.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2604.03540v4",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-01T01:34:00.334373Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-04-04T01:32:01Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2604.03540",
+        "code_url": "https://github.com/YuxuanGao0822/DBPO",
+        "pdf_url": "https://arxiv.org/pdf/2604.03540",
+        "project_url": null
+      },
+      "title": "Drift-Based Policy Optimization: Native One-Step Policy Learning for Online Robot Control",
+      "title_zh": "基于漂移的策略优化：面向在线机器人控制的原生一步策略学习",
+      "updated_at": "2026-08-29T02:29:15Z",
+      "version": 4
+    },
+    {
       "abstract": "Robotic manipulation requires understanding both the 3D spatial structure of the environment and its temporal evolution, yet most existing policies neglect one or both aspects. They often rely on 2D visual observations or backbones pretrained on static image--text pairs, which leads to high data requirements and limited comprehension of environment dynamics. To address this, we introduce SpatialVAM, the first 3D Video Action Model that simultaneously predict spatial-aware multi-view heatmap videos and RGB videos. Our key insight is that this design naturally injects 3D information into video foundation models while aligning the representation format between video pretraining and action finetuning. Extensive experiments demonstrate that SpatialVAM enables data-efficient, robust, generalizable, and interpretable manipulation. With only ten demonstration trajectories and no additional pretraining, SpatialVAM handles challenging long-horizon and contact-rich tasks, generalizes to out-of-distribution settings, and predicts realistic future videos. Evaluations on Meta-World (22\\%$\\uparrow$), RoboCasa (15\\%$\\uparrow$) and real-world robotic platforms (16\\%$\\uparrow$) show that SpatialVAM consistently outperforms other video action models, vision language action models and 3D-based policies, establishing a new state-of-the-art in data-efficient multi-task manipulation.",
       "analysis": {
         "key_results": "仅用10条演示轨迹且无额外预训练，即可处理长时程接触丰富任务并泛化到分布外场景；在Meta-World（提升22%）、RoboCasa（提升15%）和真实机器人平台（提升16%）上超越其他视频动作模型、视觉语言动作模型和基于3D的策略，建立了数据高效多任务操作的新最先进水平。",
@@ -1739,22 +1923,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 84,
-    "completion_tokens": 17414,
+    "cache_hits": 0,
+    "completion_tokens": 22621,
     "error_categories": {
       "ValidationError": 1
     },
     "failed": 1,
-    "fetched": 1800,
-    "figure_available": 93,
-    "figure_cache_hits": 62,
+    "fetched": 964,
+    "figure_available": 44,
+    "figure_cache_hits": 0,
     "figure_failed": 0,
-    "figure_requests": 44,
-    "figure_unavailable": 13,
-    "model_calls": 54,
-    "prefiltered": 138,
-    "prompt_tokens": 46994,
-    "published": 106,
-    "total_tokens": 64408
+    "figure_requests": 55,
+    "figure_unavailable": 11,
+    "model_calls": 69,
+    "prefiltered": 69,
+    "prompt_tokens": 60238,
+    "published": 55,
+    "total_tokens": 82859
   }
 }
