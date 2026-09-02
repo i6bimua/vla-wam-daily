@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-01T09:15:42.159658Z",
+  "generated_at": "2026-09-02T00:46:56.358051Z",
   "papers": [
     {
       "abstract": "Flow-based vision-language-action (VLA) policies offer strong expressivity for action generation, but suffer from a fundamental inefficiency: multi-step inference is required to recover action structure from uninformative Gaussian noise, leading to a poor efficiency-quality trade-off under real-time constraints. We address this issue by rethinking the role of the starting point in generative action modeling. Instead of shortening the sampling trajectory, we propose CF-VLA, a coarse-to-fine two-stage formulation that restructures action generation into a coarse initialization step that constructs an action-aware starting point, followed by a single-step local refinement that corrects residual errors. Concretely, the coarse stage learns a conditional posterior over endpoint velocity to transform Gaussian noise into a structured initialization, while the fine stage performs a fixed-time refinement from this initialization. To stabilize training, we introduce a stepwise strategy that first learns a controlled coarse predictor and then performs joint optimization. Experiments on CALVIN and LIBERO show that our method establishes a strong efficiency-performance frontier under low-NFE (Number of Function Evaluations) regimes: it consistently outperforms existing NFE=2 methods, matches or surpasses the NFE=10 $\\pi_{0.5}$ baseline on several metrics, reduces action sampling latency by 75.4%, and achieves the best average real-robot success rate of 83.0%, outperforming MIP by 19.5 points and $\\pi_{0.5}$ by 4.0 points. These results suggest that structured, coarse-to-fine generation enables both strong performance and efficient inference. Our code is available at https://github.com/EmbodiedAI-RoboTron/CF-VLA.",
@@ -1413,6 +1413,102 @@
       "version": 2
     },
     {
+      "abstract": "Most digital videos are stored in 8-bit low dynamic range (LDR) formats, where much of the original high dynamic range (HDR) scene radiance is lost due to saturation and quantization. This loss of highlight and shadow detail precludes mapping accurate luminance to HDR displays and limits meaningful re-exposure in post-production workflows. Although techniques have been proposed to convert LDR images to HDR through dynamic range expansion, they struggle to restore realistic detail in the over- and underexposed regions. To address this, we present DiffHDR, a framework that formulates LDR-to-HDR conversion as a generative radiance inpainting task within the latent space of a video diffusion model. By operating in Log-Gamma color space, DiffHDR leverages spatio-temporal generative priors from a pretrained video diffusion model to synthesize plausible HDR radiance in over- and underexposed regions while recovering the continuous scene radiance of the quantized pixels. Our framework further enables controllable LDR-to-HDR video conversion guided by text prompts or reference images. To address the scarcity of paired HDR video data, we develop a pipeline that synthesizes high-quality HDR video training data from static HDRI maps. Extensive experiments demonstrate that DiffHDR significantly outperforms state-of-the-art approaches in radiance fidelity and temporal stability, producing realistic HDR videos with considerable latitude for re-exposure.",
+      "analysis": {
+        "key_results": "实验表明，DiffHDR在辐射度保真度和时间稳定性上显著优于现有方法，能够生成具有足够重新曝光宽容度的逼真HDR视频。",
+        "limitations": "摘要未说明",
+        "main_contribution": "将LDR到HDR视频转换表述为视频扩散模型潜在空间中的生成式辐射度修复，并实现了可控的文本或参考图像引导转换，以及构建了高质量HDR视频训练数据合成流程。",
+        "method": "在Log-Gamma色彩空间中使用预训练视频扩散模型的时空生成先验，进行潜在空间辐射度修复，并通过文本或参考图像引导实现可控转换，同时利用静态HDRI地图合成配对HDR视频训练数据。",
+        "one_sentence_summary": "DiffHDR提出将LDR到HDR视频转换建模为视频扩散模型潜在空间中的辐射度修复任务，以恢复过曝和欠曝区域的真实细节。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文专注于低动态范围到高动态范围视频的转换，利用扩散模型提高图像质量，与VLA（视觉语言动作）和WAM（世界动作模型）无直接关系，但所涉及的量化与高效推理技术可能对机器人策略中的图像处理效率有间接参考价值。",
+        "relevance_score": 6,
+        "tags": [
+          "Video Generation",
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.AI",
+        "cs.GR"
+      ],
+      "arxiv_id": "2604.06161",
+      "authors": [
+        "Zhengming Yu",
+        "Li Ma",
+        "Mingming He",
+        "Leo Isikdogan",
+        "Yuancheng Xu",
+        "Dmitriy Smirnov",
+        "Pablo Salamanca",
+        "Dao Mi",
+        "Pablo Delgado",
+        "Ning Yu",
+        "Julien Philip",
+        "Xin Li",
+        "Wenping Wang",
+        "Paul Debevec"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-02T00:46:56.358051Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2604.06161/v3/fig1-panel1.png"
+            ],
+            "caption": "DiffHDR reconstructs lost radiance to convert LDR videos into faithful HDR while maintaining temporal coherence (Top). DiffHDR further enables controllable HDR synthesis guided by text prompts or reference images, facilitating realistic hallucination of saturated regions (Bottom).",
+            "image_urls": [
+              "https://arxiv.org/html/2604.06161v3/teaser_v4.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2604.06161v3#S0.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2604.06161/v3/fig2-panel1.png"
+            ],
+            "caption": "Framework of DiffHDR. Given an input LDR video, we first detect its clipped regions and map it into the proposed Log-Gamma color space. A finetuned video diffusion model reconstructs missing radiance in over- and underexposed regions. A mask detector and context-focused prompting module support controllable detail synthesis. The final output HDR video supports faithful re-exposure, accurate reproduction on HDR displays, and flexible post-production workflows.",
+            "image_urls": [
+              "https://arxiv.org/html/2604.06161v3/pipeline_v4.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2604.06161v3#S2.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2604.06161v3",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-02T00:46:56.358051Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-04-07T17:56:18Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2604.06161",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2604.06161",
+        "project_url": "https://eyeline-labs.github.io/DiffHDR/"
+      },
+      "title": "DiffHDR: Re-Exposing LDR Videos with Video Diffusion Models",
+      "title_zh": "DiffHDR：利用视频扩散模型重新曝光LDR视频",
+      "updated_at": "2026-08-31T22:30:56Z",
+      "version": 3
+    },
+    {
       "abstract": "Colorectal cancer screening critically depends on colonoscopy, yet existing platforms offer limited support for systematically studying the coupled dynamics of operator control, instrument motion, and visual feedback. This gap restricts reproducible closed-loop research in robotic colonoscopy, medical imaging, and emerging vision-language-action (VLA) learning paradigms. To address this challenge, we present OpenRC, an open-source modular robotic colonoscopy framework that retrofits conventional scopes while preserving clinical workflow. The framework supports simultaneous recording of video, operator commands, actuation state, and distal tip pose. We experimentally validated motion consistency and quantified cross-modal latency across sensing streams. Using this platform, we collected a multimodal dataset comprising 1,894 teleoperated episodes ~19 hours across 10 structured task variations of routine navigation, failure events, and recovery behaviors. By unifying open hardware and an aligned multimodal dataset, OpenRC provides a reproducible foundation for research in multimodal robotic colonoscopy and surgical autonomy. Both the hardware design and dataset are available at https://github.com/artslab2019/openrc-robotic-colonoscopy. The dataset has been contributed to the Open-H-Embodiment Initiative by NVIDIA.",
       "analysis": {
         "key_results": "实验验证了运动一致性并量化了跨模态延迟；数据集包含1894个遥操作片段、约19小时，覆盖10种结构化任务变体（常规导航、失败事件和恢复行为）。",
@@ -1808,7 +1904,7 @@
         "checked_at": "2026-08-13T05:41:39.833674Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2604.02047v2",
-        "recovery_checked_at": "2026-08-31T10:39:51.503573Z",
+        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -1923,22 +2019,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 55,
-    "completion_tokens": 12164,
+    "cache_hits": 83,
+    "completion_tokens": 7138,
     "error_categories": {
-      "ValidationError": 2
+      "ValidationError": 1
     },
-    "failed": 2,
-    "fetched": 1478,
-    "figure_available": 65,
-    "figure_cache_hits": 45,
+    "failed": 1,
+    "fetched": 1739,
+    "figure_available": 80,
+    "figure_cache_hits": 68,
     "figure_failed": 0,
-    "figure_requests": 32,
-    "figure_unavailable": 12,
-    "model_calls": 40,
-    "prefiltered": 95,
-    "prompt_tokens": 33303,
-    "published": 77,
-    "total_tokens": 45467
+    "figure_requests": 21,
+    "figure_unavailable": 9,
+    "model_calls": 23,
+    "prefiltered": 106,
+    "prompt_tokens": 19722,
+    "published": 89,
+    "total_tokens": 26860
   }
 }

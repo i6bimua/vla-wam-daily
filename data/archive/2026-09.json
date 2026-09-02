@@ -1,0 +1,430 @@
+{
+  "generated_at": "2026-09-02T00:46:56.358051Z",
+  "papers": [
+    {
+      "abstract": "Action chunking is a standard execution strategy in modern Vision-Language-Action (VLA) frameworks, but fixed execution horizons impose a trade-off between efficiency and accuracy. Short chunks require frequent inference and may cause oscillatory behavior, whereas long chunks can become misaligned with newly observed states. We address this limitation with an adaptive action chunking approach based on internal cross-attention dynamics in the action expert. We observe that, as the prediction horizon extends, action-to-observation cross-attention becomes increasingly dispersed and its entropy rises toward a plateau. This pattern is associated with higher action prediction error and provides an online signal that the current observation offers limited grounding for further open-loop execution. Based on this observation, we introduce a training-free truncation mechanism that detects sustained high-entropy plateaus and dynamically selects the execution horizon during inference. The method uses attention weights already computed by the policy and introduces negligible additional overhead. Evaluations on $\\pi_{0.5}$ and X-VLA across RoboTwin 2.0, LIBERO, and three real-world manipulation tasks show improved average task success over fixed-horizon and adaptive chunking baselines, while preserving efficient closed-loop control. These results show that cross-attention dynamics can provide a practical internal signal for adaptive action execution in VLAs.",
+      "analysis": {
+        "key_results": "在π0.5与X-VLA上，于RoboTwin 2.0、LIBERO和三个真实操作任务中，相比固定步长和自适应分块基线均提升了平均任务成功率，同时保持高效闭环控制。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出一种基于VLA内部交叉注意力动态的自适应动作分块方法，通过在线检测高熵平台实现训练无关的截断机制，无需额外训练即可动态选择执行步长。",
+        "method": "观察到动作-观测交叉注意力随预测步长增加而分散、熵上升至平台期，并据此设计训练无关的截断机制，利用策略本身计算的注意力权重在线选择执行步长。",
+        "one_sentence_summary": "提出一种基于VLA策略内部跨注意力熵增动态的训练无关自适应动作分块方法，以动态选择执行步长，避免固定步长导致的效率与精度权衡。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "本文直接针对VLA（Vision-Language-Action）框架的动作执行策略展开，通过分析VLA内部的交叉注意力动态提升动作预测的准确性与效率，对VLA主题具有核心相关性。",
+        "relevance_score": 10,
+        "tags": [
+          "Action Prediction",
+          "Robot Learning",
+          "Efficient Inference",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2609.00908",
+      "authors": [
+        "Runze Xu",
+        "Xiaolong Shan",
+        "Shuang Dai",
+        "Yu Wang",
+        "Jincheng Yu"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-02T00:46:56.358051Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2609.00908/v1/fig2-panel1.png"
+            ],
+            "caption": "Method Overview. Our framework dynamically determines action chunk sizes by monitoring the cross-attention entropy within the action expert. Conditioned on VLM states, the action expert identifies chunk boundaries by monitoring attention focus. This enables adaptive execution across task stages.",
+            "image_urls": [
+              "https://arxiv.org/html/2609.00908v1/fig1_v3.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2609.00908v1#S1.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2609.00908v1",
+        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_status": "not_found",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-02T00:46:56.358051Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-01T08:38:16Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.00908",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.00908",
+        "project_url": null
+      },
+      "title": "Knowing When to Stop: Adaptive Action Chunking via Internal Cross-Attention Dynamics in VLAs",
+      "title_zh": "知止：利用VLA内部交叉注意力动态实现自适应动作分块",
+      "updated_at": "2026-09-01T08:38:16Z",
+      "version": 1
+    },
+    {
+      "abstract": "As one of the most critical challenges in large language models, contextual faithfulness directly determines their reliability in knowledge-intensive applications. This task is particularly challenging as it requires balancing factual consistency with generation efficiency. Contrastive decoding methods require dual forward passes (with and without context) to compare model outputs, doubling inference computational overhead, while post-training alignment demands extensive reinforcement learning with substantial computational overhead. To address this challenge, we present \\textbf{SFAD}, a speculative decoding framework that enhances contextual faithfulness without inference degradation. We first construct \\textbf{ConFide}, a preference dataset with fine-grained atomic perturbations, to train a context-faithful draft model via Direct Preference Optimization. During inference, Epistemic Friction detects potential hallucinations by quantifying distributional tension weighted by specialist certainty. When friction exceeds the threshold, Asymmetric Logit Steering refines the target distribution through residual-based logit injection; otherwise, standard speculation proceeds. Extensive experiments demonstrate that SFAD substantially improves faithfulness while achieving $2.48\\times$ speedup, offering a practical solution for efficient LLMs.",
+      "analysis": {
+        "key_results": "SFAD显著提升忠实性并实现2.48倍加速。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出SFAD推测解码框架，在保证生成效率的同时提升大语言模型的上下文忠实性。",
+        "method": "构建ConFide偏好数据集训练忠实草稿模型；推理时使用Epistemic Friction检测潜在幻觉，并通过Asymmetric Logit Steering修正输出。",
+        "one_sentence_summary": "提出SFAD推测解码框架，通过偏好数据训练草稿模型和事实性检测与修正机制，在不降低推理速度的情况下提升上下文忠实性。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "本文研究的是大语言模型的推测解码与上下文忠实性，未涉及视觉语言动作模型或具身世界模型，与本网站主题无直接关系。",
+        "relevance_score": 8,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CL"
+      ],
+      "arxiv_id": "2609.00796",
+      "authors": [
+        "Guanqiao Chen",
+        "Di Wang",
+        "Lijie Hu"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-02T00:46:56.358051Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2609.00796/v1/fig1-panel1.png"
+            ],
+            "caption": "The ConFide pipeline for factuality-aware preference data construction.",
+            "image_urls": [
+              "https://arxiv.org/html/2609.00796v1/ConFide_framework.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2609.00796v1#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2609.00796/v1/fig2-panel1.png"
+            ],
+            "caption": "SFAD framework.",
+            "image_urls": [
+              "https://arxiv.org/html/2609.00796v1/Pipeline.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2609.00796v1#S1.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2609.00796v1",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:speculative-decoding",
+        "composite:speculative_generation",
+        "composite:draft_verification_decoding"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-02T00:46:56.358051Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-01T06:46:54Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.00796",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.00796",
+        "project_url": null
+      },
+      "title": "SFAD: Speculative Factuality-Aware Decoding",
+      "title_zh": "SFAD：面向上下文忠实性的推测事实感知解码",
+      "updated_at": "2026-09-01T06:46:54Z",
+      "version": 1
+    },
+    {
+      "abstract": "Many automobile and mobility companies deploy learned driving policies on embedded computers with limited memory and power. Pruning, knowledge distillation, and quantization are the standard methods to reduce the size and the inference cost of these policies. However, these methods are commonly assessed by aggregate numerical scores, and such scores may not reflect the ability of the policy to drive safely when interacting with other road users. In this study, we propose a stage-wise closed-loop evaluation approach to follow a driving policy through a compression pipeline. We formulate the driving task as a partially observable Markov decision process (POMDP) and train a belief-state policy with proximal policy optimization (PPO) in Gym-Duckietown. We then extract the actor, compress it one stage at a time, and evaluate it on five driving curricula. We show that structured pruning is the stage at which the driving capability is first lost. Meanwhile, distillation improves the pruned actor, but the improvement is limited by its rehearsal data. Integer quantization of the improved actor loses some of the curricula that require the vehicle to stop and then resume. Interestingly, the same procedure on the unpruned actor preserves all five curricula. Our study thus provides an empirical analysis aiming to answer the currently active discussions on how to accept a compressed driving policy, so as to achieve a safe and statistically reliable deployment of automated driving functions.",
+      "analysis": {
+        "key_results": "结构化剪枝首先导致驾驶能力丢失；蒸馏能改善剪枝后的actor但受限于其复述数据；整数量化进一步导致某些需要停车再起步的课程丢失；而对未剪枝actor进行相同量化保留了所有五个课程。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出一种分阶段闭环评估方法，跟踪驾驶策略在压缩流程中的能力损失与恢复情况。",
+        "method": "将驾驶任务建模为POMDP，使用PPO训练信念状态策略，随后依次进行结构化剪枝、蒸馏和整数量化，并在五个驾驶课程上闭环评估。",
+        "one_sentence_summary": "对驾驶策略在剪枝、蒸馏和量化压缩过程中进行分阶段闭环评估，揭示压缩各阶段对驾驶能力的影响。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "该研究聚焦于压缩驾驶策略的闭环评估，与VLA/WAM无直接关系，但其评估范式对机器人策略压缩的验证具有借鉴意义。",
+        "relevance_score": 6,
+        "tags": [
+          "Efficient Inference",
+          "Model Quantization",
+          "Evaluation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.AI",
+        "cs.CV"
+      ],
+      "arxiv_id": "2609.00718",
+      "authors": [
+        "Ahmad Alfan Alfian Irfan",
+        "Nur Ahmad Khatim",
+        "Mansur Arief"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-02T00:46:56.358051Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2609.00718/v1/fig1-panel1.png"
+            ],
+            "caption": "The five driving curricula rendering through onboard camera frames taken from evaluation rollouts in Gym-Duckietown.",
+            "image_urls": [
+              "https://arxiv.org/html/2609.00718v1/fig_task.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2609.00718v1#S3.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2609.00718/v1/fig2-panel1.png"
+            ],
+            "caption": "Overview of the study. Top: the driving policy is built in Gym-Duckietown, where YOLO and MobileNetV3-small measurements are fused by EKF-based belief updaters into a belief state, and a Belief-PPO actor-critic is trained through the five curricula. Bottom: the extracted actor moves through structured pruning, two distillation branches that differ only in rehearsal data, and three precision routes from the same checkpoint.",
+            "image_urls": [
+              "https://arxiv.org/html/2609.00718v1/fig_pipeline.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2609.00718v1#S4.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2609.00718v1",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:integer-quantization",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-02T00:46:56.358051Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-01T04:50:17Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.00718",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.00718",
+        "project_url": null
+      },
+      "title": "A Closed-Loop Evaluation of Capability Loss and Recovery in Compressed Driving Policies",
+      "title_zh": "压缩驾驶策略能力损失与恢复的闭环评估",
+      "updated_at": "2026-09-01T04:50:17Z",
+      "version": 1
+    },
+    {
+      "abstract": "Edge-AI model selection is commonly driven by one isolated metric - accuracy, latency, memory, energy, or safety, even though a deployable language model must balance all five. Our work focuses on answering the question whether na- tively trained small language models (SLMs) or large language models (LLMs) compressed through post-training quantization offer the more sustainable edge- deployment trade-off. We introduce a reproducible Holistic Sustainability Score (HSS) organized around the triple bottom line: an economic pillar for capability and systems efficiency, an environmental pillar for operational GPU energy and a social pillar for harmful-prompt robustness. Five BF16 SLMs and five LLMs under different quantization approaches - BF16, INT8, NF4 4-bit, GPTQ 4-bit, and GGUF Q4 produce 30 measured configurations. Capability is assessed on five zero-shot benchmarks; efficiency uses latency, throughput, peak VRAM and energy; and safety is approximated by attack success rate on five harmful prompts. Qwen3-30B-A3B/GGUF Q4 ranks first in the combined pool (93.38), followed by Mistral-Small-24B/GGUF Q4 (92.40), while Phi-4-mini/BF16 is the highest- ranked SLM in that pool (89.49). Thus, the hypothesis that native SLMs must be the most sustainable edge choice is not supported universally; optimized quantized LLMs can win overall, while SLMs remain competitive through lower resource demand. Quantization is a systems-level choice rather than a monotonic precision- efficiency trade-off and HSS remains relative to its comparison pool and proxy definitions.",
+      "analysis": {
+        "key_results": "Qwen3-30B-A3B/GGUF Q4 综合得分最高（93.38），其次是 Mistral-Small-24B/GGUF Q4（92.40），Phi-4-mini/BF16 是SLM中最高分（89.49）。原生SLM并非总是最可持续的边缘选择，量化LLM可整体胜出，SLM则在资源需求上保持竞争力。",
+        "limitations": "HSS 评分是相对于比较集和代理定义而言的。",
+        "main_contribution": "提出可复现的整体可持续性评分（HSS），从能力、效率、能耗和安全性四个维度系统评估了30种SLM与量化LLM配置的边缘部署表现。",
+        "method": "对5个BF16 SLM和5个LLM在不同量化方法（BF16、INT8、NF4 4-bit、GPTQ 4-bit、GGUF Q4）下生成30种配置，使用5个零样本基准测试能力，测量延迟、吞吐量、峰值显存和能耗，用5个有害提示的攻击成功率近似安全性。",
+        "one_sentence_summary": "通过综合经济、环境和社会三重底线指标，比较原生小型语言模型与量化后大语言模型在边缘部署下的可持续性优劣。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文专注于语言模型量化与边缘部署效率，不涉及VLA、WAM或机器人动作/世界建模；但其量化方法和评估框架对机器人策略模型的边缘部署效率优化有潜在参考价值。",
+        "relevance_score": 7,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.AI"
+      ],
+      "arxiv_id": "2609.00665",
+      "authors": [
+        "Jainil Dharmil Shah"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-02T00:46:56.358051Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2609.00665/v1/fig1-panel1.png"
+            ],
+            "caption": "Experimental design. Five BF16 SLMs are compared with five LLM families, each evaluated under five precision/backend cases. Every LLM-to-quantization connection denotes one measured configuration.",
+            "image_urls": [
+              "https://arxiv.org/html/2609.00665v1/figures/figure_1.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2609.00665v1#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2609.00665/v1/fig2-panel1.png"
+            ],
+            "caption": "Measured metrics. Capability, systems efficiency, operational energy and refusal behavior are retained separately before aggregation.",
+            "image_urls": [
+              "https://arxiv.org/html/2609.00665v1/figures/figure_2.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2609.00665v1#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2609.00665v1",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:post-training-quantization",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-02T00:46:56.358051Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-01T03:44:18Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.00665",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.00665",
+        "project_url": null
+      },
+      "title": "Triple-Bottom-Line Sustainability of Language Models for Edge AI: A Comparison Between SLMs and Quantized LLMs",
+      "title_zh": "边缘 AI 语言模型的三重底线可持续性：SLM 与量化 LLM 的比较",
+      "updated_at": "2026-09-01T03:44:18Z",
+      "version": 1
+    },
+    {
+      "abstract": "A multi-model language service must route each request while preserving workload-level budgets for compute, latency, memory, or monetary cost. Two features make this problem materially harder than static model selection. Prompt representations are high dimensional, so only a small subset of embedding directions may predict the incremental value of a model, and both the request mix and the model frontier drift after launches, fine-tunes, quantization changes, and system updates. We formulate nonstationary sparse contextual routing with multiple knapsack constraints and an optional shadow-audit stream that evaluates a small fraction of prompts on several models. We propose Drift-Aware Sparse Routing (DRS). The policy estimates reward and resource use from a rolling audit window, routes using pessimistic reward and optimistic cost estimates, updates resource shadow prices online, and applies a hard meter before commitment. The analysis separates control from statistics. On any event with uniform prediction radii $\\{\\beta_t\\}$, regret against a paced dynamic fluid benchmark is bounded by the sum of the radii, a capacity-buffer term, and an $O(\\sqrt{T})$ pacing term. Under a sparse linear model and bounded drift $V_T$, rolling estimation gives \\[ \\widetilde O\\left( T\\sqrt{\\frac{s}{\\rho W}}+WV_T+\\sqrt{T} \\right), \\] where $s$ is sparsity, $\\rho$ is the audit rate, and $W$ is the window length. Optimizing $W$ yields the usual stationary $O(\\sqrt{sT/\\rho})$ rate when $V_T=0$ and a $O(T^{2/3}(s/\\rho)^{1/3}V_T^{1/3})$ adaptation term under drift.",
+      "analysis": {
+        "key_results": "在动态流体基准下，遗憾界为半径总和、容量缓冲项和O(√T)节奏项；稀疏线性模型下为Õ(T√(s/ρW)+WV_T+√T)。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出Drift-Aware Sparse Routing (DRS)，一种在非平稳稀疏上下文和共享预算约束下进行多模型路由的策略，具有理论遗憾界。",
+        "method": "使用滚动审计窗口估计奖励和资源使用，基于悲观奖励和乐观成本估计路由，在线更新资源影子价格，并在决策前应用硬计量。",
+        "one_sentence_summary": "在多模型服务中，提出漂移感知的稀疏路由策略以在请求分布和模型前沿变化下维持资源预算约束。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文研究LLM服务中的模型路由，是一种高效推理方法，但不涉及VLA、WAM或机器人策略/世界模型，无直接关系。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Evaluation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.AI"
+      ],
+      "arxiv_id": "2609.00662",
+      "authors": [
+        "Cheung Hao Lee",
+        "Patrick Wong"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-02T00:46:56.358051Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2609.00662/v1/fig1-panel1.png"
+            ],
+            "caption": "Mean cumulative utility. Dashed vertical lines mark the two changes in task mix and model quality.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2609.00662v1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2609.00662/v1/fig2-panel1.png"
+            ],
+            "caption": "Mean utility per request in 150-request blocks. Rolling policies respond to the two changes; the frozen policy continues to route using first-regime relationships.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2609.00662v1"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2609.00662v1",
+        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-02T00:46:56.358051Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-01T03:39:59Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.00662",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.00662",
+        "project_url": null
+      },
+      "title": "Drift-Aware LLM Routing with Sparse Contexts and Shared Budgets",
+      "title_zh": "漂移感知的稀疏上下文与共享预算下的LLM路由",
+      "updated_at": "2026-09-01T03:39:59Z",
+      "version": 1
+    }
+  ],
+  "schema_version": "1",
+  "stats": {
+    "cache_hits": 83,
+    "completion_tokens": 7138,
+    "error_categories": {
+      "ValidationError": 1
+    },
+    "failed": 1,
+    "fetched": 1739,
+    "figure_available": 80,
+    "figure_cache_hits": 68,
+    "figure_failed": 0,
+    "figure_requests": 21,
+    "figure_unavailable": 9,
+    "model_calls": 23,
+    "prefiltered": 106,
+    "prompt_tokens": 19722,
+    "published": 89,
+    "total_tokens": 26860
+  }
+}
