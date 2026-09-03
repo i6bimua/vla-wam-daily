@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-02T08:32:22.297046Z",
+  "generated_at": "2026-09-03T00:55:04.046556Z",
   "papers": [
     {
       "abstract": "Behavior cloning with high-capacity generative policies achieves strong imitation performance, but is often limited by demonstration coverage and distribution shift. Direct reinforcement learning fine-tuning can improve performance, but updating large action decoders is frequently unstable and sample inefficient. We propose Lagrangian Perturbation Diffusion Steering (LP-DS), a lightweight adaptation method that improves a frozen generative policy by learning a compact noise-space perturbation before decoding. LP-DS optimizes this perturbation with a Lagrangian trust-region objective, improving downstream value while constraining deviation from the latent prior. Across RoboMimic manipulation, OpenAI Gym locomotion, and Adroit dexterous manipulation benchmarks, LP-DS improves sample efficiency, success, and return while maintaining higher action-space entropy than unconstrained noise-space steering, with return improvements of up to 25% over prior baselines. Additional evaluations with flow-matching backbones, a large vision-language-action model, and physical Franka deployment show that LP-DS is not limited to compact diffusion policies or simulated benchmarks. Project page: https://sites.google.com/view/lp-ds/home.",
@@ -1178,6 +1178,171 @@
       "version": 2
     },
     {
+      "abstract": "Zeroth-order (ZO) optimization removes backpropagation, but conventional implementations still create candidate states by mutating model weights and materialize updates through the full parameter state. We introduce Inference-Native ZO, which exposes ZO's query semantics and lowers candidate-state evaluation and mutable learning state to abstractions an inference runtime can execute directly. We formulate ZO as programmable gradient acquisition through candidate-state queries. Direction construction, candidate selection, observation, estimation, and update semantics form a query process whose model-facing primitive is candidate evaluation. We formalize the logical queries required by that process as a ProbePlan, leaving physical state realization and scheduling to the backend. Factorized side states, persistent-subspace reuse, lazy updates, and optional LoRA banks reduce state-management cost. The same formulation covers token-scoring/prefill queries and autoregressive generation while inheriting adapter dispatch, quantization, batching, parallelism, and scheduling from the runtime. A multivariate central-limit argument connects factorized perturbations to dense Gaussian ZO as rank grows. On OPT-13B, required inference queries account for 98.2% of an inference-native step at batch 64; in repeated batch-16 measurements, the complete step is 1.019x a matched-query control. State-transition DRAM traffic falls from 146.7 GB under dense mutation to 26 MB with persistent banked state. Packed PyTorch matches vLLM within 2.1% across the tested regimes, attributing the ragged-batch gain to padding elimination and variable-length packing. Foreground inference and ZO probes also execute in the same physical Qwen3-8B batches with zero observed output or objective deviation.",
+      "analysis": {
+        "key_results": "在 OPT-13B 上，批次大小为 64 时所需推理查询占推理原生步骤的 98.2%；批次大小为 16 时完整步骤为匹配查询控制的 1.019 倍；状态转换 DRAM 流量从密集变异的 146.7 GB 降至持久库状态的 26 MB；packed PyTorch 在测试场景下与 vLLM 相差 2.1% 以内。",
+        "limitations": "摘要未说明",
+        "main_contribution": "将零阶优化制定为可通过候选状态查询进行可编程梯度获取的方法，并引入 ProbePlan 形式化所需逻辑查询，使推理运行时可直接执行候选评估。",
+        "method": "通过方向构造、候选选择、观察、估计和更新等查询过程实现零阶优化，利用分解侧状态、持久子空间重用、惰性更新和可选 LoRA 组来降低状态管理成本，并整合推理运行时的量化、批处理和调度。",
+        "one_sentence_summary": "本文提出推理原生零阶优化方法，将零阶优化的查询语义与推理运行时的抽象相结合，以降低状态管理开销并集成量化、批处理等推理特性。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文专注于高效零阶优化与推理运行时的整合，属于模型量化与高效推理技术，未直接涉及视觉-语言-动作（VLA）或世界动作模型（WAM），但对机器人策略等大模型的参数高效微调或部署可能具有潜在方法价值。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Model Quantization"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG"
+      ],
+      "arxiv_id": "2605.28760",
+      "authors": [
+        "Zelin Li",
+        "Caiwen Ding"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-03T00:55:04.046556Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2605.28760/v2/fig1-panel1.png"
+            ],
+            "caption": "A query-centric view of ZO. Removing backward exposes update-signal acquisition as explicit candidate queries. Algorithmic semantics specify what must be evaluated; the execution layer realizes equivalent candidates and returns observations.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2605.28760v2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2605.28760v2",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-03T00:55:04.046556Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-05-27T17:19:19Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2605.28760",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2605.28760",
+        "project_url": null
+      },
+      "title": "Inference-Native Zeroth-Order Optimization",
+      "title_zh": "推理原生零阶优化",
+      "updated_at": "2026-09-01T18:51:03Z",
+      "version": 2
+    },
+    {
+      "abstract": "Vision-Language-Action (VLA) models are increasingly expected to not only complete robot tasks, but also follow human instructions about how those tasks should be executed. However, existing robot datasets usually pair trajectories with coarse goal-level language, leaving execution-critical details such as active arm, approach direction, and contact region unspecified. This limits steerable policy learning and robotic video understanding. We introduce FineVLA, an open framework for action-aligned fine-grained VLA supervision. The framework includes: (1) a data construction tool that unifies 972,247 trajectories across 85K tasks from 10 open-source robot datasets and builds FineVLA-Data, a human-verified dataset of 47,159 fine-grained trajectories; (2) a held-out benchmark with 500 videos, 11,631 atomic facts, and 1,030 VQA questions; (3) a robotics-specialized VLM annotator for scalable fine-grained annotation; and (4) a steerable VLA policy trained with controlled mixtures of fine-grained and raw goal-level instructions. Our experiments yield three findings. First, fine-grained supervision does not sacrifice goal-level success: FG-only improves over Raw-only by +1.4 to +8.1 success-rate points across settings. Second, fine-grained and raw instructions are complementary, following a consistent inverted-U trend peaking at FG:Raw = 1:2 to 1:1. The best mixed setting reaches 86.8%/82.5% in RoboTwin simulation and 62.7/100 in real-world dual-arm manipulation (vs. 49.9 Raw-only). Third, fine-grained supervision improves steerable control: the largest real-world gains appear on pose (+23), color (+18), and approach direction (+18)--factors where goal-level instructions provide no guidance. Overall, fine-grained language should augment goal-level instructions: specifying how to execute alongside what to achieve. Project page: https://finevla.xlang.ai/",
+      "analysis": {
+        "key_results": "细粒度监督不牺牲目标级成功率（提升1.4~8.1个百分点）；细粒度与原始指令互补，最佳混合比例（1:2到1:1）在RoboTwin模拟达到86.8%/82.5%，真实双臂操作达到62.7/100（原始仅49.9）；细粒度监督在姿态(+23)、颜色(+18)、接近方向(+18)上提升最大。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出FineVLA框架，包括数据构建工具、细粒度数据集FineVLA-Data、评测基准和可操控VLA策略，并证明细粒度监督与目标级指令的互补性。",
+        "method": "构建动作对齐的细粒度VLA监督框架：统一多源机器人轨迹，利用机器人专用VLM标注器生成细粒度语言，训练可操控VLA策略，并混合细粒度与原始目标级指令。",
+        "one_sentence_summary": "该论文提出FineVLA框架，通过细粒度指令对齐提升VLA策略的可操控性，并构建数据集、基准和策略来验证细粒度监督的有效性。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "本文直接聚焦VLA策略的细粒度指令对齐，提升机器人操控的可控性和成功率的，属于VLA核心研究方向，与WAM无直接关系。",
+        "relevance_score": 9,
+        "tags": [
+          "Vision-Language",
+          "Policy Learning",
+          "Robot Manipulation",
+          "Evaluation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.AI"
+      ],
+      "arxiv_id": "2605.27284",
+      "authors": [
+        "Xintong Hu",
+        "Xuhong Huang",
+        "Jinyu Zhang",
+        "Yutong Yao",
+        "Yuchong Sun",
+        "Qiuyue Wang",
+        "Mingsheng Li",
+        "Sicheng Xie",
+        "Yitao Liu",
+        "Junhao Chen",
+        "Yixuan Chen",
+        "Yingming Zheng",
+        "Shuai Bai",
+        "Tao Yu"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-03T00:55:04.046556Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2605.27284/v3/fig1-panel1.png"
+            ],
+            "caption": "Overview of FineVLA. FineVLA builds a closed loop for action-instruction alignment, connecting fine-grained data construction, robotic video understanding, scalable annotation, and steerable VLA policy learning. Left : FineVLA-Tool unifies heterogeneous robot trajectories from 10 open-source datasets, removes redundant demonstrations through clustering and sampling, and annotates representative trajectories with action-aligned descriptions across ten fine-grained dimensions. The resulting FineVLA-Data supports both RoboFine-Bench, which evaluates fine-grained robotic video understanding through Grounding VQA, Reasoning VQA, and Caption Evaluation, and RoboFine-VLM, a robotics-specialized VLM trained as a scalable annotator for new trajectories. Right : FineVLA-Policy is trained with mixtures of raw goal-level instructions and fine-grained process-level instructions under two action-decoding architectures, and is evaluated in both RoboTwin simulation and real-world dual-arm manipulation. The steerable-control examples illustrate how fine-grained language specifies execution-sensitive factors such as contact region, target object, active actor, trajectory and orientation, and failure recovery.",
+            "image_urls": [
+              "https://arxiv.org/html/2605.27284v3/main.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.27284v3#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2605.27284/v3/fig2-panel1.png"
+            ],
+            "caption": "Pipeline of FineVLA-Tool. FineVLA-Tool converts large-scale heterogeneous robot demonstrations into action-aligned fine-grained instruction data through four stages. Stage 1 : raw trajectories from 10 open-source robot datasets are converted into a unified LeRobot-style format and filtered to remove invalid videos. Stage 2 : action and state representations are canonicalized across embodiments, and an action-state consistency quality gate removes corrupted or inconsistent trajectories. Stage 3 : dynamic time warping (DTW)-based similarity computation and clustering identify representative trajectories, reducing redundancy while preserving diverse manipulation strategies. Stage 4 : selected trajectories are decomposed into step-level descriptions and annotated with a ten-dimensional fine-grained schema, followed by human verification. The resulting FineVLA-Data provides human-verified, process-level supervision for training RoboFine-VLM as a scalable annotator and FineVLA-Policy as a steerable VLA policy.",
+            "image_urls": [
+              "https://arxiv.org/html/2605.27284v3/Tool.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.27284v3#S2.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2605.27284v3",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-03T00:55:04.046556Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-05-26T17:01:10Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2605.27284",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2605.27284",
+        "project_url": "https://finevla.xlang.ai/"
+      },
+      "title": "FineVLA: Fine-Grained Instruction Alignment for Steerable Vision-Language-Action Policies",
+      "title_zh": "FineVLA：面向可操控VLA策略的细粒度指令对齐",
+      "updated_at": "2026-09-02T11:34:07Z",
+      "version": 3
+    },
+    {
       "abstract": "Vision-Language-Action (VLA) models provide a promising foundation for general-purpose robotics, yet their real-world deployment demands the ability to continually acquire new skills without forgetting prior ones. While recent studies have explored continual learning for VLA models in simulated settings, the challenge remains largely unexamined under realistic physical conditions. To bridge this gap, we construct a real-world continual learning benchmark comprising ten diverse sequential manipulation tasks across both single-arm and bimanual configurations. Through extensive experiments on this benchmark, we find that naive sequential fine-tuning leads to severe catastrophic forgetting, whereas a well-configured experience replay (ER) approach can effectively mitigate forgetting and outperform joint multi-task training under equivalent computational budgets. Notably, by synthesizing our empirical findings, we successfully achieve stable continual learning across the full 10-task heterogeneous stream, retaining previously acquired capabilities while adapting to diverse new skills in real-world deployment. This work presents an empirical study grounded in real-world continual VLA learning and offers actionable insights for deploying robust, long-lived robotic policies.",
       "analysis": {
         "key_results": "简单序贯微调导致严重灾难性遗忘；精心配置的经验回放在同等计算预算下优于联合多任务训练，成功实现跨十个异构任务流的稳定持续学习。",
@@ -1752,7 +1917,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2605.22164v2",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -2190,7 +2355,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2605.18475v2",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -2808,7 +2973,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2605.11222v2",
-        "recovery_checked_at": "2026-09-01T09:18:38.735227Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -3560,22 +3725,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 95,
-    "completion_tokens": 9058,
+    "cache_hits": 89,
+    "completion_tokens": 12504,
     "error_categories": {
       "ValidationError": 1
     },
     "failed": 1,
-    "fetched": 2006,
-    "figure_available": 89,
-    "figure_cache_hits": 76,
+    "fetched": 2212,
+    "figure_available": 94,
+    "figure_cache_hits": 70,
     "figure_failed": 0,
-    "figure_requests": 24,
-    "figure_unavailable": 11,
-    "model_calls": 28,
-    "prefiltered": 123,
-    "prompt_tokens": 24060,
-    "published": 100,
-    "total_tokens": 33118
+    "figure_requests": 32,
+    "figure_unavailable": 8,
+    "model_calls": 38,
+    "prefiltered": 127,
+    "prompt_tokens": 33280,
+    "published": 102,
+    "total_tokens": 45784
   }
 }

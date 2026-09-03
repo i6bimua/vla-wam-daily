@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-02T08:32:22.297046Z",
+  "generated_at": "2026-09-03T00:55:04.046556Z",
   "papers": [
     {
       "abstract": "Large language models (LLMs) are being used as policies for autonomous decision-making and planning in many domains. Despite their strong reasoning capabilities, LLMs struggle with long-horizon tasks, especially under partial observability. World models are a promising way to enhance policy performance, both during training and inference. During inference, agents currently use world models to simulate the consequences of candidate actions before committing to an action, which can improve decision-making. However, we argue that simulation alone is an incomplete interface for decision-making under partial observability: simulation doesn't adequately capture uncertainty about the current state, which agents may need for accurate decision-making. We address this limitation with Belief-Based World Models (BB-WMs), which model and maintain a belief that LLMs can query to access information on what is known and uncertain about the current state. Before developing methods to learn accurate BB-WMs, we first ask a more fundamental question: does exposing a world model's belief directly to an LLM policy improve decision-making? Our results show that giving LLM agents access to world model beliefs improves task performance under partial observability, while remaining complementary to existing simulation-based world models. Code is released at https://github.com/skumar-ml/belief-world-models.",
@@ -149,7 +149,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2609.00450v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -266,6 +266,93 @@
       "title_zh": "视觉不是负担：用于视觉语言模型无损推测解码的一次性块草稿生成",
       "updated_at": "2026-08-31T20:50:35Z",
       "version": 1
+    },
+    {
+      "abstract": "Weight-only post-training quantization (PTQ) can alleviate the computational burden of serving large language models (LLMs) at scale. However, existing PTQ methods often fail to generalize across models and suffer severe accuracy loss below 2 bits. Many leverage unstructured sparsity to mitigate this loss, but at the cost of regularity and GPU-friendly execution. We present QTEA, a sub-2-bit PTQ framework that quantizes weights into ternary values and uses salient weights as residual error compensators. To maintain hardware efficiency, residuals are assigned to selected columns with semi-structured $1:4$ sparsity within the salient columns. We further add column-wise rescale refinement to GPTQ-style column-by-column quantization, alternately updating per-column scales and ternary assignments to reduce reconstruction error. We also identify order-dependent error propagation in GPTQ and introduce error decay to attenuate late-stage error accumulation. On Qwen3-14B, QTEA compresses all weights to an effective 1.7 bits per weight while improving average accuracy over the strongest ternary PTQ baseline by 16.7%. It also achieves 1.40$\\times$ and 2.61$\\times$ lower perplexity on WikiText and C4 respectively. This trend holds on Llama3-8B, where QTEA obtains a 6.6% accuracy gain and 1.34$\\times$ / 1.95$\\times$ lower perplexity on the same datasets. Finally, we develop a lookup-table based kernel that achieves 7.2$\\times$ faster per-token generation over an FP16 baseline. Code is available at https://github.com/Intelligent-Microsystems-Lab/QTEA.",
+      "analysis": {
+        "key_results": "在 Qwen3-14B 上平均精度比最强三元PTQ基线提高16.7%，在 WikiText 和 C4 上困惑度分别降低1.40倍和2.61倍；在 Llama3-8B 上精度提升6.6%，困惑度分别降低1.34倍和1.95倍；开发的查找表内核比 FP16 基线加速7.2倍。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出 QTEA 框架，将权重量化为三元值，并利用显著权重的结构化稀疏残差补偿误差，结合逐列缩放细化与误差衰减机制，在低于2比特下保持大语言模型精度。",
+        "method": "权重三元量化，结合1:4半结构化稀疏的显著列残差补偿，采用GPTQ风格的逐列量化并交替更新每列缩放和三元赋值，引入误差衰减抑制误差传播。",
+        "one_sentence_summary": "QTEA 提出了一种权重三元量化与稀疏残差补偿相结合的低于2比特的LLM量化后训练方法。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "该论文专注于大语言模型的权重后训练量化，属于独立的模型量化效率研究，未涉及视觉-语言-动作（VLA）模型、世界模型或机器人动作预测，因此与本站点主题无直接关系，但其量化方法对后续在机器人VLA模型上的应用具有参考价值。",
+        "relevance_score": 8,
+        "tags": [
+          "Efficient Inference",
+          "Model Quantization"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "arxiv_id": "2609.00224",
+      "authors": [
+        "Yipin Guo",
+        "Arun M George",
+        "Jie Fu",
+        "Tareq Mahmoud",
+        "Sixue Xing",
+        "Siddharth Joshi"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-03T00:55:04.046556Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2609.00224/v2/fig1-panel1.png"
+            ],
+            "caption": "WikiText2 perplexity comparison across Qwen3 model sizes. Results with perplexity greater than 100 are omitted.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2609.00224v2"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2609.00224/v2/fig2-panel1.png"
+            ],
+            "caption": "Overview of QTEA. We employ Column-Semi Sparse Salient to enhance quantization robustness while maintaining equivalent overhead; utilize Rescale Refinement to boost the representational power of ternary weights; apply Error Decay to mitigate the issue of uneven error propagation during column-wise quantization; and finally, construct an efficient computational kernel to accelerate inference.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2609.00224v2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2609.00224v2",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:post-training-quantization",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-03T00:55:04.046556Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-08-31T18:33:36Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.00224",
+        "code_url": "https://github.com/Intelligent-Microsystems-Lab/QTEA",
+        "pdf_url": "https://arxiv.org/pdf/2609.00224",
+        "project_url": null
+      },
+      "title": "QTEA: Ternary LLMs with Sparse Residual Salient Weight and By-Column Optimization",
+      "title_zh": "QTEA：基于稀疏残差显著权重的三元大语言模型量化框架",
+      "updated_at": "2026-09-02T07:12:48Z",
+      "version": 2
     },
     {
       "abstract": "Weight-only post-training quantization (PTQ) can alleviate the computational burden of serving large language models (LLMs) at scale. However, existing PTQ methods often fail to generalize across models and suffer severe accuracy loss below 2 bits. Many leverage unstructured sparsity to mitigate this loss, but at the cost of regularity and GPU-friendly execution. We present QTEA, a sub-2-bit PTQ framework that quantizes weights into ternary values and uses salient weights as residual error compensators. To maintain hardware efficiency, residuals are assigned to selected columns with semi-structured \\(1{:}4\\) sparsity within the salient columns. We further add column-wise rescale refinement to GPTQ-style column-by-column quantization, alternately updating per-column scales and ternary assignments to reduce reconstruction error. We also identify order-dependent error propagation in GPTQ and introduce error decay to attenuate late-stage error accumulation. On Qwen3-14B, QTEA compresses all weights to an effective 1.7 bits per weight while improving average accuracy over the strongest ternary PTQ baseline by 16.7\\%. It also achieves 1.40\\(\\times\\) and 2.61\\(\\times\\) lower perplexity on WikiText and C4 respectively. This trend holds on Llama3-8B, where QTEA obtains a 6.6\\% accuracy gain and 1.34\\(\\times\\)/1.95\\(\\times\\) lower perplexity on the same datasets. Finally, we develop a lookup-table based kernel that achieves 7.2\\(\\times\\) faster per-token generation over an FP16 baseline. Code is available at https://github.com/Intelligent-Microsystems-Lab/QTEA.",
@@ -418,7 +505,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2609.00188v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -912,10 +999,10 @@
         "Dean F. Hougen"
       ],
       "figure_gallery": {
-        "checked_at": "2026-09-01T09:15:42.159658Z",
+        "checked_at": "2026-09-03T00:55:04.046556Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.30996v1",
-        "recovery_checked_at": "2026-09-01T09:18:38.735227Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -1094,7 +1181,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.30935v1",
-        "recovery_checked_at": "2026-09-01T09:18:38.735227Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -1555,6 +1642,90 @@
       "version": 1
     },
     {
+      "abstract": "Multimodal models often build on architectures designed for generative vision-language modeling, typically combining separately pretrained vision encoders with causal language models. Visual document retrievers such as ColPali repurpose these models as encoders, carrying over the parameter and compute overhead of a VLM for a non-generative task. We introduce NeoMME, a family of 260M and 800M-parameter Multimodal and Multilingual bidirectional Encoders that process multilingual text and raw image patches in a single bidirectional Transformer encoder. Both models are pretrained from scratch with a masked discrete-diffusion text objective, conditioned on visible image patches for multimodal examples. Both support a 16,384-token context, enough to encode up to two standard 4K UHD images. To demonstrate its downstream capabilities, we fine-tune NeoMME with jointly trained dense and late-interaction heads. On the ViDoRe v3 benchmark, the resulting NeoMME-Retriever 260M outperforms all evaluated models strictly below 800M parameters with 0.523 nDCG@10, while NeoMME-Retriever 800M reaches 0.556. At a matched 2048x2048 image input size on an NVIDIA L40S, NeoMME-260M encodes pages with about 2x the throughput of ColModernVBERT. Hierarchical token pooling and asymmetric quantization compress late-interaction multimodal document embeddings by 255x while preserving over 95% of baseline nDCG@10. We contribute NeoMME to Hugging Face Transformers and release the pretrained backbone and retrieval-compatible checkpoints under Apache 2.0 at https://hf.co/collections/Hcompany/neomme.",
+      "analysis": {
+        "key_results": "NeoMME-Retriever 260M在ViDoRe v3上nDCG@10为0.523，800M达到0.556；在2048x2048输入下吞吐量约为ColModernVBERT的2倍；量化后压缩255倍并保留超过95%的基线nDCG@10。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出NeoMME系列（260M/800M参数），一种单塔多模态多语言基础编码器，并在检索微调中通过层级池化和不对称量化压缩嵌入。",
+        "method": "采用掩码离散扩散文本目标，从零预训练双向Transformer编码器；检索微调使用联合训练的稠密与后期交互头，并使用层级token池化和不对称量化。",
+        "one_sentence_summary": "本文提出多模态多语言双向编码器NeoMME，通过从零预训练与层级池化和不对称量化，实现高效文档检索。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "该工作聚焦多模态检索编码器的高效推理与量化，不涉及VLA或世界模型，但与视觉-语言模型压缩和高效推理有间接关联。",
+        "relevance_score": 6,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.IR",
+        "cs.AI",
+        "cs.CV"
+      ],
+      "arxiv_id": "2609.01657",
+      "authors": [
+        "Aur\\'elien Lac",
+        "Tony Wu"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-03T00:55:04.046556Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2609.01657/v1/fig1-panel1.png"
+            ],
+            "caption": "Unlike dual-tower and VLM encoders,",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2609.01657v1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2609.01657/v1/fig2-panel1.png"
+            ],
+            "caption": "Dynamic-resolution image processing with a variable side-length cap.",
+            "image_urls": [
+              "https://arxiv.org/html/2609.01657v1/dynamic-resolution.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2609.01657v1#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2609.01657v1",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-03T00:55:04.046556Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-08-31T13:08:15Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.01657",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.01657",
+        "project_url": "https://hf.co/collections/Hcompany/neomme"
+      },
+      "title": "NeoMME: A Single-Tower Multimodal-Native Multilingual Foundation Encoder for Efficient Fine-Tuning and Inference",
+      "title_zh": "NeoMME：单塔多模态原生多语言基础编码器，面向高效微调与推理",
+      "updated_at": "2026-08-31T13:08:15Z",
+      "version": 1
+    },
+    {
       "abstract": "Recent vision-language-action (VLA) methods improve manipulation performance by aligning their representations with 3D scene geometry. However, these methods often struggle with long-horizon manipulation and observation aliasing between visually similar states due to a lack of temporal information: the 3D scene geometry captures only the current state, rather than how it has evolved over time. To resolve this, we present Temporal Forcing, a 4D representation alignment method for VLA models. Specifically, we first introduce a history pathway that enables a vanilla VLA model to summarize observation history into temporally aware latent representations. Then, the latent representations are aligned with the geometric features extracted by a pretrained 4D foundation model, which captures the evolving 3D world through temporally consistent geometric representations, enabling a deeper understanding of dynamic environments. Temporal Forcing reaches 98.8% on LIBERO, outperforming its base model by 2.2 points. On a physical hidden-placement task, it raises full-task success from 20.0% to 43.3%. Code will be publicly available.",
       "analysis": {
         "key_results": "在LIBERO上达到98.8%，比基础模型提高2.2个百分点；在物理隐藏放置任务中，全任务成功率从20.0%提升至43.3%。",
@@ -1687,7 +1858,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.30564v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1897,6 +2068,88 @@
     {
       "abstract": "For provenance research and art market studies, auction catalogs are an essential resource to trace specific objects over time and space. While historical auction catalogs follow established domain conventions, their internal formatting remains highly variable, and their large-scale analysis is currently restricted by the lack of machine-readable representations of the auction lots. We propose a pipeline to automatically extract structured lot-level metadata from German Sales, a large database of historical auction and sales catalogs from the 19th and 20th centuries. Using a manually annotated test set of representative catalog pages, we evaluate Vision-Language Models (VLMs) under varying prompt strategies and constrained decoding frameworks. To reflect the practical constraints faced by cultural heritage institutions, including budget, compute resources, and data privacy requirements, we benchmark the methods across different deployment modes ranging from commercial providers to locally hosted, quantized models. We find that commercial endpoints establish the performance ceiling, while institutional gateways offer a viable, privacy-preserving alternative. Local deployments remain feasible, but strictly require enforcing the output structure during generation to guarantee a valid JSON format. While varying degrees of human-in-the-loop correction are still necessary, this work demonstrates that a VLM-based pipeline can successfully unlock historical auction catalogs for large-scale automated analysis.",
       "analysis": {
+        "key_results": "商业API性能最高，机构网关可作为保护隐私的可行替代方案；本地量化模型需在生成过程中强制结构约束才能输出有效JSON。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出了一条从历史拍卖目录中自动提取结构化批次元数据的管道，并对视觉语言模型在不同部署模式（商业API、机构网关、本地量化模型）下进行了基准评测。",
+        "method": "使用视觉语言模型（VLMs），结合不同的提示策略和约束解码框架，在手动标注的拍卖目录页面测试集上进行评估。",
+        "one_sentence_summary": "本文提出一种从历史艺术品拍卖目录中自动提取结构化批次元数据的管道，并系统评估了不同部署模式下视觉语言模型的表现。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文不涉及机器人或VLA/WAM，但与本站关注的模型量化效率主题相关：论文在文化机构资源受限场景下评估了本地量化VLM的可行性，对本站量化技术在通用视觉语言模型上的实践有间接参考价值。",
+        "relevance_score": 6,
+        "tags": [
+          "Vision-Language",
+          "Model Quantization",
+          "Evaluation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.AI",
+        "cs.CL",
+        "cs.DL"
+      ],
+      "arxiv_id": "2608.30510",
+      "authors": [
+        "Mathias Zinnen",
+        "Alisha Mund",
+        "Sabine Lang",
+        "Lukas H\\\"uttner",
+        "Thomas Gorges",
+        "Vincent Christlein"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-03T00:55:04.046556Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2608.30510/v2/fig2-panel1.png",
+              "/figures/2608.30510/v2/fig2-panel2.png",
+              "/figures/2608.30510/v2/fig2-panel3.png",
+              "/figures/2608.30510/v2/fig2-panel4.png"
+            ],
+            "caption": "Overview of the diversity in our test corpus. The figure displays representative pages from the five evaluated auction catalogs and illustrates visual variations regarding format and object type. Pages marked with \"art\" contain lots that would traditionally be considered \"artworks\", such as paintings, drawings, prints, and sculptures. The category \"mixed\" also includes objects such as furniture or vases. Catalog samples from [ 16 ] .",
+            "image_urls": [
+              "https://arxiv.org/html/2608.30510v2/1908_p7.png",
+              "https://arxiv.org/html/2608.30510v2/1909_p5.png",
+              "https://arxiv.org/html/2608.30510v2/1932_p5.png",
+              "https://arxiv.org/html/2608.30510v2/1935_p15.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2608.30510v2#S2.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2608.30510v2",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
+        "recovery_status": "not_found",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-03T00:55:04.046556Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-08-31T09:44:15Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2608.30510",
+        "code_url": "https://github.com/mathiaszinnen/auction-lot-extraction",
+        "pdf_url": "https://arxiv.org/pdf/2608.30510",
+        "project_url": null
+      },
+      "title": "Lot Machine: Multimodal Lot Extraction from Auction Catalogs",
+      "title_zh": "拍卖目录多模态批次信息提取管道",
+      "updated_at": "2026-09-01T20:07:28Z",
+      "version": 2
+    },
+    {
+      "abstract": "For provenance research and art market studies, auction catalogs are an essential resource to trace specific objects over time and space. While historical auction catalogs follow established domain conventions, their internal formatting remains highly variable, and their large-scale analysis is currently restricted by the lack of machine-readable representations of the auction lots. We propose a pipeline to automatically extract structured lot-level metadata from German Sales, a large database of historical auction and sales catalogs from the 19th and 20th centuries. Using a manually annotated test set of representative catalog pages, we evaluate Vision-Language Models (VLMs) under varying prompt strategies and constrained decoding frameworks. To reflect the practical constraints faced by cultural heritage institutions, including budget, compute resources, and data privacy requirements, we benchmark the methods across different deployment modes ranging from commercial providers to locally hosted, quantized models. We find that commercial endpoints establish the performance ceiling, while institutional gateways offer a viable, privacy-preserving alternative. Local deployments remain feasible, but strictly require enforcing the output structure during generation to guarantee a valid JSON format. While varying degrees of human-in-the-loop correction are still necessary, this work demonstrates that a VLM-based pipeline can successfully unlock historical auction catalogs for large-scale automated analysis.",
+      "analysis": {
         "key_results": "商业端点性能最佳，机构网关提供可行的隐私保护替代方案，本地部署可行但必须通过生成过程中的输出结构强制来保证有效JSON格式。",
         "limitations": "不同程度的人机协同校正仍属必要。",
         "main_contribution": "提出一种从德国历史拍卖目录中自动提取结构化拍品级元数据的工作流程，并评估视觉语言模型在不同部署模式（商业端点、机构网关、本地量化模型）下的表现。",
@@ -1950,7 +2203,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.30510v1",
-        "recovery_checked_at": "2026-09-01T09:18:38.735227Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -2115,7 +2368,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.30428v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -2317,6 +2570,95 @@
       "title_zh": "TopGQ：利用拓扑信息的快速图神经网络后训练量化",
       "updated_at": "2026-08-31T07:49:03Z",
       "version": 1
+    },
+    {
+      "abstract": "Direct vision-language-action policies generate continuous robot actions efficiently, but standard behavior cloning leaves two complementary gaps: their representations are not explicitly required to describe how the scene evolves over multiple time scales, and deployment trajectories of unequal quality are often reused without separating useful dynamics from undesirable behavior. We introduce \\method, a direct world-action policy that combines outcome-agnostic predictive learning with outcome-aware policy improvement. \\method first retains a local fixed-offset JEPA objective and adds trajectory-relative multi-horizon transition alignment at 25%, 50%, 75%, and 100% of the remaining episode. These training-only targets require the current policy representation to preserve both local physical changes and longer-range task progress, without supplying explicit future tokens to the action head. \\method then trains an independent distributional value critic on cumulative deployment trajectories, computes action-chunk-aligned $N$-step advantages, and converts them into positive, negative, or null text conditions for a flow-matching actor. Thus, every valid trajectory can teach what physically happened, while the actor is deployed only under the condition associated with relatively better actions. The multi-horizon predictor and critic are removed from online execution, preserving direct action generation from the current observation, language instruction, and proprioception. \\redclaim{Across the three simulation benchmarks, \\method achieves the strongest overall performance while preserving the direct actor's online execution path.}",
+      "analysis": {
+        "key_results": "在三个模拟基准上，PAVE 实现了最强的整体性能，同时保持直接执行器的在线执行路径。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出 PAVE，一种结合结果无关预测学习与结果感知策略改进的直接世界-行动策略，能够在保持直接策略在线执行路径的同时获得最强整体性能。",
+        "method": "PAVE 结合局部固定偏移 JEPA 目标与多尺度过渡对齐（剩余回合的25%、50%、75%、100%），并训练独立分布式价值评论家，将计算出的动作块对齐N步优势转化为正、负或空文本条件来训练流匹配执行器。",
+        "one_sentence_summary": "PAVE 提出一种直接世界-行动策略，通过多尺度预测对齐和基于价值引导的行动条件进化来提升机器人策略性能。",
+        "primary_topic": "WAM",
+        "relation_to_vla_wam": "该论文直接针对视觉-语言-行动（VLA）策略与世界模型的结合，提出直接世界-行动策略，通过预测学习与价值引导改进动作生成，核心属于世界模型驱动的机器人策略学习。",
+        "relevance_score": 9,
+        "tags": [
+          "Policy Learning",
+          "Robot Learning",
+          "World Modeling",
+          "Robot Manipulation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.AI"
+      ],
+      "arxiv_id": "2608.30378",
+      "authors": [
+        "Botong Zhao",
+        "Fang Yu",
+        "Tim Yu",
+        "Senhua Zhu",
+        "Xinyuan Chen",
+        "Yue Lu"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-03T00:55:04.046556Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2608.30378/v2/fig1-panel1.png"
+            ],
+            "caption": "Conceptual positioning of Pave . Predictive correctness and behavioral desirability are complementary, while both auxiliary modules remain training-time or offline components.",
+            "image_urls": [
+              "https://arxiv.org/html/2608.30378v2/figures/Figure1.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2608.30378v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2608.30378/v2/fig2-panel1.png"
+            ],
+            "caption": "Overview of Pave . Multi-horizon current–future alignment supplies training-only predictive supervision, while the offline value branch converts accumulated trajectories into advantage text that is concatenated with the task. The deployed path retains only the current-observation predictor and flow-matching action expert.",
+            "image_urls": [
+              "https://arxiv.org/html/2608.30378v2/figures/method_overview_draft.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2608.30378v2#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2608.30378v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-03T00:55:04.046556Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-08-31T07:36:11Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2608.30378",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2608.30378",
+        "project_url": null
+      },
+      "title": "PAVE: Predictive Alignment and Value-Guided Evolution for World-Action Policies",
+      "title_zh": "PAVE：预测对齐与价值引导进化的世界-行动策略",
+      "updated_at": "2026-09-02T09:43:34Z",
+      "version": 2
     },
     {
       "abstract": "Direct vision-language-action policies generate continuous robot actions efficiently, but standard behavior cloning leaves two complementary gaps: their representations are not explicitly required to describe how the scene evolves over multiple time scales, and deployment trajectories of unequal quality are often reused without separating useful dynamics from undesirable behavior. We introduce \\method, a direct world-action policy that combines outcome-agnostic predictive learning with outcome-aware policy improvement. \\method first retains a local fixed-offset JEPA objective and adds trajectory-relative multi-horizon transition alignment at 25%, 50%, 75%, and 100% of the remaining episode. These training-only targets require the current policy representation to preserve both local physical changes and longer-range task progress, without supplying explicit future tokens to the action head. \\method then trains an independent distributional value critic on cumulative deployment trajectories, computes action-chunk-aligned $N$-step advantages, and converts them into positive, negative, or null text conditions for a flow-matching actor. Thus, every valid trajectory can teach what physically happened, while the actor is deployed only under the condition associated with relatively better actions. The multi-horizon predictor and critic are removed from online execution, preserving direct action generation from the current observation, language instruction, and proprioception. \\redclaim{Across the three simulation benchmarks, \\method achieves the strongest overall performance while preserving the direct actor's online execution path.}",
@@ -3474,7 +3816,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.29897v2",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -3680,7 +4022,7 @@
         "checked_at": "2026-09-02T00:46:56.358051Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2609.00066v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -4076,7 +4418,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.29667v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -4150,7 +4492,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2609.00052v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -4314,7 +4656,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2609.00049v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -4467,7 +4809,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.29432v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -5054,7 +5396,7 @@
         "checked_at": "2026-08-31T10:39:35.009582Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.28557v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -5684,7 +6026,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.28099v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -5922,7 +6264,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.27929v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -7189,7 +7531,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.26821v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -7267,7 +7609,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.26788v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -7595,7 +7937,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.26659v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -7981,7 +8323,7 @@
         "checked_at": "2026-08-28T06:28:28.076086Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.26493v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -8736,7 +9078,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.26013v2",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -8810,7 +9152,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.26004v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -8971,7 +9313,7 @@
         "checked_at": "2026-08-28T06:28:28.076086Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.25956v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -9514,7 +9856,7 @@
         "checked_at": "2026-08-30T09:49:00.165694Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.25677v2",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -9572,7 +9914,7 @@
         "checked_at": "2026-08-27T04:11:46.258254Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.25677v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -9893,7 +10235,7 @@
         "checked_at": "2026-08-28T06:28:28.076086Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.25539v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -10052,7 +10394,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.26214v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -10122,7 +10464,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.25428v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -10281,7 +10623,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.25395v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -10789,7 +11131,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.25188v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -10872,7 +11214,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.25053v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -11107,7 +11449,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.24855v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -11352,7 +11694,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.24658v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -11697,7 +12039,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.24411v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -12194,7 +12536,7 @@
         "checked_at": "2026-08-28T06:28:28.076086Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.24173v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -12694,7 +13036,7 @@
         "checked_at": "2026-08-26T04:41:26.872513Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.24070v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "html_unavailable"
@@ -12943,7 +13285,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.24040v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -13016,7 +13358,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.24004v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -13042,6 +13384,93 @@
       "title_zh": "AgentSpec：面向LLM智能体批量推理的投机解码",
       "updated_at": "2026-08-25T02:49:29Z",
       "version": 1
+    },
+    {
+      "abstract": "World-model predictions increasingly inform robot actions, yet instantaneous, model-internal reliability signals do not record where comparable imagination has failed. DreamLedger treats reliability as a persistent deployment object: execution-settled credit indexed by condition, region, and horizon, queried before use. Predictions consumed by the planner become claims settled against arriving reality without manual labels. Credit gates consumption; tickets and replayable logs preserve auditability. Persistent credit changes where the gate refuses rather than what the model gets wrong: 69% of denials occur in cells with prior failures, episode-local resets triple off-target denials in healthy conditions, and persistent credit halves burned imagination under localized recurrent degradation, at the cost of task completion. At matched refusal volume, every arm that removes the books or their persistence raises the per-spend burn rate, while a rate-matched random gate reduces task success without a burn-rate advantage in the healthy regimes; in a degraded regime with collapsed completion, random refusal regains a burn-rate advantage. We evaluate three simulated domains, unmodified DreamerV3, TD-MPC2, and V-JEPA 2-AC mounts, and a real Franka. Paired quadrotor evaluation shows credit gating reduces burned imagination by 62% (95% CI 43-81%) versus blind consumption. Settlement-grounded calibration yields moderate, seed-consistent operating points. In manipulation, the ledger completes +5.4pp more tasks than rate-matched random refusal, while trading success for verification against the no-books verifier (probes 0.55 vs. 1.00 at success 0.90 vs. 0.93). The trust layer spans decoder-, latent-, and token-space interfaces. On hardware, a failure loop is re-priced online, at 5 cm all counterfactual refusals land on the lowest-credit class, and all 1,062 registered spends replay from audit logs.",
+      "analysis": {
+        "key_results": "69% 的拒绝发生在有先前失败的单元；回合内重置使健康条件下离目标拒绝增加三倍；持久信用将局部反复退化下的燃烧想象力减半但牺牲任务完成度；在操作性任务中，比等拒绝率的随机门控多完成 5.4pp 任务；在四旋翼评估中信用门控将燃烧想象力减少 62%（95% CI 43-81%）；硬件上失败循环被在线重新定价，5 厘米处所有反事实拒绝落在最低信用类别，1,062 次注册消耗全部可从审计日志重放。",
+        "limitations": "摘要提到持久信用会降低任务完成度；在退化且完成率崩溃的机制下，随机拒绝重新获得燃烧率优势；信任层覆盖解码器、潜空间和 token 空间接口但具体局限未展开。",
+        "main_contribution": "提出 DreamLedger，一种将世界模型可靠性作为持久部署对象的框架，通过执行结算信用（按条件、区域、时间范围索引）在消费前查询并门控预测，实现可审计、可回放的想象力管理。",
+        "method": "将规划器消费的预测作为可结算的声明（claims），与现实到达后自动结算为信用；信用门控消费，配合票据与可重放日志保持可审计性；在 DreamerV3、TD-MPC2、V-JEPA 2-AC 以及真实 Franka 上评估。",
+        "one_sentence_summary": "DreamLedger 将世界模型预测的可靠性构建为可持久化的执行结算信用，在规划消费前查询信用以决定是否拒绝想象力，从而减少无效预测消耗。",
+        "primary_topic": "World Model",
+        "relation_to_vla_wam": "该工作直接面向世界模型在机器人动作规划中的可靠性管理，与 WAM（世界-动作模型）和 VLA（视觉-语言-动作）均有紧密联系：在三种模拟域和真实 Franka 上验证，涵盖潜空间、token 空间接口，展示了在机器人任务中减少无效世界模型想象力消耗的方法，对 VLA/WAM 的部署效率与可靠性具有直接参考意义。",
+        "relevance_score": 8,
+        "tags": [
+          "World Modeling",
+          "Efficient Inference",
+          "Robot Learning",
+          "Evaluation",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2608.23863",
+      "authors": [
+        "Xianyao Li",
+        "Ruitong Tian",
+        "Rui Min",
+        "Fang Xu",
+        "Eric Jing Du"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-03T00:55:04.046556Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2608.23863/v3/fig1-panel1.png"
+            ],
+            "caption": "Overview of DreamLedger. Top: In a real Franka tabletop deployment, a consumed prediction is frozen as a claim (endpoint within R R ; actual wrist-camera view). Settled history provides p ^ \\hat{p} and gates reliance, attributable execution evidence updates the books, and every spend is audit-replayable (all values are deployment records). Bottom: With host models unchanged, the same ledger core spans three simulated domains and three established open-source world models, settling seven claim types (Sec. V-C ).",
+            "image_urls": [
+              "https://arxiv.org/html/2608.23863v3/teaser.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2608.23863v3#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2608.23863/v3/fig2-panel1.png"
+            ],
+            "caption": "DreamLedger mechanism. Execution-settled history and model-",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2608.23863v3"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2608.23863v3",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-03T00:55:04.046556Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-08-24T22:12:10Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2608.23863",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2608.23863",
+        "project_url": null
+      },
+      "title": "DreamLedger: Where to Refuse World-Model Imagination Using Execution-Settled Credit",
+      "title_zh": "DreamLedger：基于执行结算信用的世界模型想象力拒绝位置选择",
+      "updated_at": "2026-09-02T08:30:28Z",
+      "version": 3
     },
     {
       "abstract": "Robots are beginning to act on world-model predictions, yet reliability is still expressed through instantaneous, model-internal signals that say whether a prediction looks trustworthy now, not where comparable imagination has already failed. DreamLedger instead treats reliability as a persistent deployment object: an execution-settled credit file recording how often consumed predictions are borne out, indexed by operating condition, region, and prediction horizon, and consulted before each use. Each consumed prediction is registered as a claim and settled against arriving reality without manual labels; the resulting credit gates consumption (low credit shortens reliance or triggers observation), and every reliance event remains auditable via dependency tickets and replayable logs. Persistent credit changes where the gate refuses rather than what the model gets wrong: 69% of denials land on cells that have already failed, episode-local reset triples off-target denials in healthy conditions, and under a localized recurrent degradation persistent credit halves burned imagination, at a cost in task completion. Across three simulated domains, unmodified DreamerV3, TD-MPC2, and V-JEPA 2-AC mounts, and a real Franka, paired quadrotor evaluation shows credit-gated planning reduces burned imagination by 62% (95% CI 43-81%) versus blind consumption; settlement-grounded calibration yields moderate, seed-consistent operating points where raw instantaneous gates collapse to extremes, while persistent books trade verification for reliance (manipulation probes 1.00 to 0.36/episode at success 0.98 vs. 0.94). The trust layer spans decoder-, latent-, and token-space interfaces. On hardware, settlement runs under real sensing and contact noise, both models are priced creditworthy at the frozen 9-cm tolerance, a failure loop is re-priced online, and all 1,062 registered spends replay from the audit logs.",
@@ -13259,7 +13688,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.23843v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -14495,7 +14924,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.23200v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -14667,7 +15096,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.23144v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -14916,7 +15345,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.23018v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -15603,7 +16032,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.22926v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -15679,7 +16108,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.22883v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -15943,7 +16372,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.22788v2",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -16029,7 +16458,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.22788v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -16103,7 +16532,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.22761v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -16176,7 +16605,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.22758v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -16334,7 +16763,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.22472v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -16495,7 +16924,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.22421v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -17066,7 +17495,7 @@
         "checked_at": "2026-08-30T09:49:00.165694Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.22294v2",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -17290,7 +17719,7 @@
         "checked_at": "2026-08-25T04:40:41.852701Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.22197v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -17346,7 +17775,7 @@
         "checked_at": "2026-08-25T04:40:41.852701Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.22110v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "html_unavailable"
@@ -17978,7 +18407,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.21883v2",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -18047,7 +18476,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.21883v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -18107,7 +18536,7 @@
         "checked_at": "2026-08-25T04:40:41.852701Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.21869v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "html_unavailable"
@@ -18618,7 +19047,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.21134v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -18959,7 +19388,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.20975v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -19216,7 +19645,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.20953v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -19275,7 +19704,7 @@
         "checked_at": "2026-08-24T04:47:52.628466Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.20936v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -19775,7 +20204,7 @@
         "checked_at": "2026-08-24T04:47:52.628466Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.20763v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -20666,7 +21095,7 @@
         "checked_at": "2026-08-22T23:15:48.929532Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.20065v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -20831,7 +21260,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.19891v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -20904,7 +21333,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.19804v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -21137,7 +21566,7 @@
         "checked_at": "2026-08-22T23:15:48.929532Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.19758v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -21644,7 +22073,7 @@
         "checked_at": "2026-08-21T04:40:28.268336Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.19492v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -21790,7 +22219,7 @@
         "checked_at": "2026-08-21T04:40:28.268336Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.19147v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -21864,7 +22293,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.19066v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -22374,7 +22803,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.18669v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -22617,7 +23046,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.18627v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -22933,7 +23362,7 @@
         "checked_at": "2026-08-21T04:40:28.268336Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.18410v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -24016,7 +24445,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.17496v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -24075,7 +24504,7 @@
         "checked_at": "2026-08-21T04:40:28.268336Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.17484v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -24426,7 +24855,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.18183v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -24496,7 +24925,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.18182v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -24574,7 +25003,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.17423v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -24648,7 +25077,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.17336v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -24722,7 +25151,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.17209v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -24880,7 +25309,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.17162v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -25123,7 +25552,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.17095v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -25281,7 +25710,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16889v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -25389,7 +25818,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16885v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -25466,7 +25895,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16843v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -25541,7 +25970,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16978v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -25716,7 +26145,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16794v2",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -25790,7 +26219,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16794v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -26044,7 +26473,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16686v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -26654,7 +27083,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16263v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -26730,7 +27159,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16234v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -27223,7 +27652,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16003v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -28055,7 +28484,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.15602v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -28125,7 +28554,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.15574v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -28182,7 +28611,7 @@
         "checked_at": "2026-08-19T04:39:25.480905Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.15567v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -29202,7 +29631,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.15139v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -29272,7 +29701,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.15117v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -29701,7 +30130,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.14420v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -29860,7 +30289,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.14191v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -29930,7 +30359,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.14149v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -30541,7 +30970,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.14016v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -30777,7 +31206,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.13756v2",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -31410,7 +31839,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.13505v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -32815,7 +33244,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.12860v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -33243,7 +33672,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.12695v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -33299,7 +33728,7 @@
         "checked_at": "2026-08-15T23:15:45.718160Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.12655v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -33444,7 +33873,7 @@
         "checked_at": "2026-08-14T05:39:18.670795Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.12515v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -34121,7 +34550,7 @@
         "checked_at": "2026-08-14T23:16:53.230596Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.12026v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -34277,7 +34706,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.11981v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -34330,7 +34759,7 @@
         "checked_at": "2026-08-14T23:16:53.230596Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.11797v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -34399,7 +34828,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.11786v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -34553,7 +34982,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.11770v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -35109,7 +35538,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.11588v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -38360,7 +38789,7 @@
         "checked_at": "2026-08-17T04:43:48.944667Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.09706v2",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -38518,7 +38947,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.09595v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -41443,7 +41872,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.08081v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -43367,7 +43796,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.06564v3",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -43881,7 +44310,7 @@
         "checked_at": "2026-08-09T05:07:43.295216Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.06291v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -44825,7 +45254,7 @@
         "checked_at": "2026-08-09T05:07:43.295216Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.05823v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -46931,7 +47360,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.04768v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -47692,7 +48121,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.04488v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -47950,7 +48379,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.04425v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -48442,7 +48871,7 @@
         "checked_at": "2026-08-06T07:02:24.946198Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.03938v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -48768,7 +49197,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.03854v3",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -48836,7 +49265,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.03854v2",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -48905,7 +49334,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.03854v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -49257,7 +49686,7 @@
         "checked_at": "2026-08-17T04:43:48.944667Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.03682v3",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -50577,7 +51006,7 @@
         "checked_at": "2026-08-06T07:02:24.946198Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.04048v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -51251,7 +51680,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.03052v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -51367,6 +51796,91 @@
       "title_zh": "AcceptMoE：面向高效MoE推测解码的承诺加权自适应验证器专家集",
       "updated_at": "2026-08-04T01:01:12Z",
       "version": 1
+    },
+    {
+      "abstract": "We study a self-supervised generation task for single-cell gene expression vectors: given a set of vectors from a cell type, we aim to generate additional gene expression vectors of that cell type. For this task we characterize both the biological fidelity of the generated gene expression vectors and the scaling behavior of the pretraining loss. The model is a causal transformer paired with a learned quantized VAE tokenizer, trained with a cross-entropy loss. To evaluate the model, we condition it on held-out gene expression vectors of a cell type and generate vectors of gene expression, comparing the resulting distribution over gene expression vectors to the ground truth distribution of that cell type. We study the scaling properties of the proposed architecture by varying the number of trained parameters and the amount of training data. To our knowledge, we find the first jointly-fit two-exponent scaling law and compute-optimal frontier for a single-cell foundation model. Finally, we discuss how this pretrained model could be finetuned for perturbation response prediction.",
+      "analysis": {
+        "key_results": "发现首个联合拟合的双指数缩放规律和计算最优前沿。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出并研究了用于单细胞基因表达生成的自监督模型，发现首个单细胞基础模型的联合双指数缩放规律和计算最优前沿。",
+        "method": "使用因果Transformer结合学习到的量化VAE tokenizer，通过交叉熵损失进行训练。",
+        "one_sentence_summary": "本文研究使用因果Transformer和量化VAE在单细胞基因表达数据上进行自监督生成，并发现双指数缩放规律。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文专注于单细胞基因表达生成和模型量化，与VLA/WAM或机器人领域无直接关系；其量化VAE技术可能对模型压缩有方法学启发，但无直接应用价值。",
+        "relevance_score": 6,
+        "tags": [
+          "Model Quantization",
+          "Data",
+          "Policy Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.AI",
+        "q-bio.GN"
+      ],
+      "arxiv_id": "2608.02961",
+      "authors": [
+        "Aleksandr Sharipov",
+        "Yusif Mukhtarov",
+        "Igor Molybog"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-03T00:55:04.046556Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2608.02961/v2/fig1-panel1.png"
+            ],
+            "caption": "Evaluation of single-cell gene expression vector generation quality metrics. Each panel plots a generation-quality 4.43M metric for the model against its validation loss across ten training checkpoints (loss falls left to right, so training progresses rightward). The dashed horizontal line marks the baseline (Table 1). The model tracks close to it, improving as the loss decreases.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2608.02961v2"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2608.02961/v2/fig2-panel1.png"
+            ],
+            "caption": "Fitted scaling surface for the self-supervised pretraining loss. Iso-loss contours of Eq. 2 are shown in the ( model size , training FLOPs ) (\\text{model size},\\ \\text{training FLOPs}) plane with C ≈ 6 ​ N ​ D C\\approx 6ND ; filled circles are the 22 empirical grid points, colored by measured loss; the solid ascending line is the compute-optimal frontier N ∗ ​ ( C ) N^{\\ast}(C) of Eq. 9 . The four labeled points, with measured and predicted losses in the legend, are runs held out of the fit, one at each model size below 83.9 83.9 M; we discuss them in Section 4.5 .",
+            "image_urls": [
+              "https://arxiv.org/html/2608.02961v2/scaling_isoloss.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2608.02961v2#S4.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2608.02961v2",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-03T00:55:04.046556Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-08-03T23:54:30Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2608.02961",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2608.02961",
+        "project_url": null
+      },
+      "title": "Scaling an Autoregressive Transformer for Single-Cell Generation",
+      "title_zh": "单细胞生成的扩展：自回归Transformer与量化VAE",
+      "updated_at": "2026-09-01T18:10:17Z",
+      "version": 2
     },
     {
       "abstract": "We study a self-supervised generation task for single-cell gene expression vectors: given a set of vectors from a cell type, we aim to generate additional gene expression vectors of that cell type. For this task we characterize both the biological fidelity of the generated gene expression vectors and the scaling behavior of the pretraining loss. The model is a causal transformer paired with a learned quantized VAE tokenizer, trained with a cross-entropy loss. To evaluate the model, we condition it on held-out gene expression vectors of a cell type and generate vectors of gene expression, comparing the resulting distribution over gene expression vectors to the ground truth distribution of that cell type. We study the scaling properties of the proposed architecture by varying the number of trained parameters and the amount of training data. To our knowledge, we find the first jointly-fit two-exponent scaling law and compute-optimal frontier for a single-cell foundation model. Finally, we discuss how this pretrained model could be finetuned for perturbation response prediction.",
@@ -53287,7 +53801,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.01851v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -55074,7 +55588,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.07557v2",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -55951,7 +56465,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.01013v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -56019,7 +56533,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.00860v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -56087,7 +56601,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.00859v1",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -56315,7 +56829,7 @@
         "checked_at": "2026-08-04T05:18:35.763554Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.00737v1",
-        "recovery_checked_at": "2026-09-02T00:49:14.712618Z",
+        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -57040,22 +57554,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 95,
-    "completion_tokens": 9058,
+    "cache_hits": 89,
+    "completion_tokens": 12504,
     "error_categories": {
       "ValidationError": 1
     },
     "failed": 1,
-    "fetched": 2006,
-    "figure_available": 89,
-    "figure_cache_hits": 76,
+    "fetched": 2212,
+    "figure_available": 94,
+    "figure_cache_hits": 70,
     "figure_failed": 0,
-    "figure_requests": 24,
-    "figure_unavailable": 11,
-    "model_calls": 28,
-    "prefiltered": 123,
-    "prompt_tokens": 24060,
-    "published": 100,
-    "total_tokens": 33118
+    "figure_requests": 32,
+    "figure_unavailable": 8,
+    "model_calls": 38,
+    "prefiltered": 127,
+    "prompt_tokens": 33280,
+    "published": 102,
+    "total_tokens": 45784
   }
 }
