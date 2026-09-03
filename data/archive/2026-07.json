@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-03T00:55:04.046556Z",
+  "generated_at": "2026-09-03T08:40:40.793519Z",
   "papers": [
     {
       "abstract": "Vision-language models (VLMs) have recently emerged as a promising paradigm for end-to-end autonomous driving, enabling agents to map multimodal inputs and high-level navigation instructions directly to executable trajectories. However, in practice, these models exhibit a persistent command-following gap: predicted trajectories often show weak sensitivity to navigation commands, resulting in incorrect behavior at critical decision points. We identify this issue as a form of conditional policy collapse, where regression-based training under multimodal trajectory distributions encourages the model to rely on dominant visual priors while marginalizing the language-conditioned signal. To address this issue, we introduce a principled formulation of classifier-free guidance (CFG) for regression-based vision-language driving. We show that CFG can be interpreted as isolating the instruction-induced residual in the action space by contrasting conditional and unconditional predictions, thereby explicitly amplifying the effect of the navigation command at inference time. However, a standard two-pass CFG introduces prohibitive latency for real-time control and produces noisy instance-level guidance directions. Building on a mean-shift interpretation of CFG, we propose Latent-Centroid Steering (LCS), a single-pass guidance mechanism that replaces instance-level residuals with class-level latent shifts. By projecting conditional representations toward precomputed command-specific centroids, LCS performs class-level latent steering based on cluster geometry that is both more stable and computationally efficient. We demonstrate that LCS reduces inference latency by approximately 50% while achieving stronger command adherence and improved driving performance on both closed-loop (Bench2Drive) and open-loop (nuScenes) benchmarks. Code will be released.",
@@ -385,7 +385,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.29221v2",
-        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
+        "recovery_checked_at": "2026-09-03T08:42:06.900289Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -737,7 +737,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.28624v1",
-        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
+        "recovery_checked_at": "2026-09-03T08:42:06.900289Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -899,7 +899,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.28589v1",
-        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
+        "recovery_checked_at": "2026-09-03T08:42:06.900289Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1806,7 +1806,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.28226v1",
-        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
+        "recovery_checked_at": "2026-09-03T08:42:06.900289Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -4363,7 +4363,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.27269v1",
-        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
+        "recovery_checked_at": "2026-09-03T08:42:06.900289Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -4975,7 +4975,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.26579v1",
-        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
+        "recovery_checked_at": "2026-09-03T08:42:06.900289Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -5496,7 +5496,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.26055v1",
-        "recovery_checked_at": "2026-09-03T00:58:41.338337Z",
+        "recovery_checked_at": "2026-09-03T08:42:06.900289Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -7768,6 +7768,76 @@
       "version": 2
     },
     {
+      "abstract": "Quantized small reasoning models can enter repetitive or otherwise unproductive trajectories, yet standard decoding does not adapt to the trajectory as it unfolds. We study MGT-B, a fixed, weight-preserving controller that converts overlapping windows of uncertainty, repetition, and local-change features into position-conditional empirical tail probabilities. It accumulates mixture betting factors with a CUSUM-shaped reset, and, after an alarm, restores a coherent earlier token and key-value-cache state before constrained re-decoding. On MATH-500, a paired three-seed evaluation over 1,500 generations per method raises exact-normalized accuracy from 54.73% for vanilla decoding to 56.40% (+1.67 percentage points; problem-clustered bootstrap 95% CI [+0.47, +2.80]), while a prospectively profiled random-intervention control reaches 54.60%. The gain is positive in all three seeds and costs 5.14% more sampled tokens. Seed-0 ablations show that rollback alone does not explain the result and that an isolated repetition penalty is harmful. Five-sample self-consistency reaches 70.0% but uses about 4.84x as many tokens as MGT-B. On the harder, non-overlapping Omni-MATH evaluation, however, MGT-B obtains 16.60% versus 16.67% for vanilla (-0.07 points; clustered 95% CI [-0.33, +0.20]) with 2.10% more sampled tokens. Thus, MGT-B provides a modest, reproducible local improvement on MATH-500 in the studied configuration, but the effect does not transfer to Omni-MATH and should not be interpreted as a general improvement in mathematical reasoning.",
+      "analysis": {
+        "key_results": "在 MATH-500 上，MGT-B 将准确率从 54.73% 提升至 56.40%（+1.67 个百分点），95% CI [+0.47, +2.80]，三个种子均为正提升，采样 token 增加 5.14%。在 Omni-MATH 上，准确率为 16.60% vs 16.67%（-0.07 个百分点），无提升。",
+        "limitations": "在更难的 Omni-MATH 评测集上无提升，不应被解释为数学推理能力的普遍改善。",
+        "main_contribution": "提出 MGT-B，一种推理时监控与定向重解码方法，用于量化小型推理模型，可在 MATH-500 上实现小幅但可复现的准确率提升。",
+        "method": "MGT-B 将重叠窗口的不确定性、重复和局部变化特征转换为位置条件经验尾部概率，累积混合投注因子，并进行 CUSUM 形状重置；报警后恢复早期 token 和 KV-cache 状态，再进行约束重新解码。",
+        "one_sentence_summary": "本文提出 MGT-B，一种针对量化小型推理模型的固定、权重保持的控制器，通过对不确定性、重复和局部变化特征进行监控并触发有约束的重新解码，在 MATH-500 上提供小幅提升，但在 Omni-MATH 上无提升。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "本文不涉及 VLA、WAM 或机器人动作/世界建模，是针对量化语言模型推理效率的独立研究，与本网站主题无直接关系。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.AI"
+      ],
+      "arxiv_id": "2607.20129",
+      "authors": [
+        "El Hassane Ettifouri",
+        "Ayoub Belfatmi",
+        "Mahaman Sanoussi Yahaya Alassan",
+        "Walid Dahhane"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-03T08:40:40.793519Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2607.20129/v2/fig1-panel1.png"
+            ],
+            "caption": "Monitoring-and-control loop. An alarm activates rollback and state-consistent re-decoding; without an alarm, decoding continues unchanged. An alarm is an operational trigger, not a certified semantic error label.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2607.20129v2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2607.20129v2",
+        "recovery_checked_at": "2026-09-03T08:42:06.900289Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-03T08:40:40.793519Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-07-22T13:34:17Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2607.20129",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2607.20129",
+        "project_url": null
+      },
+      "title": "CUSUM-Shaped Inference-Time Monitoring and Targeted Re-Decoding for Quantized Small Language Model Reasoning",
+      "title_zh": "针对量化小型语言模型推理的 CUSUM 形状推理时监控与定向重解码",
+      "updated_at": "2026-09-02T15:24:06Z",
+      "version": 2
+    },
+    {
       "abstract": "Cross-embodiment navigation is a key challenge in embodied intelligence. Due to differences in embodiment, the same visual observation may imply different actions for different agents, making prediction ambiguous when relying solely on vision. Existing studies mainly rely on reinforcement learning, which requires large-scale interaction and careful reward design, making it difficult to support scalable pretraining and real-world adaptation. In contrast, imitation-learning-based approaches remain limited. To address these challenges, we propose an imitation-learning-based embodiment-aware navigation framework with a modular multi-stage design. In pretraining, we construct a cross-embodiment navigation dataset from Internet videos and introduce embodiment geometry as conditional tokens to reduce action ambiguity under the same observation. In fine-tuning, we design a multimodal information injection mechanism based on a decoupled architecture. Specifically, we design a trajectory augmentation strategy to generate high-risk samples, which are used to train spatial perception and risk-aware correction separately, thereby explicitly incorporating embodiment geometry for safe navigation. Experimental results show that the proposed method effectively improves navigation performance across different embodiment settings, demonstrating the effectiveness of incorporating embodiment geometry into embodied navigation.",
       "analysis": {
         "key_results": "实验结果表明，该方法在不同具身设置下有效提升了导航性能，验证了将具身几何信息融入具身导航的有效性。",
@@ -8575,7 +8645,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.15550v2",
-        "recovery_checked_at": "2026-09-02T08:34:54.652938Z",
+        "recovery_checked_at": "2026-09-03T08:42:06.900289Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -9850,6 +9920,104 @@
       "version": 3
     },
     {
+      "abstract": "Language-conditioned manipulation requires both precise contact-rich control and robust reasoning over language, scenes, and long horizons. End-to-end Vision-Language-Action (VLA) models provide strong local visuomotor skills, but they are trained on in-distribution task trajectories and often fail under deployment perturbations such as semantic retargeting, goal re-binding, spatial-layout shifts, and unstable local contacts. LLM coding agents provide complementary semantic and compositional reasoning, but purely analytic primitives struggle with irregular grasping, constrained placement, and articulated-object interaction. We present Harness VLA, a memory-augmented agentic framework that exposes a frozen VLA as a retryable contact-rich primitive and composes it with a small fixed library of analytic primitives for grounding, staging, transport, navigation, and release. Rather than expanding the skill library, the harness learns the operating range of these fixed primitives from task-specific execution traces, global success rules, and failure models. By lifting semantic re-grounding, non-contact execution, and VLA re-staging to the planner while reserving the frozen VLA for local contact-rich phases, Harness VLA extends pretrained VLAs beyond their original trajectory distribution without finetuning. Across perturbed tabletop, household kitchen, and clean-to-randomized bimanual manipulation, Harness VLA improves over the strongest relevant baselines by 38.6 and 25.4 percentage points on LIBERO-Pro and RoboCasa365, respectively, and reaches 58.4% on RoboTwin C2R. Code is available at https://github.com/RLinf/RPent.",
+      "analysis": {
+        "key_results": "在 LIBERO-Pro 和 RoboCasa365 上分别比最强相关基线提高 38.6 和 25.4 个百分点，并在 RoboTwin C2R 上达到 58.4% 的成功率。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出 Harness VLA 框架，通过记忆引导的智能体将冻结的 VLA 模型与固定解析原语相结合，在不进行微调的情况下扩展预训练 VLA 模型的能力范围，并显著提升在多种扰动下的操纵性能。",
+        "method": "使用记忆增强的智能体框架，通过任务特定执行轨迹、全局成功规则和失败模型学习固定原语的操作范围，将语义重定位、非接触执行和 VLA 重新分级交由规划器处理，同时保留冻结 VLA 用于局部接触丰富阶段。",
+        "one_sentence_summary": "该论文提出 Harness VLA，一种记忆增强的智能体框架，将冻结的 VLA 模型作为可重试的接触丰富原语，并与解析原语组合，提升语言条件操纵在扰动下的鲁棒性。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "高度相关，论文核心是利用冻结的 VLA 模型作为可重试原语，通过智能体框架和记忆机制增强其在语言条件机器人操纵中的泛化能力和鲁棒性，直接针对 VLA 模型在实际部署中的局限，对机器人动作与世界建模研究具有重要价值。",
+        "relevance_score": 9,
+        "tags": [
+          "Robot Manipulation",
+          "Policy Learning",
+          "Robot Learning",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2607.08448",
+      "authors": [
+        "Yixian Zhang",
+        "Huanming Zhang",
+        "Feng Gao",
+        "Xiao Li",
+        "Zhihao Liu",
+        "Chunyang Zhu",
+        "Jiaxing Qiu",
+        "Yuchen Yan",
+        "Jiyuan Liu",
+        "Wenhao Tang",
+        "Zhengru Fang",
+        "Yi Nie",
+        "Changxu Wei",
+        "Yu Wang",
+        "Wenbo Ding",
+        "Chao Yu"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-03T08:40:40.793519Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2607.08448/v4/fig1-panel1.png"
+            ],
+            "caption": "Harness VLA system overview. Given a task description, RGB-D observations, and robot state, the agentic planner selects structured calls from a fixed primitive library rather than emitting low-level actions directly. The library exposes the frozen VLA as vla_act for contact-rich behaviors and uses analytic primitives such as move_to , rotate , and set_gripper for perception-conditioned staging, transport, posture adjustment, and release. Task Specific Memory stores successful command traces from reference-seed exploration for few-shot re-grounding, while Global Memory stores reusable success rules and failure models. The right panels summarize gains over the relevant strongest baselines, and the bottom strip illustrates a rollout that alternates sparse VLA invocations with analytic control.",
+            "image_urls": [
+              "https://arxiv.org/html/2607.08448v4/figures/scheme.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2607.08448v4#S0.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2607.08448/v4/fig2-panel1.png"
+            ],
+            "caption": "Primitive composition extends a frozen VLA beyond its trajectory distribution. Deployment perturbations expand the possible task configurations beyond the in-distribution trajectories covered by the frozen VLA. A direct VLA rollout may attempt to bridge the perturbed space and fail before reaching the target. Harness VLA instead decomposes the task into local contact-rich VLA invocations and analytic primitive control: analytic primitives perceive the current target, re-ground task bindings, and move the robot between VLA-compatible local regions, while vla_act is invoked only for contact-rich phases inside those regions.",
+            "image_urls": [
+              "https://arxiv.org/html/2607.08448v4/figures/Abstract_figure.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2607.08448v4#S1.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2607.08448v4",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-03T08:40:40.793519Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-07-09T13:08:54Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2607.08448",
+        "code_url": "https://github.com/RLinf/RPent",
+        "pdf_url": "https://arxiv.org/pdf/2607.08448",
+        "project_url": null
+      },
+      "title": "Harness VLA: Steering Frozen VLAs into Reliable Manipulation Primitives via Memory-Guided Agents",
+      "title_zh": "Harness VLA：通过记忆引导智能体将冻结的 VLA 引导为可靠的操纵原语",
+      "updated_at": "2026-09-02T13:36:23Z",
+      "version": 4
+    },
+    {
       "abstract": "Vision--Language--Action (VLA) policies such as $\\pi_{0.5}$ and OpenVLA perform well on many manipulation tasks, but they are often reactive: the next action is predicted from the current observation, instruction, and proprioceptive state. This assumption breaks down in stage-dependent manipulation, where visually similar states may require different actions depending on latent task progress and previous interaction outcomes. We argue that such tasks require not only memory, but dynamics-aware belief updates: the policy should preserve task progress during stable or occluded phases and revise its belief near contact, release, or subgoal transitions. We introduce Temporally Conditioned Memory-Fusion Policies (TFP), a lightweight memory-action framework for VLA backbones. TFP maintains an episode-local task-progress belief with Liquid Time-Constant dynamics and injects the updated belief directly into the flow-matching action decoder through adaptive modulation. This lets temporally accumulated context shape the generated action chunk, rather than serving only as passive history context. With a 3.3B-parameter model, TFP improves the average success rate from 96.9% to 98.75% on LIBERO and from 91.4% to 93.77% on LIBERO-plus. On the memory-focused MIKASA ShellGameTouch diagnostic, TFP achieves success up to 75.0%. Mechanistic analyses show that write-gain changes near manipulation events are about 6 times larger than far non-event phases, and hidden-state interventions show that the belief causally modulates generated action chunks. These results suggest that compact, event-sensitive memory dynamics can improve VLA policies under occlusion, visual perturbation, and stage-dependent task structure.",
       "analysis": {
         "key_results": "在3.3B参数模型上，LIBERO成功率从96.9%提升至98.75%，LIBERO-plus从91.4%提升至93.77%，MIKASA ShellGameTouch达到75.0%成功率；写入增益变化在操作事件附近比非事件阶段大约6倍。",
@@ -11029,22 +11197,20 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 89,
-    "completion_tokens": 12504,
-    "error_categories": {
-      "ValidationError": 1
-    },
-    "failed": 1,
-    "fetched": 2212,
-    "figure_available": 94,
-    "figure_cache_hits": 70,
+    "cache_hits": 103,
+    "completion_tokens": 4331,
+    "error_categories": {},
+    "failed": 0,
+    "fetched": 2093,
+    "figure_available": 90,
+    "figure_cache_hits": 84,
     "figure_failed": 0,
-    "figure_requests": 32,
-    "figure_unavailable": 8,
-    "model_calls": 38,
-    "prefiltered": 127,
-    "prompt_tokens": 33280,
-    "published": 102,
-    "total_tokens": 45784
+    "figure_requests": 13,
+    "figure_unavailable": 7,
+    "model_calls": 12,
+    "prefiltered": 115,
+    "prompt_tokens": 10839,
+    "published": 97,
+    "total_tokens": 15170
   }
 }
