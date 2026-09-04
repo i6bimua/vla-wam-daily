@@ -1371,6 +1371,56 @@
       "version": 1
     }
   },
+  "analysis:v1:033bfca86bc58efcb43a98b7c50a0e31f90033388b81937480cc1c015a0c67ff": {
+    "key": "analysis:v1:033bfca86bc58efcb43a98b7c50a0e31f90033388b81937480cc1c015a0c67ff",
+    "record": {
+      "abstract": "Neural Representations for Videos (NeRV) encode entire video sequences within neural network parameters, offering an alternative paradigm to conventional video codecs. However, the convolutional decoder of NeRV remains computationally expensive and memory intensive, limiting its deployment in resource-constrained environments. This paper proposes LRConv-NeRV, an efficient NeRV variant that replaces selected dense 3x3 convolutional layers with structured low-rank separable convolutions, trained end-to-end within the decoder architecture. By progressively applying low-rank factorization from the largest to earlier decoder stages, LRConv-NeRV enables controllable trade-offs between reconstruction quality and efficiency. Extensive experiments demonstrate that applying LRConv only to the final decoder stage reduces decoder complexity by 68%, from 201.9 to 64.9 GFLOPs, and model size by 9.3%, while incurring negligible quality loss and achieving approximately 9.2% bitrate reduction. Under INT8 post-training quantization, LRConv-NeRV preserves reconstruction quality close to the dense NeRV baseline, whereas more aggressive factorization of early decoder stages leads to disproportionate quality degradation. Compared to existing work under layer-aligned settings, LRConv-NeRV achieves a more favorable efficiency versus quality trade-off, offering substantial GFLOPs and parameter reductions while maintaining higher PSNR/MS-SSIM and improved temporal stability. Temporal flicker analysis using LPIPS further shows that the proposed solution preserves temporal coherence close to the NeRV baseline, results establish LRConv-NeRV as a potential architectural alternative for efficient neural video decoding under low-precision and resource-constrained settings.",
+      "analysis": {
+        "key_results": "在最后一级应用低秩卷积可减少68%计算量（从201.9到64.9 GFLOPs）和9.3%模型大小，比特率降低约9.2%，PSNR/MS-SSIM和时域稳定性保持良好；INT8量化下质量接近密集基线，而更激进的早期分解导致质量显著下降。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出LRConv-NeRV，用结构化低秩可分离卷积替换NeRV解码器中的部分密集卷积，实现效率与质量的灵活权衡，并在INT8量化下保持质量。",
+        "method": "将选定的密集3x3卷积替换为低秩可分离卷积，从最后一级到早期级逐步应用低秩分解，并结合INT8后训练量化。",
+        "one_sentence_summary": "通过将NeRV解码器中的部分密集3x3卷积替换为结构化低秩可分离卷积，并支持后训练INT8量化，在保持重建质量的同时显著降低计算量和模型大小。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文专注神经视频压缩和模型量化，未直接涉及VLA、WAM或机器人策略，但所提低秩卷积与量化结合的高效解码技术可为边缘或资源受限系统中的视觉编码提供参考。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Model Quantization",
+          "Video Generation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "arxiv_id": "2603.18261",
+      "authors": [
+        "Tamer Shanableh"
+      ],
+      "matched_rules": [
+        "exact:post-training-quantization",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-03-18T20:31:59Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2603.18261",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2603.18261",
+        "project_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=11578955"
+      },
+      "title": "LRConv-NeRV: Low Rank Convolution for Efficient Neural Video Compression",
+      "title_zh": "LRConv-NeRV：用于高效神经视频压缩的低秩卷积",
+      "updated_at": "2026-09-02T19:03:37Z",
+      "version": 2
+    }
+  },
   "analysis:v1:035ca25687211b4a12764ecc6ecaf4a5f7cd8c1418cbe7dccfb90afae6375219": {
     "key": "analysis:v1:035ca25687211b4a12764ecc6ecaf4a5f7cd8c1418cbe7dccfb90afae6375219",
     "record": {
@@ -1735,6 +1785,57 @@
       "title": "TaskPress: Query-Agnostic KV Cache Compression via Task-Guided Pruning",
       "title_zh": "TaskPress：通过任务引导的裁剪实现查询无关的KV缓存压缩",
       "updated_at": "2026-08-04T07:51:37Z",
+      "version": 1
+    }
+  },
+  "analysis:v1:03f9389af5467b383f746cfc57206d743139caec31630f3f8648ee14a7b642e1": {
+    "key": "analysis:v1:03f9389af5467b383f746cfc57206d743139caec31630f3f8648ee14a7b642e1",
+    "record": {
+      "abstract": "Tool-using LLM agents spend wall-clock time not only on model inference but also in serial action--observation turns, where each tool call, environment transition, and observation can delay subsequent decisions. We introduce \\textbf{Speculative Macro Commit} (SMC), a runtime mechanism for a two-tier agent system: a large authoritative actor model produces the official trajectory, while a faster speculative drafter model continuously predicts and executes future action chains on an isolated environment snapshot. SMC mines recurring multi-action skeletons from training traces and stores them in a macro library used to match against action chains predicted by the drafter at runtime. When the actor's next tool call matches the first drafted action, SMC commits the remaining pre-executed draft steps, together with their observations, to the official trajectory. Using Qwen3.5-27B INT4 as the authoritative actor model and Qwen3.5-4B as the speculative drafter model, SMC matches the sequential agent's overall accuracy while reducing latency by 10.23\\% over the Speculative Actions (SA) baseline and 18.59\\% over sequential execution on the $\\tau^2$-Bench Telecom subset. On AppWorld, SMC reduces wall time by 7.7\\% over SA baseline and 44.9\\% over sequential execution, with a small reduction in task completion. Overall, SMC provides a practical way to reuse multi-step speculative execution and reduce agent latency beyond single-step speculative actions. Our code is publicly available \\href{https://github.com/zeyuliu1037/speculative-macro-commit}{\\textcolor{magenta}{here}}.",
+      "analysis": {
+        "key_results": "使用 Qwen3.5-27B INT4 作为主执行模型、Qwen3.5-4B 作为草稿模型，在 τ²-Bench Telecom 子集上相比 SA 基线降低延迟 10.23%、相比顺序执行降低 18.59%；在 AppWorld 上相比 SA 基线降低墙钟时间 7.7%、相比顺序执行降低 44.9%，任务完成率略有下降。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出 Speculative Macro Commit (SMC) 机制，通过宏库复用多步投机执行，超越单步投机动作的延迟降低效果。",
+        "method": "在两层智能体系统中，较快的草稿模型在独立环境快照上连续预测并执行未来动作链，挖掘训练轨迹中的重复多动作骨架形成宏库进行匹配；当主执行者的下一步工具调用与草稿链首个动作匹配时，提交剩余预执行步骤及其观察结果。",
+        "one_sentence_summary": "本文提出投机宏提交（SMC）机制，通过两层级智能体系统中的投机草稿模型预执行动作链，并将匹配的预执行步骤及其观察结果批量提交给主执行者，以减少工具使用 LLM 智能体的墙钟延迟。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "本文专注于 LLM 智能体的投机解码加速，未涉及视觉-语言-动作（VLA）或世界-动作模型（WAM）；但其投机多步执行与提交机制可能对机器人策略或世界模型的推理加速具有方法论参考价值。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.AI",
+        "cs.MA"
+      ],
+      "arxiv_id": "2609.03236",
+      "authors": [
+        "Zeyu Liu",
+        "Souvik Kundu",
+        "Peter A. Beerel"
+      ],
+      "matched_rules": [
+        "composite:speculative_generation",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-03T00:31:43Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.03236",
+        "code_url": "https://github.com/zeyuliu1037/speculative-macro-commit",
+        "pdf_url": "https://arxiv.org/pdf/2609.03236",
+        "project_url": null
+      },
+      "title": "Speculative Macro Commit for Faster Tool-Using Agents",
+      "title_zh": "用于加速工具使用智能体的投机宏提交机制",
+      "updated_at": "2026-09-03T00:31:43Z",
       "version": 1
     }
   },
@@ -2166,6 +2267,57 @@
       "title": "Hybrid Token Compression for Vision-Language Models",
       "title_zh": "面向视觉语言模型的混合视觉Token压缩",
       "updated_at": "2026-08-11T11:19:44Z",
+      "version": 2
+    }
+  },
+  "analysis:v1:060a753f3abee5c3014052c90f5d9b82dee01062e140aa765aa8b0714349ebe2": {
+    "key": "analysis:v1:060a753f3abee5c3014052c90f5d9b82dee01062e140aa765aa8b0714349ebe2",
+    "record": {
+      "abstract": "Sign language production requires more than hand motion generation. Non-manual features, including mouthings, eyebrow raises, gaze, and head movements, are grammatically obligatory and cannot be recovered from manual articulators alone. Existing 3D production systems face two barriers to integrating them: the body-model fittings they train on retain a facial space too low-dimensional to encode these articulations, and, if richer representations are adopted, standard discrete tokenization suffers from codebook collapse, leaving most of the expression space largely unreachable. We propose SMPL-FX, which couples FLAME's rich expression space with the SMPL-X body parameterisation, and tokenize the resulting representation with modality-specific Finite Scalar Quantization VAEs for body, hands, and face, raising face codebook utilization from 78.8% to 99.0%. M3T is an autoregressive transformer trained on this multi-modal motion vocabulary, with an auxiliary sign-to-text translation objective that encourages semantically grounded embeddings. Across three standard datasets, M3T achieves state-of-the-art sign language production quality, and on NMFs-CSL, where signs are distinguishable only by non-manual features, our model reaches 58.3% accuracy against 49.0% for the strongest comparable baseline, without large-scale sign-language pre-training. Project page: https://cogvis-cvssp.github.io/papers/m3t/",
+      "analysis": {
+        "key_results": "面部码本利用率从78.8%提升至99.0%；在三个标准数据集上取得最先进手语生成质量；在NMFs-CSL上准确率达到58.3%，优于最强基线49.0%，且无需大规模手语预训练。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出SMPL-FX表示和M3T自回归Transformer，结合模态特定有限标量量化VAE与手语翻译辅助目标，实现高质量手语生成。",
+        "method": "将FLAME面部表情空间与SMPL-X身体参数耦合，使用模态特定有限标量量化VAE对身体、手部和面部进行离散令牌化，并用自回归Transformer通过辅助手语到文本翻译目标进行训练。",
+        "one_sentence_summary": "提出SMPL-FX与M3T，通过模态特定有限标量量化VAE和自回归Transformer提升手语生成中非手部特征的表现。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "该工作专注于手语生成中的离散标记化和量化技术，不直接涉及机器人视觉-语言-动作模型或世界模型。但其模态特定有限标量量化方法为多模态动作建模提供了高效离散表示思路，对机器人动作令牌化和高效推理具有潜在参考价值。",
+        "relevance_score": 8,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV"
+      ],
+      "arxiv_id": "2603.23617",
+      "authors": [
+        "Alexandre Symeonidis-Herzig",
+        "Jianhe Low",
+        "Ozge Mercanoglu Sincan",
+        "Richard Bowden"
+      ],
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-03-24T18:05:03Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2603.23617",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2603.23617",
+        "project_url": "https://cogvis-cvssp.github.io/papers/m3t/"
+      },
+      "title": "M3T: Discrete Multi-Modal Motion Tokens for Sign Language Production",
+      "title_zh": "M3T：面向手语生成的离散多模态运动令牌",
+      "updated_at": "2026-09-02T19:07:43Z",
       "version": 2
     }
   },
@@ -3809,6 +3961,54 @@
       "title": "Demystifying When and Why VLAs Fail in Contact-Rich Tasks and How to Fix Them",
       "title_zh": "揭秘视觉-语言-动作模型在接触密集任务中失败的原因及修复方法",
       "updated_at": "2026-08-02T17:34:19Z",
+      "version": 1
+    }
+  },
+  "analysis:v1:0b16aade30f0004cfe88f01456ce90bfccbcd5b73ce1186bd9e631b71a4cb117": {
+    "key": "analysis:v1:0b16aade30f0004cfe88f01456ce90bfccbcd5b73ce1186bd9e631b71a4cb117",
+    "record": {
+      "abstract": "This paper presents an experimental design for constructing a multimodal dataset to analyze user engagement in human-robot interaction (HRI). Prior studies have mainly relied on observable behavioral cues, with limited frameworks integrating physiological signals. We therefore propose a structured data-collection protocol to build a multimodal dataset that includes wearable physiological signals, behavioral data, and self-report measures under different levels of task complexity defined in this experiment.",
+      "analysis": {
+        "key_results": "摘要未说明",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出结构化数据收集协议，构建多模态 HRI 数据集，整合生理信号、行为数据和自我报告，以分析不同任务复杂度下的用户参与度。",
+        "method": "结构化数据收集协议，采集可穿戴生理信号、行为数据和自我报告。",
+        "one_sentence_summary": "本文提出一个实验设计，构建包含可穿戴生理信号、行为数据和自我报告的多模态人机交互数据集，用于分析用户参与度。",
+        "primary_topic": "Dataset",
+        "relation_to_vla_wam": "该论文关注人机交互参与度分析的数据集构建，不涉及 VLA、WAM 或机器人世界模型，但多模态数据收集方法对机器人学习中的数据采集和评估具有参考价值。",
+        "relevance_score": 6,
+        "tags": [
+          "Data",
+          "Evaluation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2609.03255",
+      "authors": [
+        "Buwan Kim",
+        "Wonse Jo"
+      ],
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-03T01:29:44Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.03255",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.03255",
+        "project_url": null
+      },
+      "title": "Establishing a Dynamic Multimodal HRI Dataset for Engagement Analysis with a Humanoid Robot",
+      "title_zh": "建立用于人形机器人交互参与度分析的动态多模态 HRI 数据集",
+      "updated_at": "2026-09-03T01:29:44Z",
       "version": 1
     }
   },
@@ -8428,6 +8628,66 @@
       "title_zh": "超越状态一致性：基于文本世界模型的行为一致性",
       "updated_at": "2026-09-02T08:58:38Z",
       "version": 2
+    }
+  },
+  "analysis:v1:1974b981c5b183443196cc49f13f9a50c620218f8cf1717158ec817f11e0f01b": {
+    "key": "analysis:v1:1974b981c5b183443196cc49f13f9a50c620218f8cf1717158ec817f11e0f01b",
+    "record": {
+      "abstract": "Existing safety alignment methods for vision-language models usually modify the model behavior globally: once the safety parameters are trained or loaded, they participate in both unsafe and already-safe generations. This always-on intervention can unnecessarily perturb the model's original reasoning path and degrade general multimodal capabilities. We argue that safety alignment should be an on-demand intervention rather than a permanent modification to every decoding trajectory. To this end, we propose a streaming recognition and gated LoRA framework for intrinsic VLM safety. During autoregressive generation, a lightweight recognizer estimates whether the current pre-token generation state is safe or unsafe. Its output updates the LoRA gate for the following decoding step; otherwise, generation follows the frozen-backbone policy. The LoRA module is trained from unsafe prefixes, transition statements, and safe continuations, so that it learns to redirect unsafe generations back to safe responses after activation. Experiments across multiple safety and general-purpose benchmarks demonstrate the effectiveness of our method in post-alignment settings.",
+      "analysis": {
+        "key_results": "多个安全与通用基准实验表明，该方法在后对齐设置下有效；具体指标未在摘要中给出。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出SafeRI框架，将安全对齐从全局永久修改转变为按需、逐令牌的流式识别与门控LoRA干预，在保持安全性的同时减少对通用多模态能力的负面影响。",
+        "method": "流式识别器在自回归生成时估计当前预令牌生成状态是否安全，其输出控制LoRA门控以决定是否激活安全参数；LoRA模块利用不安全前缀、过渡语句和安全续写进行训练。",
+        "one_sentence_summary": "该文提出一种流式识别与门控LoRA框架，在自回归生成过程中动态识别不安全状态并按需激活安全参数，以降低对模型通用能力的干扰。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "本文聚焦视觉语言模型的安全对齐与高效推理（门控LoRA），不直接涉及VLA或WAM；其门控机制与按需激活的LoRA设计对机器人策略的高效推理有一定方法参考价值，但与本站核心主题无直接关系。",
+        "relevance_score": 5,
+        "tags": [
+          "Efficient Inference",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV"
+      ],
+      "arxiv_id": "2609.03544",
+      "authors": [
+        "Caoyuan Ma",
+        "Tian Gu",
+        "Wenpu Liu",
+        "Weichu Xie",
+        "Shuai Dong",
+        "Yuqi Xu",
+        "Ji Zhao",
+        "Ziyue Wang",
+        "Wenzheng Chang",
+        "Taiqiang Wu",
+        "Yongfu Zhu",
+        "Wenqi Shao",
+        "Zheng Wang",
+        "Yinqiang Zheng"
+      ],
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-03T08:43:07Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.03544",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.03544",
+        "project_url": null
+      },
+      "title": "SafeRI: Recognition and Intervention for Token-Level Safety Intervention in Large Vision Language Models",
+      "title_zh": "SafeRI：面向大型视觉语言模型令牌级安全介入的识别与干预框架",
+      "updated_at": "2026-09-03T08:43:07Z",
+      "version": 1
     }
   },
   "analysis:v1:198645cd647886f8155db2f10f970c9f37fa9d7f26fd0bbc809e6cd0a0cf10f9": {
@@ -20652,6 +20912,68 @@
       "version": 1
     }
   },
+  "analysis:v1:415770c03d06afb83299b0253e25fe3493959b9e1411720a0efd933315b41b37": {
+    "key": "analysis:v1:415770c03d06afb83299b0253e25fe3493959b9e1411720a0efd933315b41b37",
+    "record": {
+      "abstract": "Recent video generation models are increasingly framed as world models. Many physical processes can unfold in more than one valid way. Therefore, a world model should reproduce not only a plausible trajectory, but also the distribution of possible behaviors under the same initial observation and action. We call this distribution-level requirement probabilistic alignment. However, existing evaluations largely assess individual-video plausibility and do not test whether repeated generations recover the correct distribution. This raises a central question: how far are current video generators from probabilistically aligned world modeling? To answer it, we formalize probabilistic alignment as a distributional criterion for world models and introduce PAWBench, a benchmark for evaluating video generators as stochastic samplers of world dynamics. We further introduce PAWEval, an outcome-level protocol that converts repeated video rollouts into empirical distributions over possible physical behaviors. Across 50 scenarios and eleven current systems, no model consistently matches the reference probabilities while recovering the range of valid behaviors. Having established this gap, we test whether language prompts, initial noise sampling, or model training can reshape the model's predictive distribution. We believe our work can serve as a foundation for future efforts to move towards probabilistically aligned world modeling.",
+      "analysis": {
+        "key_results": "在50个场景和11个当前系统上，没有模型能始终匹配参考概率同时覆盖有效行为范围。",
+        "limitations": "摘要未说明",
+        "main_contribution": "形式化定义概率对齐（probabilistic alignment）作为世界模型的分布级准则，并引入PAWBench基准和PAWEval评估协议，用以测试视频生成模型是否复现物理行为的正确分布。",
+        "method": "形式化概率对齐为世界模型的分布准则；提出PAWBench（50个场景）和PAWEval（将重复视频rollouts转换为可能物理行为的经验分布），测试语言提示、初始噪声采样和模型训练对预测分布的影响。",
+        "one_sentence_summary": "提出了概率对齐标准与PAWBench基准，用于评估视频生成模型是否能在相同初始条件下生成符合物理规律的可能结果分布。",
+        "primary_topic": "World Model",
+        "relation_to_vla_wam": "本论文直接涉及世界模型（World Model）的评估，提出了分布级概率对齐准则，为机器人世界模型（WAM）的评估与改进提供了关键基准和方法论基础，但不直接涉及VLA或特定机器人任务。",
+        "relevance_score": 9,
+        "tags": [
+          "World Modeling",
+          "Video Generation",
+          "Evaluation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "arxiv_id": "2608.27345",
+      "authors": [
+        "Yuandong Pu",
+        "Le Zhuo",
+        "Sayak Paul",
+        "Gabriel Jorge Menezes",
+        "Avram {\\DJ}or{\\dj}evi\\'c",
+        "Shiyang Li",
+        "Yifan Zhou",
+        "Bin Fu",
+        "Wenlong Zhang",
+        "Junjun He",
+        "Yu Qiao",
+        "Yihao Liu",
+        "Jinbo Xing",
+        "Xi Chen"
+      ],
+      "matched_rules": [
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-08-27T16:46:38Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2608.27345",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2608.27345",
+        "project_url": null
+      },
+      "title": "PAWBench: How Far Are We from Probabilistically Aligned World Modeling?",
+      "title_zh": "PAWBench：距离概率对齐的世界建模还有多远？",
+      "updated_at": "2026-09-03T08:39:17Z",
+      "version": 3
+    }
+  },
   "analysis:v1:417f28d46f3c610b2ed133ef9bb52eb1c41f5c44a5246701b7cdf81df04da60d": {
     "key": "analysis:v1:417f28d46f3c610b2ed133ef9bb52eb1c41f5c44a5246701b7cdf81df04da60d",
     "record": {
@@ -20700,6 +21022,63 @@
       "title": "Enhancing VLM Reward Models Through Structure-Aware Fine-Tuning",
       "title_zh": "通过结构感知微调增强视觉语言模型奖励模型",
       "updated_at": "2026-08-04T16:15:12Z",
+      "version": 1
+    }
+  },
+  "analysis:v1:41a919f2022f7c020c76c5ac3aca5c1a5b3b08a2ff2976f15ff13537a12403ea": {
+    "key": "analysis:v1:41a919f2022f7c020c76c5ac3aca5c1a5b3b08a2ff2976f15ff13537a12403ea",
+    "record": {
+      "abstract": "Vision-Language-Action (VLA) policies fuse multimodal sensory inputs, but training on limited and homogeneous robot demonstrations encourages spurious inter-sensor correlations rather than task-relevant signal, a failure we term modality entanglement. Under real-world occlusions and distractors, this manifests as nuisance sensitivity to corruption of uninformative sensors and single-modality insufficiency when only one informative sensor remains intact. We propose Evidence-Gated Regularization (EGR), a modality-agnostic training objective that introduces zero inference-time overhead. EGR derives a per-frame and per-sensor task-relevance signal to gate two state-conditional consistency objectives: invariance on low-evidence sensors, and single-sensor sufficiency on high-evidence ones. We introduce a benchmark based on BEHAVIOR-1K, comprising a fast inference-only diagnostic suite and 47 rollout-based skills targeting modality entanglement. We validate EGR on this benchmark and on two real-robot setups with fundamentally different embodiments: a bi-manual setup with two Kinova arms and three RGB cameras, and a single-arm MELFA ASSISTA setup combining vision and GelSight tactile sensors. EGR improves simulation success rates (SR) from 12.5% to 16.4% under full modalities (+31%), from 9.4% to 16.5% under uninformative-sensor corruption (+75%), and from 2.8% to 6.1% under single-sensor fallback (+120%). Under physical-object distractors, EGR boosts SR from 30% to 85% on the bi-manual setup (+183%) and from 55% to 70% on the tactile setup (+27%).",
+      "analysis": {
+        "key_results": "在仿真基准上，全模态成功率从 12.5% 提高到 16.4%（+31%），无信息传感器损坏下从 9.4% 提高到 16.5%（+75%），单传感器回退下从 2.8% 提高到 6.1%（+120%）；真实机器人实验中，双臂设置下成功率从 30% 提升到 85%（+183%），触觉设置下从 55% 提升到 70%（+27%）。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出证据门控正则化（EGR），一种模态无关的训练目标，可零推理开销地提升 VLA 策略对传感器遮挡、干扰和单模态退化的鲁棒性。",
+        "method": "EGR 利用逐帧、逐传感器的任务相关性信号，对低证据传感器执行不变性约束，对高证据传感器执行单传感器充分性约束。",
+        "one_sentence_summary": "提出证据门控正则化（EGR），在训练时对低证据传感器施加不变性、对高证据传感器施加单传感器充分性约束，以缓解 VLA 策略的模态纠缠问题。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "本文直接改进 VLA 策略的多模态鲁棒性，通过正则化解决模态纠缠问题，对 VLA 在遮挡、干扰和传感器失效场景下的可靠部署具有直接价值。",
+        "relevance_score": 9,
+        "tags": [
+          "Vision-Language",
+          "Robot Learning",
+          "Robot Manipulation",
+          "Evaluation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.CV",
+        "cs.LG"
+      ],
+      "arxiv_id": "2609.03142",
+      "authors": [
+        "Yue Yang",
+        "Diego Romeres",
+        "Chiori Hori",
+        "Gedas Bertasius",
+        "Daniel Szafir",
+        "Siddarth Jain"
+      ],
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-02T20:25:21Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.03142",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.03142",
+        "project_url": null
+      },
+      "title": "Sensing Which Modality Matters: Evidence-Gated Regularization for Robust VLA Policies",
+      "title_zh": "感知哪个模态重要：面向鲁棒 VLA 策略的证据门控正则化",
+      "updated_at": "2026-09-02T20:25:21Z",
       "version": 1
     }
   },
@@ -22780,6 +23159,65 @@
       "title_zh": "RedFlow：将失败经验重定向为流匹配 VLA 策略的行为级修正",
       "updated_at": "2026-07-30T07:14:39Z",
       "version": 1
+    }
+  },
+  "analysis:v1:48778095fb11e47c78d88b68151716ed5c4e86121d2203689e8c4eb16845fd74": {
+    "key": "analysis:v1:48778095fb11e47c78d88b68151716ed5c4e86121d2203689e8c4eb16845fd74",
+    "record": {
+      "abstract": "Robot actions are inherently embodiment-specific and only weakly aligned with image-space visual changes, limiting their effectiveness as conditioning signals for robot world models. In contrast, visual tracks provide an embodiment-agnostic representation of how task-relevant points move through a scene, offering dense image-space guidance for accurate and spatially precise future video prediction. Building on this observation, we propose TrAct, a world-model-based robot decision-making framework that uses visual tracks as an intermediate interface between control and prediction. TrAct consists of three components: a Vision-Language-Action-and-Track model (VLAT) that jointly predicts candidate actions and corresponding visual tracks from the current observation and language instruction; a track-conditioned world model (TWM) that predicts future visual outcomes conditioned on the proposed tracks; and a vision-language reward model (VLAC) that scores the predicted outcomes. At inference time, VLAT generates candidate action-track pairs, TWM rolls out their visual consequences, and VLAC selects the track whose predicted outcome best satisfies the instruction; the action paired with the selected track is then executed by the robot. Experiments on the proposed LIBERO-INTEGRAL benchmark and real-world Franka manipulation show that TrAct improves success rates from 27% to 55% in simulation and from 49% to 76% on real-world tasks compared with the strong VLA baseline $\\pi_{0.5}$. Furthermore, TWM consistently improves video prediction quality over the action-conditioned world model (AWM). These results demonstrate that visual tracks provide an effective shared interface between robot control and visual prediction, enabling more accurate world modeling and stronger robot generalization.",
+      "analysis": {
+        "key_results": "在LIBERO-INTEGRAL基准和真实Franka操作中，TrAct相比VLA基线π0.5成功率从27%提升到55%（仿真）和49%提升到76%（真实），且TWM视频预测质量优于动作条件世界模型AWM。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出TrAct框架，通过视觉轨迹作为控制与预测的共享接口，以及配套的VLAT、TWM、VLAC模块。",
+        "method": "联合预测动作与视觉轨迹的VLAT模型，基于轨迹条件的视觉世界模型TWM，以及视觉语言奖励模型VLAC，在推理时通过预测结果选择最优动作-轨迹对。",
+        "one_sentence_summary": "本文提出TrAct框架，用视觉轨迹作为高层决策与视觉世界模型之间的中间表示，以提升机器人操作成功率。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "核心贡献围绕VLA和WAM展开：引入视觉轨迹作为VLA与世界模型之间的交互表示，直接提升动作预测和世界建模精度，是VLA/WAM方向的代表性工作。",
+        "relevance_score": 10,
+        "tags": [
+          "Robot Learning",
+          "Action Prediction",
+          "World Modeling",
+          "Vision-Language",
+          "Robot Manipulation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2608.24101",
+      "authors": [
+        "Zhi Cao",
+        "Howard Ji",
+        "Kevin Zhang",
+        "Kuangzhi Ge",
+        "Li Fei-Fei",
+        "Jiajun Wu",
+        "Huang Huang"
+      ],
+      "matched_rules": [
+        "exact:vision-language-action",
+        "exact:action-conditioned-world-model",
+        "composite:vision_language_robotics",
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-08-25T06:00:01Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2608.24101",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2608.24101",
+        "project_url": null
+      },
+      "title": "TrAct: Bridging Robot Control and Visual Prediction with Visual Tracks",
+      "title_zh": "TrAct：以视觉轨迹连接机器人控制与视觉预测",
+      "updated_at": "2026-09-01T23:59:10Z",
+      "version": 3
     }
   },
   "analysis:v1:48f236868f2c61323b614e015c8a21b895cd66eed02ac244778d16a6a3b0cf25": {
@@ -25138,6 +25576,58 @@
       "title": "REAL-Q: E2E LLM Quantization via Dynamic Gradient Descent",
       "title_zh": "REAL-Q：基于动态梯度下降的端到端大语言模型量化",
       "updated_at": "2026-08-30T06:30:31Z",
+      "version": 1
+    }
+  },
+  "analysis:v1:50602f285a63ababa99e6cc98b29ee3d7c9610b09baf1eb9f21c48d4048f4429": {
+    "key": "analysis:v1:50602f285a63ababa99e6cc98b29ee3d7c9610b09baf1eb9f21c48d4048f4429",
+    "record": {
+      "abstract": "We present Jina-OCR-v1, an end-to-end document parsing model built to serve on low-budget GPUs. It combines the compressed-vision encoder and the 3B mixture-of-experts decoder of DeepSeek-OCR, which activates about 570M parameters per token, with a FastMTP speculative decoding head that shares a single draft block recursively across K=3 prediction steps. Greedy verification makes decoding lossless. Post-training combines instruction alignment, robustness fine-tuning on difficult documents, and GRPO under dense verifiable rewards: deterministic formula, table, and structural checks that award partial credit. The training data mixes cleaned public corpora with targeted synthetic pages. At the default dynamic-resolution setting, Jina-OCR-v1 scores 91.14 on OmniDocBench v1.6 and 83.4 on olmOCR-Bench, and reaches the highest page throughput in our comparison at 2.57 pages per second. On a low-budget GPU such as the NVIDIA L4, FastMTP doubles decoding speed over greedy autoregressive decoding. The model is publicly available at https://huggingface.co/jinaai/jina-ocr-v1.",
+      "analysis": {
+        "key_results": "在OmniDocBench v1.6上得分91.14，在olmOCR-Bench上得分83.4，页面吞吐量最高达2.57页/秒；在NVIDIA L4上FastMTP将解码速度提升一倍。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出Jina-OCR-v1，一种端到端文档解析模型，采用FastMTP投机解码机制，在保证无损解码的同时显著提升低预算GPU上的推理速度。",
+        "method": "使用DeepSeek-OCR的压缩视觉编码器和3B混合专家解码器，并加入FastMTP投机解码头（递归共享草稿块，K=3步预测，贪心验证），配合指令对齐、鲁棒性微调和GRPO密集可验证奖励训练。",
+        "one_sentence_summary": "本文提出Jina-OCR-v1，一个结合压缩视觉编码器、3B MoE解码器和FastMTP投机解码的高效文档解析模型，在低预算GPU上实现高吞吐量。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "本文专注于文档解析领域的投机解码效率优化，与VLA（视觉-语言-动作）或WAM（世界-动作模型）无直接关系；但其FastMTP投机解码方法对低预算GPU上的高效推理具有参考价值，可迁移至机器人策略或世界模型的解码加速。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CL",
+        "cs.CV"
+      ],
+      "arxiv_id": "2609.03181",
+      "authors": [
+        "Alejandro Bar\\'on Garc\\'ia",
+        "Feng Wang",
+        "Emilia Garcia Casademont",
+        "Han Xiao"
+      ],
+      "matched_rules": [
+        "exact:speculative-decoding",
+        "composite:speculative_generation"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-02T21:49:21Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.03181",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.03181",
+        "project_url": "https://huggingface.co/jinaai/jina-ocr-v1"
+      },
+      "title": "Jina-OCR-v1: Efficient Document Parsing with Speculative Decoding and Dense Verifiable Rewards",
+      "title_zh": "Jina-OCR-v1：结合投機解碼與密集可驗證獎勵的高效文檔解析",
+      "updated_at": "2026-09-02T21:49:21Z",
       "version": 1
     }
   },
@@ -27888,6 +28378,62 @@
       "version": 1
     }
   },
+  "analysis:v1:593f143485816503944cdbb7745e41d0eed30d516da4a672ea5f5c1f1033af19": {
+    "key": "analysis:v1:593f143485816503944cdbb7745e41d0eed30d516da4a672ea5f5c1f1033af19",
+    "record": {
+      "abstract": "Graphical user interface (GUI) agents are increasingly used to execute natural-language instructions on user interfaces, yet real users may issue infeasible instructions due to benign mistakes. A reliable agent should not only know how to act, but also when not to act. In this work, we introduce CONFLICTGUI, a benchmark covering instruction-internal conflicts and instruction-GUI context conflicts to study conflict-aware termination. Our evaluation reveals severe execution-biased overcompliance: agents that perform well on feasible tasks often continue to execute blindly under conflicting instructions. To mitigate this behavior, we propose CONFLICTGUARD, an inference-time framework that aligns an agent's feasibility awareness with its action generation. CONFLICTGUARD contains two coupled components: a feasibility verification protocol that guides the agent to assess instruction logic and GUI-side evidence before acting, and a conditional action modulation mechanism that steers agents from over-compliant execution into termination-oriented behavior. Experiments across five widely-used agents demonstrate that CONFLICTGUARD improves average conflict task success rate significantly, while preserving normal GUI-task performance. These results validate that a lightweight inference-time intervention can substantially boost GUI Agent's competence to identify inappropriate execution scenarios and refrain from unnecessary actions.",
+      "analysis": {
+        "key_results": "在五个广泛使用的智能体上，CONFLICTGUARD显著提高了冲突任务的平均成功率，同时保持正常GUI任务性能。",
+        "limitations": "摘要未说明",
+        "main_contribution": "引入CONFLICTGUI基准和CONFLICTGUARD推理时框架，使GUI智能体能够识别不可行指令并终止执行。",
+        "method": "CONFLICTGUARD包含可行性验证协议和条件动作调制机制，在推理时引导智能体评估指令逻辑与GUI证据。",
+        "one_sentence_summary": "该论文提出了一个基准和推理时框架，用于提升GUI智能体在指令冲突时终止执行的能力。",
+        "primary_topic": "Benchmark",
+        "relation_to_vla_wam": "该论文针对GUI智能体，而非机器人操作或虚拟世界模型（VLA/WAM）任务，但所提出的冲突感知终止方法对具身智能体的安全终止研究有方法论借鉴价值。",
+        "relevance_score": 6,
+        "tags": [
+          "Evaluation",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.AI"
+      ],
+      "arxiv_id": "2609.03438",
+      "authors": [
+        "Zhaoyuan Huang",
+        "Tianjie Ju",
+        "Pengzhou Cheng",
+        "Zheng Wu",
+        "Yansi Li",
+        "Chuanbiao Song",
+        "Jun Lan",
+        "Huijia Zhu",
+        "Weiqiang Wang",
+        "Zhuosheng Zhang"
+      ],
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-03T06:48:41Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.03438",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.03438",
+        "project_url": null
+      },
+      "title": "Do GUI Agents Know When Not to Act? Enabling Conflict-Aware Termination for Multimodal GUI Agents",
+      "title_zh": "GUI智能体是否知道何时不行动？面向多模态GUI智能体的冲突感知终止",
+      "updated_at": "2026-09-03T06:48:41Z",
+      "version": 1
+    }
+  },
   "analysis:v1:595ded6ed46198184cd5af1d244b10b73afd10c55a09d18e57d466687e61803d": {
     "key": "analysis:v1:595ded6ed46198184cd5af1d244b10b73afd10c55a09d18e57d466687e61803d",
     "record": {
@@ -28509,6 +29055,61 @@
       "version": 2
     }
   },
+  "analysis:v1:5b615e9ae4a2da77f1881630de7718023ca13e5d1e25aa887173ccb92bc5a031": {
+    "key": "analysis:v1:5b615e9ae4a2da77f1881630de7718023ca13e5d1e25aa887173ccb92bc5a031",
+    "record": {
+      "abstract": "Recent vision-language-action models offer a path toward robots with broader repertoires than conventional task-specific systems. Construction deployment, however, requires a precise inventory of worker activities and the capabilities needed to execute them. We present TARCAT, an occupation-grounded taxonomy derived from 91 O*NET tasks across seven high-employment construction occupations and 30 instructional videos of physical work. TARCAT defines 41 action primitives in 12 groups and three classes and provides a mechanism for composing parameterized primitive sequences into reusable skills. This human-interpretable structure can organize demonstrations, specify robot requirements, and support coding agents that retrieve and extend skill libraries. We also demonstrate selected primitives on a DOBOT CR3 arm with a CRAFT hand. TARCAT thereby provides a common vocabulary for analyzing human work and developing general-purpose construction robots. Annotations are available at https://github.com/AICPS/TARCAT-Taxonomy.",
+      "analysis": {
+        "key_results": "定义了41个动作原语、12个组和3个类别；在DOBOT CR3机械臂（配备CRAFT手）上演示了选定的原语。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出TARCAT，一个面向建筑施工机器人的职业任务活动分类法，包含41个动作原语、12个组和3个类别，并提供将参数化原语序列组合成可重用技能的机制。",
+        "method": "从7个高就业建筑施工职业的91个O*NET任务和30个物理作业教学视频中提取并构建分类法；使用该结构组织演示、指定机器人需求，并支持编码智能体检索和扩展技能库。",
+        "one_sentence_summary": "本文提出TARCAT，一个基于职业任务和教学视频的建筑施工任务分类法，将工人活动定义为可组合的动作原语和技能，并用DOBOT CR3机械臂对部分原语进行演示验证。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该分类法为视觉-语言-动作（VLA）模型在建筑施工机器人领域的应用提供了任务表示和动作原语词汇，可作为VLA模型的顶层任务分解与技能组织基础，对本站VLA主题具有直接支撑价值。",
+        "relevance_score": 9,
+        "tags": [
+          "Vision-Language",
+          "Robot Manipulation",
+          "Action Prediction",
+          "Data",
+          "Policy Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2608.25395",
+      "authors": [
+        "Sadman Sakib",
+        "Zhangyi None Peng",
+        "Yujie Pang",
+        "Yu Otsuki",
+        "Mohammad Abdullah Al Faruque"
+      ],
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-08-26T05:42:54Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2608.25395",
+        "code_url": "https://github.com/AICPS/TARCAT-Taxonomy",
+        "pdf_url": "https://arxiv.org/pdf/2608.25395",
+        "project_url": null
+      },
+      "title": "A Taxonomy of Construction Task Activities for Robot Workers",
+      "title_zh": "面向机器人作业工人的建筑施工任务活动分类法",
+      "updated_at": "2026-09-02T21:48:20Z",
+      "version": 2
+    }
+  },
   "analysis:v1:5b9f8b76b92aa454c121654f9f66fc07ed14cf8ad2f4f87681862814b246c675": {
     "key": "analysis:v1:5b9f8b76b92aa454c121654f9f66fc07ed14cf8ad2f4f87681862814b246c675",
     "record": {
@@ -28854,6 +29455,57 @@
       "title_zh": "屏幕截图还是工具？在混合GUI-MCP计算机使用代理中引导工具使用并管理多模态上下文",
       "updated_at": "2026-08-04T08:35:51Z",
       "version": 1
+    }
+  },
+  "analysis:v1:5cc1c0e2b34aed4a9b6e1228849bc03e299c4145841a0992a4cf27e206dbc670": {
+    "key": "analysis:v1:5cc1c0e2b34aed4a9b6e1228849bc03e299c4145841a0992a4cf27e206dbc670",
+    "record": {
+      "abstract": "As one of the most critical challenges in large language models, contextual faithfulness directly determines their reliability in knowledge-intensive applications. This task is particularly challenging as it requires balancing factual consistency with generation efficiency. Contrastive decoding methods require dual forward passes (with and without context) to compare model outputs, doubling inference computational overhead, while post-training alignment demands extensive reinforcement learning with substantial computational overhead. To address this challenge, we present SFAD, a speculative decoding framework that enhances contextual faithfulness without inference degradation. We first construct ConFide, a preference dataset with fine-grained atomic perturbations, to train a context-faithful draft model via Direct Preference Optimization. During inference, Epistemic Friction detects potential hallucinations by quantifying distributional tension weighted by specialist certainty. When friction exceeds the threshold, Asymmetric Logit Steering refines the target distribution through residual-based logit injection; otherwise, standard speculation proceeds. Extensive experiments demonstrate that SFAD substantially improves faithfulness while achieving $2.48\\times$ speedup, offering a practical solution for efficient LLMs.",
+      "analysis": {
+        "key_results": "在保持2.48倍加速的同时显著提升上下文忠实性。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出SFAD框架，通过构建ConFide偏好数据集、训练上下文忠实草稿模型、以及引入Epistemic Friction和Asymmetric Logit Steering机制，在不牺牲推理速度的情况下提高上下文忠实性。",
+        "method": "构建ConFide偏好数据集训练草稿模型；推理中通过Epistemic Friction检测潜在幻觉，并使用Asymmetric Logit Steering进行残差logit注入细化目标分布，否则执行标准推测。",
+        "one_sentence_summary": "提出SFAD推测解码框架，在保持与标准推测解码相同加速效果的同时显著提升大语言模型的上下文忠实性。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "该论文聚焦于大语言模型的推测解码效率优化，未直接涉及VLA、WAM或机器人领域，但所述推测解码技术对VLA/WAM等模型的高效推理具有潜在参考价值。",
+        "relevance_score": 8,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CL"
+      ],
+      "arxiv_id": "2609.00796",
+      "authors": [
+        "Guanqiao Chen",
+        "Di Wang",
+        "Lijie Hu"
+      ],
+      "matched_rules": [
+        "exact:speculative-decoding",
+        "composite:speculative_generation",
+        "composite:draft_verification_decoding"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-01T06:46:54Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.00796",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.00796",
+        "project_url": null
+      },
+      "title": "SFAD: Speculative Factuality-Aware Decoding",
+      "title_zh": "SFAD：面向上下文忠实性的推测事实感知解码框架",
+      "updated_at": "2026-09-03T03:00:30Z",
+      "version": 2
     }
   },
   "analysis:v1:5cdd70e6e9799cba5ece3b04ea55e7ab05160075772262c39232c6edb245fa69": {
@@ -30236,6 +30888,63 @@
       "version": 1
     }
   },
+  "analysis:v1:6144c9736ae26e4621c2d9e04c2f1d1f1b1ca66186695908a84200b71654b05c": {
+    "key": "analysis:v1:6144c9736ae26e4621c2d9e04c2f1d1f1b1ca66186695908a84200b71654b05c",
+    "record": {
+      "abstract": "Action-conditioned JEPA world models enable planning toward visually specified goals without reconstructing future pixels, yet latent prediction alone does not explicitly encourage the learned representations to retain information relevant to robotic control. We introduce an end-to-end JEPA world model that augments latent prediction with inverse dynamics (IDM) and state alignment (SA). While inverse dynamics discourages latent collapse and makes latent transitions informative of the actions that produced them, state alignment grounds consecutive representations in their associated physical configuration and motion. Across four benchmark tasks, our model attains the highest success rates on TwoRoom (100%), PushT (98%), and OGBench-Cube (87%), while performing comparably to LeWorldModel on Reacher. Our ablation further shows that adding state alignment consistently improves planning success over IDM alone across all four tasks. Although LeWorldModel, our primary baseline, attains higher average straightening on OGBench-Cube, transition-subspace analysis shows that its transition energy is concentrated in a substantially lower-dimensional subspace. Our state-aligned model exhibits a higher effective transition dimension than LeWorldModel and improves planning over IDM alone, supporting state alignment as an effective complement to inverse dynamics for robotic planning.",
+      "analysis": {
+        "key_results": "在四个基准任务上，TwoRoom成功率100%，PushT成功率98%，OGBench-Cube成功率87%，Reacher与LeWorldModel相当；消融实验表明状态对齐在所有四个任务上均比单独使用逆动力学提升规划成功率。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出一种增强的JEPA世界模型，结合逆动力学（IDM）和状态对齐（SA），使潜在表示保留机器人控制相关信息，并在多个基准任务上取得最高成功率。",
+        "method": "在JEPA世界模型中引入逆动力学（IDM）和状态对齐（SA），通过端到端训练增强潜在预测，其中逆动力学防止潜在坍缩并使潜在转移能指示产生它的动作，状态对齐将连续表示与其对应物理构型和运动对齐。",
+        "one_sentence_summary": "该论文提出一种端到端的JEPA世界模型，通过在潜在预测中融入逆动力学和状态对齐，提升目标条件机器人规划的性能。",
+        "primary_topic": "WAM",
+        "relation_to_vla_wam": "该论文以世界模型（WAM）为核心，针对目标条件机器人规划，引入逆动力学和状态对齐，对本站关注的机器人世界建模和策略学习具有直接价值。",
+        "relevance_score": 9,
+        "tags": [
+          "World Modeling",
+          "Action Prediction",
+          "Robot Learning",
+          "Robot Manipulation",
+          "Policy Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "arxiv_id": "2609.03565",
+      "authors": [
+        "Muyuan Liu (1)",
+        "Yue Huang (1)",
+        "Zheng Liang (1)",
+        "Xiang Gao (1) ((1) GENISOM AI",
+        "Beijing",
+        "China)"
+      ],
+      "matched_rules": [
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-03T09:11:13Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.03565",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.03565",
+        "project_url": null
+      },
+      "title": "Toward Physically Grounded JEPA World Models for Goal-Conditioned Robotic Planning",
+      "title_zh": "面向目标条件机器人规划的物理接地JEPA世界模型",
+      "updated_at": "2026-09-03T09:11:13Z",
+      "version": 1
+    }
+  },
   "analysis:v1:6164c6d0d56fc08124be6f7a7d35b5fb51c531036784ff9e2c1695e54219fc08": {
     "key": "analysis:v1:6164c6d0d56fc08124be6f7a7d35b5fb51c531036784ff9e2c1695e54219fc08",
     "record": {
@@ -30948,6 +31657,59 @@
       "title_zh": "基于语义3D高斯溅射的具身多模态接地对开放词汇移动操作",
       "updated_at": "2026-08-11T10:16:30Z",
       "version": 1
+    }
+  },
+  "analysis:v1:641556bd478d8a2c75e7404cc5f5331133f26a429b0941c4cb6f871e1c60965b": {
+    "key": "analysis:v1:641556bd478d8a2c75e7404cc5f5331133f26a429b0941c4cb6f871e1c60965b",
+    "record": {
+      "abstract": "Post-training quantization (PTQ) is essential for deploying LLMs under memory and bandwidth constraints. However, extreme low-bit quantization remains highly sensitive to activation outliers and anisotropic weight curvature. Existing incoherence-based PTQ methods mitigate this issue with fixed randomized Hadamard transforms (RHTs), which improve quantization robustness but cannot adapt the rotated basis to the layer, calibration distribution, or quantizer. We introduce HARP (Hadamard-preconditioned Adaptive Rotation Processor), a learnable structured two-sided orthogonal processor that replaces fixed Hadamard mixing while preserving exact full-precision equivalence. HARP represents each rotation as a product of sparse butterfly-like block-orthogonal stages, supports non-power-of-two dimensions through Mixed-Radix schedules, and initializes to the RHT processor up to a fixed permutation. Fitted only on calibration data, HARP adapts the quantization basis to each layer and backend. Across 2--4-bit settings on Llama models from 1B to 70B, HARP consistently improves perplexity and yields its clearest zero-shot gains at 2 bits; a 2-bit Qwen3-8B experiment shows the same transfer beyond the Llama family. HARP also preserves deployment efficiency: on Llama 2 7B at 2 bits, it reaches 128 tok/s, retaining 90% of RHT throughput (142 tok/s) and running approximately $2.1\\times$ faster than FP16 (61 tok/s).",
+      "analysis": {
+        "key_results": "在Llama 1B至70B的2-4位设置上，HARP持续改善困惑度，并在2位时获得最明显的零样本增益；2位Qwen3-8B实验显示跨模型族迁移；在Llama 2 7B 2位时达到128 tok/s，保持RHT吞吐量的90%，比FP16快2.1倍。",
+        "limitations": "摘要未说明",
+        "main_contribution": "引入HARP，一种可学习的结构化双侧正交处理器，用于替代固定的随机Hadamard变换，以提高低比特后训练量化的鲁棒性。",
+        "method": "HARP将每个旋转表示为稀疏蝴蝶状块正交阶段的乘积，支持非2的幂维度通过Mixed-Radix调度，并从RHT处理器初始化，仅在校准数据上适配量化基础。",
+        "one_sentence_summary": "提出了一种可学习的结构化正交处理器HARP，用于替代固定Hadamard旋转，提升极端低比特下的LLM量化性能。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文聚焦于通用LLM的低比特量化，不直接涉及VLA、WAM或机器人领域。但HARP作为一种通用量化技术，可能对后续在VLA/WAM模型上应用低比特量化具有方法论参考价值。",
+        "relevance_score": 6,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "arxiv_id": "2605.29843",
+      "authors": [
+        "Artur Zagitov",
+        "Gleb Molodtsov",
+        "Aleksandr Beznosikov"
+      ],
+      "matched_rules": [
+        "exact:llm-quantization",
+        "exact:post-training-quantization",
+        "exact:low-bit-quantization",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-05-28T12:24:15Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2605.29843",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2605.29843",
+        "project_url": null
+      },
+      "title": "HARP: Hadamard-Preconditioned Adaptive Rotation Processor for Extreme LLM Quantization",
+      "title_zh": "HARP：用于极端LLM量化的Hadamard预条件自适应旋转处理器",
+      "updated_at": "2026-09-02T20:21:34Z",
+      "version": 2
     }
   },
   "analysis:v1:6442177dd256a3fdfb6eff7564c92a6cdfcd0237ba0a050d3c513d4212e2c891": {
@@ -32372,6 +33134,60 @@
       "title_zh": "近似推测解码",
       "updated_at": "2026-08-30T16:55:25Z",
       "version": 3
+    }
+  },
+  "analysis:v1:67a07a4596c7dbd3855d5793003db786f346c3787c48f8ad94c59eff527c5576": {
+    "key": "analysis:v1:67a07a4596c7dbd3855d5793003db786f346c3787c48f8ad94c59eff527c5576",
+    "record": {
+      "abstract": "Robotic perception from a single viewpoint is often limited by self-occlusion and incomplete surface visibility. This paper presents DARP(Dual-Arm Robotic Perception) https://doi.org/10.21227/rmv3-be47, a calibrated dual-arm RGB-D-IR dataset for object-centered robotic perception using two independently moving eye-in-hand manipulators positioned on opposite sides of a shared tabletop workspace. Each arm carries an Intel RealSense sensor that continuously records RGB, depth, and stereo infrared data while synchronized robot joint states are logged for pose recovery. Objects are placed without fixed poses or marked locations, and the acquisition procedure performs automatic localization, cross-arm confirmation, adaptive viewpoint generation, and continuous multimodal recording. DARP contains ten unique tabletop objects and preserves the original sensor recordings, robot-state logs, object-level metadata, and calibration information required to reconstruct camera trajectories in a shared metric frame. To evaluate the geometric consistency of the acquisition, we implement a deterministic multi-view fusion pipeline that converts calibrated RGB-D observations into complementary partial point clouds and measured surface meshes without using learned or generative completion methods. Evaluation on 224 held-out RGB-D keyframes comprising 1,563,466 three-dimensional query points yields a median point-to-mesh distance of 2.13~mm and an RMSE of 4.04~mm, with 96.56\\% of points within 10~mm of the measured-surface mesh. DARP is intended as a reusable resource for multi-view reconstruction, collaborative robotic perception, multimodal fusion, active perception, and future learning-based reasoning over partial object observations.",
+      "analysis": {
+        "key_results": "在224个测试关键帧上，点云到网格中位距离2.13mm，RMSE 4.04mm，96.56%点在10mm内。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出DARP数据集，包含10个桌面物体、同步的双机械臂RGB-D-IR数据、机器人关节状态及标定信息，并提供了多视角融合基线评估。",
+        "method": "双机械臂标定、自动定位与跨臂确认、自适应视点生成、连续多模态记录，以及确定性多视图融合管线。",
+        "one_sentence_summary": "本文发布DARP数据集，利用双机械臂眼在手传感器采集RGB-D-IR数据，用于多视角机器人感知和三维重建研究。",
+        "primary_topic": "Dataset",
+        "relation_to_vla_wam": "该数据集为机器人感知提供多视角RGB-D-IR数据和机器人状态，支持机器人操作中的物体重建和感知，可作为训练VLA模型或世界模型的数据资源，但不直接涉及动作预测或世界模型。",
+        "relevance_score": 9,
+        "tags": [
+          "Data",
+          "Robot Manipulation",
+          "Robot Learning",
+          "Evaluation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.CV"
+      ],
+      "arxiv_id": "2608.31002",
+      "authors": [
+        "Manish Kansana",
+        "Mohammed Yusuf Mujawar",
+        "Sudip Mittal",
+        "Shahram Rahimi",
+        "Noorbakhsh Amiri Golilarz"
+      ],
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-08-31T15:53:41Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2608.31002",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2608.31002",
+        "project_url": null
+      },
+      "title": "DARP: A Calibrated Dual-Arm RGB-D-IR Dataset for Multi-View Robotic Perception",
+      "title_zh": "DARP：用于多视角机器人感知的标定双机械臂RGB-D-IR数据集",
+      "updated_at": "2026-09-02T19:13:16Z",
+      "version": 2
     }
   },
   "analysis:v1:67c73f05ef62ecf62a85c867871985e7144b1861af03e3f964b6c1ae6b93e836": {
@@ -34251,6 +35067,67 @@
       "version": 1
     }
   },
+  "analysis:v1:6ee2a9a9e1251a9d86b341c819eae7c6e4a33739ee31cbe351ee96623043c3ba": {
+    "key": "analysis:v1:6ee2a9a9e1251a9d86b341c819eae7c6e4a33739ee31cbe351ee96623043c3ba",
+    "record": {
+      "abstract": "Large language model agents are increasingly deployed as autonomous loops. Starting from one human goal, such a system repeatedly discovers work, plans, executes tool calls, verifies outcomes and persists state across many unattended iterations. The agent safeguards in wide use, however, are defined over a single trajectory, and their safety state is re-initialized when the next trajectory begins. We show that this is a failure of composition rather than an implementation detail. Our central result is a separation: against an attack whose evidence is fragmented across several iterations, every trajectory-scoped monitor has a true-positive rate equal to its false-positive rate, however expressive it is, because the evidence it would need never appears in the window it sees, whereas a monitor retaining cross-iteration state separates the two perfectly. We further show that the obvious repair of carrying a geometrically decaying risk score is insufficient, because the cooling-off period a patient adversary must wait is a constant that does not grow with the horizon $N$. We then present LoopHarness, which restores a persistent, non-decaying safety state at the loop level. Under mediated commits and an arbiter detection floor $\\delta_M$, it bounds the expected number of unauthorized irreversible actions by $B+m-1+m/\\delta_M$, a constant in $N$, of which the $B+m-1$ term is decided by a model-free rule and therefore survives a fully colluding verifier. We give a complete evaluation protocol on native Agent-SafetyBench tasks with paired clean and attacked episodes, an outer-state attack suite whose decisive evidence exists only across iterations, per-module ablations, and an adaptive white-box red team.",
+      "analysis": {
+        "key_results": "已授权的不可逆动作期望数受限于常数 B+m-1+m/δ_M，与迭代轮数 N 无关。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出循环级别的持久非衰减安全状态机制 LoopHarness，用于解决跨迭代攻击证据分散导致的监控失效问题。",
+        "method": "在循环层面引入持久安全状态，通过中介提交和仲裁检测阈值 δ_M 限制未授权不可逆动作的期望数量。",
+        "one_sentence_summary": "本文研究自主大语言模型智能体在循环执行中的安全监控问题，提出跨迭代持久安全状态方法。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "本文主题为大型语言模型智能体的安全监控与组合性，不涉及 VLA、机器人世界模型或高效推理/量化，与本站主题无直接关系。",
+        "relevance_score": 1,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "arxiv_id": "2608.27141",
+      "authors": [
+        "Chenhao Wu",
+        "Haoxuan Jia",
+        "Yang Liu",
+        "Yingguang Yang",
+        "Yuhan Lin",
+        "Chongyang Zhang",
+        "Hao Zheng",
+        "Yulin Huang",
+        "Jianshen Zhang",
+        "Yongzhi Qi",
+        "Shang Luo",
+        "Kefu Xu",
+        "Jifeng Zhu",
+        "Bin Chong"
+      ],
+      "matched_rules": [
+        "composite:draft_verification_decoding"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-08-27T13:52:31Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2608.27141",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2608.27141",
+        "project_url": null
+      },
+      "title": "Safety Does Not Compose: Non-Decaying Loop State for Autonomous LLM Agents",
+      "title_zh": "安全不具组合性：面向自主大语言模型智能体的非衰减循环状态",
+      "updated_at": "2026-09-03T04:56:36Z",
+      "version": 4
+    }
+  },
   "analysis:v1:6f13d2b9d608e10a8ba29030c8ea8c995d5988748a2e10cecfd83185e9c9631b": {
     "key": "analysis:v1:6f13d2b9d608e10a8ba29030c8ea8c995d5988748a2e10cecfd83185e9c9631b",
     "record": {
@@ -35944,6 +36821,61 @@
       "title_zh": "RoboProcessBench：面向视觉语言机器人操作的过程感知理解基准",
       "updated_at": "2026-07-28T07:26:47Z",
       "version": 2
+    }
+  },
+  "analysis:v1:774003fecfbd4345b2c3663d2d41530d323bdc9ddec57786fdde10434d08dd32": {
+    "key": "analysis:v1:774003fecfbd4345b2c3663d2d41530d323bdc9ddec57786fdde10434d08dd32",
+    "record": {
+      "abstract": "Evaluating robot manipulation policies is becoming increasingly important as generalist models, particularly vision-language-action (VLA) models, are deployed on physical robots. However, conventional real-world evaluation remains labor-intensive, unstable, and insufficiently informative. It requires repeated hardware trials, manual scene resets, and continuous operator monitoring, may produce different policy rankings across repeated evaluations, and primarily relies on success-rate metrics that provide limited information about execution quality. In contrast, humans assess robot performance by observing and comparing complete behaviors rather than relying solely on binary success outcomes. To this end, we propose R2S-Eval, an evaluation pipeline that combines real-to-sim calibration with vision-language model (VLM) preference evaluation. The real-to-sim component efficiently generates rollout videos in a simulator calibrated to the real-world evaluation setting, thereby reducing the need for repeated hardware trials. The VLM evaluator assesses the execution quality of rollout videos and produces pairwise preferences, which are subsequently aggregated into policy rankings. We further introduce a protocol to assess whether the proposed evaluation pipeline yields validated policy conclusions while mitigating the key challenges of conventional real-world evaluation. Experiments in both simulation and real-world settings demonstrate that R2S-Eval produces reliable and stable policy conclusions, achieves agreement with human preferences, substantially reduces repeated hardware-operation effort, and reveals behavior-quality differences that are not captured by binary success labels. In general, R2S-Eval advances robot evaluation from manual success counting toward automated, statistically stable, and quality-aware evaluation of robot behavior. Project page: https://r2s-eval.github.io.",
+      "analysis": {
+        "key_results": "在仿真和真实世界实验中，R2S-Eval 产生可靠且稳定的策略结论，与人类偏好一致，显著减少重复硬件操作，并揭示二元成功标签无法捕捉的行为质量差异。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出R2S-Eval评估流水线，通过真实到仿真校准减少硬件重复试验，并利用VLM评估执行质量以生成策略排序，解决传统评估劳动密集、不稳定且信息不足的问题。",
+        "method": "结合真实到仿真校准生成仿真 rollout 视频，利用视觉语言模型（VLM）对视频执行质量进行评估并产生成对偏好，聚合为策略排序；同时提出验证协议确保评估结论可靠。",
+        "one_sentence_summary": "提出R2S-Eval评估流水线，将真实到仿真校准与VLM偏好评估结合，自动生成并评估机器人操作策略的执行质量。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该工作聚焦于VLA机器人操作策略的评估，通过仿真与VLM自动评估策略执行质量，与VLA主题高度相关，但不涉及世界模型或世界-动作建模。",
+        "relevance_score": 8,
+        "tags": [
+          "Evaluation",
+          "Robot Manipulation",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2609.03276",
+      "authors": [
+        "Yidi Wang",
+        "Feixiang Ruan",
+        "Ruoqu Chen",
+        "Jie Yin",
+        "Yang Yu",
+        "Mengdi Xu",
+        "Kaifeng Zhang"
+      ],
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-03T02:08:16Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.03276",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.03276",
+        "project_url": "https://r2s-eval.github.io/"
+      },
+      "title": "R2S-Eval: Robot Evaluation with Real-to-Sim Calibration via Vision-Language Models",
+      "title_zh": "R2S-Eval：基于实到虚校准与视觉语言模型的机器人策略评估方法",
+      "updated_at": "2026-09-03T02:08:16Z",
+      "version": 1
     }
   },
   "analysis:v1:77b9ae1bf93b62b09c10cd176865bcc6823358562b5c12c20b1a9d9c13f8df8a": {
@@ -41283,6 +42215,62 @@
       "title_zh": "MineExplorer：评估Minecraft中多模态大语言模型智能体的开放世界探索能力",
       "updated_at": "2026-08-27T14:41:02Z",
       "version": 3
+    }
+  },
+  "analysis:v1:8a8e0683e6a929919473364e9da09bd47ca6b7dd9e87f1491c8a4782f955dcb9": {
+    "key": "analysis:v1:8a8e0683e6a929919473364e9da09bd47ca6b7dd9e87f1491c8a4782f955dcb9",
+    "record": {
+      "abstract": "Long-horizon indoor mobile manipulation (MoMa) requires robots to execute extended navigation-manipulation sequences whose feasibility depends on state changes induced by preceding skills. Vision-language models (VLMs) can decompose instructions into plausible skill sequences, but they do not reliably track such cumulative embodiment constraints or revise a plan when execution deviates from expectation. We present MoMaStage, a map-light framework for state-consistent planning and closed-loop execution in long-horizon indoor MoMa. MoMaStage couples a frozen VLM with robot execution through three mechanisms: (i) a hierarchical library of grounded, executable skills and a topology-only projection of a Skill-State Graph (SSG) that constrains the VLM's planning space; (ii) an SSG verifier that propagates scene-region and gripper-occupancy state to reject infeasible plans before execution; and (iii) an event-driven monitor that triggers graph-grounded repair only when an observed outcome invalidates the remaining plan. The SSG captures the compact embodiment state needed for skill sequencing without requiring a dense scene map, while geometric and contact-level conditions remain within the underlying controllers. Experiments in physics-rich simulation and on a real mobile manipulator show that MoMaStage improves planning validity and long-horizon execution survival over the evaluated baselines, while reducing latency and model token consumption.",
+      "analysis": {
+        "key_results": "在物理仿真和真实移动操作平台上，MoMaStage 相比评估的基线方法提升了规划有效性和长时程执行存活率，同时降低了延迟和模型 token 消耗。",
+        "limitations": "摘要未说明。",
+        "main_contribution": "提出 MoMaStage 框架，将冻结的视觉语言模型与机器人执行耦合，通过层次化技能库、技能状态图（SSG）验证器和事件驱动监控器，提升长时程移动操作任务的规划有效性和执行成功率。",
+        "method": "构建仅拓扑投影的技能状态图（SSG）约束 VLM 的规划空间，利用 SSG 验证器传播场景区域和抓手占用状态以拒绝不可行规划，并通过事件驱动监控器在观测结果失效时触发基于图的修正。",
+        "one_sentence_summary": "MoMaStage 通过技能状态图约束视觉语言模型的规划空间，实现长时程室内移动操作中状态一致的规划与闭环执行。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该工作属于视觉语言模型驱动的机器人操作规划，使用技能状态图建模操作引起的状态变化，与 VLA 中语言条件策略和动作执行约束高度相关，但未直接涉及高效推理或世界模型。",
+        "relevance_score": 8,
+        "tags": [
+          "Robot Manipulation",
+          "Vision-Language",
+          "Evaluation",
+          "Robot Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2603.08383",
+      "authors": [
+        "Chenxu Li",
+        "Zixuan Chen",
+        "Yetao Li",
+        "Jiapeng Xu",
+        "Hongyu Ding",
+        "Jieqi Shi",
+        "Jing Huo",
+        "Yang Gao"
+      ],
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-03-09T13:43:38Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2603.08383",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2603.08383",
+        "project_url": null
+      },
+      "title": "MoMaStage: Skill-State Graph Guided Planning and Closed-Loop Execution for Long-Horizon Indoor Mobile Manipulation",
+      "title_zh": "MoMaStage：面向长时程室内移动操作的状态一致规划与闭环执行框架",
+      "updated_at": "2026-09-03T09:27:38Z",
+      "version": 2
     }
   },
   "analysis:v1:8aa097f5ce7026834dd06257230ca85703754b8eba75b2ed3f11d93b155201b3": {
@@ -48167,6 +49155,56 @@
       "version": 2
     }
   },
+  "analysis:v1:a2f4c01c6c4e7dd5ac8607c86645fc0c11233a0ead0286b24e5534acfb2171ca": {
+    "key": "analysis:v1:a2f4c01c6c4e7dd5ac8607c86645fc0c11233a0ead0286b24e5534acfb2171ca",
+    "record": {
+      "abstract": "We propose the first compression approach for image-to-shape Diffusion Transformers (DiTs) that substantially reduces model size while preserving geometric fidelity. Despite remarkable progress in 3D shape generation, large DiT-based models remain computationally prohibitive in resource-constrained settings. Furthermore, it is difficult to directly transfer existing diffusion model compression strategies developed for different domains to 3D generation, and prior 3D efficiency approaches focus primarily on inference speed rather than backbone compression. To address this limitation, we build a geometry-aware compression framework tailored to image-to-shape DiTs. Guided by the observation that 3D DiT layers exhibit non-uniform importance for geometry synthesis, we introduce a vitality-guided framework integrating structured pruning, adaptive quantization, and targeted fine-tuning. Our method achieves up to 66% model-size reduction across state-of-the-art image-to-3D models while maintaining synthesis fidelity comparable to full-sized counterparts. This highlights the potential of our framework as a plug-and-play solution for efficient 3D shape generation across diverse models.",
+      "analysis": {
+        "key_results": "在多个最先进的图像到3D模型上实现高达66%的模型尺寸缩减，同时合成保真度与全尺寸模型相当。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出首个针对图像到形状扩散Transformer的压缩方法，实现大幅模型缩减同时保持几何保真度。",
+        "method": "活力引导的几何感知压缩框架，包括结构化剪枝、自适应量化和定向微调。",
+        "one_sentence_summary": "提出一种面向图像到形状扩散Transformer的几何感知压缩框架，结合结构化剪枝、自适应量化和定向微调，实现模型规模缩减高达66%且保持几何保真度。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "该工作针对图像到形状的3D生成扩散Transformer压缩，不直接涉及视觉语言动作模型或世界行动模型，但所用的模型量化与高效推理技术对机器人策略或世界模型的压缩具有潜在借鉴价值。",
+        "relevance_score": 6,
+        "tags": [
+          "Efficient Inference",
+          "Model Quantization"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV"
+      ],
+      "arxiv_id": "2607.00382",
+      "authors": [
+        "Jaeah Lee",
+        "Hyunjin Kim",
+        "Jaewoong Cho",
+        "Gihyun Kwon"
+      ],
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-07-01T03:26:41Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2607.00382",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2607.00382",
+        "project_url": null
+      },
+      "title": "Vitality-Aware Compression for Efficient Image-to-Shape Diffusion Transformers",
+      "title_zh": "面向高效图像到形状扩散Transformer的活力感知压缩",
+      "updated_at": "2026-09-03T03:18:57Z",
+      "version": 2
+    }
+  },
   "analysis:v1:a3241d2b136f65cafdead8d583011a9819027046ef0204c09d180003899b0826": {
     "key": "analysis:v1:a3241d2b136f65cafdead8d583011a9819027046ef0204c09d180003899b0826",
     "record": {
@@ -53326,6 +54364,57 @@
       "version": 1
     }
   },
+  "analysis:v1:b10926950a31ae4743cb6670b9c84b3402ed9e948b27236039517faa0f53a42c": {
+    "key": "analysis:v1:b10926950a31ae4743cb6670b9c84b3402ed9e948b27236039517faa0f53a42c",
+    "record": {
+      "abstract": "Semantic identifiers (SIDs) represent entities as hierarchical token sequences for generative retrieval and recommendation. Residual-quantization tokenizers construct these sequences by selecting a codeword at each level and passing a residual to the next. We view this process as progressive commonality removal: each token captures a component shared within its group, while later tokens should model the remaining differences. This view reveals three limitations: a corpus-wide shared component can consume first-level capacity, hard assignment ignores graded similarities to nearby codewords, and full-codeword subtraction can leave variation along the selected-codeword direction in the next residual. We therefore develop our solution in the post-hoc setting, where residual construction is not constrained by input reconstruction. Specifically, we propose PRQ-KMeans, which removes the global-mean component, refines centroids with Top-k similarity-weighted updates, and replaces full-codeword subtraction with a projection residual that removes each representation's selected-centroid component. Experiments on a large-scale industrial search dataset and four public recommendation benchmarks show that PRQ-KMeans achieves the strongest overall performance among the evaluated tokenizers, including gains of up to 7.4% in HitRate and 11.8% in MRR on the industrial dataset.",
+      "analysis": {
+        "key_results": "在一个大规模工业搜索数据集和四个公开推荐基准上，PRQ-KMeans取得了评估标记化方法中的最佳整体性能，其中在工业数据集上HitRate最高提升7.4%，MRR最高提升11.8%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出PRQ-KMeans，一种后验设置下的投影残差量化方法，通过移除全局均值、使用Top-k相似度加权更新质心以及采用投影残差替代全码字减法来改进语义ID标记化。",
+        "method": "PRQ-KMeans：移除全局均值分量，使用Top-k相似度加权更新优化质心，并用投影残差替代全码字减法，以逐步移除公共分量并保留必要的差异信息。",
+        "one_sentence_summary": "该论文提出了一种改进的残差量化标记化方法PRQ-KMeans，用于生成式检索和推荐中的语义标识符。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文聚焦于生成式检索和推荐任务中的量化编码，与VLA（视觉-语言-动作）和WAM（世界模型）主题无直接关系。然而，其提出的投影残差量化思想作为一种模型量化方案，可能对高效推理具有参考价值，但与机器人策略或世界模型无直接结合。",
+        "relevance_score": 6,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG"
+      ],
+      "arxiv_id": "2608.24207",
+      "authors": [
+        "Yunxiao Luo",
+        "Siyuan Wang",
+        "Ben Chen",
+        "Chenyi Lei",
+        "Qingpeng Cai"
+      ],
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-08-25T08:18:57Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2608.24207",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2608.24207",
+        "project_url": null
+      },
+      "title": "PRQ-KMeans: Projection Residual Quantization for Semantic ID Tokenization",
+      "title_zh": "PRQ-KMeans：用于语义ID标记化的投影残差量化方法",
+      "updated_at": "2026-09-03T03:14:59Z",
+      "version": 2
+    }
+  },
   "analysis:v1:b17434dc1d3b3c2676d6be9dd59d064f8a541612f491bbde527764e61c11db93": {
     "key": "analysis:v1:b17434dc1d3b3c2676d6be9dd59d064f8a541612f491bbde527764e61c11db93",
     "record": {
@@ -55076,6 +56165,65 @@
       "title": "Fine-Grained Action Recognition with Cross-Attentive Latent Sparse Experts",
       "title_zh": "基于交叉注意力潜在稀疏专家融合的细粒度动作识别",
       "updated_at": "2026-08-14T14:05:03Z",
+      "version": 2
+    }
+  },
+  "analysis:v1:b8455c4a6b69bfbcd51297f3a1cb5ff64287b268a621982cec2526f686b89c1e": {
+    "key": "analysis:v1:b8455c4a6b69bfbcd51297f3a1cb5ff64287b268a621982cec2526f686b89c1e",
+    "record": {
+      "abstract": "Real-time embodied social interaction places two equally demanding requirements on an agent: continuously generating fluent multimodal interaction behavior, and proactively reasoning over accumulated dialogue and visual context to decide when to take initiative. These requirements must both be satisfied under a strict latency budget, making them difficult to meet simultaneously. We present ProAct, a dual-system framework that manages these time-critical requirements by integrating a low-latency Behavioral System for streaming multimodal interaction with a slower Cognitive System that performs long-horizon social reasoning and produces high-level proactive intentions. The Cognitive System incorporates an efficient memory mechanism and a user-motivation prediction module to reason over accumulated dialogue and visual context and determine when proactive intervention is appropriate. The Behavioral System further includes an intention-conditioned streaming flow-matching motion generator with a disentangled ControlNet branch, which translates deliberative intentions into continuous non-verbal behavior without disrupting interaction fluency. We deploy ProAct on a physical humanoid robot and validate the framework through comprehensive experiments, including real-world user studies, motion-generation benchmarks, and evaluation on ProActBench, a new, targeted benchmark for evaluating proactive trigger detection and restraint in embodied interaction.",
+      "analysis": {
+        "key_results": "在真实人机用户研究、运动生成基准以及新提出的ProActBench基准上验证了框架的有效性，涵盖主动触发检测与抑制。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出ProAct双系统框架，集成低延迟行为系统进行流式多模态交互，以及认知系统进行长程社交推理并生成高层主动意图，同时在物理人形机器人上实现与验证。",
+        "method": "行为系统采用意图条件流匹配运动生成器和解耦ControlNet分支；认知系统包含记忆机制和用户动机预测模块；系统整体在严格延迟预算下协调工作。",
+        "one_sentence_summary": "提出一个双系统框架ProAct，结合低延迟行为系统与高延迟认知系统，实现人形机器人的实时多模态社交交互和主动介入推理。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "本文核心为具身社交交互中的视觉-语言-动作协同框架，属于VLA相关研究；其中低延迟行为系统与认知系统的解耦设计对WAM的实时动作生成与长时规划具有参考价值。",
+        "relevance_score": 8,
+        "tags": [
+          "Vision-Language",
+          "Action Prediction",
+          "Policy Learning",
+          "Robot Learning",
+          "Robot Manipulation",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.CV",
+        "cs.GR"
+      ],
+      "arxiv_id": "2602.14048",
+      "authors": [
+        "Zeyi Zhang",
+        "Zixi Kang",
+        "Ruijie Zhao",
+        "Yusen Feng",
+        "Biao Jiang",
+        "Hanyu Ji",
+        "Libin Liu"
+      ],
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-02-15T08:27:34Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2602.14048",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2602.14048",
+        "project_url": "https://proactrobot.github.io/"
+      },
+      "title": "ProAct: Harnessing Streaming Motion Generation and Agentic Reasoning for Real-Time Embodied Social Interaction",
+      "title_zh": "ProAct：融合流式运动生成与主动推理的实时具身社交交互框架",
+      "updated_at": "2026-09-03T04:53:28Z",
       "version": 2
     }
   },
@@ -61245,6 +62393,53 @@
       "version": 1
     }
   },
+  "analysis:v1:cae595dcebaf03a93473990d62a9abb0b48f7d036c45d27e503a094ecb0f522a": {
+    "key": "analysis:v1:cae595dcebaf03a93473990d62a9abb0b48f7d036c45d27e503a094ecb0f522a",
+    "record": {
+      "abstract": "After a weak verifier accepts a large-language-model response, a second call may resample or reroute. Because correctness is hidden, action selection is an identification problem. We order three gates: recoverable stopping debt, two-sided FIT action support, and held-out value from an outcome-blind selector. In a pinned 152-query MBPP+ experiment, a Qwen2.5-14B Base-only false-positive stop leaves +2.592 percentage points of Qwen2.5-7B recovery (query-cluster 95% interval [+1.618, +3.664]). Separately, after 7B Base-test rejection, fixed escalation to 14B exceeds leave-one-out 7B resampling by +2.882 points [+0.931, +5.201]; this is fixed-action ranking, not conditional selection. An all-episode audit produces a +2.697-point realized-maximum gap, but for two actions this statistic equals (1/2)E|Delta| - (1/2)|E Delta| and contains no observable-history term. It lies inside an exact-fold exchangeable reference (mean +3.158; 95% interval [+2.434, +3.947]). The audit unconditionally acts on 1,520 episodes: 1,240 observable stops and 280 verifier rejections; 198 stops are evaluator-only false positives. Neither tested outcome-blind controller improves on fixed rerouting. A separate LiveCodeBench ladder has all-zero FIT action advantages despite exclusive TEST rescues. A preregistered BigCodeBench support gate then finds only 23/19 and 22/19 signed episodes/queries against minima of 25/20, so L1-L4, DEV, and TEST stay unopened. Stopping debt exists, but current evidence does not identify when to resample rather than reroute.",
+      "analysis": {
+        "key_results": "在 MBPP+ 固定 152 查询实验中，14B Base 模型仅假阳性停止留下 +2.592 个百分点的 7B 恢复空间（95% 区间 [+1.618, +3.664]）；7B Base 测试拒绝后，固定升级至 14B 比留一法 7B 重采样高出 +2.882 个百分点（区间 [+0.931, +5.201]）；全事件审计产生 +2.697 点的实现最大差距。BigCodeBench 支持门控未达到最低要求，L1-L4、DEV 和 TEST 保持未打开。",
+        "limitations": "当前证据无法识别何时应重采样而不是重路由；结果盲控制器没有改善固定重路由；BigCodeBench 支持门控未达到最低要求。",
+        "main_contribution": "论文提出了三个门控（可恢复停止债务、双侧 FIT 动作支持、结果盲选择器的留出值），并在 MBPP+ 固定实验中评估了停止、重采样与重路由的策略。",
+        "method": "论文将弱验证器接受后的动作选择建模为识别问题，并通过三个门控以及留出值、交换参考等统计方法评估固定重路由与重采样策略。",
+        "one_sentence_summary": "论文研究大语言模型在被弱验证器接受后的动作选择问题，将正确性隐藏的情形建模为识别问题，并通过实验表明重采样与重路由之间的选择缺乏可识别的证据。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "论文专注于大语言模型的推测解码中的动作选择问题，不涉及 VLA、WAM 或机器人动作-世界建模，与本站主题无直接关系。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG"
+      ],
+      "arxiv_id": "2607.08665",
+      "authors": [
+        "Teng-Ruei Chen"
+      ],
+      "matched_rules": [
+        "composite:draft_verification_decoding"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-07-09T16:34:15Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2607.08665",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2607.08665",
+        "project_url": null
+      },
+      "title": "Resample or Reroute? Recoverable Stopping Debt Without Identified Action Selection",
+      "title_zh": "重采样还是重路由？可恢复停止债务下未能识别的动作选择",
+      "updated_at": "2026-09-02T11:48:21Z",
+      "version": 3
+    }
+  },
   "analysis:v1:cb23cc24e072325d3314d4d3be1c20fff83ce09f5e52a34222d53103fe7e1f1f": {
     "key": "analysis:v1:cb23cc24e072325d3314d4d3be1c20fff83ce09f5e52a34222d53103fe7e1f1f",
     "record": {
@@ -62315,6 +63510,64 @@
       "title_zh": "D-VLC：未知环境中异构多机器人系统的去中心化视觉-语言协作框架",
       "updated_at": "2026-08-03T03:22:03Z",
       "version": 2
+    }
+  },
+  "analysis:v1:cf1feeb7f7452566a53898a7ab8158c976ce0b411b4904442c308cc12b43d82b": {
+    "key": "analysis:v1:cf1feeb7f7452566a53898a7ab8158c976ce0b411b4904442c308cc12b43d82b",
+    "record": {
+      "abstract": "Visual fluency in generated video does not imply physical reliability, and a scalar quality score alone is incapable of indicating the obligation a clip violates or the moment it fails. We present VeriPhy, an auditable physical-verification system in which a text-only planner compiles the prompt into typed physical obligations and a statically validated execution plan before any frame is observed. During execution, observations gate and scope only declared calls to frozen low-level experts (e.g., segmentation and tracking, counting, eleven typed physical measurements over the resulting tracks, depth, OCR, and audio-event detection). Each action returns a provenance-carrying evidence record whose payload, when usable, is either a typed measurement or an explicitly tagged learned state. Typed resolvers and fixed composition map usable records to a three-valued state (supported, contradicted, or unknown, surfaced as plausible, implausible, or abstain) with full provenance, so that every verdict is traceable to the evidence that produced it. We anchor evaluation in a 1,500-clip corpus of human-annotated flaw records that localize real generation failures in prompt reference, space, and time. On a 149-clip core carrying 304 such records, VeriPhy accounts for 228, against 164 for a published question-decomposition evaluator given the same clips and the same claims. Recall alone does not separate it from prompting the same backbone monolithically, which reaches 222; what separates them is that each decision retains its evidence record and provenance, making the traces auditable one verdict at a time and usable as the interface through which a critic verdict could be written back into generation.",
+      "analysis": {
+        "key_results": "在包含149个剪辑的304条人工标注缺陷记录核心集上，VeriPhy 识别出228条，而对比的已发表问题分解评估器为164条；整体提示同一骨干网络可达到222条召回，但 VeriPhy 的优势在于每个决策保留证据记录和溯源，使其可审计并支持写回生成。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出了 VeriPhy 系统，用于对生成视频进行可审计的物理正确性验证，输出带完整溯源的证据记录和三值判定，并支持写回生成以进行精炼。",
+        "method": "使用文本规划器生成类型化物理义务和静态验证的执行计划，在执行中通过门控作用域调用冻结的低层专家（分割、跟踪、计数、深度、OCR、音频事件检测等），并由类型化解析器和固定组合将证据记录映射为三值状态。",
+        "one_sentence_summary": "VeriPhy 是一个可审计的物理验证系统，通过文本规划器将提示编译为类型化物理义务，并在生成过程中对冻结的低层专家进行有据可查的调用，从而为世界模型评估提供可追溯的判定。",
+        "primary_topic": "World Model",
+        "relation_to_vla_wam": "该工作针对世界模型评估与精炼，与 WAM（World-Action Model）中的世界建模和评估相关，但不涉及 VLA 或机器人动作预测，而是专注于视频生成中的物理合理性验证。",
+        "relevance_score": 6,
+        "tags": [
+          "Evaluation",
+          "World Modeling",
+          "Video Generation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV"
+      ],
+      "arxiv_id": "2609.03153",
+      "authors": [
+        "Wenzhuo Xu",
+        "Yuchen Zhu",
+        "Chongjian Ge",
+        "Xuan Shen",
+        "Jing Shi",
+        "Jason Kuen",
+        "Yongxin Chen",
+        "Molei Tao",
+        "Christopher McComb",
+        "Noelia Grande Guti\\'errez",
+        "Jiuxiang Gu"
+      ],
+      "matched_rules": [
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-02T20:36:45Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.03153",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.03153",
+        "project_url": null
+      },
+      "title": "VeriPhy: Agentic Physical Reasoning for World Model Evaluation and Refinement",
+      "title_zh": "VeriPhy：面向世界模型评估与精化的智能体物理推理",
+      "updated_at": "2026-09-02T20:36:45Z",
+      "version": 1
     }
   },
   "analysis:v1:cf625b0890eb9177877658ee5f3d4a36e4f936018f6aa124c1355a09350f06b2": {
@@ -64672,6 +65925,61 @@
       "title": "Recursive Synthesis for Long-Horizon Terminal Tasks",
       "title_zh": "面向长程终端任务的递归合成框架",
       "updated_at": "2026-08-05T23:24:26Z",
+      "version": 1
+    }
+  },
+  "analysis:v1:d5e26475f1ca1ca11e790e52504176257001d29c2284f67e0b50a7900516a6d7": {
+    "key": "analysis:v1:d5e26475f1ca1ca11e790e52504176257001d29c2284f67e0b50a7900516a6d7",
+    "record": {
+      "abstract": "World models are an emerging paradigm in representation learning in which an agent jointly learns state-action dynamics and observation models from offline trajectory data, enabling multi-step planning and trajectory prediction with uncertainty estimates. They have shown strong results in robotics and game environments, but, to the best of our knowledge, have not previously been applied to the space domain. This paper introduces a world model-based approach to cooperative and non-cooperative spacecraft rendezvous and proximity operations. First, we introduce an open-source, JAX-based International Space Station (ISS) docking environment supporting parallel GPU simulation of spacecraft orbit and attitude dynamics, generating the thousands of state-action transitions that world model training requires. Second, we introduce Out-of-this-World-Model, a transformer-based world model that encodes relative kinematic states and body-fixed camera imagery into a latent state and predicts its evolution under commanded thrusts and torques using one-step flow matching. It produces a distribution over future observations, capturing stochastic dynamics and per-timestep uncertainty, and outperforms DreamerV3-style posterior-correction baselines with fewer trainable parameters and hyperparameters. Third, we apply the approach to a capsule autonomously docking with the ISS under keep-out-zone constraints, demonstrating improved sample efficiency and task performance over reinforcement learning baselines (53% versus 29% docking success across ports), better out-of-distribution generalization (on held-out ports the world model more than doubles baseline success, 40% versus 17%), and detection of anomalous objects encountered during approach with 98% classification accuracy. We open-source the simulation environment and model architecture to enable further study of this paradigm.",
+      "analysis": {
+        "key_results": "该模型在对接成功率上优于强化学习基线（53%对29%），在保持外推端口上成功率提高一倍以上（40%对17%），异常物体分类准确率达98%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "引入Out-of-this-World-Model，一个基于Transformer的世界模型，将相对运动学状态和体载相机图像编码到潜在状态，并通过一步流匹配预测其演化，用于航天器交会与接近操作。",
+        "method": "构建了一个开源的JAX国际空间站对接环境，支持并行GPU仿真；提出Out-of-this-World-Model，采用Transformer编码器、一步流匹配进行潜在状态预测，并输出未来观测的分布以捕捉随机动力学和逐步不确定性。",
+        "one_sentence_summary": "本文提出面向航天器交会与接近操作的GPU加速天体动力学世界模型，具备不确定性与异常检测能力。",
+        "primary_topic": "World Model",
+        "relation_to_vla_wam": "本文属于机器人世界模型（WAM）范畴，尽管面向航天器而非地面机器人，但所提出的世界模型框架、潜在动力学预测、不确定性建模及模拟环境对通用WAM研究具有方法论参考价值。",
+        "relevance_score": 9,
+        "tags": [
+          "World Modeling",
+          "Robot Learning",
+          "Simulation",
+          "Policy Learning",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.SY",
+        "eess.SY"
+      ],
+      "arxiv_id": "2609.03067",
+      "authors": [
+        "Duncan Eddy",
+        "Isaac R. Ward",
+        "Grace Ra Kim",
+        "and Mykel J. Kochenderfer"
+      ],
+      "matched_rules": [
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-02T18:39:40Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.03067",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.03067",
+        "project_url": null
+      },
+      "title": "GPU-Accelerated Astrodynamics World Models for Spacecraft Rendezvous and Proximity Operations",
+      "title_zh": "GPU加速的天体动力学世界模型用于航天器交会与接近操作",
+      "updated_at": "2026-09-02T18:39:40Z",
       "version": 1
     }
   },
@@ -67299,6 +68607,62 @@
       "version": 1
     }
   },
+  "analysis:v1:dc465ac695a45a34b154c0bdb90f4397c1f6f43344dd39abdbb5530ca173bb3c": {
+    "key": "analysis:v1:dc465ac695a45a34b154c0bdb90f4397c1f6f43344dd39abdbb5530ca173bb3c",
+    "record": {
+      "abstract": "Action-conditioned video models require large-scale visual data paired with control signals that are temporally aligned with the resulting scene transitions. Such supervision is difficult to obtain from ordinary real-world video because the actions that caused each visual change are typically unknown. We present a large-scale synthetic data production pipeline built on Unreal Engine for generating action-conditioned, multi-view video. To accommodate the different execution requirements of real-time physics and high-quality offline rendering, the pipeline executes trajectory generation and final rendering in two stages: Stage I runs real physics in PIE and records per-frame character states, control inputs, and camera states into an intermediate trajectory representation; Stage II replays those trajectories in a new engine process and renders them offline with Movie Render Queue (MRQ). Around this core, we develop a distributed production system with cache-aware task partitioning, node-local slot scheduling, automated scene screening, aesthetic and luminance filtering, partial-output recovery, asynchronous upload, and continuous cluster health monitoring. The production cluster contains 25 servers with eight NVIDIA RTX 5090 GPUs per server. From 2,384 asset packs, 429 levels were retained for production together with a pool of 40 humanoid characters. The pipeline has produced 2,691 hours of 1080p video and 6,076 hours of 720p video. We describe the system architecture, the implementation decisions that emerged from production failures, and the limitations of using perceptual quality proxies for world-model data curation. The pipeline described in this report constitutes the Unreal Engine synthetic-data production component used in EchoWM.",
+      "analysis": {
+        "key_results": "生产集群由25台服务器组成，每台配备8块NVIDIA RTX 5090 GPU；从2384个资产包中筛选出429个关卡和40个人形角色；共生成2691小时的1080p视频和6076小时的720p视频。",
+        "limitations": "使用感知质量代理指标进行世界模型数据筛选存在局限性。",
+        "main_contribution": "提出了一个基于虚幻引擎的大规模动作条件多视角视频合成数据生产流水线，包含两阶段轨迹生成与离线渲染、分布式生产系统及质量控制机制。",
+        "method": "采用两阶段流水线：第一阶段在 PIE 中运行实时物理并记录角色状态、控制输入和相机状态到中间轨迹表示；第二阶段在新引擎进程中重放轨迹并使用 Movie Render Queue 离线渲染。同时开发了分布式生产系统，包括缓存感知任务划分、节点本地槽调度、自动场景筛选、美学与亮度过滤、部分输出恢复、异步上传和集群健康监控。",
+        "one_sentence_summary": "本文提出并实现了一个大规模合成数据生产流水线，利用虚幻引擎生成动作条件、多视角视频，为世界模型预训练提供数据。",
+        "primary_topic": "World Model",
+        "relation_to_vla_wam": "该数据流水线直接服务于世界模型（WM）的训练，是 EchoWM 的虚幻引擎合成数据生产组件，为机器人世界建模和动作条件视频生成提供大规模监督数据，与 VLA/WAM 主题高度相关。",
+        "relevance_score": 9,
+        "tags": [
+          "Data",
+          "World Modeling",
+          "Video Generation",
+          "Simulation",
+          "Robot Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.GR"
+      ],
+      "arxiv_id": "2609.03557",
+      "authors": [
+        "Haoyu Wang",
+        "Songchun Zhang",
+        "Haoran Li",
+        "Haoyang Huang",
+        "Zeyue Xue",
+        "Nan Duan"
+      ],
+      "matched_rules": [
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-03T08:58:04Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.03557",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.03557",
+        "project_url": null
+      },
+      "title": "Building Pretraining Data for World Models: An Unreal Engine-Based Pipeline for Action-Conditioned Video Generation",
+      "title_zh": "为世界模型构建预训练数据：基于虚幻引擎的动作条件视频生成流水线",
+      "updated_at": "2026-09-03T08:58:04Z",
+      "version": 1
+    }
+  },
   "analysis:v1:dc4944e31c1823568d2f64ecbe2916593750ca6105a4fb705d99cdefb61822b6": {
     "key": "analysis:v1:dc4944e31c1823568d2f64ecbe2916593750ca6105a4fb705d99cdefb61822b6",
     "record": {
@@ -67861,6 +69225,61 @@
       "title_zh": "VidNum：诊断视频基础数值推理中VLM失效模式的基准",
       "updated_at": "2026-07-29T07:08:51Z",
       "version": 5
+    }
+  },
+  "analysis:v1:ddf80cce985a01de4b95b88371670e20d83335696e6af1745d58e599fe6065f6": {
+    "key": "analysis:v1:ddf80cce985a01de4b95b88371670e20d83335696e6af1745d58e599fe6065f6",
+    "record": {
+      "abstract": "Audio tokenizers serve as the discrete interface between continuous audio and Audio Language Models (ALMs), but existing tokenizers often struggle to support both understanding and generation. Reconstruction-oriented codecs preserve acoustic fidelity but lack rich semantics, while semantic-aware tokenizers typically rely on separate semantic and acoustic streams, introducing redundancy or misalignment. We propose \\textbf{EntangleCodec}, a unified discrete audio tokenizer that learns caption-aligned semantic-acoustic representations before quantization. By aligning audio with rich captions rather than ASR transcripts, EntangleCodec captures linguistic content, speaker identity, emotion, prosody, and acoustic scenes within a compact token stream. A flow-matching diffusion decoder further enables high-quality reconstruction across speech, music, and general audio. EntangleCodec achieves reconstruction quality competitive with specialized codecs, outperforms all codec-based baselines on audio understanding by up to \\textbf{+7.4\\%} on MMAR, and supports both TTS and TTA generation in a unified framework. Furthermore, EntangleCodec-based audio language models demonstrate strong scaling behavior: even at \\textit{0.6B} parameters, the model surpasses specialized continuous-representation LLMs with over \\textit{13B} parameters across three benchmarks using \\textbf{22$\\times$} fewer parameters; scaling to \\textit{8B} further establishes new state-of-the-art results on MMAR, highlighting that representation quality is as critical as model scale in audio language modeling. Code and model weights are available at https://github.com/luckyerr/EntangleCodec.",
+      "analysis": {
+        "key_results": "重建质量与专用编解码器相当；在音频理解任务MMAR上比基于编解码器的基线最高提升+7.4%；支持统一的TTS和TTA生成；基于EntangleCodec的ALM在0.6B参数时超过13B连续表征LLM（三个基准，参数少22倍），8B模型在MMAR上取得新SOTA。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出EntangleCodec，一种统一的离散音频tokenizer，通过将音频与丰富字幕（而非ASR转录）对齐，在量化前学习语义-声学纠缠表征；使用流匹配扩散解码器实现跨语音、音乐和通用音频的高质量重建。",
+        "method": "在量化前进行字幕对齐的语义-声学表征学习；使用流匹配扩散解码器进行高质量重建。",
+        "one_sentence_summary": "提出一个统一的离散音频tokenizer，在量化前学习与字幕对齐的语义-声学表征，实现高质量重建与理解/生成任务。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文专注于音频tokenizer和音频语言模型效率（量化、离散表示），不涉及视觉语言动作（VLA）或世界行动模型（WAM）。虽然标签中包括量化，但与本网站主题无直接关联。",
+        "relevance_score": 1,
+        "tags": [
+          "Vision-Language",
+          "Model Quantization"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.SD",
+        "cs.AI",
+        "eess.AS"
+      ],
+      "arxiv_id": "2606.02739",
+      "authors": [
+        "Hui Li",
+        "Yangfan Gao",
+        "Junlin Shang",
+        "Changhao Jiang",
+        "Tao Gui",
+        "Qi Zhang",
+        "Xuanjing Huang"
+      ],
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-06-01T18:05:18Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2606.02739",
+        "code_url": "https://github.com/luckyerr/EntangleCodec",
+        "pdf_url": "https://arxiv.org/pdf/2606.02739",
+        "project_url": null
+      },
+      "title": "EntangleCodec: A Unified Discrete Audio Tokenizer via Semantic-Acoustic Entanglement",
+      "title_zh": "EntangleCodec：语义-声学纠缠的统一离散音频tokenizer",
+      "updated_at": "2026-09-03T07:24:50Z",
+      "version": 2
     }
   },
   "analysis:v1:de188712489ae6e22d550a3fe5cbe7635d10dc7346ead8eedcac34c1a11bcf67": {
@@ -72746,6 +74165,63 @@
       "version": 1
     }
   },
+  "analysis:v1:ecf4c0b0f596a8c92f6ec2aa8ff41ac55fb72d33272fb00f83136f3ef639a152": {
+    "key": "analysis:v1:ecf4c0b0f596a8c92f6ec2aa8ff41ac55fb72d33272fb00f83136f3ef639a152",
+    "record": {
+      "abstract": "World models offer a promising paradigm for autonomous driving by predicting how traffic scenes may evolve and using such predictions to support action generation. However, existing approaches either separate future prediction from action generation or jointly predict them at the same temporal scale, making it difficult to simultaneously achieve long-horizon anticipation and responsive, observation-grounded decision making. We present Drive-HWM, a hierarchical slow--fast world modeling framework that organizes future representation prediction and action generation at complementary temporal scales. The slow world model predicts multi-step future representations to capture extended scene evolution. To explicitly model the abundant motion dynamics in driving environments, we introduce Dynamic-Aware Latents learned through optical-flow prediction. Guided by these future representations, the fast model uses a lightweight multimodal backbone and an autoregressive expert to jointly predict the next frame and the immediate action from the latest observation. Next-frame prediction encourages the fast model to capture imminent scene evolution, while one-step action generation allows decisions to be continuously updated as new observations arrive. Extensive experiments on NAVSIM v1 and v2 demonstrate the strong driving performance of Drive-HWM. Comprehensive ablation studies further validate the effectiveness of the hierarchical slow--fast design, dynamics-aware future representations, and joint next-frame and action prediction.",
+      "analysis": {
+        "key_results": "在 NAVSIM v1 和 v2 上的大量实验验证了 Drive-HWM 的强驾驶性能；消融实验验证了分层设计、动态感知未来表征和联合预测的有效性。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出分层快慢世界模型框架 Drive-HWM，将未来表征预测与动作生成组织在不同时间尺度上，并引入通过光流预测学习的动态感知潜变量。",
+        "method": "慢世界模型预测多步未来表征并学习动态感知潜变量；快模型在潜变量引导下联合预测下一帧和即时动作。",
+        "one_sentence_summary": "Drive-HWM 提出一种分层快慢世界模型框架，通过动态感知潜变量引导未来表征预测与即时动作生成，用于自动驾驶。",
+        "primary_topic": "World Model",
+        "relation_to_vla_wam": "本文聚焦于驾驶场景的分层世界模型，将环境动态建模与动作生成相结合，为机器人世界模型和策略学习提供直接相关的方法与见解。",
+        "relevance_score": 10,
+        "tags": [
+          "World Modeling",
+          "Policy Learning",
+          "Vision-Language",
+          "Robot Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV"
+      ],
+      "arxiv_id": "2609.03572",
+      "authors": [
+        "Zhaoxin Fan",
+        "Tianbao Zhang",
+        "Wenjun Wu",
+        "Xiaofeng Wang",
+        "Yeying Jin",
+        "Jian Zhao",
+        "Zheng Zhu",
+        "Shuicheng Yan"
+      ],
+      "matched_rules": [
+        "composite:vision_language_robotics",
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-03T09:21:19Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.03572",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.03572",
+        "project_url": null
+      },
+      "title": "Drive-HWM: Hierarchical World Models for Dynamic-Latent Guided Autonomous Driving",
+      "title_zh": "Drive-HWM：用于动态潜在引导自动驾驶的分层世界模型",
+      "updated_at": "2026-09-03T09:21:19Z",
+      "version": 1
+    }
+  },
   "analysis:v1:ecf7b91f46ef82b5e27e8fce3ad7a4373969100ee90ac170cd064f0dbb31898f": {
     "key": "analysis:v1:ecf7b91f46ef82b5e27e8fce3ad7a4373969100ee90ac170cd064f0dbb31898f",
     "record": {
@@ -72846,6 +74322,65 @@
       "title_zh": "用于事实性检查与幻觉检测的分解蕴涵方法",
       "updated_at": "2026-08-06T09:52:09Z",
       "version": 1
+    }
+  },
+  "analysis:v1:ed3e6908b0159d3399613378c4a0cfd5aca0e1ed6e2f2742cfd993c7d5fa2873": {
+    "key": "analysis:v1:ed3e6908b0159d3399613378c4a0cfd5aca0e1ed6e2f2742cfd993c7d5fa2873",
+    "record": {
+      "abstract": "Large language models (LLMs) are increasingly evolving from conversational assistants into agents capable of operating external digital environments. Graphical user interface (GUI) agents play an important role in this transition, as many real-world workflows remain accessible only through user-facing software interfaces. However, despite recent progress on general computer-use benchmarks, domain-specific professional standard operating procedures (SOPs) remain challenging for GUI agents because they often involve implicit domain knowledge, software-specific conventions, and task-level verification requirements. We introduce OmegaUse-SOP, a human-in-the-loop SOP Engineering system for transforming human demonstrations of professional computer use into reusable SOP skills for GUI agents. Analogous to prompt engineering, SOP Engineering iteratively refines demonstrations, execution rules, and domain knowledge to convert professional SOPs into reusable GUI-agent skills. OmegaUse-SOP consists of four modules: Observe, Reason, Configure, and Execute. Together, these modules record expert operations as multimodal GUI traces, abstract low-level events into semantic step-level instructions, incorporate domain rules and task-specific parameters, and execute the resulting skills in live GUI environments through step-wise grounding, action generation, and verification. To demonstrate its effectiveness, we collaborate with a power-sector client and test OmegaUse-SOP on photovoltaic simulation workflows in PVsyst 7.2. The results suggest that OmegaUse-SOP can improve GUI-agent reliability on professional SOP tasks, highlighting a practical path toward deploying GUI agents in domain-specific professional software environments.",
+      "analysis": {
+        "key_results": "在PVsyst 7.2光伏仿真工作流中的测试表明，OmegaUse-SOP能提高GUI智能体在专业SOP任务上的可靠性。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出OmegaUse-SOP，一个将人类演示转化为可复用SOP技能的人机协作系统，用于专业领域的GUI智能体。",
+        "method": "通过四个模块（Observe, Reason, Configure, Execute）记录专家操作、抽象事件为语义指令、融入领域规则和参数，并在真实GUI环境中执行与验证。",
+        "one_sentence_summary": "提出一种人机协作的SOP工程系统OmegaUse-SOP，将专家操作演示转化为可复用的GUI智能体技能，并在光伏仿真软件PVsyst上验证了可靠性提升。",
+        "primary_topic": "Dataset",
+        "relation_to_vla_wam": "无直接关系。该工作聚焦GUI智能体和SOP技能生成，不涉及机器人视觉-语言-动作模型或世界模型。",
+        "relevance_score": 3,
+        "tags": [
+          "Data",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.HC",
+        "cs.AI"
+      ],
+      "arxiv_id": "2609.02149",
+      "authors": [
+        "Yixiong Xiao",
+        "Lang An",
+        "Hucheng Yang",
+        "Pinxue Ma",
+        "Yongquan Chen",
+        "Jingjia Cao",
+        "Yusai Zhao",
+        "Ting Wang",
+        "Ting Liu",
+        "Siqi Bao",
+        "Jingbo Zhou",
+        "Hua Wu"
+      ],
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-02T06:03:18Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.02149",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.02149",
+        "project_url": null
+      },
+      "title": "OmegaUse-SOP: SOP Engineering for Professional Computer Use from Human Demonstrations",
+      "title_zh": "OmegaUse-SOP：从人类演示进行专业计算机使用的SOP工程",
+      "updated_at": "2026-09-03T08:01:01Z",
+      "version": 2
     }
   },
   "analysis:v1:ed7bb0e0d8456d9af59118eb11b761a732ca0dce7405b1189fe66b64a1a6be26": {

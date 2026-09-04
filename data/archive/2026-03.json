@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-03T08:40:40.793519Z",
+  "generated_at": "2026-09-04T00:39:59.843362Z",
   "papers": [
     {
       "abstract": "Vision-Language-Action (VLA) models that encode actions using a discrete tokenization scheme have been widely adopted for robotic manipulation, but existing decoding paradigms remain fundamentally limited. Whether actions are decoded sequentially by autoregressive VLAs or in parallel by discrete diffusion VLAs, once a token is generated, it is typically fixed and cannot be revised in subsequent iterations. Consequently, early token errors cannot be effectively corrected later. We propose DFM-VLA, a discrete flow matching VLA that iteratively refines action tokens. DFM-VLA models a token-level probability velocity field that dynamically updates the full action sequence across refinement iterations. We investigate two approaches to constructing the velocity field: an auxiliary velocity-head formulation and an embedding-guided formulation. To further improve prediction accuracy, we introduce a metric-aligned action tokenizer (MAAT) tailored to the coarse-to-fine nature of DFM, together with a two-stage decoding strategy. Extensive experiments on CALVIN, LIBERO, LIBERO-Plus, and real-world manipulation tasks demonstrate the effectiveness of our approach. Our project is available at https://chris1220313648.github.io/DFM-VLA/.",
@@ -288,6 +288,77 @@
       "title_zh": "RoboHarness：一种通过上下文自适应增强视觉-语言-动作模型鲁棒性的记忆增强策略 harness",
       "updated_at": "2026-08-12T07:57:23Z",
       "version": 3
+    },
+    {
+      "abstract": "Sign language production requires more than hand motion generation. Non-manual features, including mouthings, eyebrow raises, gaze, and head movements, are grammatically obligatory and cannot be recovered from manual articulators alone. Existing 3D production systems face two barriers to integrating them: the body-model fittings they train on retain a facial space too low-dimensional to encode these articulations, and, if richer representations are adopted, standard discrete tokenization suffers from codebook collapse, leaving most of the expression space largely unreachable. We propose SMPL-FX, which couples FLAME's rich expression space with the SMPL-X body parameterisation, and tokenize the resulting representation with modality-specific Finite Scalar Quantization VAEs for body, hands, and face, raising face codebook utilization from 78.8% to 99.0%. M3T is an autoregressive transformer trained on this multi-modal motion vocabulary, with an auxiliary sign-to-text translation objective that encourages semantically grounded embeddings. Across three standard datasets, M3T achieves state-of-the-art sign language production quality, and on NMFs-CSL, where signs are distinguishable only by non-manual features, our model reaches 58.3% accuracy against 49.0% for the strongest comparable baseline, without large-scale sign-language pre-training. Project page: https://cogvis-cvssp.github.io/papers/m3t/",
+      "analysis": {
+        "key_results": "面部码本利用率从78.8%提升至99.0%；在三个标准数据集上取得最先进手语生成质量；在NMFs-CSL上准确率达到58.3%，优于最强基线49.0%，且无需大规模手语预训练。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出SMPL-FX表示和M3T自回归Transformer，结合模态特定有限标量量化VAE与手语翻译辅助目标，实现高质量手语生成。",
+        "method": "将FLAME面部表情空间与SMPL-X身体参数耦合，使用模态特定有限标量量化VAE对身体、手部和面部进行离散令牌化，并用自回归Transformer通过辅助手语到文本翻译目标进行训练。",
+        "one_sentence_summary": "提出SMPL-FX与M3T，通过模态特定有限标量量化VAE和自回归Transformer提升手语生成中非手部特征的表现。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "该工作专注于手语生成中的离散标记化和量化技术，不直接涉及机器人视觉-语言-动作模型或世界模型。但其模态特定有限标量量化方法为多模态动作建模提供了高效离散表示思路，对机器人动作令牌化和高效推理具有潜在参考价值。",
+        "relevance_score": 8,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV"
+      ],
+      "arxiv_id": "2603.23617",
+      "authors": [
+        "Alexandre Symeonidis-Herzig",
+        "Jianhe Low",
+        "Ozge Mercanoglu Sincan",
+        "Richard Bowden"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-04T00:39:59.843362Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2603.23617/v2/fig1-panel1.png"
+            ],
+            "caption": "Sign Motion Language Model. A single autoregressive transformer operates over slp ( text → \\rightarrow motion ) and slt ( motion → \\rightarrow text ) within a shared token space. Spoken-language tokens and modality-specific FSQ motion tokens (body, hands, face) are embedded and concatenated with identifiers (e.g., <ASL_RH> , <DGS_F> ) to distinguish language and articulator streams. The model predicts the next token across all modalities using a unified encoder and decoder with modality-specific output heads. The translation supervision grounds token embeddings, improving production quality. Both production and translation share the same encoder-decoder parameters.",
+            "image_urls": [
+              "https://arxiv.org/html/2603.23617v2/M3T-MLM.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2603.23617v2#S3.F1"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2603.23617v2",
+        "recovery_checked_at": "2026-09-04T00:42:36.691623Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-03-24T18:05:03Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2603.23617",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2603.23617",
+        "project_url": "https://cogvis-cvssp.github.io/papers/m3t/"
+      },
+      "title": "M3T: Discrete Multi-Modal Motion Tokens for Sign Language Production",
+      "title_zh": "M3T：面向手语生成的离散多模态运动令牌",
+      "updated_at": "2026-09-02T19:07:43Z",
+      "version": 2
     },
     {
       "abstract": "Deploying safety-critical agents requires anticipating the consequences of actions before they are executed. While world models offer a paradigm for this proactive foresight, current approaches relying on visual simulation incur prohibitive latencies, often exceeding several seconds per step. In this work, we challenge the assumption that visual processing is necessary for failure prevention. We show that a trained policy's latent state, combined with its planned actions, already encodes sufficient information to anticipate action outcomes, making visual simulation redundant for failure prevention. To this end, we introduce DILLO (DIstiLLed Language-ActiOn World Model), a fast steering layer that shifts the paradigm from \"simulate-then-act\" to \"describe-then-act.\" DILLO is trained via cross-modal distillation, where a privileged Vision Language Model teacher annotates offline trajectories and a latent-conditioned Large Language Model student learns to predict semantic outcomes. This creates a text-only inference path, bypassing heavy visual generation entirely, achieving a 14x speedup over baselines. Experiments on MetaWorld and LIBERO demonstrate that DILLO produces high-fidelity descriptions of the next state and is able to steer the policy, improving episode success rate by up to 15 pp and 9.3 pp on average across tasks. Code is available at github.com/MaxPappa/DILLO.",
@@ -791,7 +862,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2603.18853v3",
-        "recovery_checked_at": "2026-09-03T08:42:06.900289Z",
+        "recovery_checked_at": "2026-09-04T00:42:36.691623Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -816,6 +887,89 @@
       "title_zh": "学习变化：通过可微分无线世界模型实现高效AAV轨迹学习",
       "updated_at": "2026-08-20T07:35:28Z",
       "version": 3
+    },
+    {
+      "abstract": "Neural Representations for Videos (NeRV) encode entire video sequences within neural network parameters, offering an alternative paradigm to conventional video codecs. However, the convolutional decoder of NeRV remains computationally expensive and memory intensive, limiting its deployment in resource-constrained environments. This paper proposes LRConv-NeRV, an efficient NeRV variant that replaces selected dense 3x3 convolutional layers with structured low-rank separable convolutions, trained end-to-end within the decoder architecture. By progressively applying low-rank factorization from the largest to earlier decoder stages, LRConv-NeRV enables controllable trade-offs between reconstruction quality and efficiency. Extensive experiments demonstrate that applying LRConv only to the final decoder stage reduces decoder complexity by 68%, from 201.9 to 64.9 GFLOPs, and model size by 9.3%, while incurring negligible quality loss and achieving approximately 9.2% bitrate reduction. Under INT8 post-training quantization, LRConv-NeRV preserves reconstruction quality close to the dense NeRV baseline, whereas more aggressive factorization of early decoder stages leads to disproportionate quality degradation. Compared to existing work under layer-aligned settings, LRConv-NeRV achieves a more favorable efficiency versus quality trade-off, offering substantial GFLOPs and parameter reductions while maintaining higher PSNR/MS-SSIM and improved temporal stability. Temporal flicker analysis using LPIPS further shows that the proposed solution preserves temporal coherence close to the NeRV baseline, results establish LRConv-NeRV as a potential architectural alternative for efficient neural video decoding under low-precision and resource-constrained settings.",
+      "analysis": {
+        "key_results": "在最后一级应用低秩卷积可减少68%计算量（从201.9到64.9 GFLOPs）和9.3%模型大小，比特率降低约9.2%，PSNR/MS-SSIM和时域稳定性保持良好；INT8量化下质量接近密集基线，而更激进的早期分解导致质量显著下降。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出LRConv-NeRV，用结构化低秩可分离卷积替换NeRV解码器中的部分密集卷积，实现效率与质量的灵活权衡，并在INT8量化下保持质量。",
+        "method": "将选定的密集3x3卷积替换为低秩可分离卷积，从最后一级到早期级逐步应用低秩分解，并结合INT8后训练量化。",
+        "one_sentence_summary": "通过将NeRV解码器中的部分密集3x3卷积替换为结构化低秩可分离卷积，并支持后训练INT8量化，在保持重建质量的同时显著降低计算量和模型大小。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文专注神经视频压缩和模型量化，未直接涉及VLA、WAM或机器人策略，但所提低秩卷积与量化结合的高效解码技术可为边缘或资源受限系统中的视觉编码提供参考。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Model Quantization",
+          "Video Generation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "arxiv_id": "2603.18261",
+      "authors": [
+        "Tamer Shanableh"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-04T00:39:59.843362Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2603.18261/v2/fig1-panel1.png"
+            ],
+            "caption": "Overall architecture of the proposed LRConv-",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2603.18261v2"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2603.18261/v2/fig2-panel1.png"
+            ],
+            "caption": "video sequences used in the evaluation of the",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2603.18261v2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2603.18261v2",
+        "recovery_checked_at": "2026-09-04T00:42:36.691623Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:post-training-quantization",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-03-18T20:31:59Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2603.18261",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2603.18261",
+        "project_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=11578955"
+      },
+      "title": "LRConv-NeRV: Low Rank Convolution for Efficient Neural Video Compression",
+      "title_zh": "LRConv-NeRV：用于高效神经视频压缩的低秩卷积",
+      "updated_at": "2026-09-02T19:03:37Z",
+      "version": 2
     },
     {
       "abstract": "Post-training model compression is essential for enhancing the portability of Large Language Models (LLMs) while preserving their performance. While several compression approaches have been proposed, less emphasis has been placed on selecting the most suitable set of data (the so-called \\emph{calibration data}) for finding the compressed model configuration. The choice of calibration data is a critical step in preserving model capabilities both intra- and inter-tasks. In this work, we address the challenge of identifying high-performance calibration sets for both pruning and quantization by analyzing intrinsic data properties rather than model-specific signals. We introduce ZipCal, a model-agnostic data curation strategy that maximizes lexical diversity based on Zipfian power laws. Experiments demonstrate that our method outperforms standard uniform random sampling across various pruning benchmarks. Notably, it also performs on par, in terms of downstream performance, with a state-of-the-art method that relies on model perplexity. The latter becomes prohibitively expensive for large-scale models and datasets, while ZipCal is on average $\\sim$240$\\times$ faster due to its tractable linear complexity. We make the code and the experiments available at https://github.com/FrancescoMonaco/ZipCal.",
@@ -1396,6 +1550,95 @@
       "version": 2
     },
     {
+      "abstract": "Long-horizon indoor mobile manipulation (MoMa) requires robots to execute extended navigation-manipulation sequences whose feasibility depends on state changes induced by preceding skills. Vision-language models (VLMs) can decompose instructions into plausible skill sequences, but they do not reliably track such cumulative embodiment constraints or revise a plan when execution deviates from expectation. We present MoMaStage, a map-light framework for state-consistent planning and closed-loop execution in long-horizon indoor MoMa. MoMaStage couples a frozen VLM with robot execution through three mechanisms: (i) a hierarchical library of grounded, executable skills and a topology-only projection of a Skill-State Graph (SSG) that constrains the VLM's planning space; (ii) an SSG verifier that propagates scene-region and gripper-occupancy state to reject infeasible plans before execution; and (iii) an event-driven monitor that triggers graph-grounded repair only when an observed outcome invalidates the remaining plan. The SSG captures the compact embodiment state needed for skill sequencing without requiring a dense scene map, while geometric and contact-level conditions remain within the underlying controllers. Experiments in physics-rich simulation and on a real mobile manipulator show that MoMaStage improves planning validity and long-horizon execution survival over the evaluated baselines, while reducing latency and model token consumption.",
+      "analysis": {
+        "key_results": "在物理仿真和真实移动操作平台上，MoMaStage 相比评估的基线方法提升了规划有效性和长时程执行存活率，同时降低了延迟和模型 token 消耗。",
+        "limitations": "摘要未说明。",
+        "main_contribution": "提出 MoMaStage 框架，将冻结的视觉语言模型与机器人执行耦合，通过层次化技能库、技能状态图（SSG）验证器和事件驱动监控器，提升长时程移动操作任务的规划有效性和执行成功率。",
+        "method": "构建仅拓扑投影的技能状态图（SSG）约束 VLM 的规划空间，利用 SSG 验证器传播场景区域和抓手占用状态以拒绝不可行规划，并通过事件驱动监控器在观测结果失效时触发基于图的修正。",
+        "one_sentence_summary": "MoMaStage 通过技能状态图约束视觉语言模型的规划空间，实现长时程室内移动操作中状态一致的规划与闭环执行。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该工作属于视觉语言模型驱动的机器人操作规划，使用技能状态图建模操作引起的状态变化，与 VLA 中语言条件策略和动作执行约束高度相关，但未直接涉及高效推理或世界模型。",
+        "relevance_score": 8,
+        "tags": [
+          "Robot Manipulation",
+          "Vision-Language",
+          "Evaluation",
+          "Robot Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2603.08383",
+      "authors": [
+        "Chenxu Li",
+        "Zixuan Chen",
+        "Yetao Li",
+        "Jiapeng Xu",
+        "Hongyu Ding",
+        "Jieqi Shi",
+        "Jing Huo",
+        "Yang Gao"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-04T00:39:59.843362Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2603.08383/v2/fig1-panel1.png"
+            ],
+            "caption": "MoMaStage structures planning and execution around a frozen VLM. A hierarchical skill library and Skill-State Graph constrain and verify task decomposition, while execution feedback triggers local, graph-grounded repair when an observed outcome deviates from the expected state transition.",
+            "image_urls": [
+              "https://arxiv.org/html/2603.08383v2/teaser_v5.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2603.08383v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2603.08383/v2/fig2-panel1.png"
+            ],
+            "caption": "Overview of MoMaStage. MoMaStage harnesses a frozen VLM through three coupled mechanisms. (a) Constrain the interface : the VLM decomposes an instruction over a topology-only projection of the Skill-State Graph (SSG), whose vocabulary is defined by a hierarchical skill library. (b) Verify before execution : an SSG-based verifier simulates the cumulative robot-state trace of the proposed plan and returns structured errors for repair. (c) Query on events, not steps : an event-driven monitor triggers graph-grounded repair when a skill outcome invalidates the remaining plan.",
+            "image_urls": [
+              "https://arxiv.org/html/2603.08383v2/frameworkv3.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2603.08383v2#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2603.08383v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-03-09T13:43:38Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2603.08383",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2603.08383",
+        "project_url": null
+      },
+      "title": "MoMaStage: Skill-State Graph Guided Planning and Closed-Loop Execution for Long-Horizon Indoor Mobile Manipulation",
+      "title_zh": "MoMaStage：面向长时程室内移动操作的状态一致规划与闭环执行框架",
+      "updated_at": "2026-09-03T09:27:38Z",
+      "version": 2
+    },
+    {
       "abstract": "Despite remarkable progress in Vision-Language-Action models (VLAs) for robot manipulation, these large pre-trained models require fine-tuning to be deployed in specific environments. These fine-tuned models are highly sensitive to camera viewpoint changes that frequently occur in unstructured environments. In this paper, we propose a zero-shot camera adaptation framework without additional demonstration data, policy fine-tuning, or architectural modification. Our key idea is to virtually adjust test-time camera observations to match the training camera configuration in real-time. For that, we use a recent feed-forward novel view synthesis model which outputs high-quality target view images, handling both extrinsic and intrinsic parameters. This plug-and-play approach preserves the pre-trained capabilities of VLAs and applies to any RGB-based policy. Through extensive experiments on the LIBERO benchmark, our method consistently outperforms baselines that use data augmentation for policy fine-tuning or additional 3D-aware features for visual input. We further validate that our approach constantly enhances viewpoint robustness in real-world robotic manipulation scenarios, including settings with varying camera extrinsics, intrinsics, and freely moving handheld cameras. Project Page: https://heo0224.github.io/AnyCamVLA/",
       "analysis": {
         "key_results": "在LIBERO基准上全面优于基于数据增强或3D特征的基线；真实世界实验验证了方法在相机外参、内参变化及手持相机自由移动场景下的鲁棒性。",
@@ -1746,20 +1989,20 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 103,
-    "completion_tokens": 4331,
+    "cache_hits": 77,
+    "completion_tokens": 9428,
     "error_categories": {},
     "failed": 0,
-    "fetched": 2093,
-    "figure_available": 90,
-    "figure_cache_hits": 84,
+    "fetched": 1762,
+    "figure_available": 83,
+    "figure_cache_hits": 66,
     "figure_failed": 0,
-    "figure_requests": 13,
+    "figure_requests": 24,
     "figure_unavailable": 7,
-    "model_calls": 12,
-    "prefiltered": 115,
-    "prompt_tokens": 10839,
-    "published": 97,
-    "total_tokens": 15170
+    "model_calls": 28,
+    "prefiltered": 105,
+    "prompt_tokens": 24863,
+    "published": 90,
+    "total_tokens": 34291
   }
 }

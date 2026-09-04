@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-03T08:40:40.793519Z",
+  "generated_at": "2026-09-04T00:39:59.843362Z",
   "papers": [
     {
       "abstract": "Behavior cloning with high-capacity generative policies achieves strong imitation performance, but is often limited by demonstration coverage and distribution shift. Direct reinforcement learning fine-tuning can improve performance, but updating large action decoders is frequently unstable and sample inefficient. We propose Lagrangian Perturbation Diffusion Steering (LP-DS), a lightweight adaptation method that improves a frozen generative policy by learning a compact noise-space perturbation before decoding. LP-DS optimizes this perturbation with a Lagrangian trust-region objective, improving downstream value while constraining deviation from the latent prior. Across RoboMimic manipulation, OpenAI Gym locomotion, and Adroit dexterous manipulation benchmarks, LP-DS improves sample efficiency, success, and return while maintaining higher action-space entropy than unconstrained noise-space steering, with return improvements of up to 25% over prior baselines. Additional evaluations with flow-matching backbones, a large vision-language-action model, and physical Franka deployment show that LP-DS is not limited to compact diffusion policies or simulated benchmarks. Project page: https://sites.google.com/view/lp-ds/home.",
@@ -809,6 +809,92 @@
       "version": 2
     },
     {
+      "abstract": "Post-training quantization (PTQ) is essential for deploying LLMs under memory and bandwidth constraints. However, extreme low-bit quantization remains highly sensitive to activation outliers and anisotropic weight curvature. Existing incoherence-based PTQ methods mitigate this issue with fixed randomized Hadamard transforms (RHTs), which improve quantization robustness but cannot adapt the rotated basis to the layer, calibration distribution, or quantizer. We introduce HARP (Hadamard-preconditioned Adaptive Rotation Processor), a learnable structured two-sided orthogonal processor that replaces fixed Hadamard mixing while preserving exact full-precision equivalence. HARP represents each rotation as a product of sparse butterfly-like block-orthogonal stages, supports non-power-of-two dimensions through Mixed-Radix schedules, and initializes to the RHT processor up to a fixed permutation. Fitted only on calibration data, HARP adapts the quantization basis to each layer and backend. Across 2--4-bit settings on Llama models from 1B to 70B, HARP consistently improves perplexity and yields its clearest zero-shot gains at 2 bits; a 2-bit Qwen3-8B experiment shows the same transfer beyond the Llama family. HARP also preserves deployment efficiency: on Llama 2 7B at 2 bits, it reaches 128 tok/s, retaining 90% of RHT throughput (142 tok/s) and running approximately $2.1\\times$ faster than FP16 (61 tok/s).",
+      "analysis": {
+        "key_results": "在Llama 1B至70B的2-4位设置上，HARP持续改善困惑度，并在2位时获得最明显的零样本增益；2位Qwen3-8B实验显示跨模型族迁移；在Llama 2 7B 2位时达到128 tok/s，保持RHT吞吐量的90%，比FP16快2.1倍。",
+        "limitations": "摘要未说明",
+        "main_contribution": "引入HARP，一种可学习的结构化双侧正交处理器，用于替代固定的随机Hadamard变换，以提高低比特后训练量化的鲁棒性。",
+        "method": "HARP将每个旋转表示为稀疏蝴蝶状块正交阶段的乘积，支持非2的幂维度通过Mixed-Radix调度，并从RHT处理器初始化，仅在校准数据上适配量化基础。",
+        "one_sentence_summary": "提出了一种可学习的结构化正交处理器HARP，用于替代固定Hadamard旋转，提升极端低比特下的LLM量化性能。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文聚焦于通用LLM的低比特量化，不直接涉及VLA、WAM或机器人领域。但HARP作为一种通用量化技术，可能对后续在VLA/WAM模型上应用低比特量化具有方法论参考价值。",
+        "relevance_score": 6,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "arxiv_id": "2605.29843",
+      "authors": [
+        "Artur Zagitov",
+        "Gleb Molodtsov",
+        "Aleksandr Beznosikov"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-04T00:39:59.843362Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2605.29843/v2/fig1-panel1.png"
+            ],
+            "caption": "WikiText2 quality–size scaling at 2 bits. HARP uses int8 parameter storage. The plots are split by model family to keep the quality gaps visible across scales.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2605.29843v2"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2605.29843/v2/fig2-panel1.png"
+            ],
+            "caption": "E8P codebook alignment for the layer-0 output projection of 2-bit Llama 2 7B under fixed RHT versus HARP. The dotted vertical line marks the maximum E8P codeword norm.",
+            "image_urls": [
+              "https://arxiv.org/html/2605.29843v2/figures/harp_e8p_alignment_main.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.29843v2#S4.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2605.29843v2",
+        "recovery_checked_at": "2026-09-04T00:42:36.691623Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:llm-quantization",
+        "exact:post-training-quantization",
+        "exact:low-bit-quantization",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-04T00:39:59.843362Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-05-28T12:24:15Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2605.29843",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2605.29843",
+        "project_url": null
+      },
+      "title": "HARP: Hadamard-Preconditioned Adaptive Rotation Processor for Extreme LLM Quantization",
+      "title_zh": "HARP：用于极端LLM量化的Hadamard预条件自适应旋转处理器",
+      "updated_at": "2026-09-02T20:21:34Z",
+      "version": 2
+    },
+    {
       "abstract": "Real-time inference of vision-language-action (VLA) models is essential for robotic control. While visual token pruning has shown strong potential for accelerating inference, most existing methods mainly base pruning decisions on shallow-layer cues and risk discarding visual information required by deep layers. To address this issue, we propose SAFE-Pruner, a plug-and-play pruning framework that incorporates attention cues of future layers into pruning decisions. Specifically, we identify semantic attention consistency, the tendency that VLA models concentrate their attention probability mass on the same semantic entity across control timesteps. Based on this observation, we design a forward-looking strategy to forecast the token saliency in deep layers, which prevents the premature removal of critical tokens and leads to more stable acceleration. We further introduce a reference timestep refresh strategy that triggers updates upon attention shifts, thereby improving forecasting accuracy and pruning reliability. Extensive experiments across diverse evaluation settings demonstrate that our method achieves up to 1.89x speedup with a minimal degradation in success rate of less than 1.5%, while outperforming state-of-the-art methods by up to 1.9%.",
       "analysis": {
         "key_results": "在多种评估设置下，实现最高1.89倍加速，成功率下降小于1.5%，优于现有方法最高达1.9%。",
@@ -1219,7 +1305,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2605.28760v2",
-        "recovery_checked_at": "2026-09-03T08:42:06.900289Z",
+        "recovery_checked_at": "2026-09-04T00:42:36.691623Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1917,7 +2003,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2605.22164v2",
-        "recovery_checked_at": "2026-09-03T08:42:06.900289Z",
+        "recovery_checked_at": "2026-09-04T00:42:36.691623Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -3725,20 +3811,20 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 103,
-    "completion_tokens": 4331,
+    "cache_hits": 77,
+    "completion_tokens": 9428,
     "error_categories": {},
     "failed": 0,
-    "fetched": 2093,
-    "figure_available": 90,
-    "figure_cache_hits": 84,
+    "fetched": 1762,
+    "figure_available": 83,
+    "figure_cache_hits": 66,
     "figure_failed": 0,
-    "figure_requests": 13,
+    "figure_requests": 24,
     "figure_unavailable": 7,
-    "model_calls": 12,
-    "prefiltered": 115,
-    "prompt_tokens": 10839,
-    "published": 97,
-    "total_tokens": 15170
+    "model_calls": 28,
+    "prefiltered": 105,
+    "prompt_tokens": 24863,
+    "published": 90,
+    "total_tokens": 34291
   }
 }
