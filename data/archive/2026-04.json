@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-07T00:38:47.084463Z",
+  "generated_at": "2026-09-07T09:04:12.863464Z",
   "papers": [
     {
       "abstract": "Flow-based vision-language-action (VLA) policies offer strong expressivity for action generation, but suffer from a fundamental inefficiency: multi-step inference is required to recover action structure from uninformative Gaussian noise, leading to a poor efficiency-quality trade-off under real-time constraints. We address this issue by rethinking the role of the starting point in generative action modeling. Instead of shortening the sampling trajectory, we propose CF-VLA, a coarse-to-fine two-stage formulation that restructures action generation into a coarse initialization step that constructs an action-aware starting point, followed by a single-step local refinement that corrects residual errors. Concretely, the coarse stage learns a conditional posterior over endpoint velocity to transform Gaussian noise into a structured initialization, while the fine stage performs a fixed-time refinement from this initialization. To stabilize training, we introduce a stepwise strategy that first learns a controlled coarse predictor and then performs joint optimization. Experiments on CALVIN and LIBERO show that our method establishes a strong efficiency-performance frontier under low-NFE (Number of Function Evaluations) regimes: it consistently outperforms existing NFE=2 methods, matches or surpasses the NFE=10 $\\pi_{0.5}$ baseline on several metrics, reduces action sampling latency by 75.4%, and achieves the best average real-robot success rate of 83.0%, outperforming MIP by 19.5 points and $\\pi_{0.5}$ by 4.0 points. These results suggest that structured, coarse-to-fine generation enables both strong performance and efficient inference. Our code is available at https://github.com/EmbodiedAI-RoboTron/CF-VLA.",
@@ -713,6 +713,90 @@
       "version": 2
     },
     {
+      "abstract": "As the world of agentic artificial intelligence applied to robotics evolves, the need for agents capable of building and retrieving memories and observations efficiently is increasing. Robots operating in complex environments must build memory structures to enable useful human-robot interactions by leveraging the mnemonic representation of the current operating context. People interacting with robots may expect the embodied agent to provide information about locations, events, or objects, which requires the agent to provide precise answers within human-like inference times to be perceived as responsive. We propose the Embodied Light Graph Retrieval Agent (EmbodiedLGR-Agent), a visual-language model (VLM)-driven agent architecture that constructs dense and efficient representations of robot operating environments. EmbodiedLGR-Agent directly addresses the need for an efficient memory representation of the environment by providing a hybrid building-retrieval approach built on parameter-efficient VLMs that store low-level information about objects and their positions in a semantic graph, while retaining high-level descriptions of the observed scenes with a traditional retrieval-augmented architecture. EmbodiedLGR-Agent is evaluated on the popular NaVQA dataset, achieving state-of-the-art performance in inference and querying times for embodied agents, while retaining competitive accuracy on the global task relative to the current state-of-the-art approaches. Moreover, EmbodiedLGR-Agent was successfully deployed on a physical robot, showing practical utility in real-world contexts through human-robot interaction, while running the visual-language model and the building-retrieval pipeline locally.",
+      "analysis": {
+        "key_results": "在NaVQA数据集上取得最先进的推理和查询时间性能，同时保持具有竞争力的全局任务精度，并在物理机器人上成功部署。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出一种VLM驱动的混合构建-检索智能体架构，使用参数高效VLM构建稠密且高效的环境表示，平衡效率与精度。",
+        "method": "混合构建-检索方法，基于参数高效VLM构建语义图存储物体及其位置的低层信息，同时用检索增强架构保留高层场景描述。",
+        "one_sentence_summary": "提出EmbodiedLGR-Agent，一种VLM驱动的混合构建-检索智能体架构，通过参数高效VLM构建语义图存储低级物体信息，并保留高层场景描述，实现高效环境记忆。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "该工作通过参数高效VLM和混合图检索架构提升机器人环境记忆构建与查询效率，与VLA/WAM中的高效推理和记忆表示相关，但不直接涉及VLA动作预测或世界模型。",
+        "relevance_score": 8,
+        "tags": [
+          "Efficient Inference",
+          "Vision-Language",
+          "Robot Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2604.18271",
+      "authors": [
+        "Paolo Riva",
+        "Leonardo Gargani",
+        "Matteo Frosi",
+        "Matteo Matteucci"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-07T09:04:12.863464Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2604.18271/v2/fig1-panel1.jpg"
+            ],
+            "caption": "The operational cycle of EmbodiedLGR-Agent starts by (1) first constructing a memory representation of the environment from observations. Then, (2) once sufficient exploration has been conducted, the user can query the agent with spatial, temporal, or descriptive requests. Lastly, (3) the agent retrieves relevant information from memory and addresses the request, guiding the user towards retrieved positions if needed.",
+            "image_urls": [
+              "https://arxiv.org/html/2604.18271v2/intro.jpg"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2604.18271v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2604.18271/v2/fig2-panel1.jpg"
+            ],
+            "caption": "We split the EmbodiedLGR-Agent operational phases between memory building (left) and querying (right). The memory building phase ingests frames from the robot’s image perception suite (i.e., one or more RGB cameras) and feeds them to a Florence-2 VLM, generating, for each frame, a caption and a set of object labels. These are then used to populate the vector database and the memory graph, along with the robot’s pose and time. The querying phase begins when the user submits a query, after which an LLM is invoked to retrieve memory data via provided tools from either the memory graph or the vector database. The LLM provides an answer to the user based on what it retrieved during the reasoning loop.",
+            "image_urls": [
+              "https://arxiv.org/html/2604.18271v2/agentoverview.jpg"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2604.18271v2#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2604.18271v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T09:04:12.863464Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-04-20T13:45:54Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2604.18271",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2604.18271",
+        "project_url": null
+      },
+      "title": "EmbodiedLGR: Integrating Lightweight Graph Representation and Retrieval for Semantic-Spatial Memory in Robotic Agents",
+      "title_zh": "EmbodiedLGR：整合轻量图表示与检索用于机器人智能体的语义空间记忆",
+      "updated_at": "2026-09-04T16:59:50Z",
+      "version": 2
+    },
+    {
       "abstract": "Current post-training methodologies for adapting Large Vision-Language Models (LVLMs) generally fall into two paradigms: Supervised Fine-Tuning (SFT) and Reinforcement Learning (RL). Despite their prevalence, both approaches suffer from inefficiencies when applied in isolation. SFT forces the model's generation along a single expert trajectory, often inducing catastrophic forgetting of general multimodal capabilities due to distributional shifts. Conversely, RL explores multiple generated trajectories but frequently encounters optimization collapse - a cold-start problem where an unaligned model fails to spontaneously sample any domain-valid trajectories in sparse-reward visual tasks. In this paper, we propose Supervised Group Relative Policy Optimization (S-GRPO), a unified post-training framework that integrates the guidance of imitation learning into the multi-trajectory exploration of preference optimization. Tailored for direct-generation visual tasks, S-GRPO introduces Conditional Ground-Truth Trajectory Injection (CGI). When a binary verifier detects a complete exploratory failure within a sampled group of trajectories, CGI injects the verified ground-truth trajectory into the candidate pool. By assigning a deterministic maximal reward to this injected anchor, S-GRPO enforces a positive signal within the group-relative advantage estimation. This mechanism reformulates the supervised learning objective as a high-advantage component of the policy gradient, compelling the model to dynamically balance between exploiting the expert trajectory and exploring novel visual concepts. Theoretical analysis and empirical results demonstrate that S-GRPO gracefully bridges the gap between SFT and RL, drastically accelerates convergence, and achieves superior domain adaptation while preserving the base model's general-purpose capabilities.",
       "analysis": {
         "key_results": "S-GRPO弥合SFT与RL的差距，大幅加速收敛，在保持基座模型通用能力的同时实现更优的领域适应。",
@@ -1025,7 +1109,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2604.13824v2",
-        "recovery_checked_at": "2026-09-07T00:40:07.361078Z",
+        "recovery_checked_at": "2026-09-07T09:06:15.013655Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -2279,20 +2363,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 0,
-    "completion_tokens": 5298,
-    "error_categories": {},
-    "failed": 0,
-    "fetched": 242,
-    "figure_available": 9,
-    "figure_cache_hits": 0,
+    "cache_hits": 2,
+    "completion_tokens": 8299,
+    "error_categories": {
+      "ValidationError": 3
+    },
+    "failed": 3,
+    "fetched": 289,
+    "figure_available": 19,
+    "figure_cache_hits": 2,
     "figure_failed": 0,
-    "figure_requests": 14,
-    "figure_unavailable": 5,
-    "model_calls": 16,
-    "prefiltered": 16,
-    "prompt_tokens": 14299,
-    "published": 14,
-    "total_tokens": 19597
+    "figure_requests": 18,
+    "figure_unavailable": 1,
+    "model_calls": 29,
+    "prefiltered": 31,
+    "prompt_tokens": 22680,
+    "published": 20,
+    "total_tokens": 30979
   }
 }

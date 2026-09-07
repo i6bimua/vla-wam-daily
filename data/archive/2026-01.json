@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-03T08:40:40.793519Z",
+  "generated_at": "2026-09-07T09:04:12.863464Z",
   "papers": [
     {
       "abstract": "Vision-Language-Action (VLA) models have demonstrated remarkable generalization capabilities in robotic manipulation tasks, yet their substantial computational overhead remains a critical obstacle to real-world deployment. Improving inference efficiency is therefore essential for practical robotic applications. Existing acceleration methods often rely on heuristic or static strategies--such as rule-based token caching or pruning--that are decoupled from task objectives and fail to adapt to dynamic scene changes. In this work, we reformulate inference acceleration as a learnable policy optimization problem and propose a novel framework that integrates a dynamic, task-aware decision-making process directly into the VLA model. At its core are two lightweight, cooperative modules: a Cached Token Selector, which determines which tokens should be reused, and a Cache Ratio Predictor, which controls how many tokens to reuse. Training these modules is non-trivial due to their discrete decisions. We address this by adopting a differentiable relaxation that allows gradient-based end-to-end optimization. Extensive experiments on the LIBERO and SIMPLER benchmarks, as well as real-robot evaluations, show that our method achieves a 1.76x wall-clock inference speedup while simultaneously improving the average success rate by 1.9 percentage points (from 75.0% to 76.9%) on LIBERO and by 5.0 percentage points on real-world tasks, significantly outperforming existing baselines. This work highlights the potential of learning task-aware computational allocation policies, paving the way for VLA models that are both powerful and efficient.",
@@ -92,6 +92,91 @@
       "title_zh": "通过自适应视觉令牌缓存学习加速视觉-语言-动作模型",
       "updated_at": "2026-08-26T04:24:45Z",
       "version": 2
+    },
+    {
+      "abstract": "Vision Language Action (VLA) models enable instruction-following manipulation, yet their deployment on coordinated dual-arm platforms remains severely constrained by under-modeled self-collisions between manipulators and grasped objects. To address this critical safety gap, we propose CoFreeVLA, a novel framework that augments end-to-end VLA policies with a lightweight, short-horizon self-collision risk estimator. The estimator predicts collision likelihoods directly from proprioceptive states, visual embeddings, and candidate action sequences. Deeply integrated into the closed-loop control system, this estimator proactively gates risky commands, autonomously synthesizes recovery trajectories to safe states via risk-guided adjustments, and biases policy refinement for safer rollouts. To ensure robust calibration, the estimator utilizes a two-stage training pipeline, pre-training with model-based synthetic collision labels, followed by post-training on real-robot rollouts. Across five bimanual tasks, six VLA backbones, and 30 trials per variant, the task-averaged collision rate decreases from 0.54 to 0.23, while the task-averaged success rate increases from 0.45 to 0.61. Compared to representative baselines, CoFreeVLA substantially reduces self-collision frequencies and improves overall task success rates, providing a crucial step toward the safe deployment of foundational models in multi-arm continuous control.",
+      "analysis": {
+        "key_results": "在五个双臂任务、六个 VLA 基线和每个变体 30 次试验中，任务平均碰撞率从 0.54 降至 0.23，平均成功率从 0.45 提升到 0.61。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出 CoFreeVLA 框架，通过轻量级自碰撞风险估计器增强端到端 VLA 策略，在闭环控制中提前抑制危险命令、生成恢复轨迹并偏置策略优化。",
+        "method": "从本体感觉状态、视觉嵌入和候选动作序列直接预测碰撞概率；两阶段训练：先用基于模型的合成碰撞标签预训练，再用真实机器人数据后训练。",
+        "one_sentence_summary": "CoFreeVLA 将轻量级短时程自碰撞风险估计器集成到 VLA 中，通过风险门控、恢复轨迹合成和安全策略偏置提升双臂操作的安全性。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该工作直接改进 VLA 在双臂操作中的安全性和成功率，涉及视觉-语言-动作模型、机器人操作和策略学习，对本站 VLA 主题具有高度相关性。",
+        "relevance_score": 9,
+        "tags": [
+          "Robot Manipulation",
+          "Policy Learning",
+          "Vision-Language",
+          "Robot Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2601.21712",
+      "authors": [
+        "Yaohua Liu",
+        "Binkai Ou",
+        "Hengjun Zhang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-07T09:04:12.863464Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2601.21712/v3/fig1-panel1.png"
+            ],
+            "caption": "(a) Risk Estimator. Given a state–action pair, the model applies a cross-attention module followed by three heads to predict collision risk r r , minimum distance d d , and time-to-collision τ \\tau . (b) Data Collection and (c) Dataset. For each state, we sample candidate actions and check their outcomes for labeling. (d) CoFree VLA. At run time, the system continuously estimates risk; when it exceeds a threshold, the policy will be blocked and the arms will be returned to a safe configuration, after which the policy resumes to complete the task.",
+            "image_urls": [
+              "https://arxiv.org/html/2601.21712v3/pipeline.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2601.21712v3#S3.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2601.21712/v3/fig2-panel1.png"
+            ],
+            "caption": "Experimental results in 5 dual-arm manipulation tasks. Evaluations of collision and success rates are on 30 trials",
+            "image_urls": [
+              "https://arxiv.org/html/2601.21712v3/experiment-overview.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2601.21712v3#S4.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2601.21712v3",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T09:04:12.863464Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-01-29T13:40:46Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2601.21712",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2601.21712",
+        "project_url": null
+      },
+      "title": "CoFreeVLA: Short-Horizon Collision-Free Dual-Arm Manipulation via Vision-Language-Action Model and Risk Estimation",
+      "title_zh": "CoFreeVLA：基于视觉-语言-动作模型与风险估计的短时程无碰撞双臂操作",
+      "updated_at": "2026-09-04T16:36:27Z",
+      "version": 3
     },
     {
       "abstract": "Bimanual manipulation in cluttered scenes requires policies that remain stable under occlusions, viewpoint changes and scene variations. Existing vision-language-action models often lack such robustness because (i) multi-view features are fused via view-agnostic token concatenation, yielding limited cross-view spatial representations, and (ii) language is injected as global conditioning, resulting in coarse instruction grounding. In this paper, we introduce PEAfowl, a perception-enhanced multi-view VLA policy for bimanual manipulation. For spatial perception, PEAfowl predicts per-token depth distributions, performs differentiable 3D lifting, and aggregates local cross-view neighbors to form geometrically grounded, cross-view aligned representations. For language utilization, we propose to replace global conditioning with a Perceiver-style text-aware readout over frozen CLIP visual features, enabling iterative evidence accumulation. To better exploit commodity RGB-D sensing despite noisy and incomplete depth, PEAfowl's depth-distribution lifting naturally supports training-only depth distillation, where a pretrained depth teacher supervises the depth-distribution head to inject refined geometric priors without adding inference overhead. On RoboTwin 2.0 under domain-randomized setting, PEAfowl improves the strongest baseline by 23.0 pp in success rate, and physical experiments further demonstrate improved performance on the evaluated real-robot tasks. Project website: https://peafowlvla.github.io/.",
@@ -503,7 +588,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2601.06519v2",
-        "recovery_checked_at": "2026-09-07T00:40:07.361078Z",
+        "recovery_checked_at": "2026-09-07T09:06:15.013655Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1141,20 +1226,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 103,
-    "completion_tokens": 4331,
-    "error_categories": {},
-    "failed": 0,
-    "fetched": 2093,
-    "figure_available": 90,
-    "figure_cache_hits": 84,
+    "cache_hits": 2,
+    "completion_tokens": 8299,
+    "error_categories": {
+      "ValidationError": 3
+    },
+    "failed": 3,
+    "fetched": 289,
+    "figure_available": 19,
+    "figure_cache_hits": 2,
     "figure_failed": 0,
-    "figure_requests": 13,
-    "figure_unavailable": 7,
-    "model_calls": 12,
-    "prefiltered": 115,
-    "prompt_tokens": 10839,
-    "published": 97,
-    "total_tokens": 15170
+    "figure_requests": 18,
+    "figure_unavailable": 1,
+    "model_calls": 29,
+    "prefiltered": 31,
+    "prompt_tokens": 22680,
+    "published": 20,
+    "total_tokens": 30979
   }
 }

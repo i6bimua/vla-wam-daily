@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-07T00:38:47.084463Z",
+  "generated_at": "2026-09-07T09:04:12.863464Z",
   "papers": [
     {
       "abstract": "Vision-Language-Action (VLA) models that encode actions using a discrete tokenization scheme have been widely adopted for robotic manipulation, but existing decoding paradigms remain fundamentally limited. Whether actions are decoded sequentially by autoregressive VLAs or in parallel by discrete diffusion VLAs, once a token is generated, it is typically fixed and cannot be revised in subsequent iterations. Consequently, early token errors cannot be effectively corrected later. We propose DFM-VLA, a discrete flow matching VLA that iteratively refines action tokens. DFM-VLA models a token-level probability velocity field that dynamically updates the full action sequence across refinement iterations. We investigate two approaches to constructing the velocity field: an auxiliary velocity-head formulation and an embedding-guided formulation. To further improve prediction accuracy, we introduce a metric-aligned action tokenizer (MAAT) tailored to the coarse-to-fine nature of DFM, together with a two-stage decoding strategy. Extensive experiments on CALVIN, LIBERO, LIBERO-Plus, and real-world manipulation tasks demonstrate the effectiveness of our approach. Our project is available at https://chris1220313648.github.io/DFM-VLA/.",
@@ -99,6 +99,92 @@
       "title_zh": "DFM-VLA：通过离散流匹配实现机器人操作的迭代动作精炼",
       "updated_at": "2026-08-06T10:15:07Z",
       "version": 4
+    },
+    {
+      "abstract": "Action-conditioned robot world models generate future video frames of the manipulated scene given a robot action sequence, offering a promising alternative for simulating tasks that are difficult to model with traditional physics engines. However, these models are optimized for short-term prediction and break down when deployed autoregressively: each predicted clip feeds back as context for the next, causing errors to compound and visual quality to rapidly degrade. We address this through the following contributions. First, we introduce a reinforcement learning (RL) post-training scheme that trains the world model on its own autoregressive rollouts rather than on ground-truth histories. We achieve this by adapting a recent contrastive RL objective for diffusion models to our setting and show that its convergence guarantees carry over exactly. Second, we design a training protocol that generates and compares multiple candidate variable-length futures from the same rollout state, reinforcing higher-fidelity predictions over lower-fidelity ones. Third, we develop efficient, multi-view visual fidelity rewards that combine complementary perceptual metrics across camera views and are aggregated at the clip level for dense, low-variance training signal. Fourth, we show that our approach establishes a new state-of-the-art for rollout fidelity on the DROID dataset, outperforming the strongest baseline on all metrics (e.g., LPIPS reduced by 14% on external cameras, SSIM improved by 9.1% on the wrist camera), winning 98% of paired comparisons, and achieving an 80% preference rate in a blind human study.",
+      "analysis": {
+        "key_results": "在DROID数据集上实现推演保真度的新SOTA：外部相机LPIPS降低14%，腕部相机SSIM提高9.1%，在配对比较中胜出98%，盲测人类偏好率达80%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出基于强化学习的后训练方案，通过在自己的自回归推演（而非真实历史）上训练世界模型、生成并比较多个候选未来片段、使用多视角视觉保真度奖励，来抑制误差累积并稳定多步推演。",
+        "method": "强化学习后训练：在自回归推演上应用对比RL目标训练扩散世界模型，并设计可变长度候选生成与多视角保真度奖励。",
+        "one_sentence_summary": "提出一种利用强化学习后训练和对比目标来稳定机器人世界模型多步自回归推演的方法，显著提升长期视频生成保真度。",
+        "primary_topic": "WAM",
+        "relation_to_vla_wam": "该论文核心是机器人世界模型（WAM）的长期推演稳定性，通过RL后训练直接提升动作条件下的视频生成质量，对基于WAM的策略学习与仿真具有重要价值。",
+        "relevance_score": 9,
+        "tags": [
+          "World Modeling",
+          "Video Generation",
+          "Policy Learning",
+          "Robot Manipulation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.CV"
+      ],
+      "arxiv_id": "2603.25685",
+      "authors": [
+        "Jai Bardhan",
+        "Patrik Drozdik",
+        "Josef Sivic",
+        "Vladimir Petrik"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-07T09:04:12.863464Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2603.25685/v2/fig1-panel1.png"
+            ],
+            "caption": "Autoregressive video rollout quality. We use an action-conditioned robot world model to generate multi-view image predictions from a single observed state. The ground-truth ( blue ) is compared against the baseline ( red ) and our post-trained model PersistWorld ( green ). While the baseline accumulates error and destroys the object (cyan bowl) within seconds, our method maintains structural integrity and spatial consistency, establishing a new state-of-the-art in rollout fidelity.",
+            "image_urls": [
+              "https://arxiv.org/html/2603.25685v2/teaser_v3.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2603.25685v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2603.25685/v2/fig2-panel1.png"
+            ],
+            "caption": "Overview of our method: (Top) Autoregressive inference: A robot policy generates actions fed to the world model, which produces multi-view frames that are appended to the history buffer and condition the next generation step. (Bottom) RL post-training: (S1) A shared variable-length prefix is rolled out autoregressively from a ground-truth initial condition. (S2) K K independent candidate continuations are branched from the frozen prefix state. (S3) Candidates are scored against ground-truth using multi-view perceptual rewards. (S4) Reward weights r r scale implicit positive/negative 𝐱 0 \\mathbf{x}_{0} predictions used in contrastive model updates via loss L L .",
+            "image_urls": [
+              "https://arxiv.org/html/2603.25685v2/method_v5.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2603.25685v2#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2603.25685v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T09:04:12.863464Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-03-26T17:36:08Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2603.25685",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2603.25685",
+        "project_url": null
+      },
+      "title": "Persistent Robot World Models: Stabilizing Multi-Step Rollouts via Reinforcement Learning",
+      "title_zh": "持久化机器人世界模型：通过强化学习稳定多步推演",
+      "updated_at": "2026-09-04T13:23:42Z",
+      "version": 2
     },
     {
       "abstract": "Vision-Language-Action (VLA) models map visual observations and natural-language instructions to robot actions; however, hierarchical and autoregressive paradigms often incur architectural overhead, accumulate long-horizon errors, and require auxiliary modules to capture environment dynamics. To this end, we present MMaDA-VLA, a fully native, pretrained discrete diffusion VLA that unifies multi-modal understanding and generation. Specifically, MMaDA-VLA uses a shared discrete token space to jointly denoise a future goal observation and an action chunk, grounding actions in predicted visual outcomes without an auxiliary world model. In this way, parallel, order-free refinement improves long-horizon consistency. Extensive experiments and comprehensive analyses demonstrate that MMaDA-VLA achieves an average success rate of 98.0\\% on LIBERO and an average successful sequence length of 4.78 on CALVIN, while performing strongly in real-world settings. The project page is available at https://yliu-cs.github.io/MMaDA-VLA.",
@@ -334,7 +420,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2603.23617v2",
-        "recovery_checked_at": "2026-09-07T00:40:07.361078Z",
+        "recovery_checked_at": "2026-09-07T09:06:15.013655Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -951,7 +1037,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2603.18853v3",
-        "recovery_checked_at": "2026-09-07T00:40:07.361078Z",
+        "recovery_checked_at": "2026-09-07T09:06:15.013655Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -2078,20 +2164,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 0,
-    "completion_tokens": 5298,
-    "error_categories": {},
-    "failed": 0,
-    "fetched": 242,
-    "figure_available": 9,
-    "figure_cache_hits": 0,
+    "cache_hits": 2,
+    "completion_tokens": 8299,
+    "error_categories": {
+      "ValidationError": 3
+    },
+    "failed": 3,
+    "fetched": 289,
+    "figure_available": 19,
+    "figure_cache_hits": 2,
     "figure_failed": 0,
-    "figure_requests": 14,
-    "figure_unavailable": 5,
-    "model_calls": 16,
-    "prefiltered": 16,
-    "prompt_tokens": 14299,
-    "published": 14,
-    "total_tokens": 19597
+    "figure_requests": 18,
+    "figure_unavailable": 1,
+    "model_calls": 29,
+    "prefiltered": 31,
+    "prompt_tokens": 22680,
+    "published": 20,
+    "total_tokens": 30979
   }
 }
