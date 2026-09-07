@@ -1,6 +1,100 @@
 {
-  "generated_at": "2026-09-05T08:10:06.205348Z",
+  "generated_at": "2026-09-07T00:38:47.084463Z",
   "papers": [
+    {
+      "abstract": "Flow-based vision-language-action (VLA) policies offer strong expressivity for action generation, but suffer from a fundamental inefficiency: multi-step inference is required to recover action structure from uninformative Gaussian noise, leading to a poor efficiency-quality trade-off under real-time constraints. We address this issue by rethinking the role of the starting point in generative action modeling. Instead of shortening the sampling trajectory, we propose CF-VLA, a coarse-to-fine two-stage formulation that restructures action generation into a coarse initialization step that constructs an action-aware starting point, followed by a single-step local refinement that corrects residual errors. Concretely, the coarse stage learns a conditional posterior over endpoint velocity to transform Gaussian noise into a structured initialization, while the fine stage performs a fixed-time refinement from this initialization. To stabilize training, we introduce a stepwise strategy that first learns a controlled coarse predictor and then performs joint optimization. Experiments on CALVIN and LIBERO show that our method establishes a strong efficiency-performance frontier under low-NFE (Number of Function Evaluations) regimes: it consistently outperforms existing NFE=2 methods, matches or surpasses the NFE=10 $\\pi_{0.5}$ baseline on several metrics, reduces action sampling latency by 75.4%, and achieves the best average real-robot success rate of 83.0%, outperforming MIP by 19.5 points and $\\pi_{0.5}$ by 4.0 points. These results suggest that structured, coarse-to-fine generation enables both strong performance and efficient inference. Our code is available at https://github.com/EmbodiedAI-RoboTron/CF-VLA.",
+      "analysis": {
+        "key_results": "在CALVIN和LIBERO上，CF-VLA在低NFE下优于现有NFE=2方法，部分指标达到或超过NFE=10的π0.5基线，动作采样延迟降低75.4%，真实机器人平均成功率达到83.0%，比MIP高19.5个百分点，比π0.5高4.0个百分点。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出CF-VLA，一种粗到细的两阶段动作生成框架，将生成过程分解为从高斯噪声构造结构化起始点的粗阶段和单步局部细化的细阶段，并设计了逐步训练策略。",
+        "method": "粗阶段学习以端点速度为条件的后验分布，将高斯噪声转化为结构化初始化；细阶段从该初始化进行固定步数的细化；训练采用先学习可控粗预测器、再联合优化的逐步策略。",
+        "one_sentence_summary": "该论文提出一种粗到细的两阶段生成式VLA方法，通过将动作生成重构为粗初始化加单步局部细化，显著提升了低函数评估次数（NFE）下的效率与性能。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该论文直接针对视觉-语言-动作（VLA）模型效率问题提出创新生成式架构，以显著降低推理步数并提升采样效率，与VLA主题高度相关，为将高效推理技术应用于机器人动作生成提供了有价值的实际验证。",
+        "relevance_score": 10,
+        "tags": [
+          "Action Prediction",
+          "Efficient Inference",
+          "Vision-Language",
+          "Robot Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "arxiv_id": "2604.24622",
+      "authors": [
+        "Fan Du",
+        "Feng Yan",
+        "Jianxiong Wu",
+        "Xinrun Xu",
+        "Weiye Zhang",
+        "Weinong Wang",
+        "Yu Guo",
+        "Bin Qian",
+        "Zhihai He",
+        "Fei Wang",
+        "Heng Yang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-07T00:38:47.084463Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2604.24622/v4/fig1-panel1.png"
+            ],
+            "caption": "Teaser of CF-VLA. Standard flow matching requires multiple iterative steps to recover action structure from uninformative Gaussian noise. CF-VLA instead adopts a coarse-to-fine two-step process: a coarse stage constructs an action-prior-guided (AP-guided) noise initialization, followed by a single-step refinement. This design achieves a stronger efficiency–performance frontier across CALVIN, LIBERO, and real-robot settings, reducing action sampling latency by 73.2%. A teaser figure of CF-VLA across CALVIN, LIBERO, and real-robot settings. The left column shows representative tasks from the three evaluation domains. The upper middle panel illustrates standard flow matching iteratively refining from Gaussian noise over many steps. The lower middle panel shows the proposed coarse-to-fine design, which first uses a KL-supervised coarse stage to transform Gaussian noise into action-prior-guided (AP-guided) noise initialization and then uses a fine stage to recover the final action in one step. The right panel summarizes the resulting latency reductions and performance gains.",
+            "image_urls": [
+              "https://arxiv.org/html/2604.24622v4/1.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2604.24622v4#S0.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2604.24622/v4/fig2-panel1.png"
+            ],
+            "caption": "Overview of CF-VLA. CF-VLA adopts a two-phase training strategy. Phase I is a stability-oriented warm-up stage that shapes endpoint velocity and variance prediction and trains the refinement branch on a controlled proxy input, avoiding unreliable coarse outputs at the beginning of optimization. Phase II then performs full joint optimization of the final coarse-to-fine mechanism: KL-supervised endpoint posterior matching transforms pure Gaussian noise into an AP-guided initialization, and a single-step refinement branch performs local correction to recover the target action. This two-phase design enables stable training and efficient two-step generation. A method overview of CF-VLA. A VLM backbone provides conditioning features to a shared action expert. The diagram contains two training phases. Phase I serves as a stabilization phase, where the endpoint branch learns a stable velocity and variance representation together with a controlled refinement proxy to provide reliable coarse outputs. Phase II then performs coarse-to-fine generation, where the endpoint branch predicts a posterior matched by KL divergence to produce AP-guided noise initialization, and the fine branch predicts a mean-squared-error-supervised update that maps the local neighborhood induced by this AP-guided initialization onto the ground-truth action manifold.",
+            "image_urls": [
+              "https://arxiv.org/html/2604.24622v4/3.1.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2604.24622v4#S2.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2604.24622v4",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T00:38:47.084463Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-04-27T15:51:40Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2604.24622",
+        "code_url": "https://github.com/EmbodiedAI-RoboTron/CF-VLA",
+        "pdf_url": "https://arxiv.org/pdf/2604.24622",
+        "project_url": null
+      },
+      "title": "CF-VLA: Efficient Coarse-to-Fine Action Generation for Vision-Language-Action Policies",
+      "title_zh": "CF-VLA：面向视觉-语言-动作策略的高效粗到细动作生成方法",
+      "updated_at": "2026-09-04T09:24:16Z",
+      "version": 4
+    },
     {
       "abstract": "Flow-based vision-language-action (VLA) policies offer strong expressivity for action generation, but suffer from a fundamental inefficiency: multi-step inference is required to recover action structure from uninformative Gaussian noise, leading to a poor efficiency-quality trade-off under real-time constraints. We address this issue by rethinking the role of the starting point in generative action modeling. Instead of shortening the sampling trajectory, we propose CF-VLA, a coarse-to-fine two-stage formulation that restructures action generation into a coarse initialization step that constructs an action-aware starting point, followed by a single-step local refinement that corrects residual errors. Concretely, the coarse stage learns a conditional posterior over endpoint velocity to transform Gaussian noise into a structured initialization, while the fine stage performs a fixed-time refinement from this initialization. To stabilize training, we introduce a stepwise strategy that first learns a controlled coarse predictor and then performs joint optimization. Experiments on CALVIN and LIBERO show that our method establishes a strong efficiency-performance frontier under low-NFE (Number of Function Evaluations) regimes: it consistently outperforms existing NFE=2 methods, matches or surpasses the NFE=10 $\\pi_{0.5}$ baseline on several metrics, reduces action sampling latency by 75.4%, and achieves the best average real-robot success rate of 83.0%, outperforming MIP by 19.5 points and $\\pi_{0.5}$ by 4.0 points. These results suggest that structured, coarse-to-fine generation enables both strong performance and efficient inference. Our code is available at https://github.com/EmbodiedAI-RoboTron/CF-VLA.",
       "analysis": {
@@ -184,6 +278,94 @@
       "title": "Vision-Language-Action Safety: Threats, Challenges, Evaluations, and Mechanisms",
       "title_zh": "视觉-语言-动作安全：威胁、挑战、评估与机制",
       "updated_at": "2026-08-25T17:09:58Z",
+      "version": 2
+    },
+    {
+      "abstract": "The real-world deployment of Vision-Language-Action (VLA) models remains limited by the risk of unpredictable and irreversible physical harm. However, we currently lack effective mechanisms to proactively detect these physical safety risks before deployment. To address this gap, we propose \\textbf{RedVLA}, the first red teaming framework for physical safety in VLA models. We systematically uncover unsafe behaviors through a two-stage process: (I) \\textbf{Risk Scenario Synthesis} constructs a valid and task-feasible initial risk scene. Specifically, it identifies critical interaction regions from benign trajectories and positions the risk factor within these regions, aiming to entangle it with the VLA's execution flow and elicit a target unsafe behavior. (II) \\textbf{Risk Amplification} ensures stable elicitation across heterogeneous models. It iteratively refines the risk factor state through gradient-free optimization guided by trajectory features. Experiments on six representative VLA models show that RedVLA uncovers diverse unsafe behaviors and achieves the ASR up to 95.5\\% within 10 optimization iterations. To mitigate these risks, we further propose SimpleVLA-Guard, a lightweight safety guard built from RedVLA-generated data. Our data, assets, and code are available \\href{https://redvla.github.io}{here}.",
+      "analysis": {
+        "key_results": "在六个代表性VLA模型上，RedVLA在10次优化迭代内攻破率（ASR）最高达95.5%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出RedVLA，首个针对视觉-语言-动作（VLA）模型物理安全风险的红队测试框架，系统地发现不安全行为，并基于生成的数据构建轻量级安全防护SimpleVLA-Guard。",
+        "method": "两阶段过程：(I) 风险场景合成，从良性轨迹中识别关键交互区域并放置风险因素，以诱发目标不安全行为；(II) 风险放大，通过无梯度优化迭代细化风险因素状态，确保跨异构模型的稳定触发。",
+        "one_sentence_summary": "提出首个针对VLA模型物理安全风险的红队测试框架RedVLA，通过风险场景合成与风险放大，系统性地挖掘不安全行为。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该工作直接针对VLA（视觉-语言-动作）模型的物理安全评估，属于机器人学习与安全评估的核心方向，与本站对VLA的评测与安全性关注高度相关。",
+        "relevance_score": 10,
+        "tags": [
+          "Vision-Language",
+          "Evaluation",
+          "Robot Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2604.22591",
+      "authors": [
+        "Yuhao Zhang",
+        "Borong Zhang",
+        "Jiaming Fan",
+        "Jiachen Shen",
+        "Yishuai Cai",
+        "Yaodong Yang",
+        "Jiaming Ji"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-07T00:38:47.084463Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2604.22591/v2/fig1-panel1.png"
+            ],
+            "caption": "Motivation of Physical Red Teaming for Vision-Language-Action Models. RedVLA proactively injects risk factors into the benign scene and optimizes it via policy feedback.",
+            "image_urls": [
+              "https://arxiv.org/html/2604.22591v2/figure1.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2604.22591v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2604.22591/v2/fig2-panel1.png"
+            ],
+            "caption": "Overview of the RedVLA Framework. (A) The Risk Scenario Synthesis process, where physical safety taxonomy, interaction identification, and risk instantiation are combined to construct a red teaming scenario. (B) The Risk Amplification process, where the injected risk factor is iteratively updated based on trajectory spatial features to trigger the target unsafe behavior.",
+            "image_urls": [
+              "https://arxiv.org/html/2604.22591v2/figure2.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2604.22591v2#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2604.22591v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T00:38:47.084463Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-04-24T14:18:23Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2604.22591",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2604.22591",
+        "project_url": "https://redvla.github.io/"
+      },
+      "title": "RedVLA: Physical Red Teaming for Vision-Language-Action Models",
+      "title_zh": "RedVLA：面向视觉-语言-动作模型的物理安全红队测试",
+      "updated_at": "2026-09-04T09:20:28Z",
       "version": 2
     },
     {
@@ -843,7 +1025,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2604.13824v2",
-        "recovery_checked_at": "2026-09-06T08:27:31.224909Z",
+        "recovery_checked_at": "2026-09-07T00:40:07.361078Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1982,7 +2164,7 @@
         "checked_at": "2026-08-13T05:41:39.833674Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2604.02047v2",
-        "recovery_checked_at": "2026-09-06T00:32:13.749604Z",
+        "recovery_checked_at": "2026-09-07T00:40:07.361078Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -2097,20 +2279,20 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 84,
-    "completion_tokens": 0,
+    "cache_hits": 0,
+    "completion_tokens": 5298,
     "error_categories": {},
     "failed": 0,
-    "fetched": 1016,
-    "figure_available": 71,
-    "figure_cache_hits": 74,
+    "fetched": 242,
+    "figure_available": 9,
+    "figure_cache_hits": 0,
     "figure_failed": 0,
-    "figure_requests": 2,
+    "figure_requests": 14,
     "figure_unavailable": 5,
-    "model_calls": 0,
-    "prefiltered": 84,
-    "prompt_tokens": 0,
-    "published": 76,
-    "total_tokens": 0
+    "model_calls": 16,
+    "prefiltered": 16,
+    "prompt_tokens": 14299,
+    "published": 14,
+    "total_tokens": 19597
   }
 }

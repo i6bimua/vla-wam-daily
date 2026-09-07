@@ -1,6 +1,312 @@
 {
-  "generated_at": "2026-09-06T08:27:22.709711Z",
+  "generated_at": "2026-09-07T00:38:47.084463Z",
   "papers": [
+    {
+      "abstract": "Vision-language-action (VLA) models are trained by imitation and capture what action to take but not why; adding causal reasoning improves manipulation, but current methods pay for it at inference time - generating reasoning tokens or rolling out predicted future states at every step, a cost that compounds over long horizons. We ask whether this benefit can instead be captured during training and discarded before deployment. We introduce Latent Semantic Scaffolding (LSS), an auxiliary loss applied during human-demonstration pretraining that aligns a VLA's action-token representations to text embeddings of physical-reasoning rationales through a small projection head. The head is dropped at inference, leaving the unmodified base policy with zero added cost. Our central finding concerns alignment granularity: aligning each action token to the rationale of its own manipulation phase (Dense LSS) rather than to a single pooled episode-level embedding (Pooled LSS) yields representations that transfer markedly better to held-out tasks. Dense LSS attains both the best in-distribution success and the best transfer to tasks unseen during alignment, whereas pooled alignment over-specializes to the training task. A representational probe shows Dense LSS induces roughly twice the per-phase separability in the backbone, supporting that phase-local alignment is the operative mechanism.",
+      "analysis": {
+        "key_results": "Dense LSS在分布内成功率和分布外迁移任务上均取得最佳表现，且其表示探针显示骨干网络中每阶段可分性约为Pooled LSS的两倍。",
+        "limitations": "摘要未说明",
+        "main_contribution": "引入LSS辅助损失，通过在训练期间对齐动作token与阶段级物理推理文本嵌入，在不增加推理成本的情况下提升VLA策略的性能与迁移能力，并证明稠密对齐优于池化对齐。",
+        "method": "在人类演示预训练中使用辅助损失，通过小型投影头将动作token表示对齐到物理推理理由的文本嵌入；推理时丢弃投影头；对比Dense LSS（每个动作token对齐到其自身操控阶段的理由）与Pooled LSS（对齐到单一池化的episode级嵌入）。",
+        "one_sentence_summary": "论文提出Latent Semantic Scaffolding（LSS）辅助损失，在人类演示预训练阶段将VLA的动作token表示与物理推理文本嵌入对齐，推理时丢弃投影头，以零额外推理成本提升VLA策略的泛化能力。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该工作直接针对机器人VLA策略，目标是在不增加推理成本的前提下注入物理因果推理能力，属于VLA训练方法改进，对VLA相关研究具有核心价值。",
+        "relevance_score": 9,
+        "tags": [
+          "Vision-Language",
+          "Policy Learning",
+          "Robot Manipulation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2609.04893",
+      "authors": [
+        "Andrew Ting Yan Li",
+        "Zhuo Li",
+        "Zhelin Yang",
+        "Zhipeng Dong",
+        "Quentin Rouxel",
+        "and Fei Chen"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-07T00:38:47.084463Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2609.04893/v1/fig2-panel1.png"
+            ],
+            "caption": "Dense LSS architecture (Stage 2, training only). A frozen DINO+SigLIP encoder and a frozen T5-XXL command encoder condition the 2B diffusion-transformer backbone, which produces K = 16 K{=}16 action tokens Z t ∈ ℝ 2176 Z_{t}\\in\\mathbb{R}^{2176} supervised by the flow-matching loss L flow L_{\\text{flow}} . In parallel, the LSAHead projection g ϕ g_{\\phi} maps each action token into T5 space and a cosine-distance loss aligns it to the reasoning embedding of its own manipulation phase, e phase ​ ( t ) e_{\\text{phase}(t)} (straddling tokens masked by m t m_{t} ). The combined objective is L total = L flow + λ ​ L LSS L_{\\text{total}}=L_{\\text{flow}}+\\lambda L_{\\text{LSS}} . Pooled LSS uses the identical architecture but replaces the per-phase targets with a single mean-pooled episode embedding (( 1 )). The entire LSS apparatus (orange) is discarded at inference, leaving the unmodified base policy.",
+            "image_urls": [
+              "https://arxiv.org/html/2609.04893v1/figures/architecture.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2609.04893v1#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2609.04893v1",
+        "recovery_checked_at": "2026-09-07T00:40:07.361078Z",
+        "recovery_status": "not_found",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T00:38:47.084463Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-04T08:49:31Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.04893",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.04893",
+        "project_url": null
+      },
+      "title": "Reasoning Without Inference Cost: Latent Semantic Scaffolding for Robot VLA Policies",
+      "title_zh": "无需推理成本的机器人VLA策略：潜语义脚手架",
+      "updated_at": "2026-09-04T08:49:31Z",
+      "version": 1
+    },
+    {
+      "abstract": "Personalized federated learning (PFL) is a promising paradigm for collaborative learning over distributed devices, where edge nodes collaboratively train personalized models without sharing raw data. Although PFL addresses data heterogeneity by learning client-specific models, it still suffers from substantial uplink and downlink communication costs when exchanging high-dimensional parameters in bandwidth-constrained systems. Recent one-bit methods achieve extreme compression, but they usually rely on a single thresholding rule applied to the whole model. This design has two limitations. First, it overlooks layer-wise differences in parameter distributions and quantization sensitivities. Second, a single threshold provides only coarse binary information and cannot capture fine-grained variations in parameter distributions. To address these issues, we propose a communication-efficient PFL framework via layer-wise multi-threshold random sketching. In the proposed method, each layer is assigned its own set of quantization thresholds, so that the compressed representation can adapt to layer-specific statistics while using multiple intervals to provide a finer low-bit description of sketched parameters. The proposed method supports bidirectional communication using compact low-bit sketches and improves the communication-accuracy tradeoff compared with existing one-bit compression approaches.",
+      "analysis": {
+        "key_results": "摘要未说明",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出一种通信高效的个性化联邦学习框架，采用分层多阈值随机草图，为每层分配独立的量化阈值，并利用多区间提供更细粒度的低比特描述，从而改善通信与准确率的权衡。",
+        "method": "分层多阈值随机草图：每层独立量化阈值，多区间低比特描述。",
+        "one_sentence_summary": "本文提出一种通信高效的个性化联邦学习框架，通过分层多阈值随机草图实现低比特压缩。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "该工作聚焦于分布式学习中的模型量化与通信压缩，未涉及VLA、WAM或机器人策略/世界模型，但与本站支持的模型量化主题直接相关，可作为高效推理技术在联邦学习场景下的方法论参考。",
+        "relevance_score": 6,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG"
+      ],
+      "arxiv_id": "2609.04830",
+      "authors": [
+        "Xu Zhang",
+        "Xingyu Hou",
+        "Jiacheng Cheng",
+        "Kaiyuan Feng",
+        "Maoguo Gong"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-07T00:38:47.084463Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2609.04830/v1/fig1-panel1.png",
+              "/figures/2609.04830/v1/fig1-panel2.png",
+              "/figures/2609.04830/v1/fig1-panel3.png",
+              "/figures/2609.04830/v1/fig1-panel4.png"
+            ],
+            "caption": "Layer-wise parameter distribution evolution in a two-layer DNN trained with standard FedAvg. Subfigures (a)–(c) show the distributions of fc1.weight and fc2.weight at rounds 0, 15, and 99. Subfigure (d) shows the test accuracy over communication rounds, with the three selected rounds marked to indicate the initial, intermediate, and converged stages.",
+            "image_urls": [
+              "https://arxiv.org/html/2609.04830v1/early.png",
+              "https://arxiv.org/html/2609.04830v1/mid.png",
+              "https://arxiv.org/html/2609.04830v1/late.png",
+              "https://arxiv.org/html/2609.04830v1/accuracy.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2609.04830v1#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2609.04830/v1/fig2-panel1.png"
+            ],
+            "caption": "System diagram of the proposed algorithm pFedLMS.",
+            "image_urls": [
+              "https://arxiv.org/html/2609.04830v1/Main_Picture.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2609.04830v1#S1.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2609.04830v1",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T00:38:47.084463Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-04T07:35:24Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.04830",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.04830",
+        "project_url": null
+      },
+      "title": "Communication-Efficient Personalized Federated Learning via Layer-Wise Multi-Threshold Random Sketching",
+      "title_zh": "通过分层多阈值随机草图实现通信高效个性化联邦学习",
+      "updated_at": "2026-09-04T07:35:24Z",
+      "version": 1
+    },
+    {
+      "abstract": "Distillation is common in LLM post-training, where on-policy knowledge distillation (OPKD) uses student-generated trajectories to prepare the student for downstream RL. At each state, the student matches a next-token distribution supplied by the teacher. As the rollout enters states the teacher would not visit, the teacher-student distribution gap can accumulate. In tool use, this gap becomes consequential because student-written calls execute before supervision and their observations shape later prefixes. Proposer-verifier generation addresses this drift by letting the teacher decide which student-proposed text is retained during generation. Existing formulations govern text but leave tool execution outside their scope. We propose Persistent Teacher Anchoring (PTA), a student-induced but teacher-committed rollout construction. PTA retains chunk-level verification and adds turn-level commitment, allowing a call to reach the environment only after the teacher has verified the entire turn. Treating verified chunks as atomic generation units, we introduce persistent lookahead, which fills idle rollout capacity by advancing future samples and carrying unfinished ones across student updates under the fixed verifier. Across Search-R1-style retrieval and DeepEyes-style perception RL, applying PTA before downstream RL improves macro best@4 by 2.5 and 2.8 points over OPKD under the same downstream RL budget, while lookahead improves throughput by 24%.",
+      "analysis": {
+        "key_results": "在Search-R1风格检索和DeepEyes风格感知RL中，在下游RL预算相同的情况下，PTA比OPKD的宏观best@4分别提高2.5和2.8分；持久前瞻使吞吐量提高24%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出PTA，一种学生生成但由教师提交的轨迹构建方法，将工具调用纳入教师验证范围，并引入持久前瞻以填充空闲展开容量、提高吞吐量。",
+        "method": "PTA保留分块级验证并增加轮次级承诺，使工具调用只有在教师验证整个轮次后才能执行；将已验证块视为原子生成单元，使用持久前瞻在固定验证器下跨学生更新推进未完成样本。",
+        "one_sentence_summary": "提出持久教师锚定（PTA）与持久前瞻（persistent lookahead），通过在工具执行前由教师验证整个轮次来缓解在线知识蒸馏中的分布漂移，并提升吞吐量。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "无直接关系。该研究聚焦工具使用智能体中的推测解码与知识蒸馏，未涉及VLA、世界模型或机器人策略。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.CL"
+      ],
+      "arxiv_id": "2609.04773",
+      "authors": [
+        "Hyun Bin Park (1)",
+        "Kyungho Song (2)",
+        "Sangmin Lee (1)",
+        "Du-Seong Chang (1) ((1) Sogang University",
+        "(2) University of Michigan",
+        "Ann Arbor)"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-07T00:38:47.084463Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2609.04773/v1/fig1-panel1.png"
+            ],
+            "caption": "Overview of the PTA rollout. (a) SKD applied directly to a tool runtime, without a separate commitment rule: unverified tool calls reach the environment, and returned observations fall inside the verification span. (b) PTA separates chunk-level verification from turn-level commitment, so that tool execution is triggered only after a committed turn.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2609.04773v1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2609.04773/v1/fig2-panel1.png"
+            ],
+            "caption": "Schematic of synchronous and lookahead scheduling over the same wall-clock interval. Ticks mark completion of the current-step batch. In (b), one lookahead sample is promoted before the boundary, another becomes carryover and resumes after the actor update, and a fresh sample fills the remaining slot in the next batch. The carryover cut occurs only at an atomic state boundary.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2609.04773v1"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2609.04773v1",
+        "recovery_checked_at": "2026-09-07T00:40:07.361078Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:draft_verification_decoding"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T00:38:47.084463Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-04T06:09:50Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.04773",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.04773",
+        "project_url": null
+      },
+      "title": "Persistent Teacher Anchoring for Tool-Using Agents",
+      "title_zh": "面向工具使用智能体的持久教师锚定",
+      "updated_at": "2026-09-04T06:09:50Z",
+      "version": 1
+    },
+    {
+      "abstract": "Prefix caching, in which a serving engine reuses the key and value tensors of a shared prompt prefix across requests, is enabled by default in the major open-source stacks and treated as a transparent optimization. We measure what it costs in reproducibility, and find that the cost rises sharply with weight quantization. Holding the model, decoding parameters, seed, and request order fixed, and issuing every request serially at batch size one, we ran an eighty-episode multi-turn agentic tool-use workload with caching enabled and disabled across two engines and four weight formats. Enabling the cache changed the agent's trajectory on 36.2 percent of episodes at 16-bit precision and on 75.0 percent at four-bit, a gradient that survives re-measurement under a controlled cache configuration. With caching disabled, repeated execution was bit-identical in every configuration, 0 of 800 episodes, which bounds other sources of nondeterminism at 0.5 percent. Repeated cache-enabled runs did diverge, and three experiments locate the cause: a single server-level prompt-cache setting moves run-to-run divergence by 37.5 percentage points, execution order acts only while that setting is active, and restoring cache state makes the cached and recompute paths each reproduce on 40 of 40 items while still differing from each other on 14. Cached serving is deterministic given cache state, and irreproducible in practice because that state is absent from the request and never reset by default. A single-turn bridge shows the divergence reaching task outcomes without shifting aggregate accuracy. We release the harness, logs, and analysis pipeline.",
+      "analysis": {
+        "key_results": "启用缓存后，16位精度下有36.2%的情节轨迹发生变化，4位量化下达到75.0%；禁用缓存时800个情节全部位相同，有界其他不确定性为0.5%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "量化了前缀缓存对LLM服务可复现性的影响，并定位了缓存状态是导致运行间分歧的关键因素。",
+        "method": "在多轮代理工具使用工作负载上，控制变量对比缓存启用/禁用下的输出差异，并开展三个实验定位原因。",
+        "one_sentence_summary": "本文测量并定位了LLM服务中前缀缓存导致的可复现性下降问题，发现该问题随权重量化而加剧。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "本文研究LLM推理服务中的缓存与量化对可复现性的影响，不直接涉及VLA（视觉-语言-动作）或WAM（世界-动作模型），但对高效推理的可靠性有参考价值。",
+        "relevance_score": 8,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.SE",
+        "cs.DC",
+        "cs.LG"
+      ],
+      "arxiv_id": "2609.04748",
+      "authors": [
+        "Aditi Patodiya"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-07T00:38:47.084463Z",
+        "figures": [],
+        "html_url": "https://arxiv.org/html/2609.04748v1",
+        "recovery_checked_at": "2026-09-07T00:40:07.361078Z",
+        "recovery_status": "not_found",
+        "recovery_version": 3,
+        "status": "not_found"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T00:38:47.084463Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-04T05:27:34Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.04748",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.04748",
+        "project_url": null
+      },
+      "title": "Same Request, Different Answer: Quantization Amplifies Cache-Induced Divergence in LLM Serving",
+      "title_zh": "相同请求，不同答案：量化放大LLM服务中缓存引发的分歧",
+      "updated_at": "2026-09-04T05:27:34Z",
+      "version": 1
+    },
     {
       "abstract": "Vision-language pre-training and predictive world modeling provide robot policies with rich semantic and dynamic visual features, but their native action and visual-prediction objectives may omit critical physical and task structure while retaining control-irrelevant visual redundancy. We call this mismatch between visual richness and control utility the action-sufficiency gap. We investigate whether this gap can be bridged by guiding intermediate features to preserve three control-relevant structure in robotic manipulation: geometry governing motion feasibility, affordance encoding instruction-relevant entities, and goals grounding instructions in task-relevant regions. To this end, we present GIFT (Guided Intermediate Feature Training), an architecture-flexible framework for learning intermediate features that translates these structures into training-time constraints through geometry alignment, affordance prediction, and goal-region reconstruction. We instantiate GIFT in a Vision-Language-Action (VLA) policy, a direct-action World-Action Model (WAM), and an inverse-dynamics WAM while retaining each model's action formulation. Under zero-shot transfer to LIBERO-Plus, GIFT-VLA, GIFT-WAM-Fast, and GIFT-WAM-IDM outperform StarVLA-OFT, Fast-WAM, and Fast-WAM-IDM by 4.6, 12.6, and 5.2 points, reaching 79.6%, 72.6%, and 87.8%, respectively. On RoboCasa, the three GIFT variants reach 61.4%, 83.6%, and 82.3%, outperforming their counterparts by 12.6, 9.0, and 8.4 points, respectively. Together, these results establish learning functionally structured intermediate features as a reusable principle across model-specific action formulations, with especially large gains on articulated-object tasks and high-precision real-world manipulation under unseen visual and spatial perturbations. Project page: https://openphoenix-team.github.io/GIFT-pages.",
       "analysis": {
@@ -127,7 +433,7 @@
         "checked_at": "2026-09-06T00:32:01.805988Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2609.04105v1",
-        "recovery_checked_at": "2026-09-06T00:32:13.749604Z",
+        "recovery_checked_at": "2026-09-07T00:40:07.361078Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -383,7 +689,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2609.04070v1",
-        "recovery_checked_at": "2026-09-06T00:32:13.749604Z",
+        "recovery_checked_at": "2026-09-07T00:40:07.361078Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -554,7 +860,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2609.04010v1",
-        "recovery_checked_at": "2026-09-06T00:32:13.749604Z",
+        "recovery_checked_at": "2026-09-07T00:40:07.361078Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -1024,6 +1330,99 @@
     {
       "abstract": "Contact-rich loco-manipulation requires a bridge between semantic action generation and physical interaction control. Existing Vision-language-action (VLA) models generate task-level actions from visual and linguistic observations, but cannot interpret the physical interactions induced by those actions. While the whole-body control (WBC) policy can stabilize the robot, it cannot distinguish task-relevant interaction forces from forces induced by external disturbances during manipulation. Although force/torque sensors provide direct measurements of physical interactions, retrofitting them entails additional hardware costs and substantial integration effort, particularly for platforms not designed with sensor integration in mind. To address this problem, we propose FWBC-VLA, a force-aware framework that bridges task-level VLA action generation and low-level whole-body compensation control for wheeled-legged robots. First, we introduce HSR-Force, a sensorless residual-torque estimator for inferring contact strength and its temporal variation. These contact estimates are then encoded as tokens and injected into the VLA action expert during action decoding, enabling the policy to perceive contact onset, sustained loading, and release. For loco-manipulation tasks, all parameters of the pretrained VLA backbone are fine-tuned on our WL\\&Arm Dataset, which comprises more than 5,000 episodes. Moreover, the robot's proprioceptive state, the Jacobian-derived body-frame force estimate, and the estimated contact state are jointly fed into a compensation generator to produce corrective actions. The manipulation-centric actions are subsequently combined with the corrective actions and passed to the WBC policy for execution. Real-world experiments on whiteboard wiping and door opening with a door closer demonstrate the effectiveness of our FWBC-VLA in contact-rich loco-manipulation.",
       "analysis": {
+        "key_results": "在真实机器人白板擦拭和开门（带闭门器）任务中验证了FWBC-VLA在接触丰富移动操作中的有效性。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出了FWBC-VLA框架，通过引入HSR-Force无传感器残差力矩估计器和力感知标记注入，使VLA策略能够感知接触状态，并结合全身补偿控制实现鲁棒的移动操作。",
+        "method": "首先使用HSR-Force估计接触强度和时序变化，将其编码为标记注入VLA动作专家；在WL&Arm数据集上微调预训练VLA；利用本体感觉状态、雅可比推导的体框架力估计和接触状态生成补偿动作，并与操作中心动作结合后交给WBC执行。",
+        "one_sentence_summary": "FWBC-VLA是一个将视觉-语言-动作模型与力感知全身控制相结合，用于轮腿机器人接触丰富移动操作任务的框架。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该工作直接扩展VLA模型以处理接触丰富的移动操作任务，通过力感知标记注入和全身补偿控制提升VLA在物理交互任务中的表现。涉及策略学习、机器人操作和数据集构建，与VLA主题高度相关。",
+        "relevance_score": 10,
+        "tags": [
+          "Robot Learning",
+          "Robot Manipulation",
+          "Policy Learning",
+          "Vision-Language",
+          "Data"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.AI"
+      ],
+      "arxiv_id": "2609.03889",
+      "authors": [
+        "Yutian Zhang",
+        "Siyuan Ma",
+        "Liwen Yang",
+        "Yang Li",
+        "Ce Hao",
+        "Haozhen Chi",
+        "Dong Wei",
+        "Qiaojun Yu",
+        "Dibo Hou"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-07T00:38:47.084463Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2609.03889/v2/fig1-panel1.png"
+            ],
+            "caption": "Comparison of VLA loco-manipulation paradigms. Kinematic whole-body VLA uses no explicit interaction feedback. Arm-centric force-aware VLA uses force for task adaptation but ignores body-level effects. We leverage a sensorless interaction estimator to construct dual feedback loops for both task actions and body compensation.",
+            "image_urls": [
+              "https://arxiv.org/html/2609.03889v2/Pics/Paradigm.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2609.03889v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2609.03889/v2/fig2-panel1.png"
+            ],
+            "caption": "Illustrations of dataset and data collecting. Left: Composition of the WL&Arm dataset. Right: Pico-based teleoperation method with force commands.",
+            "image_urls": [
+              "https://arxiv.org/html/2609.03889v2/Pics/Dataset.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2609.03889v2#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2609.03889v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T00:38:47.084463Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-03T14:10:47Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.03889",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.03889",
+        "project_url": null
+      },
+      "title": "FWBC-VLA: Force-Aware Whole-Body Compensation for Contact-Rich Loco-Manipulation",
+      "title_zh": "FWBC-VLA：面向接触丰富移动操作任务的力感知全身补偿框架",
+      "updated_at": "2026-09-04T04:51:57Z",
+      "version": 2
+    },
+    {
+      "abstract": "Contact-rich loco-manipulation requires a bridge between semantic action generation and physical interaction control. Existing Vision-language-action (VLA) models generate task-level actions from visual and linguistic observations, but cannot interpret the physical interactions induced by those actions. While the whole-body control (WBC) policy can stabilize the robot, it cannot distinguish task-relevant interaction forces from forces induced by external disturbances during manipulation. Although force/torque sensors provide direct measurements of physical interactions, retrofitting them entails additional hardware costs and substantial integration effort, particularly for platforms not designed with sensor integration in mind. To address this problem, we propose FWBC-VLA, a force-aware framework that bridges task-level VLA action generation and low-level whole-body compensation control for wheeled-legged robots. First, we introduce HSR-Force, a sensorless residual-torque estimator for inferring contact strength and its temporal variation. These contact estimates are then encoded as tokens and injected into the VLA action expert during action decoding, enabling the policy to perceive contact onset, sustained loading, and release. For loco-manipulation tasks, all parameters of the pretrained VLA backbone are fine-tuned on our WL\\&Arm Dataset, which comprises more than 5,000 episodes. Moreover, the robot's proprioceptive state, the Jacobian-derived body-frame force estimate, and the estimated contact state are jointly fed into a compensation generator to produce corrective actions. The manipulation-centric actions are subsequently combined with the corrective actions and passed to the WBC policy for execution. Real-world experiments on whiteboard wiping and door opening with a door closer demonstrate the effectiveness of our FWBC-VLA in contact-rich loco-manipulation.",
+      "analysis": {
         "key_results": "在真实世界白板擦拭和带闭门器的开门任务中验证了FWBC-VLA在接触丰富移动操作中的有效性。",
         "limitations": "摘要未说明",
         "main_contribution": "提出FWBC-VLA框架，将力感知信息注入VLA动作生成与低层全身补偿控制，并构建了包含5000+ episodes的WL&Arm数据集进行微调。",
@@ -1335,7 +1734,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2609.03715v1",
-        "recovery_checked_at": "2026-09-06T00:32:13.749604Z",
+        "recovery_checked_at": "2026-09-07T00:40:07.361078Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -1583,7 +1982,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2609.03641v1",
-        "recovery_checked_at": "2026-09-06T00:32:13.749604Z",
+        "recovery_checked_at": "2026-09-07T00:40:07.361078Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -1843,7 +2242,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2609.03591v1",
-        "recovery_checked_at": "2026-09-06T00:32:13.749604Z",
+        "recovery_checked_at": "2026-09-07T00:40:07.361078Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -3558,7 +3957,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2609.02531v1",
-        "recovery_checked_at": "2026-09-06T00:32:13.749604Z",
+        "recovery_checked_at": "2026-09-07T00:40:07.361078Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -3804,7 +4203,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2609.02401v1",
-        "recovery_checked_at": "2026-09-06T08:27:31.224909Z",
+        "recovery_checked_at": "2026-09-07T00:40:07.361078Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -3884,7 +4283,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2609.02350v1",
-        "recovery_checked_at": "2026-09-06T00:32:13.749604Z",
+        "recovery_checked_at": "2026-09-07T00:40:07.361078Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -4038,7 +4437,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2609.02339v1",
-        "recovery_checked_at": "2026-09-06T08:27:31.224909Z",
+        "recovery_checked_at": "2026-09-07T00:40:07.361078Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -4885,7 +5284,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2609.01567v2",
-        "recovery_checked_at": "2026-09-06T00:32:13.749604Z",
+        "recovery_checked_at": "2026-09-07T00:40:07.361078Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -5129,7 +5528,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2609.01404v1",
-        "recovery_checked_at": "2026-09-06T08:27:31.224909Z",
+        "recovery_checked_at": "2026-09-07T00:40:07.361078Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -5706,7 +6105,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2609.01059v1",
-        "recovery_checked_at": "2026-09-06T08:27:31.224909Z",
+        "recovery_checked_at": "2026-09-07T00:40:07.361078Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -5822,6 +6221,80 @@
     {
       "abstract": "Action chunking is a standard execution strategy in modern Vision-Language-Action (VLA) frameworks, but fixed execution horizons impose a trade-off between efficiency and accuracy. Short chunks require frequent inference and may cause oscillatory behavior, whereas long chunks can become misaligned with newly observed states. We address this limitation with an adaptive action chunking approach based on internal cross-attention dynamics in the action expert. We observe that, as the prediction horizon extends, action-to-observation cross-attention becomes increasingly dispersed and its entropy rises toward a plateau. This pattern is associated with higher action prediction error and provides an online signal that the current observation offers limited grounding for further open-loop execution. Based on this observation, we introduce a training-free truncation mechanism that detects sustained high-entropy plateaus and dynamically selects the execution horizon during inference. The method uses attention weights already computed by the policy and introduces negligible additional overhead. Evaluations on $\\pi_{0.5}$ and X-VLA across RoboTwin 2.0, LIBERO, and three real-world manipulation tasks show improved average task success over fixed-horizon and adaptive chunking baselines, while preserving efficient closed-loop control. These results show that cross-attention dynamics can provide a practical internal signal for adaptive action execution in VLAs.",
       "analysis": {
+        "key_results": "在π0.5和X-VLA上，于RoboTwin 2.0、LIBERO及三个真实world操控任务中，相比固定视界和自适应分块基线，平均任务成功率提升，同时保持高效的闭环控制。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出一种无需训练的自适应动作分块截断机制，利用动作专家的跨注意力熵动态选择执行视界，以解决固定执行视界在效率与精度之间的权衡。",
+        "method": "分析动作专家中动作到观测的跨注意力动态，观察到随着预测视界延长，注意力分布趋于分散、熵上升至平台期并与动作预测误差相关；据此检测持续高熵平台并动态截断执行视界。",
+        "one_sentence_summary": "提出基于视觉-语言-动作模型中动作专家内部跨注意力动态的自适应动作分块方法，以无需训练的方式动态决定执行视界，在多个基准和真实任务上提升成功率。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "直接针对VLA模型的动作执行策略，通过内部注意力信号实现自适应闭环控制，属于高效推理与机器人操作的交叉研究，对VLA系统部署和动作分块策略有直接价值。",
+        "relevance_score": 9,
+        "tags": [
+          "Action Prediction",
+          "Efficient Inference",
+          "Robot Manipulation",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2609.00908",
+      "authors": [
+        "Runze Xu",
+        "Xiaolong Shan",
+        "Shuang Dai",
+        "Yu Wang",
+        "Jincheng Yu"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-07T00:38:47.084463Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2609.00908/v2/fig2-panel1.png"
+            ],
+            "caption": "Method Overview. Our framework dynamically determines action chunk sizes by monitoring the cross-attention entropy within the action expert. Conditioned on VLM states, the action expert identifies chunk boundaries by monitoring attention focus. This enables adaptive execution across task stages.",
+            "image_urls": [
+              "https://arxiv.org/html/2609.00908v2/fig1_4.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2609.00908v2#S1.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2609.00908v2",
+        "recovery_checked_at": "2026-09-07T00:40:07.361078Z",
+        "recovery_status": "not_found",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T00:38:47.084463Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-01T08:38:16Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.00908",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.00908",
+        "project_url": null
+      },
+      "title": "Knowing When to Stop: Adaptive Action Chunking via Internal Cross-Attention Dynamics in VLAs",
+      "title_zh": "知止：通过VLA内部跨注意力动态实现自适应动作分块",
+      "updated_at": "2026-09-04T08:35:27Z",
+      "version": 2
+    },
+    {
+      "abstract": "Action chunking is a standard execution strategy in modern Vision-Language-Action (VLA) frameworks, but fixed execution horizons impose a trade-off between efficiency and accuracy. Short chunks require frequent inference and may cause oscillatory behavior, whereas long chunks can become misaligned with newly observed states. We address this limitation with an adaptive action chunking approach based on internal cross-attention dynamics in the action expert. We observe that, as the prediction horizon extends, action-to-observation cross-attention becomes increasingly dispersed and its entropy rises toward a plateau. This pattern is associated with higher action prediction error and provides an online signal that the current observation offers limited grounding for further open-loop execution. Based on this observation, we introduce a training-free truncation mechanism that detects sustained high-entropy plateaus and dynamically selects the execution horizon during inference. The method uses attention weights already computed by the policy and introduces negligible additional overhead. Evaluations on $\\pi_{0.5}$ and X-VLA across RoboTwin 2.0, LIBERO, and three real-world manipulation tasks show improved average task success over fixed-horizon and adaptive chunking baselines, while preserving efficient closed-loop control. These results show that cross-attention dynamics can provide a practical internal signal for adaptive action execution in VLAs.",
+      "analysis": {
         "key_results": "在π0.5与X-VLA上，于RoboTwin 2.0、LIBERO和三个真实操作任务中，相比固定步长和自适应分块基线均提升了平均任务成功率，同时保持高效闭环控制。",
         "limitations": "摘要未说明",
         "main_contribution": "提出一种基于VLA内部交叉注意力动态的自适应动作分块方法，通过在线检测高熵平台实现训练无关的截断机制，无需额外训练即可动态选择执行步长。",
@@ -5866,7 +6339,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2609.00908v1",
-        "recovery_checked_at": "2026-09-06T00:32:13.749604Z",
+        "recovery_checked_at": "2026-09-07T00:40:07.361078Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -6311,20 +6784,20 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 34,
-    "completion_tokens": 0,
+    "cache_hits": 0,
+    "completion_tokens": 5298,
     "error_categories": {},
     "failed": 0,
-    "fetched": 357,
-    "figure_available": 27,
-    "figure_cache_hits": 29,
+    "fetched": 242,
+    "figure_available": 9,
+    "figure_cache_hits": 0,
     "figure_failed": 0,
-    "figure_requests": 0,
-    "figure_unavailable": 2,
-    "model_calls": 0,
-    "prefiltered": 34,
-    "prompt_tokens": 0,
-    "published": 29,
-    "total_tokens": 0
+    "figure_requests": 14,
+    "figure_unavailable": 5,
+    "model_calls": 16,
+    "prefiltered": 16,
+    "prompt_tokens": 14299,
+    "published": 14,
+    "total_tokens": 19597
   }
 }

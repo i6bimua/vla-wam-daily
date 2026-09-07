@@ -937,6 +937,55 @@
       "version": 1
     }
   },
+  "analysis:v1:01c0c3b2e46755636a5754f5380dbf2909839bdc37f997bd84b0ab63a13a8a62": {
+    "key": "analysis:v1:01c0c3b2e46755636a5754f5380dbf2909839bdc37f997bd84b0ab63a13a8a62",
+    "record": {
+      "abstract": "Prefix caching, in which a serving engine reuses the key and value tensors of a shared prompt prefix across requests, is enabled by default in the major open-source stacks and treated as a transparent optimization. We measure what it costs in reproducibility, and find that the cost rises sharply with weight quantization. Holding the model, decoding parameters, seed, and request order fixed, and issuing every request serially at batch size one, we ran an eighty-episode multi-turn agentic tool-use workload with caching enabled and disabled across two engines and four weight formats. Enabling the cache changed the agent's trajectory on 36.2 percent of episodes at 16-bit precision and on 75.0 percent at four-bit, a gradient that survives re-measurement under a controlled cache configuration. With caching disabled, repeated execution was bit-identical in every configuration, 0 of 800 episodes, which bounds other sources of nondeterminism at 0.5 percent. Repeated cache-enabled runs did diverge, and three experiments locate the cause: a single server-level prompt-cache setting moves run-to-run divergence by 37.5 percentage points, execution order acts only while that setting is active, and restoring cache state makes the cached and recompute paths each reproduce on 40 of 40 items while still differing from each other on 14. Cached serving is deterministic given cache state, and irreproducible in practice because that state is absent from the request and never reset by default. A single-turn bridge shows the divergence reaching task outcomes without shifting aggregate accuracy. We release the harness, logs, and analysis pipeline.",
+      "analysis": {
+        "key_results": "启用缓存后，16位精度下有36.2%的情节轨迹发生变化，4位量化下达到75.0%；禁用缓存时800个情节全部位相同，有界其他不确定性为0.5%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "量化了前缀缓存对LLM服务可复现性的影响，并定位了缓存状态是导致运行间分歧的关键因素。",
+        "method": "在多轮代理工具使用工作负载上，控制变量对比缓存启用/禁用下的输出差异，并开展三个实验定位原因。",
+        "one_sentence_summary": "本文测量并定位了LLM服务中前缀缓存导致的可复现性下降问题，发现该问题随权重量化而加剧。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "本文研究LLM推理服务中的缓存与量化对可复现性的影响，不直接涉及VLA（视觉-语言-动作）或WAM（世界-动作模型），但对高效推理的可靠性有参考价值。",
+        "relevance_score": 8,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.SE",
+        "cs.DC",
+        "cs.LG"
+      ],
+      "arxiv_id": "2609.04748",
+      "authors": [
+        "Aditi Patodiya"
+      ],
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T00:38:47.084463Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-04T05:27:34Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.04748",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.04748",
+        "project_url": null
+      },
+      "title": "Same Request, Different Answer: Quantization Amplifies Cache-Induced Divergence in LLM Serving",
+      "title_zh": "相同请求，不同答案：量化放大LLM服务中缓存引发的分歧",
+      "updated_at": "2026-09-04T05:27:34Z",
+      "version": 1
+    }
+  },
   "analysis:v1:01e5165938108bbfec011e1d482d1cf47e026bf88eca26f996d58a40f9cdca0c": {
     "key": "analysis:v1:01e5165938108bbfec011e1d482d1cf47e026bf88eca26f996d58a40f9cdca0c",
     "record": {
@@ -1631,6 +1680,54 @@
       "title_zh": "精通PokeGym：测试时图引导多模态进化",
       "updated_at": "2026-08-03T15:01:45Z",
       "version": 2
+    }
+  },
+  "analysis:v1:03dd35f16a6f72ce54da8a4291bb661535f8767bf2b17418c6aeb2da8208b987": {
+    "key": "analysis:v1:03dd35f16a6f72ce54da8a4291bb661535f8767bf2b17418c6aeb2da8208b987",
+    "record": {
+      "abstract": "Ransomware detection and family attribution require analysis of different modalities because it can use packing, obfuscation, process manipulation and runtime evasion techniques. However, conventional multimodal usually uses all available modalities for every sample resulting in unnecessary computational cost and increased latency. In this paper, we present a Cost Aware Hierarchical Multi-Agent System (HMAS) for adaptive ransomware detection. The proposed architecture organizes specialized agents into hierarchical domain controllers coordinated by a Meta Orchestrator. Static analysis is used as the initial low-cost modality while additional dynamic and memory modality is selectively used when confidence is insufficient or specialist agents exhibit disagreement. A cost model incorporates modality use and processing overhead. It enables the orchestration policy to balance analysis performance against computational cost. A locally deployed large language model provides verification for selected difficult cases without replacing the deterministic pipeline. Experimental evaluation compares adaptive HMAS with static only, static plus dynamic and exhaustive analysis policies across binary ransomware detection and multiclass family attribution. The complete HMAS achieved 96.57% accuracy, 0.96 F1-score and 0.99 ROC-AUC for binary detection. It also achieved 0.90 macro-F1 for family attribution. At the same time, the HMAS reduced average analysis cost by 43.97% relative to exhaustive analysis and substantially reduced average analysis latency except for the case where LLM is used. Routing analysis showed that 56.05% of cases were resolved using static evidence alone. Only 4.33% required the complete evidence pipeline. These findings demonstrate that adaptive HMAS can provide accuracy cost tradeoff for ransomware analysis while retaining support for heterogeneous and incomplete modalities.",
+      "analysis": {
+        "key_results": "完整HMAS在二进制勒索软件检测中达到96.57%准确率、0.96 F1分数和0.99 ROC-AUC，家族归属宏F1为0.90；与穷尽分析相比平均分析成本降低43.97%，平均分析延迟显著降低（LLM使用场景除外）；56.05%的案例仅凭静态证据解决，仅4.33%需要完整证据流水线。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出了一种成本感知的分层多智能体系统（HMAS），用于自适应勒索软件检测和家族归属，在保持准确性的同时降低计算成本。",
+        "method": "分层多智能体系统，由元编排器协调，静态分析作为初始低成本模态，根据置信度或专家分歧动态选择动态和内存模态，并用成本模型指导策略，同时使用本地部署的大语言模型对困难案例进行验证。",
+        "one_sentence_summary": "提出一种成本感知的分层多智能体系统，通过选择性调用高成本模态来平衡勒索软件检测的准确性与计算开销。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "该论文研究的是勒索软件检测和家族识别，不涉及视觉-语言-动作（VLA）或世界-动作模型（WAM）。其重点在于自适应多模态推理的成本优化，与本站主题无直接关系。",
+        "relevance_score": 1,
+        "tags": [
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "arxiv_id": "2609.04820",
+      "authors": [
+        "Mubashar Iqbal",
+        "Asifullah Khan"
+      ],
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T00:38:47.084463Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-04T07:17:09Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.04820",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.04820",
+        "project_url": null
+      },
+      "title": "Cost-Aware Hierarchical Multi-Agent Ransomware Detection and Family Attribution",
+      "title_zh": "用于自适应勒索软件检测与家族识别的成本感知分层多智能体系统",
+      "updated_at": "2026-09-04T07:17:09Z",
+      "version": 1
     }
   },
   "analysis:v1:03e1538dbdb5e70039c2b2336deea92ec38e2bfa4dae56b07cf8e689c80fa71d": {
@@ -6635,6 +6732,55 @@
       "title_zh": "CURE：面向块并行推测解码的局部不确定性修复",
       "updated_at": "2026-08-01T08:43:34Z",
       "version": 1
+    }
+  },
+  "analysis:v1:12daa934e810dcd993ba0e6c5195931391faa1e18378b61cdb0618644dea64f7": {
+    "key": "analysis:v1:12daa934e810dcd993ba0e6c5195931391faa1e18378b61cdb0618644dea64f7",
+    "record": {
+      "abstract": "Contemporary reservoir computing relies heavily on globally Lipschitz, well-behaved activation functions, limiting applications in defense, disaster response, and pharmaceutical modeling where robust operation under extreme conditions is critical. We systematically investigate non-smooth activation functions, including chaotic, stochastic, and fractal variants, in echo state networks. Through parameter sweeps across 36,610 reservoir configurations, we demonstrate that several non-smooth functions not only maintain behavior consistent with the Echo State Property (ESP) but outperform traditional smooth activations in convergence speed and spectral radius tolerance. Notably, the Cantor function (continuous everywhere, zero derivative almost everywhere) maintains ESP-consistent behavior up to spectral radii of rho = 10, an order of magnitude beyond typical bounds for traditional functions, while achieving 2.6x faster convergence than tanh and ReLU. We introduce a theoretical framework for quantized activation functions, defining a Degenerate Echo State Property (d-ESP) capturing stability for discrete-output functions, and prove that d-ESP implies traditional ESP. We conjecture a critical crowding ratio Q=N/k (reservoir size / quantization levels) predicting failure thresholds for discrete activations. Our analysis reveals that preprocessing topology, rather than continuity, determines stability: monotone, compressive preprocessing maintains ESP across scales, while dispersive or discontinuous preprocessing triggers sharp failures. Our findings challenge assumptions about activation function design in reservoir computing; the exceptional performance of certain fractal functions is only partially explained by the effective-gain analysis presented here, suggesting fundamental gaps in our understanding of how geometric properties of activation functions influence reservoir dynamics.",
+      "analysis": {
+        "key_results": "康托函数在谱半径高达10时仍保持ESP一致行为（远超传统函数），且收敛速度比tanh和ReLU快2.6倍；单调压缩预处理维持ESP，而分散或不连续预处理导致急剧失败。",
+        "limitations": "摘要指出某些分形函数的卓越性能无法完全由有效增益分析解释，表明对激活函数几何性质影响的理解存在根本性不足。",
+        "main_contribution": "系统研究非光滑激活函数在回声状态网络中的表现，提出量化激活函数的理论框架和退化回声状态性质(d-ESP)，并发现预处理拓扑是决定稳定性的关键因素。",
+        "method": "在36,610个储备池配置上对多种非光滑激活函数进行参数扫描实验，并对量化激活函数进行理论分析，证明d-ESP蕴含传统ESP。",
+        "one_sentence_summary": "该论文系统研究了非光滑激活函数（包括分形、混沌和随机变体）在回声状态网络中的性能，发现函数预处理拓扑而非连续性决定了稳定性。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文研究的是储备池计算中的激活函数量化，与VLA或WAM无直接关系。但其对量化激活函数稳定性的理论分析可能为神经网络的量化提供参考，尤其对资源受限下的推理效率有潜在价值。",
+        "relevance_score": 6,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG"
+      ],
+      "arxiv_id": "2512.14675",
+      "authors": [
+        "Rae Chipera",
+        "Jenny Du",
+        "and Irene Tsapara"
+      ],
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T00:38:47.084463Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2025-12-16T18:41:01Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2512.14675",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2512.14675",
+        "project_url": null
+      },
+      "title": "Fractal and Chaotic Activation Functions in Echo State Networks: Preprocessing Topology Governs the Echo State Property",
+      "title_zh": "回声状态网络中的分形与混沌激活函数：预处理拓扑决定回声状态性质",
+      "updated_at": "2026-09-04T01:35:06Z",
+      "version": 2
     }
   },
   "analysis:v1:135653d0e78d60b5e7b18039c41072177eab561b636336d3f8d3f2ceddd73ca2": {
@@ -11754,6 +11900,61 @@
       "version": 4
     }
   },
+  "analysis:v1:2451afc7ee25be6236598497ff119d70c495356d226e877740f6a7541943fbe1": {
+    "key": "analysis:v1:2451afc7ee25be6236598497ff119d70c495356d226e877740f6a7541943fbe1",
+    "record": {
+      "abstract": "The real-world deployment of Vision-Language-Action (VLA) models remains limited by the risk of unpredictable and irreversible physical harm. However, we currently lack effective mechanisms to proactively detect these physical safety risks before deployment. To address this gap, we propose \\textbf{RedVLA}, the first red teaming framework for physical safety in VLA models. We systematically uncover unsafe behaviors through a two-stage process: (I) \\textbf{Risk Scenario Synthesis} constructs a valid and task-feasible initial risk scene. Specifically, it identifies critical interaction regions from benign trajectories and positions the risk factor within these regions, aiming to entangle it with the VLA's execution flow and elicit a target unsafe behavior. (II) \\textbf{Risk Amplification} ensures stable elicitation across heterogeneous models. It iteratively refines the risk factor state through gradient-free optimization guided by trajectory features. Experiments on six representative VLA models show that RedVLA uncovers diverse unsafe behaviors and achieves the ASR up to 95.5\\% within 10 optimization iterations. To mitigate these risks, we further propose SimpleVLA-Guard, a lightweight safety guard built from RedVLA-generated data. Our data, assets, and code are available \\href{https://redvla.github.io}{here}.",
+      "analysis": {
+        "key_results": "在六个代表性VLA模型上，RedVLA在10次优化迭代内攻破率（ASR）最高达95.5%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出RedVLA，首个针对视觉-语言-动作（VLA）模型物理安全风险的红队测试框架，系统地发现不安全行为，并基于生成的数据构建轻量级安全防护SimpleVLA-Guard。",
+        "method": "两阶段过程：(I) 风险场景合成，从良性轨迹中识别关键交互区域并放置风险因素，以诱发目标不安全行为；(II) 风险放大，通过无梯度优化迭代细化风险因素状态，确保跨异构模型的稳定触发。",
+        "one_sentence_summary": "提出首个针对VLA模型物理安全风险的红队测试框架RedVLA，通过风险场景合成与风险放大，系统性地挖掘不安全行为。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该工作直接针对VLA（视觉-语言-动作）模型的物理安全评估，属于机器人学习与安全评估的核心方向，与本站对VLA的评测与安全性关注高度相关。",
+        "relevance_score": 10,
+        "tags": [
+          "Vision-Language",
+          "Evaluation",
+          "Robot Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2604.22591",
+      "authors": [
+        "Yuhao Zhang",
+        "Borong Zhang",
+        "Jiaming Fan",
+        "Jiachen Shen",
+        "Yishuai Cai",
+        "Yaodong Yang",
+        "Jiaming Ji"
+      ],
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T00:38:47.084463Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-04-24T14:18:23Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2604.22591",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2604.22591",
+        "project_url": "https://redvla.github.io/"
+      },
+      "title": "RedVLA: Physical Red Teaming for Vision-Language-Action Models",
+      "title_zh": "RedVLA：面向视觉-语言-动作模型的物理安全红队测试",
+      "updated_at": "2026-09-04T09:20:28Z",
+      "version": 2
+    }
+  },
   "analysis:v1:24684f9983a25c8f494ce9af812f824d24e6395c234412b6d0aedcfd4aa3fe92": {
     "key": "analysis:v1:24684f9983a25c8f494ce9af812f824d24e6395c234412b6d0aedcfd4aa3fe92",
     "record": {
@@ -12550,6 +12751,70 @@
       "title_zh": "时序距离JEPA：面向规划感知的潜在世界模型预测控制表征学习",
       "updated_at": "2026-07-29T10:22:25Z",
       "version": 2
+    }
+  },
+  "analysis:v1:262322634461aa79434a28050add5bdc833eea2b1853fa5e1479cb5a55aebd4b": {
+    "key": "analysis:v1:262322634461aa79434a28050add5bdc833eea2b1853fa5e1479cb5a55aebd4b",
+    "record": {
+      "abstract": "Reinforcement learning (RL) has emerged as a critical paradigm for post-training Vision-Language-Action (VLA) models, enabling embodied agents to adapt and improve through environmental interaction. However, existing RL frameworks for VLAs inherit synchronous design principles from traditional LLM training, treating entire rollouts as indivisible units and alternating strictly between data collection and policy optimization. This fundamentally mismatches the unique characteristics of VLA training, as physical simulators introduce highly variable, resource-intensive latencies. To address this, we introduce RL-VLA$^3$, a fully asynchronous distributed RL framework that enables fine-grained asynchronous interaction between simulation, inference, and training components through dynamic batching schedulers and flexible environment sharding strategies. Extensive experiments across diverse simulation backends, VLA architectures, and RL algorithms demonstrate that RL-VLA$^3$ achieves throughput improvements of up to 85.2\\% over synchronous baselines while maintaining identical sample efficiency, with scalability validated from 8 to 256 GPUs. To our knowledge, RL-VLA$^3$ is the first fully asynchronous RL training framework tailored specifically for the system-level challenges of VLA training.",
+      "analysis": {
+        "key_results": "在多种仿真后端、VLA架构和RL算法上，相比同步基线吞吐量提升最高85.2%，样本效率保持一致，并在8到256个GPU上验证可扩展性。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出首个针对VLA训练的全异步强化学习框架，通过动态批调度和灵活环境分片实现细粒度异步交互。",
+        "method": "动态批调度器（dynamic batching schedulers）和灵活环境分片（flexible environment sharding）实现仿真、推理、训练之间的异步交互。",
+        "one_sentence_summary": "提出一个全异步分布式强化学习框架RL-VLA³，解耦仿真、推理和训练，显著提升VLA训练吞吐量。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "论文直接解决VLA（视觉-语言-动作）模型强化学习训练中的系统级效率问题，对VLA的大规模训练和部署具有核心价值。",
+        "relevance_score": 9,
+        "tags": [
+          "Policy Learning",
+          "Efficient Inference",
+          "Robot Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.AI"
+      ],
+      "arxiv_id": "2602.05765",
+      "authors": [
+        "Haoran Sun",
+        "Yongjian Guo",
+        "Zhong Guan",
+        "Shuai Di",
+        "Xiaodong Bai",
+        "Jing Long",
+        "Tianyun Zhao",
+        "Mingxi Luo",
+        "Hongke Zhao",
+        "Likang Wu",
+        "Xiaotie Deng",
+        "Xu Chu",
+        "Xi Xiao",
+        "Sheng Wen",
+        "Yicheng Gong",
+        "Junwu Xiong"
+      ],
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T00:38:47.084463Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-02-05T15:30:23Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2602.05765",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2602.05765",
+        "project_url": null
+      },
+      "title": "RL-VLA$^3$: A Flexible and Asynchronous Reinforcement Learning Framework for VLA Training",
+      "title_zh": "RL-VLA³：一种面向VLA训练的灵活异步强化学习框架",
+      "updated_at": "2026-09-04T02:37:29Z",
+      "version": 3
     }
   },
   "analysis:v1:262e414539133cab1455c1b3219ed9634f4f10f38a60068c68926ad0dbc721c1": {
@@ -13687,6 +13952,57 @@
       "title": "TurboVLA: Real-Time Vision-Language-Action Model at 32 Hz on an RTX 4090 with <1 GB VRAM",
       "title_zh": "TurboVLA：RTX 4090上32 Hz实时视觉-语言-动作模型，显存低于1 GB",
       "updated_at": "2026-07-29T17:59:58Z",
+      "version": 1
+    }
+  },
+  "analysis:v1:29c29b926f5a81a528ad01098e34734da3e53962e34cd3baf07d99314cf743c0": {
+    "key": "analysis:v1:29c29b926f5a81a528ad01098e34734da3e53962e34cd3baf07d99314cf743c0",
+    "record": {
+      "abstract": "Personalized federated learning (PFL) is a promising paradigm for collaborative learning over distributed devices, where edge nodes collaboratively train personalized models without sharing raw data. Although PFL addresses data heterogeneity by learning client-specific models, it still suffers from substantial uplink and downlink communication costs when exchanging high-dimensional parameters in bandwidth-constrained systems. Recent one-bit methods achieve extreme compression, but they usually rely on a single thresholding rule applied to the whole model. This design has two limitations. First, it overlooks layer-wise differences in parameter distributions and quantization sensitivities. Second, a single threshold provides only coarse binary information and cannot capture fine-grained variations in parameter distributions. To address these issues, we propose a communication-efficient PFL framework via layer-wise multi-threshold random sketching. In the proposed method, each layer is assigned its own set of quantization thresholds, so that the compressed representation can adapt to layer-specific statistics while using multiple intervals to provide a finer low-bit description of sketched parameters. The proposed method supports bidirectional communication using compact low-bit sketches and improves the communication-accuracy tradeoff compared with existing one-bit compression approaches.",
+      "analysis": {
+        "key_results": "摘要未说明",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出一种通信高效的个性化联邦学习框架，采用分层多阈值随机草图，为每层分配独立的量化阈值，并利用多区间提供更细粒度的低比特描述，从而改善通信与准确率的权衡。",
+        "method": "分层多阈值随机草图：每层独立量化阈值，多区间低比特描述。",
+        "one_sentence_summary": "本文提出一种通信高效的个性化联邦学习框架，通过分层多阈值随机草图实现低比特压缩。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "该工作聚焦于分布式学习中的模型量化与通信压缩，未涉及VLA、WAM或机器人策略/世界模型，但与本站支持的模型量化主题直接相关，可作为高效推理技术在联邦学习场景下的方法论参考。",
+        "relevance_score": 6,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG"
+      ],
+      "arxiv_id": "2609.04830",
+      "authors": [
+        "Xu Zhang",
+        "Xingyu Hou",
+        "Jiacheng Cheng",
+        "Kaiyuan Feng",
+        "Maoguo Gong"
+      ],
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T00:38:47.084463Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-04T07:35:24Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.04830",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.04830",
+        "project_url": null
+      },
+      "title": "Communication-Efficient Personalized Federated Learning via Layer-Wise Multi-Threshold Random Sketching",
+      "title_zh": "通过分层多阈值随机草图实现通信高效个性化联邦学习",
+      "updated_at": "2026-09-04T07:35:24Z",
       "version": 1
     }
   },
@@ -16839,6 +17155,61 @@
       "version": 1
     }
   },
+  "analysis:v1:3437d9a1352514b85d847dce2e78b76f2f1411f0aa5940bdc5743a3641f98095": {
+    "key": "analysis:v1:3437d9a1352514b85d847dce2e78b76f2f1411f0aa5940bdc5743a3641f98095",
+    "record": {
+      "abstract": "Speculative Decoding (SD) accelerates large language model inference by allowing a lightweight draft model to propose tokens that are subsequently verified in parallel by a larger target model. Recent approaches introduce lossy verification schemes to further improve efficiency by relaxing strict distributional matching. Yet such relaxation silently rewrites the decoding distribution, and the resulting acceleration can come at the cost of unstable, sometimes severely degraded generation quality. In this work, we present a principled analysis of the distributions induced by lossy verification methods. We show that many seemingly distinct approaches differ only superficially and can be unified into two categories: truncation-based verification and collaborative verification. We further construct a diagnostic evaluation framework across curated benchmarks. For truncation-based methods, we identify a fundamental pitfall-performance can degrade significantly compared to the true truncation sampling baseline due to distributional distortion. For collaborative verification, we reveal that well-designed relaxation principles, namely overshoot suppression and supervision quality, matter far more than the linear interpolation between draft and target. Our code is available at https://github.com/ZhouYuxuanYX/Fast-HSD.",
+      "analysis": {
+        "key_results": "截断型方法会因分布扭曲导致性能显著低于真实截断采样基线；协作型方法中，过冲抑制和监督质量比草稿与目标之间的线性插值更重要。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出对有损验证方法诱导分布的 principled 分析，将多种表面不同的方法统一为截断型与协作型两类，并建立诊断评估框架以揭示失效模式。",
+        "method": "对有损验证方法进行理论分析，构建诊断评估框架，并在精选基准上进行实证评估。",
+        "one_sentence_summary": "本文系统分析了推测解码中有损验证方法的分布特性，将其统一为截断型和协作型两类，并揭示了各自的失效模式与关键设计原则。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "本文独立研究推测解码的效率与质量权衡，未直接涉及 VLA、WAM 或机器人策略，但对高效推理方法在机器人模型中的潜在应用具有方法论参考价值。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CL"
+      ],
+      "arxiv_id": "2607.26627",
+      "authors": [
+        "Tianyu Wang",
+        "Yuxuan Zhou",
+        "Heng Li",
+        "Wenbin Wang",
+        "Zikai Xiao",
+        "Chunrui Zheng",
+        "Junyuan Shang"
+      ],
+      "matched_rules": [
+        "exact:speculative-decoding",
+        "composite:speculative_generation",
+        "composite:draft_verification_decoding"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T00:38:47.084463Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-07-29T08:54:27Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2607.26627",
+        "code_url": "https://github.com/ZhouYuxuanYX/Fast-HSD",
+        "pdf_url": "https://arxiv.org/pdf/2607.26627",
+        "project_url": null
+      },
+      "title": "Revisiting Lossy Verification in Speculative Decoding: Mechanisms, Trade-offs, and Failure Modes",
+      "title_zh": "重审推测解码中的有损验证：机制、权衡与失效模式",
+      "updated_at": "2026-09-04T06:41:21Z",
+      "version": 2
+    }
+  },
   "analysis:v1:3445db0a8f58ba29b183e0204820eb8fefa736178e26fe3f7344dfd940d92312": {
     "key": "analysis:v1:3445db0a8f58ba29b183e0204820eb8fefa736178e26fe3f7344dfd940d92312",
     "record": {
@@ -19531,6 +19902,62 @@
       "version": 3
     }
   },
+  "analysis:v1:3c69855ba0d99889b46d56b12b1233a362e35969ea3aec19ad3857f8b3d0d603": {
+    "key": "analysis:v1:3c69855ba0d99889b46d56b12b1233a362e35969ea3aec19ad3857f8b3d0d603",
+    "record": {
+      "abstract": "Spatial reasoning is foundational for Vision-Language Models (VLMs), particularly when deployed as Vision-Language-Action (VLA) agents in physical environments. However, existing benchmarks predominantly focus on elementary, single-hop relations, neglecting the multi-hop compositional reasoning and precise visual grounding essential for real-world scenarios. To address this, we introduce MultihopSpatial, offering three key contributions: (1) A comprehensive benchmark designed for multi-hop and compositional spatial reasoning, featuring 1- to 3-hop complex queries across diverse spatial perspectives. (2) Acc@50IoU, a complementary metric that simultaneously evaluates reasoning and visual grounding by requiring both answer selection and precise bounding box prediction - capabilities vital for robust VLA deployment. (3) MultihopSpatial-Train, a dedicated large-scale training corpus to foster spatial intelligence. Extensive evaluation of 37 state-of-the-art VLMs yields eight key insights, revealing that compositional spatial reasoning remains a formidable challenge. Finally, we demonstrate that reinforcement learning post-training on our corpus enhances both intrinsic VLM spatial reasoning and downstream embodied manipulation performance.",
+      "analysis": {
+        "key_results": "对37个最先进VLM的广泛评估揭示了八项关键见解，表明组合空间推理仍是一个巨大挑战；强化学习后训练提升了内在VLM空间推理和下游具身操作性能。",
+        "limitations": "摘要未说明",
+        "main_contribution": "引入MultihopSpatial基准（1-3跳复杂空间查询）、Acc@50IoU指标（同时评估答案选择和边界框定位）以及MultihopSpatial-Train训练语料，并通过强化学习后训练增强VLM的空间推理和下游操作性能。",
+        "method": "构建多跳组合空间推理基准和训练语料，定义Acc@50IoU指标，对37个前沿VLM进行评估，并进行强化学习后训练。",
+        "one_sentence_summary": "提出MultihopSpatial基准与训练语料，评估并提升视觉语言模型在多跳组合空间推理和视觉定位上的能力，并验证其对具身操作任务的促进作用。",
+        "primary_topic": "Benchmark",
+        "relation_to_vla_wam": "该工作直接面向VLA（视觉语言动作）智能体的空间推理与视觉定位能力，其基准、指标和训练语料旨在提升真实环境中VLA的鲁棒部署，并通过强化学习后训练改善下游具身操作，与机器人动作预测和策略学习紧密相关。",
+        "relevance_score": 9,
+        "tags": [
+          "Vision-Language",
+          "Evaluation",
+          "Robot Learning",
+          "Robot Manipulation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "arxiv_id": "2603.18892",
+      "authors": [
+        "Youngwan Lee",
+        "Soojin Jang",
+        "Yoorhim Cho",
+        "Seunghwan Lee",
+        "Yong-Ju Lee",
+        "Sung Ju Hwang"
+      ],
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T00:38:47.084463Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-03-19T13:33:26Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2603.18892",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2603.18892",
+        "project_url": "https://youngwanlee.github.io/multihopspatial"
+      },
+      "title": "MultihopSpatial: Multi-hop Compositional Spatial Reasoning Benchmark for Vision-Language Model",
+      "title_zh": "MultihopSpatial：面向视觉语言模型的多跳组合空间推理基准",
+      "updated_at": "2026-09-04T05:56:22Z",
+      "version": 2
+    }
+  },
   "analysis:v1:3c724cab90b21f39fb2959165075dc6714af815ea3b3dd00576ae23e2b27f35a": {
     "key": "analysis:v1:3c724cab90b21f39fb2959165075dc6714af815ea3b3dd00576ae23e2b27f35a",
     "record": {
@@ -21886,6 +22313,67 @@
       "version": 3
     }
   },
+  "analysis:v1:42e85da8bf08f07f5b6bd7c2f15088d00f9561dd6d4cba50f139880152159cdd": {
+    "key": "analysis:v1:42e85da8bf08f07f5b6bd7c2f15088d00f9561dd6d4cba50f139880152159cdd",
+    "record": {
+      "abstract": "Flow-based vision-language-action (VLA) policies offer strong expressivity for action generation, but suffer from a fundamental inefficiency: multi-step inference is required to recover action structure from uninformative Gaussian noise, leading to a poor efficiency-quality trade-off under real-time constraints. We address this issue by rethinking the role of the starting point in generative action modeling. Instead of shortening the sampling trajectory, we propose CF-VLA, a coarse-to-fine two-stage formulation that restructures action generation into a coarse initialization step that constructs an action-aware starting point, followed by a single-step local refinement that corrects residual errors. Concretely, the coarse stage learns a conditional posterior over endpoint velocity to transform Gaussian noise into a structured initialization, while the fine stage performs a fixed-time refinement from this initialization. To stabilize training, we introduce a stepwise strategy that first learns a controlled coarse predictor and then performs joint optimization. Experiments on CALVIN and LIBERO show that our method establishes a strong efficiency-performance frontier under low-NFE (Number of Function Evaluations) regimes: it consistently outperforms existing NFE=2 methods, matches or surpasses the NFE=10 $\\pi_{0.5}$ baseline on several metrics, reduces action sampling latency by 75.4%, and achieves the best average real-robot success rate of 83.0%, outperforming MIP by 19.5 points and $\\pi_{0.5}$ by 4.0 points. These results suggest that structured, coarse-to-fine generation enables both strong performance and efficient inference. Our code is available at https://github.com/EmbodiedAI-RoboTron/CF-VLA.",
+      "analysis": {
+        "key_results": "在CALVIN和LIBERO上，CF-VLA在低NFE下优于现有NFE=2方法，部分指标达到或超过NFE=10的π0.5基线，动作采样延迟降低75.4%，真实机器人平均成功率达到83.0%，比MIP高19.5个百分点，比π0.5高4.0个百分点。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出CF-VLA，一种粗到细的两阶段动作生成框架，将生成过程分解为从高斯噪声构造结构化起始点的粗阶段和单步局部细化的细阶段，并设计了逐步训练策略。",
+        "method": "粗阶段学习以端点速度为条件的后验分布，将高斯噪声转化为结构化初始化；细阶段从该初始化进行固定步数的细化；训练采用先学习可控粗预测器、再联合优化的逐步策略。",
+        "one_sentence_summary": "该论文提出一种粗到细的两阶段生成式VLA方法，通过将动作生成重构为粗初始化加单步局部细化，显著提升了低函数评估次数（NFE）下的效率与性能。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该论文直接针对视觉-语言-动作（VLA）模型效率问题提出创新生成式架构，以显著降低推理步数并提升采样效率，与VLA主题高度相关，为将高效推理技术应用于机器人动作生成提供了有价值的实际验证。",
+        "relevance_score": 10,
+        "tags": [
+          "Action Prediction",
+          "Efficient Inference",
+          "Vision-Language",
+          "Robot Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "arxiv_id": "2604.24622",
+      "authors": [
+        "Fan Du",
+        "Feng Yan",
+        "Jianxiong Wu",
+        "Xinrun Xu",
+        "Weiye Zhang",
+        "Weinong Wang",
+        "Yu Guo",
+        "Bin Qian",
+        "Zhihai He",
+        "Fei Wang",
+        "Heng Yang"
+      ],
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T00:38:47.084463Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-04-27T15:51:40Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2604.24622",
+        "code_url": "https://github.com/EmbodiedAI-RoboTron/CF-VLA",
+        "pdf_url": "https://arxiv.org/pdf/2604.24622",
+        "project_url": null
+      },
+      "title": "CF-VLA: Efficient Coarse-to-Fine Action Generation for Vision-Language-Action Policies",
+      "title_zh": "CF-VLA：面向视觉-语言-动作策略的高效粗到细动作生成方法",
+      "updated_at": "2026-09-04T09:24:16Z",
+      "version": 4
+    }
+  },
   "analysis:v1:42f24f25ea166057e544c17428be01e96561051c882936e9deb8b0b72667d3e6": {
     "key": "analysis:v1:42f24f25ea166057e544c17428be01e96561051c882936e9deb8b0b72667d3e6",
     "record": {
@@ -23174,6 +23662,57 @@
       "title_zh": "PredVLA：亚百万参数的预测编码策略用于机器人操作",
       "updated_at": "2026-08-27T06:27:11Z",
       "version": 1
+    }
+  },
+  "analysis:v1:461f2c51bf0096b7dcbde950315fafa8fd302d77f8aec9d92c11b3451352943c": {
+    "key": "analysis:v1:461f2c51bf0096b7dcbde950315fafa8fd302d77f8aec9d92c11b3451352943c",
+    "record": {
+      "abstract": "Valuable data remains embedded in unstructured sources: web pages, reports, contracts, filings, earnings calls, and PDFs. The big bet in enterprise AI is deploying LLM agents that reason over this data to answer complex questions for every knowledge worker. Agents can do this today, but at prohibitive cost. Each question repeatedly opens large documents to recover scattered evidence, consuming up to a million tokens. However, if the data were already structured, the same question would reduce to a cheap database lookup. For example, on FanOutQA benchmark, reasoning over an ideal pre-structured store is 28X cheaper, and the gap grows to orders of magnitude as questions fan out over more documents. Yet structuring everything in advance is not viable: documents hold vastly more possible structure than any workload will use, and the useful structure and documents are unknown until queries arrive. We propose agentic data cracking, a method that structures unstructured data adaptively and speculatively as a byproduct of reasoning itself. Structuring is adaptive because observed queries decide when it happens and what matters, and speculative because it goes beyond the current question. Whenever the agent opens a document to answer, a cracking sub-agent forks from the already-loaded context at marginal cost and extracts grounded structure likely to serve related future queries. Over time, an increasing share of queries is fully covered by structured data and answered without opening a document, keeping agentic accuracy at close to RAG cost. On FanOutQA, extended with merely one related question per test question, cracking cuts cost by 53% while preserving accuracy. Agentic data cracking is a first step toward next-generation data infrastructure for agentic reasoning over unstructured data: a shared substrate beneath the model where knowledge that reasoning already paid to uncover accumulates.",
+      "analysis": {
+        "key_results": "在FanOutQA基准测试上，通过为每个测试问题仅添加一个相关问题，破解方法在保持准确性的同时将成本降低了53%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出智能体数据破解方法，通过自适应和推测性地对非结构化数据进行结构化，作为推理过程的副产品，从而显著降低企业AI代理在处理非结构化数据时的推理成本。",
+        "method": "在代理打开文档回答问题后，一个破解子代理从已加载的上下文中派生，提取可能服务于未来相关查询的接地结构；通过观察查询自适应决定何时以及哪些内容需要结构化，并推测性地超越当前问题。",
+        "one_sentence_summary": "提出智能体数据破解方法，通过自适应和推测性地将非结构化数据结构化，从而降低代理推理成本。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "本文研究的是智能体推理中的高效推断和数据管理，不涉及VLA（视觉-语言-动作）或WAM（世界行动模型）。其推测性结构化和上下文重用思想可能对机器人策略学习中的高效数据利用有启发，但无直接关系。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.AI",
+        "cs.CL",
+        "cs.DB"
+      ],
+      "arxiv_id": "2608.31082",
+      "authors": [
+        "Milad Rezaei Hajidehi",
+        "Qitong Wang",
+        "Stratos Idreos"
+      ],
+      "matched_rules": [
+        "composite:speculative_generation"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T00:38:47.084463Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-08-31T16:53:45Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2608.31082",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2608.31082",
+        "project_url": null
+      },
+      "title": "Agentic Context Cracking: Token-Efficient Data Reasoning Agents via Adaptive Structuring of Unstructured Data",
+      "title_zh": "智能体上下文破解：通过自适应结构化非结构化数据实现令牌高效的数据推理智能体",
+      "updated_at": "2026-09-04T07:11:29Z",
+      "version": 2
     }
   },
   "analysis:v1:4721800ba4a8be7c32c003f46c9e39e9712294d5c78371eb364fae4cf900795d": {
@@ -28921,6 +29460,65 @@
       "version": 1
     }
   },
+  "analysis:v1:58f3785043434c75f754541712dda7f48b04b0e680a4ee863ad709ff80370290": {
+    "key": "analysis:v1:58f3785043434c75f754541712dda7f48b04b0e680a4ee863ad709ff80370290",
+    "record": {
+      "abstract": "AI-assisted computer-aided design (CAD) for industrial products involves two challenging phases. Part-level generation maps diverse forms of user intent, including renders, text descriptions, 2D drawings, and real photographs, to executable programs in a CAD domain-specific language. Assembly-level generation must additionally handle interacting parts, plan mating relations, estimate poses, and place all parts correctly. Existing specialized CAD models are commonly trained on narrow input domains, such as renders or texts, and often generalize poorly, while general-purpose frontier models cover broader inputs but perform inconsistently across CAD domains. We present VisCAD, a foundation model suite designed to provide both broad generalization and strong CAD capability for realistic industrial products. At its core is VisCAD-M1, a 27B model trained through mid-training and post-training for part-level design generation. On PubCADBench and RealCADBench, VisCAD-M1 achieves the highest average part-level score among the evaluated models, reaching 0.5540 compared with 0.5496 for the strongest frontier model. Reusing VisCAD-M1 as a test-time verifier can further raise the score to 0.5797, an approximately 5 percent relative improvement over the previous state of the art. VisCAD also includes a domain-specific harness that leverages frontier models for complex assembly generation and demonstrates advantages over general-purpose harnesses in both quantitative and qualitative evaluations.",
+      "analysis": {
+        "key_results": "在PubCADBench和RealCADBench上，VisCAD-M1的平均零件级得分为0.5540，超过最强前沿模型的0.5496；使用VisCAD-M1作为测试时验证器后得分提升至0.5797，相对提升约5%；装配生成的领域专用框架在定量和定性评估中均优于通用框架。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出了VisCAD基础模型套件，包含27B模型VisCAD-M1，通过中期训练和后训练实现零件级设计生成，并开发了利用前沿模型进行复杂装配生成的领域专用框架。",
+        "method": "使用27B模型VisCAD-M1，通过中期训练和后训练进行零件级设计生成；将VisCAD-M1作为测试时验证器进一步提升性能；使用领域专用框架进行装配级生成。",
+        "one_sentence_summary": "VisCAD是一个面向工业CAD设计生成的基础模型套件，包含27B模型VisCAD-M1，能处理多模态输入并生成CAD程序。",
+        "primary_topic": "Dataset",
+        "relation_to_vla_wam": "本文针对计算机辅助设计（CAD）领域，与具身智能、视觉语言动作模型（VLA）或世界动作模型（WAM）无直接关系，未涉及机器人、动作预测或世界建模。",
+        "relevance_score": 1,
+        "tags": [
+          "Data",
+          "Evaluation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.CL"
+      ],
+      "arxiv_id": "2609.03811",
+      "authors": [
+        "Guanlin Li",
+        "Zhichao Huang",
+        "Huimu Yu",
+        "Yichen Long",
+        "Hongsen Liu",
+        "Linxin Cai",
+        "Qiuhe Hong",
+        "Ziqi Liu",
+        "Luya Wang",
+        "Wenxiang Wu",
+        "Ning Zhang",
+        "Yuchen Wang"
+      ],
+      "matched_rules": [
+        "composite:draft_verification_decoding"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T00:38:47.084463Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-03T13:14:36Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.03811",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.03811",
+        "project_url": null
+      },
+      "title": "VisCAD: A Foundation Model Suite with Multimodal Industrial CAD Intelligence",
+      "title_zh": "VisCAD：面向多模态工业CAD智能的基础模型套件",
+      "updated_at": "2026-09-04T02:31:25Z",
+      "version": 2
+    }
+  },
   "analysis:v1:591d20ffb44f41ad0ef60774a856d460e8fe4fabdf1a1d5434a2b2fb1dd22c4a": {
     "key": "analysis:v1:591d20ffb44f41ad0ef60774a856d460e8fe4fabdf1a1d5434a2b2fb1dd22c4a",
     "record": {
@@ -32168,6 +32766,120 @@
       "title": "BrainWAM: Action-Space Coordination of Semantic Priors and Predictive Dynamics for Autonomous Driving",
       "title_zh": "BrainWAM：自动驾驶中语义先验与预测动力学的动作空间协调",
       "updated_at": "2026-08-19T15:52:04Z",
+      "version": 2
+    }
+  },
+  "analysis:v1:62e2e659ffa5d30dc5f2f372db38161a4fa2a89923c8f620db555c76ab546923": {
+    "key": "analysis:v1:62e2e659ffa5d30dc5f2f372db38161a4fa2a89923c8f620db555c76ab546923",
+    "record": {
+      "abstract": "Vision-language-action (VLA) models are trained by imitation and capture what action to take but not why; adding causal reasoning improves manipulation, but current methods pay for it at inference time - generating reasoning tokens or rolling out predicted future states at every step, a cost that compounds over long horizons. We ask whether this benefit can instead be captured during training and discarded before deployment. We introduce Latent Semantic Scaffolding (LSS), an auxiliary loss applied during human-demonstration pretraining that aligns a VLA's action-token representations to text embeddings of physical-reasoning rationales through a small projection head. The head is dropped at inference, leaving the unmodified base policy with zero added cost. Our central finding concerns alignment granularity: aligning each action token to the rationale of its own manipulation phase (Dense LSS) rather than to a single pooled episode-level embedding (Pooled LSS) yields representations that transfer markedly better to held-out tasks. Dense LSS attains both the best in-distribution success and the best transfer to tasks unseen during alignment, whereas pooled alignment over-specializes to the training task. A representational probe shows Dense LSS induces roughly twice the per-phase separability in the backbone, supporting that phase-local alignment is the operative mechanism.",
+      "analysis": {
+        "key_results": "Dense LSS在分布内成功率和分布外迁移任务上均取得最佳表现，且其表示探针显示骨干网络中每阶段可分性约为Pooled LSS的两倍。",
+        "limitations": "摘要未说明",
+        "main_contribution": "引入LSS辅助损失，通过在训练期间对齐动作token与阶段级物理推理文本嵌入，在不增加推理成本的情况下提升VLA策略的性能与迁移能力，并证明稠密对齐优于池化对齐。",
+        "method": "在人类演示预训练中使用辅助损失，通过小型投影头将动作token表示对齐到物理推理理由的文本嵌入；推理时丢弃投影头；对比Dense LSS（每个动作token对齐到其自身操控阶段的理由）与Pooled LSS（对齐到单一池化的episode级嵌入）。",
+        "one_sentence_summary": "论文提出Latent Semantic Scaffolding（LSS）辅助损失，在人类演示预训练阶段将VLA的动作token表示与物理推理文本嵌入对齐，推理时丢弃投影头，以零额外推理成本提升VLA策略的泛化能力。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该工作直接针对机器人VLA策略，目标是在不增加推理成本的前提下注入物理因果推理能力，属于VLA训练方法改进，对VLA相关研究具有核心价值。",
+        "relevance_score": 9,
+        "tags": [
+          "Vision-Language",
+          "Policy Learning",
+          "Robot Manipulation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2609.04893",
+      "authors": [
+        "Andrew Ting Yan Li",
+        "Zhuo Li",
+        "Zhelin Yang",
+        "Zhipeng Dong",
+        "Quentin Rouxel",
+        "and Fei Chen"
+      ],
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T00:38:47.084463Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-04T08:49:31Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.04893",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.04893",
+        "project_url": null
+      },
+      "title": "Reasoning Without Inference Cost: Latent Semantic Scaffolding for Robot VLA Policies",
+      "title_zh": "无需推理成本的机器人VLA策略：潜语义脚手架",
+      "updated_at": "2026-09-04T08:49:31Z",
+      "version": 1
+    }
+  },
+  "analysis:v1:62eaf662453c2acfefa53fa1adff2fe7c96da687eec15fd86a115715235128ba": {
+    "key": "analysis:v1:62eaf662453c2acfefa53fa1adff2fe7c96da687eec15fd86a115715235128ba",
+    "record": {
+      "abstract": "Contact-rich loco-manipulation requires a bridge between semantic action generation and physical interaction control. Existing Vision-language-action (VLA) models generate task-level actions from visual and linguistic observations, but cannot interpret the physical interactions induced by those actions. While the whole-body control (WBC) policy can stabilize the robot, it cannot distinguish task-relevant interaction forces from forces induced by external disturbances during manipulation. Although force/torque sensors provide direct measurements of physical interactions, retrofitting them entails additional hardware costs and substantial integration effort, particularly for platforms not designed with sensor integration in mind. To address this problem, we propose FWBC-VLA, a force-aware framework that bridges task-level VLA action generation and low-level whole-body compensation control for wheeled-legged robots. First, we introduce HSR-Force, a sensorless residual-torque estimator for inferring contact strength and its temporal variation. These contact estimates are then encoded as tokens and injected into the VLA action expert during action decoding, enabling the policy to perceive contact onset, sustained loading, and release. For loco-manipulation tasks, all parameters of the pretrained VLA backbone are fine-tuned on our WL\\&Arm Dataset, which comprises more than 5,000 episodes. Moreover, the robot's proprioceptive state, the Jacobian-derived body-frame force estimate, and the estimated contact state are jointly fed into a compensation generator to produce corrective actions. The manipulation-centric actions are subsequently combined with the corrective actions and passed to the WBC policy for execution. Real-world experiments on whiteboard wiping and door opening with a door closer demonstrate the effectiveness of our FWBC-VLA in contact-rich loco-manipulation.",
+      "analysis": {
+        "key_results": "在真实机器人白板擦拭和开门（带闭门器）任务中验证了FWBC-VLA在接触丰富移动操作中的有效性。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出了FWBC-VLA框架，通过引入HSR-Force无传感器残差力矩估计器和力感知标记注入，使VLA策略能够感知接触状态，并结合全身补偿控制实现鲁棒的移动操作。",
+        "method": "首先使用HSR-Force估计接触强度和时序变化，将其编码为标记注入VLA动作专家；在WL&Arm数据集上微调预训练VLA；利用本体感觉状态、雅可比推导的体框架力估计和接触状态生成补偿动作，并与操作中心动作结合后交给WBC执行。",
+        "one_sentence_summary": "FWBC-VLA是一个将视觉-语言-动作模型与力感知全身控制相结合，用于轮腿机器人接触丰富移动操作任务的框架。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该工作直接扩展VLA模型以处理接触丰富的移动操作任务，通过力感知标记注入和全身补偿控制提升VLA在物理交互任务中的表现。涉及策略学习、机器人操作和数据集构建，与VLA主题高度相关。",
+        "relevance_score": 10,
+        "tags": [
+          "Robot Learning",
+          "Robot Manipulation",
+          "Policy Learning",
+          "Vision-Language",
+          "Data"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.AI"
+      ],
+      "arxiv_id": "2609.03889",
+      "authors": [
+        "Yutian Zhang",
+        "Siyuan Ma",
+        "Liwen Yang",
+        "Yang Li",
+        "Ce Hao",
+        "Haozhen Chi",
+        "Dong Wei",
+        "Qiaojun Yu",
+        "Dibo Hou"
+      ],
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T00:38:47.084463Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-03T14:10:47Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.03889",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.03889",
+        "project_url": null
+      },
+      "title": "FWBC-VLA: Force-Aware Whole-Body Compensation for Contact-Rich Loco-Manipulation",
+      "title_zh": "FWBC-VLA：面向接触丰富移动操作任务的力感知全身补偿框架",
+      "updated_at": "2026-09-04T04:51:57Z",
       "version": 2
     }
   },
@@ -35617,6 +36329,64 @@
       "title_zh": "GaussianDream++：面向机器人操作的高效3D高斯世界建模",
       "updated_at": "2026-08-26T11:41:55Z",
       "version": 1
+    }
+  },
+  "analysis:v1:6cf63a263b88ea02b91d3c13e2872179a3ae970f08cfdee06b0775d1968a3b22": {
+    "key": "analysis:v1:6cf63a263b88ea02b91d3c13e2872179a3ae970f08cfdee06b0775d1968a3b22",
+    "record": {
+      "abstract": "Quadruped mobile manipulation requires two tightly coupled capabilities: reaching manipulation-ready configurations and maintaining stable contact throughout articulated-object interaction. However, existing methods often terminate navigation near the target, leaving a gap between reachability and manipulation readiness, while tracking lag, motion jitter, and contact instability limit continuous interaction. To address these challenges, we present TONAV, a unified framework integrating task-oriented navigation with action-velocity chunk learning. First, we introduce a position-velocity-coupled teleoperation framework that explicitly captures motion dynamics to improve master-follower consistency and collect smooth, temporally consistent demonstrations. Next, task-oriented navigation leverages vision-language reasoning to decompose high-level instructions into executable subgoals and adaptively refine the robot base toward a manipulation-ready configuration. Finally, action-velocity chunk learning jointly models joint positions and their temporal transitions under velocity supervision, enabling smooth and stable sustained-contact manipulation. Real-world experiments across diverse articulated-object tasks demonstrate that TONAV achieves higher success rates in both task-oriented navigation and complete mobile manipulation, mitigating the navigation-manipulation gap and improving continuous-contact interaction. The project page is at https://haochen611.github.io/TONAV.",
+      "analysis": {
+        "key_results": "真实世界实验表明，TONAV在任务导向导航和完整移动操作中均实现更高的成功率，缓解了导航-操作差距并改善连续接触交互。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出TONAV统一框架，整合任务导向导航与动作-速度块学习，缩小导航与操作准备之间的差距，提升连续接触操作能力。",
+        "method": "引入位置-速度耦合遥操作系统采集平滑演示；任务导向导航使用视觉-语言推理将高层指令分解为子目标，并自适应调整机器人基座至操作准备姿态；动作-速度块学习在速度监督下联合建模关节位置及其时间变化，实现稳定的持续接触操作。",
+        "one_sentence_summary": "TONAV是一个统一框架，结合任务导向导航与动作-速度块学习，用于关节对象的四足移动操作。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该论文面向视觉-语言驱动的机器人操作策略，结合高层指令分解与动作预测，属于VLA范畴，与机器人世界模型通过动作生成和基座自适应密切相关。",
+        "relevance_score": 9,
+        "tags": [
+          "Action Prediction",
+          "Robot Manipulation",
+          "Vision-Language",
+          "Policy Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.CV"
+      ],
+      "arxiv_id": "2608.22296",
+      "authors": [
+        "Haoran Lin",
+        "Mingyu Yang",
+        "Pengfei Qi",
+        "Kehan Chen",
+        "Qiang Diao",
+        "Liangji Zeng",
+        "Wenrui Chen",
+        "Yaonan Wang",
+        "Kailun Yang"
+      ],
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T00:38:47.084463Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-08-23T08:41:23Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2608.22296",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2608.22296",
+        "project_url": "https://haochen611.github.io/TONAV"
+      },
+      "title": "TONAV: Task-Oriented Navigation and Action-Velocity Chunk Learning for Articulated Object Quadrupedal Mobile Manipulation",
+      "title_zh": "TONAV：面向任务导航与动作-速度块学习的四足移动操作",
+      "updated_at": "2026-09-04T03:45:08Z",
+      "version": 2
     }
   },
   "analysis:v1:6d19196921cf59dc9020bb5497e868c497422bed4279883a9ece3341e8123e76": {
@@ -43005,6 +43775,60 @@
       "version": 1
     }
   },
+  "analysis:v1:89f7ac19ed251985fac69a1b2f3cc6aa440ee19112530138324d75054adb06dd": {
+    "key": "analysis:v1:89f7ac19ed251985fac69a1b2f3cc6aa440ee19112530138324d75054adb06dd",
+    "record": {
+      "abstract": "Distillation is common in LLM post-training, where on-policy knowledge distillation (OPKD) uses student-generated trajectories to prepare the student for downstream RL. At each state, the student matches a next-token distribution supplied by the teacher. As the rollout enters states the teacher would not visit, the teacher-student distribution gap can accumulate. In tool use, this gap becomes consequential because student-written calls execute before supervision and their observations shape later prefixes. Proposer-verifier generation addresses this drift by letting the teacher decide which student-proposed text is retained during generation. Existing formulations govern text but leave tool execution outside their scope. We propose Persistent Teacher Anchoring (PTA), a student-induced but teacher-committed rollout construction. PTA retains chunk-level verification and adds turn-level commitment, allowing a call to reach the environment only after the teacher has verified the entire turn. Treating verified chunks as atomic generation units, we introduce persistent lookahead, which fills idle rollout capacity by advancing future samples and carrying unfinished ones across student updates under the fixed verifier. Across Search-R1-style retrieval and DeepEyes-style perception RL, applying PTA before downstream RL improves macro best@4 by 2.5 and 2.8 points over OPKD under the same downstream RL budget, while lookahead improves throughput by 24%.",
+      "analysis": {
+        "key_results": "在Search-R1风格检索和DeepEyes风格感知RL中，在下游RL预算相同的情况下，PTA比OPKD的宏观best@4分别提高2.5和2.8分；持久前瞻使吞吐量提高24%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出PTA，一种学生生成但由教师提交的轨迹构建方法，将工具调用纳入教师验证范围，并引入持久前瞻以填充空闲展开容量、提高吞吐量。",
+        "method": "PTA保留分块级验证并增加轮次级承诺，使工具调用只有在教师验证整个轮次后才能执行；将已验证块视为原子生成单元，使用持久前瞻在固定验证器下跨学生更新推进未完成样本。",
+        "one_sentence_summary": "提出持久教师锚定（PTA）与持久前瞻（persistent lookahead），通过在工具执行前由教师验证整个轮次来缓解在线知识蒸馏中的分布漂移，并提升吞吐量。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "无直接关系。该研究聚焦工具使用智能体中的推测解码与知识蒸馏，未涉及VLA、世界模型或机器人策略。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.CL"
+      ],
+      "arxiv_id": "2609.04773",
+      "authors": [
+        "Hyun Bin Park (1)",
+        "Kyungho Song (2)",
+        "Sangmin Lee (1)",
+        "Du-Seong Chang (1) ((1) Sogang University",
+        "(2) University of Michigan",
+        "Ann Arbor)"
+      ],
+      "matched_rules": [
+        "composite:draft_verification_decoding"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T00:38:47.084463Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-04T06:09:50Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.04773",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.04773",
+        "project_url": null
+      },
+      "title": "Persistent Teacher Anchoring for Tool-Using Agents",
+      "title_zh": "面向工具使用智能体的持久教师锚定",
+      "updated_at": "2026-09-04T06:09:50Z",
+      "version": 1
+    }
+  },
   "analysis:v1:8a0adb08c48dd3f6efbdcdcfd7c7811adef4b9e188fa3179ccf1a3456f734a07": {
     "key": "analysis:v1:8a0adb08c48dd3f6efbdcdcfd7c7811adef4b9e188fa3179ccf1a3456f734a07",
     "record": {
@@ -46165,6 +46989,60 @@
       "title_zh": "DeicticVLA：在单一VLA中统一基于语言与指示手势的指令模式",
       "updated_at": "2026-08-28T09:14:09Z",
       "version": 1
+    }
+  },
+  "analysis:v1:94a61fb66e8f3a19ed230a392870063b80e95b04120001ae4f2474640a3c9412": {
+    "key": "analysis:v1:94a61fb66e8f3a19ed230a392870063b80e95b04120001ae4f2474640a3c9412",
+    "record": {
+      "abstract": "Action chunking is a standard execution strategy in modern Vision-Language-Action (VLA) frameworks, but fixed execution horizons impose a trade-off between efficiency and accuracy. Short chunks require frequent inference and may cause oscillatory behavior, whereas long chunks can become misaligned with newly observed states. We address this limitation with an adaptive action chunking approach based on internal cross-attention dynamics in the action expert. We observe that, as the prediction horizon extends, action-to-observation cross-attention becomes increasingly dispersed and its entropy rises toward a plateau. This pattern is associated with higher action prediction error and provides an online signal that the current observation offers limited grounding for further open-loop execution. Based on this observation, we introduce a training-free truncation mechanism that detects sustained high-entropy plateaus and dynamically selects the execution horizon during inference. The method uses attention weights already computed by the policy and introduces negligible additional overhead. Evaluations on $\\pi_{0.5}$ and X-VLA across RoboTwin 2.0, LIBERO, and three real-world manipulation tasks show improved average task success over fixed-horizon and adaptive chunking baselines, while preserving efficient closed-loop control. These results show that cross-attention dynamics can provide a practical internal signal for adaptive action execution in VLAs.",
+      "analysis": {
+        "key_results": "在π0.5和X-VLA上，于RoboTwin 2.0、LIBERO及三个真实world操控任务中，相比固定视界和自适应分块基线，平均任务成功率提升，同时保持高效的闭环控制。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出一种无需训练的自适应动作分块截断机制，利用动作专家的跨注意力熵动态选择执行视界，以解决固定执行视界在效率与精度之间的权衡。",
+        "method": "分析动作专家中动作到观测的跨注意力动态，观察到随着预测视界延长，注意力分布趋于分散、熵上升至平台期并与动作预测误差相关；据此检测持续高熵平台并动态截断执行视界。",
+        "one_sentence_summary": "提出基于视觉-语言-动作模型中动作专家内部跨注意力动态的自适应动作分块方法，以无需训练的方式动态决定执行视界，在多个基准和真实任务上提升成功率。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "直接针对VLA模型的动作执行策略，通过内部注意力信号实现自适应闭环控制，属于高效推理与机器人操作的交叉研究，对VLA系统部署和动作分块策略有直接价值。",
+        "relevance_score": 9,
+        "tags": [
+          "Action Prediction",
+          "Efficient Inference",
+          "Robot Manipulation",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2609.00908",
+      "authors": [
+        "Runze Xu",
+        "Xiaolong Shan",
+        "Shuang Dai",
+        "Yu Wang",
+        "Jincheng Yu"
+      ],
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-07T00:38:47.084463Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-01T08:38:16Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.00908",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.00908",
+        "project_url": null
+      },
+      "title": "Knowing When to Stop: Adaptive Action Chunking via Internal Cross-Attention Dynamics in VLAs",
+      "title_zh": "知止：通过VLA内部跨注意力动态实现自适应动作分块",
+      "updated_at": "2026-09-04T08:35:27Z",
+      "version": 2
     }
   },
   "analysis:v1:94c4cd9264fde34146dd274e2257940eda063ae7ff18e08899390a291ada64f3": {
