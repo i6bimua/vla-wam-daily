@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-03T00:55:04.046556Z",
+  "generated_at": "2026-09-09T08:47:10.771216Z",
   "papers": [
     {
       "abstract": "Does Chain-of-Thought (CoT) reasoning genuinely improve Vision Language Action (VLA) models, or does it merely add overhead? Existing CoT-VLA systems report limited and inconsistent gains, yet no prior work has rigorously diagnosed when and why CoT helps robots act. Through systematic experiments, we identify two necessary conditions that must be jointly satisfied for CoT to be effective in VLA: (1) Decoding Alignment: CoT and actions must be generated with modality-appropriate mechanisms; forcing both through a single autoregressive decoder is not merely suboptimal but actively harmful, degrading performance by 4.2 percentage points; (2) Causal Alignment: CoT must be causally linked to task success via outcome-based optimization; without it, supervised CoT is indistinguishable from no reasoning at all under action-execution-sensitive dynamics shift, exhibiting a 32.0 pp performance drop nearly identical to the 31.6 pp drop of a reasoning-free baseline. Guided by these findings, we build DeepThinkVLA: a hybrid-attention decoder satisfies Condition 1 by pairing causal attention for language with bidirectional attention for parallel action decoding, while a two-stage SFT-then-RL pipeline satisfies Condition 2 by aligning the full reasoning: action chain with sparse task-success rewards. DeepThinkVLA achieves 97.0\\% success on LIBERO, 79.0\\% robustness on LIBERO-Plus (vs. 61.6\\% for $\\pi_0$-FAST), and 59.3\\% success on RoboTwin 2.0, exceeding the strongest baseline by 21.7 points. Furthermore, real-robot experiments provide preliminary evidence for the physical applicability of our CoT data construction and hybrid architecture. Our codes are available at https://github.com/OpenBMB/DeepThinkVLA.",
@@ -429,6 +429,78 @@
       "version": 2
     },
     {
+      "abstract": "Compressing large-scale neural networks is essential for deploying models on resource-constrained devices. Most existing methods adopt weight pruning or low-bit quantization individually, often resulting in suboptimal compression rates to preserve acceptable performance drops. We introduce a unified framework for simultaneous pruning and low-bit quantization via Bayesian variational learning (\\method), which achieves higher compression rates than prior baselines while maintaining comparable performance. The key idea is to employ a spike-and-slab prior to induce sparsity and model quantized weights using Gaussian Mixture Models (GMMs) to enable low-bit precision. Due to the intractability of the objective involving spike-and-slab priors with GMMs, we derive an efficient approximation that facilitates effective compression with minimal accuracy loss. In theory, we provide a consistent result for our proposed variational approach to a sparse and quantized deep neural network. Extensive experiments on compressing ResNet, BERT-base, Llama3.2, and Qwen2.5 models show that our method achieves higher compression rates than a line of existing methods with comparable performance drops. Project page: https://comeusr.github.io/SQS_Webpage.",
+      "analysis": {
+        "key_results": "在压缩ResNet、BERT-base、Llama3.2和Qwen2.5模型的实验表明，所提方法在性能下降相当的情况下，比一系列现有方法实现更高的压缩率。",
+        "limitations": "摘要未说明",
+        "main_contribution": "引入统一框架，通过贝叶斯变分学习同时进行剪枝和低比特量化，达到比现有方法更高的压缩率。",
+        "method": "使用spike-and-slab先验诱导稀疏性，并用高斯混合模型（GMM）建模量化权重，推导有效近似以最小化精度损失。",
+        "one_sentence_summary": "提出一个统一贝叶斯变分学习框架SQS，同时进行权重剪枝和低比特量化，以实现更高的压缩率且保持性能。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "该方法针对通用神经网络压缩，未直接涉及VLA（视觉-语言-动作）或WAM（世界-动作模型）。但作为独立的模型量化与剪枝技术，可潜在应用于机器人模型或世界模型的部署优化，与本站效率主题相关。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Model Quantization"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "arxiv_id": "2510.08999",
+      "authors": [
+        "Ziyi Wang",
+        "Nan Jiang",
+        "Guang Lin",
+        "Qifan Song"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-09T08:47:10.771216Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2510.08999/v2/fig1-panel1.png"
+            ],
+            "caption": "Our SQS method achieves high compression with minimal performance degradation by jointly pruning and quantizing model weights through variational learning. We employ a spike-and-GMM variational distribution to approximate full-precision weights: the spike component promotes sparsity for pruning, while the slab component (i.e., GMM) models a quantized weight distribution.",
+            "image_urls": [
+              "https://arxiv.org/html/2510.08999v2/sqs-main-diagram-crop.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2510.08999v2#S3.F1"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2510.08999v2",
+        "recovery_checked_at": "2026-09-09T08:52:57.390698Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:low-bit-quantization",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-09T08:47:10.771216Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2025-10-10T04:54:29Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2510.08999",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2510.08999",
+        "project_url": "https://comeusr.github.io/SQS_Webpage"
+      },
+      "title": "SQS: Bayesian DNN Compression through Sparse Quantized Sub-distributions",
+      "title_zh": "SQS: 基于稀疏量化子分布的贝叶斯深度神经网络压缩",
+      "updated_at": "2026-09-07T06:24:07Z",
+      "version": 2
+    },
+    {
       "abstract": "Enabling embodied agents to imagine future states is essential for robust and generalizable visual navigation. Yet, state-of-the-art systems typically rely on modular designs that decouple navigation planning from visual world modeling, which often induces state-action misalignment and weak adaptability in novel or dynamic scenarios. We propose UniWM, a unified, memory-augmented world model that integrates egocentric visual foresight and planning within a single multimodal autoregressive backbone. UniWM explicitly grounds action selection in visually imagined outcomes, tightly aligning prediction with control. Meanwhile, a hierarchical memory mechanism fuses short-term perceptual cues with longer-term trajectory context, supporting stable and coherent reasoning over extended horizons. Extensive experiments on four challenging benchmarks (Go Stanford, ReCon, SCAND, HuRoN) and the 1X Humanoid Dataset show that UniWM improves navigation success rates by up to 30%, substantially reduces trajectory errors against strong baselines, generalizes zero-shot to the unseen TartanDrive dataset, and scales naturally to high-dimensional humanoid navigation. These results position UniWM as a principled step toward unified, imagination-driven embodied navigation. The code and models are available at https://github.com/UWMILab/UniWM.",
       "analysis": {
         "key_results": "在四个挑战性基准（Go Stanford、ReCon、SCAND、HuRoN）和1X Humanoid数据集上，导航成功率最高提升30%，大幅降低轨迹误差，零样本泛化到TartanDrive，并自然扩展到高维人形导航。",
@@ -628,22 +700,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 89,
-    "completion_tokens": 12504,
+    "cache_hits": 6,
+    "completion_tokens": 27084,
     "error_categories": {
-      "ValidationError": 1
+      "ValidationError": 4
     },
-    "failed": 1,
-    "fetched": 2212,
-    "figure_available": 94,
-    "figure_cache_hits": 70,
+    "failed": 4,
+    "fetched": 1401,
+    "figure_available": 60,
+    "figure_cache_hits": 5,
     "figure_failed": 0,
-    "figure_requests": 32,
-    "figure_unavailable": 8,
-    "model_calls": 38,
-    "prefiltered": 127,
-    "prompt_tokens": 33280,
-    "published": 102,
-    "total_tokens": 45784
+    "figure_requests": 67,
+    "figure_unavailable": 12,
+    "model_calls": 86,
+    "prefiltered": 92,
+    "prompt_tokens": 72360,
+    "published": 72,
+    "total_tokens": 99444
   }
 }
