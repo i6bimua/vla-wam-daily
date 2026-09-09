@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-07T00:38:47.084463Z",
+  "generated_at": "2026-09-09T00:59:52.165970Z",
   "papers": [
     {
       "abstract": "A long-standing challenge in AI is to develop agents capable of solving a wide range of physical tasks and generalizing to new, unseen tasks and environments. A popular recent approach involves training a world model from state-action trajectories and subsequently use it with a planning algorithm to solve new tasks. Planning is commonly performed in the input space, but a recent family of methods has introduced planning algorithms that optimize in the learned representation space of the world model, with the promise that abstracting irrelevant details yields more efficient planning. In this work, we characterize models from this family as JEPA-WMs and investigate the technical choices that make algorithms from this class work. We propose a comprehensive study of several key components with the objective of finding the optimal approach within the family. We conducted experiments using both simulated environments and real-world robotic data, and studied how the model architecture, the training objective, and the planning algorithm affect planning success. We combine our findings to propose a model that outperforms two established baselines, DINO-WM and V-JEPA-2-AC, in both navigation and manipulation tasks. Code, data and checkpoints are available at https://github.com/facebookresearch/jepa-wms.",
@@ -378,6 +378,77 @@
       "version": 4
     },
     {
+      "abstract": "Speech codecs are usually optimized for waveform fidelity, allocating bits to acoustic detail that can be inferred from linguistic structure. This leads to inefficient compression and degraded recognition performance. We propose SemDAC, a semantic-aware neural speech codec that adds hierarchical semantic conditioning to residual vector quantization (RVQ). The first RVQ quantizer is distilled from HuBERT features to produce semantic tokens capturing phonetic content, while later quantizers encode residual acoustics. The decoder is conditioned on semantic tokens via feature-wise linear modulation (FiLM), steering reconstruction toward information not explained by semantic abstraction. At 0.95 kbps, SemDAC matches or surpasses a 2.5 kbps DAC baseline on PESQ, STOI, SI-SNR, and Whisper WER, with comparable ViSQOL, and achieves higher subjective MOS than higher-bitrate DAC baselines. Results show that explicit semantic conditioning, rather than token disentanglement or increased model size alone, improves compression efficiency and recognition robustness.",
+      "analysis": {
+        "key_results": "在 0.95 kbps 下，SemDAC 在 PESQ、STOI、SI-SNR 和 Whisper WER 上匹配或超过 2.5 kbps DAC 基线，ViSQOL 相当，主观 MOS 高于更高比特率 DAC 基线。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出 SemDAC，一种将层次化语义条件化添加到残差矢量量化中的语义感知神经语音编解码器。",
+        "method": "首个 RVQ 量化器从 HuBERT 特征蒸馏得到语义令牌，后续量化器编码残差声学；解码器通过 FiLM 以语义令牌为条件。",
+        "one_sentence_summary": "SemDAC 通过层次化语义条件化 RVQ 实现更高的语音压缩效率和识别鲁棒性。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "该论文关注语音压缩的量化效率，与 VLA/WAM 无直接关系；其量化蒸馏与 FiLM 条件化方法可能对机器人多模态模型压缩有借鉴意义。",
+        "relevance_score": 6,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.SD",
+        "cs.CL",
+        "cs.LG"
+      ],
+      "arxiv_id": "2512.21653",
+      "authors": [
+        "Liuyang Bai",
+        "Weiyi Lu",
+        "Li Guo"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-09T00:59:52.165970Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2512.21653/v2/fig1-panel1.png"
+            ],
+            "caption": "Architecture of SemDAC. The quantizer stack is divided into a semantic quantizer, supervised by a pretrained HuBERT model, and acoustic quantizers that encode residual details. FiLM generators map semantic tokens into modulation parameters, which are injected through FiLM modules into the decoder to enforce semantic consistency during reconstruction.",
+            "image_urls": [
+              "https://arxiv.org/html/2512.21653v2/model_arch.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2512.21653v2#S1.F1"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2512.21653v2",
+        "recovery_checked_at": "2026-09-09T01:00:59.221180Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-09T00:59:52.165970Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2025-12-25T12:49:41Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2512.21653",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2512.21653",
+        "project_url": null
+      },
+      "title": "Decoder-Side Semantic Conditioning for Low-Bitrate Neural Speech Compression",
+      "title_zh": "低比特率神经语音压缩的解码端语义条件化",
+      "updated_at": "2026-09-06T09:13:15Z",
+      "version": 2
+    },
+    {
       "abstract": "Contemporary reservoir computing relies heavily on globally Lipschitz, well-behaved activation functions, limiting applications in defense, disaster response, and pharmaceutical modeling where robust operation under extreme conditions is critical. We systematically investigate non-smooth activation functions, including chaotic, stochastic, and fractal variants, in echo state networks. Through parameter sweeps across 36,610 reservoir configurations, we demonstrate that several non-smooth functions not only maintain behavior consistent with the Echo State Property (ESP) but outperform traditional smooth activations in convergence speed and spectral radius tolerance. Notably, the Cantor function (continuous everywhere, zero derivative almost everywhere) maintains ESP-consistent behavior up to spectral radii of rho = 10, an order of magnitude beyond typical bounds for traditional functions, while achieving 2.6x faster convergence than tanh and ReLU. We introduce a theoretical framework for quantized activation functions, defining a Degenerate Echo State Property (d-ESP) capturing stability for discrete-output functions, and prove that d-ESP implies traditional ESP. We conjecture a critical crowding ratio Q=N/k (reservoir size / quantization levels) predicting failure thresholds for discrete activations. Our analysis reveals that preprocessing topology, rather than continuity, determines stability: monotone, compressive preprocessing maintains ESP across scales, while dispersive or discontinuous preprocessing triggers sharp failures. Our findings challenge assumptions about activation function design in reservoir computing; the exceptional performance of certain fractal functions is only partially explained by the effective-gain analysis presented here, suggesting fundamental gaps in our understanding of how geometric properties of activation functions influence reservoir dynamics.",
       "analysis": {
         "key_results": "康托函数在谱半径高达10时仍保持ESP一致行为（远超传统函数），且收敛速度比tanh和ReLU快2.6倍；单调压缩预处理维持ESP，而分散或不连续预处理导致急剧失败。",
@@ -588,7 +659,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2512.11393v3",
-        "recovery_checked_at": "2026-09-08T08:41:58.425541Z",
+        "recovery_checked_at": "2026-09-09T01:00:59.221180Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1326,19 +1397,19 @@
   "schema_version": "1",
   "stats": {
     "cache_hits": 0,
-    "completion_tokens": 5298,
+    "completion_tokens": 3909,
     "error_categories": {},
     "failed": 0,
-    "fetched": 242,
-    "figure_available": 9,
+    "fetched": 144,
+    "figure_available": 10,
     "figure_cache_hits": 0,
     "figure_failed": 0,
-    "figure_requests": 14,
-    "figure_unavailable": 5,
-    "model_calls": 16,
-    "prefiltered": 16,
-    "prompt_tokens": 14299,
-    "published": 14,
-    "total_tokens": 19597
+    "figure_requests": 11,
+    "figure_unavailable": 1,
+    "model_calls": 12,
+    "prefiltered": 12,
+    "prompt_tokens": 10588,
+    "published": 11,
+    "total_tokens": 14497
   }
 }
