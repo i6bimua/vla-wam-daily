@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-07T09:04:12.863464Z",
+  "generated_at": "2026-09-10T00:46:32.771031Z",
   "papers": [
     {
       "abstract": "Behavior cloning with high-capacity generative policies achieves strong imitation performance, but is often limited by demonstration coverage and distribution shift. Direct reinforcement learning fine-tuning can improve performance, but updating large action decoders is frequently unstable and sample inefficient. We propose Lagrangian Perturbation Diffusion Steering (LP-DS), a lightweight adaptation method that improves a frozen generative policy by learning a compact noise-space perturbation before decoding. LP-DS optimizes this perturbation with a Lagrangian trust-region objective, improving downstream value while constraining deviation from the latent prior. Across RoboMimic manipulation, OpenAI Gym locomotion, and Adroit dexterous manipulation benchmarks, LP-DS improves sample efficiency, success, and return while maintaining higher action-space entropy than unconstrained noise-space steering, with return improvements of up to 25% over prior baselines. Additional evaluations with flow-matching backbones, a large vision-language-action model, and physical Franka deployment show that LP-DS is not limited to compact diffusion policies or simulated benchmarks. Project page: https://sites.google.com/view/lp-ds/home.",
@@ -1166,6 +1166,89 @@
       "version": 2
     },
     {
+      "abstract": "The NVIDIA Blackwell Ultra (B300) GPU cuts FP64 vector throughput $\\sim 30\\times$ while multiplying FP8 tensor throughput. After the recovery of FP64 GEMM via Ozaki Scheme II on FP8 tensor cores and the Tensor-Memory Equilibrium model of the companions (\"FP8 is All You Need, Part 1\" and \"Ozaki 2.5\") we ask whether the fifth canonical HPC primitive, the full-FP64 $1024^3$ 3-D FFT, can be carried by the same substrate, and answer with a design and its limit. It is a Bailey six-step transform with no FP64 arithmetic: FP8-tensor DFT GEMMs with fused twiddles, residue-domain Karatsuba combines and exact CRT reconstruction whose bulk is a small GEMM on the FP16 tensor path and whose remainder is a Kulisch fixed-point accumulation with a two-sided modulo-$M$ lift, so the only rounding is the final conversion; constants are machine-generated and verified bit-exactly. The central finding: the binding resource is not floating point but a per-output integer epilogue with floor $(c_{\\rm epi}/8),B_{\\rm mem}$, $c_{\\rm epi} \\approx 203$-$281$ instructions per output: on B300 it holds the transform at 63-87 ms against a 12.9 ms roof ($4.9$-$6.7\\times$ short); at most $1.3$-$1.9\\times$ faster than the collapsed native path, possibly no faster at realised issue rates; no software route reaches the roof; on the NVIDIA Rubin GPU emulation loses $8$-$11\\times$. An FP32 variant meets the same wall: the cause is per-scalar reconstruction, not FP64. Each floor term names its remedy: the NVIDIA B200 GPU's INT8 tensor core restored with a position-weighted cross-column accumulation primitive, a load-path deconstruction datapath shared with the companions, two ISA idioms and modular reduction at the MMA output give 16.0-23.5 ms with minor hardware and 12.9-15.0 ms with one moderate ask. All figures are projected floors, not measurements, with sensitivities and the FP8 layout condition given.",
+      "analysis": {
+        "key_results": "该变换在 B300 上预计耗时 63-87 ms，而理论峰值需 12.9 ms（相差 4.9-6.7 倍）；仅比原生路径快 1.3-1.9 倍，实际可能无加速；软件手段无法达到理论峰值；在 Rubin GPU 模拟上性能损失 8-11 倍。",
+        "limitations": "所有性能数据均为预测下限而非实测；软件实现无法突破整数尾声指令瓶颈。",
+        "main_contribution": "提出一种在 FP8 张量核上执行全 FP64 三维 FFT 的设计，并识别出限制性能的整数尾声墙，同时提出最小硬件修改方案。",
+        "method": "Bailey 六步变换，结合 FP8 张量核上的 DFT GEMM、融合旋转因子、残差域 Karatsuba 组合和精确 CRT 重构；使用机器生成并位精确验证的常数。",
+        "one_sentence_summary": "本文探讨在 NVIDIA B300 GPU 的低精度张量核上以 FP8 等格式实现全 FP64 三维 FFT，发现性能瓶颈在于每个输出元素的整数尾声指令数，并提出特定硬件改进以缓解。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文专注于高效科学计算中的低精度张量核算法，与 VLA（视觉-语言-动作）和 WAM（世界-动作模型）无直接关系。但其对量化张量核算术和低精度重构的方法性探讨，对使用低精度加速机器人模型推理（如模型量化）可能具有一定的参考价值。",
+        "relevance_score": 6,
+        "tags": [
+          "Efficient Inference",
+          "Model Quantization"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.MS",
+        "cs.AI",
+        "cs.DC",
+        "cs.PF"
+      ],
+      "arxiv_id": "2606.23698",
+      "authors": [
+        "Satoshi Matsuoka"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-10T00:46:32.771031Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2606.23698/v3/fig1-panel1.png"
+            ],
+            "caption": "Kulisch fixed-point Phase B accumulator (Rev-34 modulus set; executable carry-save form). The = 15 shifted-column slice sums produced by Phase A are signed INT32 values S",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2606.23698v3"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2606.23698/v3/fig2-panel1.png"
+            ],
+            "caption": "FP64 vector parity floor for FFT-class workloads. The solid line is the binding floor = 1.56B (native FFT parity); the dashed line is the naive-Ozaki-Bailey FFT Phase B parity η",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2606.23698v3"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2606.23698v3",
+        "recovery_checked_at": "2026-09-10T00:49:18.645414Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-10T00:46:32.771031Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-05-28T03:49:46Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2606.23698",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2606.23698",
+        "project_url": null
+      },
+      "title": "FP8 is All You Need (Part 2): Full-FP64 3-D FFT on FP8-Generation Tensor CoresThe Integer-Epilogue Wall and the Minimal Hardware That Would Remove It",
+      "title_zh": "FP8 即所需（第二部分）：在 FP8 代张量核上的全 FP64 三维 FFT——整数尾声墙及移除它的最小硬件",
+      "updated_at": "2026-09-08T18:14:04Z",
+      "version": 3
+    },
+    {
       "abstract": "Vision-Language-Action (VLA) models unify perception, reasoning, and control in a single policy, but their multi-billion-parameter backbones and diffusion-based action heads make on-device deployment prohibitively expensive. Low-bit post-training quantization (PTQ) is the natural remedy, yet the diffusion action head that emits continuous control signals is highly sensitive to it: a few weight and activation outliers are enough to destabilize the head, so prior work leaves it at full precision or falls back to mixed-precision schemes, and uniformly quantizing the whole model to low bit-width remains an open challenge. We present HoloQ-VLA, the first training-free PTQ framework that compresses both the language backbone and the entire diffusion action head to uniform W4A4 precision without mixed-precision allocation. Instead of trading weight quality against activation quality, HoloQ-VLA targets the two outlier sources with complementary transforms: a weight-adapted rotation composed with an activation-dispersing Hadamard transform, together with per-step scaling that absorbs the dynamic-range drift exhibited by the action head across denoising steps. On LIBERO, HoloQ-VLA compresses Pi-0.5 and GR00T-N1.5 to W4A4 with 98.0% and 87.8% task success rates, matching or exceeding their FP16 references of 97.1% and 87.0%, while reducing the static memory footprint by 74.2%. Real-world manipulation experiments further demonstrate that HoloQ-VLA maintains smooth and accurate control across diverse real-world scenarios.",
       "analysis": {
         "key_results": "在LIBERO上，压缩Pi-0.5和GR00T-N1.5至W4A4，任务成功率分别为98.0%和87.8%，达到或超过FP16基准（97.1%和87.0%），同时减少74.2%的静态内存占用。",
@@ -1395,7 +1478,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2605.28760v2",
-        "recovery_checked_at": "2026-09-09T08:52:57.390698Z",
+        "recovery_checked_at": "2026-09-10T00:49:18.645414Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -2093,7 +2176,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2605.22164v2",
-        "recovery_checked_at": "2026-09-09T08:52:57.390698Z",
+        "recovery_checked_at": "2026-09-10T00:49:18.645414Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -3901,22 +3984,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 2,
-    "completion_tokens": 8299,
+    "cache_hits": 72,
+    "completion_tokens": 12133,
     "error_categories": {
-      "ValidationError": 3
+      "ValidationError": 1
     },
-    "failed": 3,
-    "fetched": 289,
-    "figure_available": 19,
-    "figure_cache_hits": 2,
+    "failed": 1,
+    "fetched": 1573,
+    "figure_available": 77,
+    "figure_cache_hits": 58,
     "figure_failed": 0,
-    "figure_requests": 18,
-    "figure_unavailable": 1,
-    "model_calls": 29,
-    "prefiltered": 31,
-    "prompt_tokens": 22680,
-    "published": 20,
-    "total_tokens": 30979
+    "figure_requests": 31,
+    "figure_unavailable": 12,
+    "model_calls": 35,
+    "prefiltered": 107,
+    "prompt_tokens": 31945,
+    "published": 89,
+    "total_tokens": 44078
   }
 }
