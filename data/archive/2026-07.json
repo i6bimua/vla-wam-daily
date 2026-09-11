@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-10T08:45:02.551752Z",
+  "generated_at": "2026-09-11T00:47:49.532444Z",
   "papers": [
     {
       "abstract": "Vision-language models (VLMs) have recently emerged as a promising paradigm for end-to-end autonomous driving, enabling agents to map multimodal inputs and high-level navigation instructions directly to executable trajectories. However, in practice, these models exhibit a persistent command-following gap: predicted trajectories often show weak sensitivity to navigation commands, resulting in incorrect behavior at critical decision points. We identify this issue as a form of conditional policy collapse, where regression-based training under multimodal trajectory distributions encourages the model to rely on dominant visual priors while marginalizing the language-conditioned signal. To address this issue, we introduce a principled formulation of classifier-free guidance (CFG) for regression-based vision-language driving. We show that CFG can be interpreted as isolating the instruction-induced residual in the action space by contrasting conditional and unconditional predictions, thereby explicitly amplifying the effect of the navigation command at inference time. However, a standard two-pass CFG introduces prohibitive latency for real-time control and produces noisy instance-level guidance directions. Building on a mean-shift interpretation of CFG, we propose Latent-Centroid Steering (LCS), a single-pass guidance mechanism that replaces instance-level residuals with class-level latent shifts. By projecting conditional representations toward precomputed command-specific centroids, LCS performs class-level latent steering based on cluster geometry that is both more stable and computationally efficient. We demonstrate that LCS reduces inference latency by approximately 50% while achieving stronger command adherence and improved driving performance on both closed-loop (Bench2Drive) and open-loop (nuScenes) benchmarks. Code will be released.",
@@ -385,7 +385,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.29221v2",
-        "recovery_checked_at": "2026-09-10T08:46:43.822491Z",
+        "recovery_checked_at": "2026-09-11T00:49:59.149839Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -737,7 +737,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.28624v1",
-        "recovery_checked_at": "2026-09-10T08:46:43.822491Z",
+        "recovery_checked_at": "2026-09-11T00:49:59.149839Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -899,7 +899,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.28589v1",
-        "recovery_checked_at": "2026-09-10T08:46:43.822491Z",
+        "recovery_checked_at": "2026-09-11T00:49:59.149839Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1806,7 +1806,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.28226v1",
-        "recovery_checked_at": "2026-09-10T08:46:43.822491Z",
+        "recovery_checked_at": "2026-09-11T00:49:59.149839Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -4363,7 +4363,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.27269v1",
-        "recovery_checked_at": "2026-09-10T08:46:43.822491Z",
+        "recovery_checked_at": "2026-09-11T00:49:59.149839Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -5063,7 +5063,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.26579v1",
-        "recovery_checked_at": "2026-09-10T08:46:43.822491Z",
+        "recovery_checked_at": "2026-09-11T00:49:59.149839Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -5584,7 +5584,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.26055v1",
-        "recovery_checked_at": "2026-09-10T08:46:43.822491Z",
+        "recovery_checked_at": "2026-09-11T00:49:59.149839Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -7899,7 +7899,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.20129v2",
-        "recovery_checked_at": "2026-09-10T08:46:43.822491Z",
+        "recovery_checked_at": "2026-09-11T00:49:59.149839Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -9696,6 +9696,87 @@
       "title_zh": "ActiveFly-Bench：面向无人机具身感知的对齐具身问答与视觉-语言-行动基准",
       "updated_at": "2026-08-10T13:31:42Z",
       "version": 2
+    },
+    {
+      "abstract": "Post-training quantization (PTQ) of large language models degrades sharply below 4-bit precision. We identify the root cause as residual stream distributional drift: quantization noise injected at each transformer layer accumulates in the shared residual representation, causing KL divergence from the FP16 baseline to grow super-linearly with depth (Pearson r=0.999 with log-perplexity, p<0.001, confirmed across all tested methods and bit-widths). We discover that 84% of LLaMA-3-8B layers exhibit non-Gaussian residual distributions (KS test, p<=0.05), and that per-layer residual stream variance grows 6,548x across depth. We propose RDQ (Residual Distribution Quantization), a PTQ framework whose central contribution is Cascaded Error Compensation (CEC): a sequential calibration procedure that captures the actual drifted activations each layer receives (computed by running calibration data through already-quantized upstream layers) and fits per-channel AWQ-style scales against those drifted inputs, with scales folded into preceding RMSNorm weights for exact mathematical equivalence at zero inference overhead. RDQ achieves state-of-the-art results on all three tested architectures: LLaMA-3-8B: 7.55 / 5.62 PPL (W3/W4); Qwen-2.5-7B: 7.46 / 6.38 PPL; Mistral-7B: 6.88 / 5.73 PPL. RDQ beats the best published baseline (LeanQuant/SpinQuant) at every model and bit-width combination, with gains up to -46.4% vs. RTN at W3A16 on LLaMA-3-8B. All output is standard group-128 asymmetric quantization, deployable on Qualcomm AIMET, GGUF, and any standard inference stack at zero runtime overhead.",
+      "analysis": {
+        "key_results": "LLaMA-3-8B: W3/W4 PPL 7.55/5.62；Qwen-2.5-7B: 7.46/6.38；Mistral-7B: 6.88/5.73；在所有模型和位宽上优于LeanQuant/SpinQuant，在LLaMA-3-8B W3A16上相比RTN提升达46.4%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出RDQ框架，核心是级联误差补偿（CEC）方法，通过利用已量化上游层产生的实际漂移激活来拟合尺度，并折叠到RMSNorm中实现零推理开销。",
+        "method": "Cascaded Error Compensation (CEC)：使用校准数据通过已量化上游层计算实际漂移激活，对漂移输入拟合AWQ式逐通道尺度，并将尺度折叠至前一层RMSNorm权重。",
+        "one_sentence_summary": "RDQ通过级联误差补偿解决LLM低比特量化中的残差流分布漂移问题，实现低于4位的高精度后训练量化。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文专注于大语言模型后训练量化，不涉及VLA、WAM或机器人应用。其方法针对LLM的残差流分布漂移，与VLA/WAM无直接关系，但量化技术可作为通用高效推理手段潜在应用于VLA/WAM模型。",
+        "relevance_score": 8,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG"
+      ],
+      "arxiv_id": "2607.10137",
+      "authors": [
+        "Prateek Singh"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-11T00:47:49.532444Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2607.10137/v3/fig1-panel1.png"
+            ],
+            "caption": "CEC sequential pipeline. Each layer’s scale is fit against actual drifted activations captured from already-quantized upstream layers via forward pre-hooks. Scales are folded into preceding RMSNorm weights for exact mathematical equivalence at zero inference overhead.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2607.10137v3"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2607.10137/v3/fig2-panel1.png"
+            ],
+            "caption": "WikiText-2 PPL on LLaMA-3-8B. RDQ+CEC achieves state-of-the-art at W4A16 (5.62, beating LeanQuant by 1.30 PPL) and near state-of-the-art at W3A16 (7.55, beating AWQ by 1.36 PPL). Both measured numbers.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2607.10137v3"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2607.10137v3",
+        "recovery_checked_at": "2026-09-11T00:49:59.149839Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:post-training-quantization",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-11T00:47:49.532444Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-07-11T05:54:00Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2607.10137",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2607.10137",
+        "project_url": null
+      },
+      "title": "RDQ: Residual Distribution Quantization for Large Language Models",
+      "title_zh": "RDQ：面向大语言模型的残差分布量化",
+      "updated_at": "2026-09-10T03:36:52Z",
+      "version": 3
     },
     {
       "abstract": "Post-training quantization (PTQ) of large language models degrades sharply below 4-bit precision. We identify the root cause as residual stream distributional drift: quantization noise injected at each transformer layer accumulates in the shared residual representation, causing KL divergence from the FP16 baseline to grow super-linearly with depth (Pearson r=0.999 with log-perplexity, p<0.001, confirmed across all tested methods and bit-widths). We discover that 84% of LLaMA-3-8B layers exhibit non-Gaussian residual distributions (KS test, p<=0.05), and that per-layer residual stream variance grows 6,548x across depth. We propose RDQ (Residual Distribution Quantization), a PTQ framework whose central contribution is Cascaded Error Compensation (CEC): a sequential calibration procedure that captures the actual drifted activations each layer receives (computed by running calibration data through already-quantized upstream layers) and fits per-channel AWQ-style scales against those drifted inputs, with scales folded into preceding RMSNorm weights for exact mathematical equivalence at zero inference overhead. RDQ achieves state-of-the-art results on all three tested architectures: LLaMA-3-8B: 7.55 / 5.62 PPL (W3/W4); Qwen-2.5-7B: 7.46 / 6.38 PPL; Mistral-7B: 6.88 / 5.73 PPL. RDQ beats the best published baseline (LeanQuant/SpinQuant) at every model and bit-width combination, with gains up to -46.4% vs. RTN at W3A16 on LLaMA-3-8B. All output is standard group-128 asymmetric quantization, deployable on Qualcomm AIMET, GGUF, and any standard inference stack at zero runtime overhead.",
@@ -11543,22 +11624,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 87,
-    "completion_tokens": 6100,
+    "cache_hits": 82,
+    "completion_tokens": 7760,
     "error_categories": {
-      "ValidationError": 2
+      "ValidationError": 1
     },
-    "failed": 2,
-    "fetched": 1572,
-    "figure_available": 79,
-    "figure_cache_hits": 75,
+    "failed": 1,
+    "fetched": 1591,
+    "figure_available": 81,
+    "figure_cache_hits": 65,
     "figure_failed": 0,
-    "figure_requests": 15,
-    "figure_unavailable": 11,
-    "model_calls": 20,
-    "prefiltered": 107,
-    "prompt_tokens": 16242,
-    "published": 90,
-    "total_tokens": 22342
+    "figure_requests": 26,
+    "figure_unavailable": 10,
+    "model_calls": 23,
+    "prefiltered": 105,
+    "prompt_tokens": 19982,
+    "published": 91,
+    "total_tokens": 27742
   }
 }
