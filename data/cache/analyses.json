@@ -23668,6 +23668,60 @@
       "version": 4
     }
   },
+  "analysis:v1:3c203448d52b0dacf0f22412869039e2eec6437fd0b1ae911317b8421e487705": {
+    "key": "analysis:v1:3c203448d52b0dacf0f22412869039e2eec6437fd0b1ae911317b8421e487705",
+    "record": {
+      "abstract": "Neurosymbolic systems rely on mathematical solvers to guarantee reasoning correctness, yet solvers are fundamentally blind to whether a formal translation maintains strict reference-equivalence to a designated formalization. We formalize this vulnerability as Verdict-Preserving-Unfaithfulness (VPU): a failure mode where an incorrect encoding executes successfully and matches the expected verdict. We theoretically prove that structural, verdict-only verification heuristics are mathematically bounded to chance-level detection on these deceptively valid traces. To resolve this, we introduce Generative Verification (GenV), which distills an offline Z3-equivalence oracle into a reference-free, continuous reference-equivalence score by repurposing the language model's native vocabulary space. Mechanistic analysis via decision-projected logit lenses and sparse autoencoders shows this generative readout natively extracts precise spatial error coordinates without explicit localization training. Empirically, our oracle-mined verifier (GenV+HN) achieves 0.961 AUROC in reference-equivalence verification, generalizes zero-shot across unseen translators and divergent formal styles, and yields an 11.3-point downstream accuracy gain in agentic test-time compute allocation.",
+      "analysis": {
+        "key_results": "GenV+HN 在参考等价验证中取得 0.961 AUROC，零样本泛化到未见翻译器和不同形式风格，并在智能体测试时计算分配上提升下游准确率 11.3 个百分点。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出生成式验证（GenV），将离线 Z3 等价预言器蒸馏为参考免费的连续参考等价分数，并证明结构性判定验证启发式在欺骗性有效迹上的检测能力被数学限定在随机水平。",
+        "method": "利用语言模型原生词汇空间，通过决策投影逻辑透镜和稀疏自编码器进行机制分析，并配合 HN 构建预言器挖掘验证器（GenV+HN）。",
+        "one_sentence_summary": "本文针对神经符号系统中形式化翻译的不忠实问题，提出生成式验证方法，通过语言模型原生词汇空间获得连续参考等价分数。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "本文不直接涉及 VLA、WAM 或机器人动作世界建模，但其生成式验证和测试时计算分配方法对高效推理具有方法论参考价值，可作为推测解码中验证器设计的借鉴。",
+        "relevance_score": 6,
+        "tags": [
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.CL"
+      ],
+      "arxiv_id": "2609.11085",
+      "authors": [
+        "Vikash Singh",
+        "Debargha Ganguly",
+        "Aman Goel",
+        "Ali Torkamani",
+        "Xiaoxue Han",
+        "Joseph Lilien",
+        "Ferhat Erata",
+        "Vipin Chaudhary"
+      ],
+      "matched_rules": [
+        "composite:draft_verification_decoding"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-14T09:40:53.704892Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-10T04:47:55Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.11085",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.11085",
+        "project_url": null
+      },
+      "title": "Beyond Solver Verdicts: Generative Reward Models for Autoformalization",
+      "title_zh": "超越求解器判定：用于自动形式化的生成式奖励模型",
+      "updated_at": "2026-09-11T17:19:24Z",
+      "version": 2
+    }
+  },
   "analysis:v1:3c2923f25dcf7e2b76974b36d80157f2b61842b080f5c6923bd52fd2865b6cc7": {
     "key": "analysis:v1:3c2923f25dcf7e2b76974b36d80157f2b61842b080f5c6923bd52fd2865b6cc7",
     "record": {
@@ -41309,6 +41363,58 @@
       "version": 1
     }
   },
+  "analysis:v1:6a8c4fbcb6c28512d914311d83a2f9d7842647b1a2844bb11d5ecf6938b87a4a": {
+    "key": "analysis:v1:6a8c4fbcb6c28512d914311d83a2f9d7842647b1a2844bb11d5ecf6938b87a4a",
+    "record": {
+      "abstract": "With the recent rise and adoption of tabular foundation models, optimizing their inference performance becomes an emerging field for efficiency research. While the models are architecturally similar to transformer-based large language models (LLMs), the size and serving patterns differ significantly. We show that the focus should be on the attention calculation and less on weight or KV cache quantization, which are more popular in LLMs. We develop a quantization strategy for queries, keys, and values to FP8 and use explicit FP8 matrix multiplication instructions to speed up the attention calculation. We find that it is crucial to align the quantization error in the test rows with the quantization error in the training rows, as otherwise the accuracy drops drastically. Our Triton kernel achieves a speedup up to 1.7x over regular 16-bit kernels, and we show that on TabPFN-v3 and TabICLv2 there is no relevant accuracy loss across TabArena and BeyondArena.",
+      "analysis": {
+        "key_results": "Triton内核相对于16位内核实现最高1.7倍加速，在TabArena和BeyondArena上对TabPFN-v3和TabICLv2没有相关精度损失。",
+        "limitations": "摘要未说明",
+        "main_contribution": "开发了一种针对表格基础模型注意力的FP8量化策略，重点优化注意力计算而非权重或KV缓存量化，并在Triton内核中实现。",
+        "method": "将查询、键、值量化为FP8，使用显式FP8矩阵乘法指令；对齐训练行和测试行的量化误差以保持精度。",
+        "one_sentence_summary": "本文提出针对表格基础模型的注意力机制FP8量化方法，通过对齐训练与测试行之间的量化误差实现加速并保持精度。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文专注于表格基础模型的量化加速，与VLA/WAM无直接关系，但其量化方法和误差对齐策略可为机器人模型的高效推理提供参考。",
+        "relevance_score": 7,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "arxiv_id": "2609.13031",
+      "authors": [
+        "Jonas M. K\\\"ubler",
+        "Benjamin J\\\"ager",
+        "Klemens Fl\\\"oge",
+        "Noah Hollmann",
+        "Frank Hutter"
+      ],
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-14T09:40:53.704892Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-11T16:31:29Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.13031",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.13031",
+        "project_url": null
+      },
+      "title": "Attention Quantization for Tabular Foundation Models",
+      "title_zh": "面向表格基础模型的注意力量化",
+      "updated_at": "2026-09-11T16:31:29Z",
+      "version": 1
+    }
+  },
   "analysis:v1:6ae7a1f06639003c304501726c44e981861723355cc73aae4cd6270912508b96": {
     "key": "analysis:v1:6ae7a1f06639003c304501726c44e981861723355cc73aae4cd6270912508b96",
     "record": {
@@ -42629,6 +42735,62 @@
       "title": "When Drafts Evolve: Speculative Decoding Meets Online Learning",
       "title_zh": "当草稿进化：推测解码遇见在线学习",
       "updated_at": "2026-08-06T16:21:33Z",
+      "version": 2
+    }
+  },
+  "analysis:v1:6f4c0e1d838e48bedcaf1f5c51e1d49722e159af14035815d95728b9f8d5b74f": {
+    "key": "analysis:v1:6f4c0e1d838e48bedcaf1f5c51e1d49722e159af14035815d95728b9f8d5b74f",
+    "record": {
+      "abstract": "Generative medical event models use tokenized sequences of patient timelines as input, but practical guidance on the many decisions around tokenization is limited. We benchmark quantization granularity, reference-range anchoring, code--value fusion, numeric and temporal encodings, and native versus harmonized event representations from an expert-mapped common data model. Using both Llama and Qwen architectures, 156 models were trained from three initialization seeds, with each configuration following a shared training recipe for up to five epochs. We evaluated learned representations from the first 24 hours of hospitalization with linear probes to predict binary and continuous outcomes during hours 24-48. Fused tokens pairing codes with value deciles increased performance across all eight outcome families relative to the equivalent unfused tokenized input with area under the receiver operating characteristic curve (AUROC) gains of $+0.002$ to $+0.033$ and Spearman correlation gains of $+0.025$ to $+0.114$. Neither anchoring value bins to reference ranges nor increasing quantization granularity consistently improved performance, while xVal variants underperformed both discrete and soft encodings. Alternatives to explicit time tokens, such as event-order and admission-relative rotary position embeddings (RoPE), yielded higher family-mean point estimates across all eight families while reducing input length. When evaluating native input against input mapped to the Common Longitudinal Intensive Care Unit Data Format (CLIF), the CLIF pipeline used 30.8\\% as many training tokens while improving performance in six of eight outcome families. These findings show tokenization and event encoding are consequential design choices when learning patient representations for downstream classification and regression.",
+      "analysis": {
+        "key_results": "编码与值十分位数融合的 token 在 8 个结局家族中表现优于未融合输入（AUROC 增益 +0.002 到 +0.033，Spearman 相关增益 +0.025 到 +0.114）；参考范围锚定和量化粒度增加未一致提升性能；xVal 变体不及离散和软编码；替代显式时间 token 的事件顺序和入院相对 RoPE 在 8 个家族中平均点估计更高并减少输入长度；CLIF 流水线使用 30.8% 的训练 token 并在 6/8 家族中提升性能。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出了一个针对生成式医学事件模型分词方案的实用基准，系统评估了量化粒度、参考范围锚定、编码-数值融合、数值与时间编码、原生与标准化事件表示等多种设计因素。",
+        "method": "使用 Llama 和 Qwen 架构，训练 156 个模型（3 个种子），在共享训练配方下最多 5 个 epoch；利用线性探针评估住院前 24 小时表征在 24-48 小时二分类和连续结局上的预测性能。",
+        "one_sentence_summary": "本文通过系统性基准测试，研究医学事件序列生成模型的分词与事件编码设计选择对下游预测性能的影响。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文研究医学事件序列的分词与数值量化对生成模型表征的影响，不直接涉及 VLA、WAM 或机器人动作/世界模型；但其关于离散量化、编码-数值融合及时间编码的对比结论对机器人领域的时间序列或事件序列分词可能具有方法学参考价值。",
+        "relevance_score": 6,
+        "tags": [
+          "Model Quantization",
+          "Data",
+          "Evaluation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "arxiv_id": "2604.16775",
+      "authors": [
+        "Inhyeok Lee",
+        "Luke Solo",
+        "Michael C. Burkhart",
+        "Bashar Ramadan",
+        "Sahil Sethi",
+        "Sarah Jabbour",
+        "William F. Parker",
+        "and Brett K. Beaulieu-Jones"
+      ],
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-14T09:40:53.704892Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-04-18T01:38:47Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2604.16775",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2604.16775",
+        "project_url": null
+      },
+      "title": "Representation Before Training: A Practical Benchmark for Generative Medical Event Model Tokenization",
+      "title_zh": "医学事件生成模型分词方案的实用基准研究",
+      "updated_at": "2026-09-11T17:45:18Z",
       "version": 2
     }
   },
@@ -46268,6 +46430,66 @@
       "version": 1
     }
   },
+  "analysis:v1:7c48007eac351cec087c9a5748ff5264f4262fb1857b971d000a66b25f9100bc": {
+    "key": "analysis:v1:7c48007eac351cec087c9a5748ff5264f4262fb1857b971d000a66b25f9100bc",
+    "record": {
+      "abstract": "Visual goal and dynamics prediction can provide language-conditioned robot policies with both a target outcome and a representation of action-dependent scene changes. We bring these predictions into action generation and selection through a shared trajectory model. Dynin-Robotics implements this formulation on Dynin-Omni, an omnimodal masked-diffusion backbone, representing language, visual observations, goals, and actions as discrete tokens. By varying conditioning and target spans, the same model learns action prediction, action-conditioned next-observation prediction, terminal goal-state prediction, and trajectory-to-instruction reconstruction. These interfaces support test-time scaling through goal prediction, action-candidate evaluation, and joint refinement of action and future-state predictions. We continually pretrain the model on approximately 1.33 million trajectories from 48 Open X-Embodiment datasets and adapt it separately to downstream domains. On two VLABench tasks, robot pretraining improves adaptation within a fixed Stage-2 step budget, and the full objective mixture improves shifted-instruction success over Policy-only post-training under the same coupled decoder. Combining goal guidance with joint action-next-state denoising further improves shifted-instruction success over action-only decoding; the benefit depends on how the predictions are composed. Dynin-Robotics achieves competitive performance on LIBERO and zero-shot LIBERO-Plus, together with a 78.4% average success rate across four manipulation conditions on a Franka Research 3 robot. An optimized block-parallel implementation accelerates model-side action decoding by up to 29.2x relative to the base implementation under the reported profiling setup. These results support shared trajectory modeling as a common interface for learning complementary robot objectives and composing their predictions during control.",
+      "analysis": {
+        "key_results": "在 VLABench 上机器人预训练改善固定 Stage-2 步骤预算内的适应，完整目标混合在 shared coupled decoder 下相比仅策略后训练提高 shifted-instruction 成功率；在 LIBERO 和零样本 LIBERO-Plus 上实现竞争性能，在 Franka Research 3 机器人上四种操作条件平均成功率 78.4%；优化的块并行实现使模型侧动作解码加速高达 29.2 倍。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出 Dynin-Robotics，一个基于共享轨迹模型的全模态掩蔽扩散 VLA 模型，支持动作预测、动作条件下一观测预测、终端目标状态预测和轨迹到指令重建，并通过测试时扩展在动作生成与选择中组合目标引导和联合动作-未来状态去噪。",
+        "method": "使用全模态掩蔽扩散骨干 Dynin-Omni 将语言、视觉观测、目标和动作表示为离散 token，通过变化条件与目标跨度统一学习多个目标，并支持目标预测、动作候选评估和动作-未来状态联合细化；持续预训练约 133 万条来自 48 个 Open X-Embodiment 数据集的轨迹，并分别适应下游领域。",
+        "one_sentence_summary": "Dynin-Robotics 通过共享轨迹模型将视觉目标与动态预测整合进语言条件机器人策略，在统一的全模态掩蔽扩散骨干上同时学习动作、未来观测、目标状态和轨迹到指令重建，并在真实机器人上验证性能。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "本文核心是 VLA 模型，其共享轨迹建模直接整合动作预测与未来观测/目标状态预测，相当于世界模型风格的未来状态预测与语言条件动作生成的融合，对 VLA 和 WAM 的研究具有直接参考价值。",
+        "relevance_score": 10,
+        "tags": [
+          "Action Prediction",
+          "Robot Learning",
+          "Robot Manipulation",
+          "Vision-Language",
+          "World Modeling",
+          "Video Generation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "arxiv_id": "2609.13053",
+      "authors": [
+        "Hoeun Lee",
+        "Jaeik Kim",
+        "Jusang Oh",
+        "Jinhyeok Kim",
+        "Geon Choi",
+        "Hyeonggeun Kim",
+        "Jaeyoung Do"
+      ],
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-14T09:40:53.704892Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-11T16:49:26Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.13053",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.13053",
+        "project_url": null
+      },
+      "title": "Dynin-Robotics: Omnimodal Unified Diffusion Vision-Language-Action Model",
+      "title_zh": "Dynin-Robotics：全模态统一扩散视觉-语言-动作模型",
+      "updated_at": "2026-09-11T16:49:26Z",
+      "version": 1
+    }
+  },
   "analysis:v1:7c494b8286fd06611f596a9a7d340e32ebf3a839e6678d90e3e30e229cd2dbba": {
     "key": "analysis:v1:7c494b8286fd06611f596a9a7d340e32ebf3a839e6678d90e3e30e229cd2dbba",
     "record": {
@@ -49902,6 +50124,60 @@
       "version": 1
     }
   },
+  "analysis:v1:862b8289f7da0c89cb2d17d54f7424cad5a7976fae9030704931d3cb01cc0234": {
+    "key": "analysis:v1:862b8289f7da0c89cb2d17d54f7424cad5a7976fae9030704931d3cb01cc0234",
+    "record": {
+      "abstract": "A medical claim's correctness often depends not on the claim alone, but on the clinical structure around it. A claim may require a lab reference range, a causal or conditional link, or patient-specific details to be judged correctly, and atom-level decomposition can fragment these dependencies, leaving the verifier with clinically incomplete claims. We reformulate medical fact-checking around snippet-level verification, where clause-grouped units preserve local clinical structure. We introduce MedSNIP-Bench, a human-annotated benchmark for snippet-level medical fact verification, and MedSNIP, an automatic snippet-generation pipeline. MedSNIP-Bench covers 276 consumer-health and clinical-vignette responses, segmented into 2,524 snippets with dual in-general and in-patient-context labels and six structural pattern codes. MedSNIP is evaluated against human snippet boundaries on MedSNIP-Bench and then used to generate snippet-level units for external corpora. Across MedSNIP-Bench, HealthFC, and MedHallu, snippet-level verification preserves or improves false-class F1, with gains concentrated where answers are long enough to fragment and where the verifier is strong enough to exploit the recovered structure. The largest merge-pattern gain is on causal-conditional clinical chains. It also reduces verifier calls by 24-73%, though the saving survives end-to-end only when decomposition is cheap, which an open-weight decomposer makes possible at no loss of chunking fidelity.",
+      "analysis": {
+        "key_results": "在MedSNIP-Bench、HealthFC和MedHallu上，片段级验证保持或提高了假类F1；最大合并模式增益出现在因果条件临床链上；验证器调用减少24-73%，但端到端节省仅在分解成本低廉时实现。",
+        "limitations": "摘要未说明",
+        "main_contribution": "引入MedSNIP-Bench（人工标注的片段级医学事实验证基准）和MedSNIP（自动片段生成流水线），并展示片段级验证在多个数据集上保持或提升性能。",
+        "method": "基于子句分组的片段级验证，结合自动片段生成流水线（MedSNIP）和人工标注基准（MedSNIP-Bench）。",
+        "one_sentence_summary": "提出医学事实验证的片段级粒度框架MedSNIP，通过保留局部临床结构来改进验证性能。",
+        "primary_topic": "Benchmark",
+        "relation_to_vla_wam": "本文专注于医学事实验证，与VLA、WAM或机器人主题无直接关系。",
+        "relevance_score": 1,
+        "tags": [
+          "Evaluation",
+          "Data"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CL"
+      ],
+      "arxiv_id": "2609.12884",
+      "authors": [
+        "Hasan Iqbal",
+        "Sarfraz Ahmad",
+        "Hyunjae Kim",
+        "Sihyeon Park",
+        "Junjie Liao",
+        "Qingyu Chen",
+        "Preslav Nakov",
+        "Yuxia Wang"
+      ],
+      "matched_rules": [
+        "composite:draft_verification_decoding"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-14T09:40:53.704892Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-11T14:08:44Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.12884",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.12884",
+        "project_url": null
+      },
+      "title": "MedSNIP: Building and Benchmarking Snippet-Level Granularity for Medical Fact Verification",
+      "title_zh": "MedSNIP：构建并基准化医学事实验证的片段级粒度",
+      "updated_at": "2026-09-11T14:08:44Z",
+      "version": 1
+    }
+  },
   "analysis:v1:8656ebee9cbd06b18507360cd5b284724c58129cdfc08e629e3fd1bb382daab0": {
     "key": "analysis:v1:8656ebee9cbd06b18507360cd5b284724c58129cdfc08e629e3fd1bb382daab0",
     "record": {
@@ -52614,6 +52890,60 @@
       "title": "AGI Maze Prediction Datasets: A Compact Benchmark for Learning World Dynamics with Transformers",
       "title_zh": "AGI迷宫预测数据集：用于Transformer学习世界动力学的紧凑基准",
       "updated_at": "2026-09-02T09:15:33Z",
+      "version": 1
+    }
+  },
+  "analysis:v1:8e743c3fb60f82cbb635b352e0993cac7d77e74bfa2bdc4bd7ce4b7bdbc93686": {
+    "key": "analysis:v1:8e743c3fb60f82cbb635b352e0993cac7d77e74bfa2bdc4bd7ce4b7bdbc93686",
+    "record": {
+      "abstract": "Speech-to-speech translation (S2ST) has advanced significantly with speech LLMs, offering the potential for joint optimization and preserving non-linguistic information. However, these models struggle with predicting high-bitrate speech tokens in LLMs, and face the challenge of relying on S2ST training data with ideally aligned speaker identity and prosody. We propose using low-bitrate tokens based on single-layer vector quantization, trained to reconstruct self-supervised learning (SSL) features. We also employ a separate token-to-waveform decoder named Autowave-X, which is also conditioned on the source speech to improve non-linguistic transfer, thereby relaxing the training data constraints. With the integration of these techniques, we propose an S2ST model named Kraken, which augments a pre-trained LLM with speech feature inputs and the low-bitrate token outputs, followed by Autowave-X vocoder. We built the model upon Qwen3-8B and trained it using 150k hours of multilingual and multitask speech data. We demonstrated that our model exhibited better translation quality than SeamlessM4T-Large v2 and Qwen2.5-Omni, along with improved speaker and prosody transfer capabilities.",
+      "analysis": {
+        "key_results": "在翻译质量上优于SeamlessM4T-Large v2和Qwen2.5-Omni，同时说话人和韵律迁移能力改善。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出基于低码率单层VQ token、独立token-to-waveform解码器Autowave-X及源语音条件化的S2ST模型Kraken，缓解高码率预测与数据对齐难题。",
+        "method": "采用单层矢量量化以SSL特征为重建目标的低码率token，结合Qwen3-8B预训练LLM和双路径源条件化，使用150k小时多语言多任务语音数据训练。",
+        "one_sentence_summary": "通过低比特率向量量化与双路径源条件化，实现LLM驱动的语音到语音翻译，提升翻译质量与说话人/韵律迁移。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "该工作专注于语音到语音翻译中的模型量化与高效推理，不涉及VLA或WAM，但对本站关注的量化技术在特定模态中的应用有一定参考价值。",
+        "relevance_score": 6,
+        "tags": [
+          "Model Quantization"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CL",
+        "cs.SD"
+      ],
+      "arxiv_id": "2609.13045",
+      "authors": [
+        "Hayato Futami",
+        "Hassan Shahmohammadi",
+        "Tushar Dhyani",
+        "Alkis Koudounas",
+        "Rapha\\\"el Lafargue",
+        "Yosuke Kashiwagi",
+        "Quentin Jodelet",
+        "Emiru Tsunoo"
+      ],
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-14T09:40:53.704892Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-11T16:41:22Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.13045",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.13045",
+        "project_url": null
+      },
+      "title": "Kraken: LLM-based Speech-to-Speech Translation via Low-bitrate VQ and Dual-path Source Conditioning",
+      "title_zh": "Kraken：基于低码率VQ与双路径源条件化的LLM语音到语音翻译",
+      "updated_at": "2026-09-11T16:41:22Z",
       "version": 1
     }
   },
@@ -58836,6 +59166,59 @@
       "version": 3
     }
   },
+  "analysis:v1:a24519c1ec750c2dbac4ece0ea5e041307ec1b4b82e3c3ff996bf184156e2bc7": {
+    "key": "analysis:v1:a24519c1ec750c2dbac4ece0ea5e041307ec1b4b82e3c3ff996bf184156e2bc7",
+    "record": {
+      "abstract": "Humans understand and interact with the real world by relying on diverse physical feedback beyond visual perception. Motivated by this, recent approaches attempt to incorporate physical sensory signals into Vision-Language-Action models (VLAs). However, they typically focus on a single type of physical signal, failing to capture the heterogeneous and complementary nature of real-world interactions. In this paper, we propose MoSS, a modular sensory stream framework that adapts VLAs to leverage multiple sensory signals for action prediction. Specifically, we introduce decoupled modality streams that integrate heterogeneous physical signals into the action stream via joint cross-modal self-attention. To enable stable incorporation of new modalities, we adopt a two-stage training scheme that freezes pretrained VLA parameters in the early stage. Furthermore, to better capture contact interaction dynamics, we incorporate an auxiliary task that predicts future physical signals. Through extensive real-world experiments, we demonstrate that MoSS successfully augments VLAs to leverage diverse physical signals (i.e., tactile, force, and torque), integrating multiple signals to achieve synergistic performance gains.",
+      "analysis": {
+        "key_results": "真实世界实验表明MoSS能够增强VLA利用触觉、力和扭矩等多种物理信号，并实现协同性能提升。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出MoSS模块化传感流框架，通过解耦模态流和联合跨模态自注意力将异构物理信号集成到动作流中，并采用两阶段训练和辅助信号预测任务。",
+        "method": "解耦模态流、联合跨模态自注意力、冻结VLA参数的两阶段训练、辅助未来物理信号预测任务。",
+        "one_sentence_summary": "提出MoSS框架，使视觉-语言-动作模型能够利用多种物理传感信号进行动作预测。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "直接针对VLA模型进行扩展，使其能利用触觉、力、扭矩等物理传感信号，属于机器人动作预测和具身智能的核心方向。",
+        "relevance_score": 9,
+        "tags": [
+          "Vision-Language",
+          "Action Prediction",
+          "Robot Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2604.23272",
+      "authors": [
+        "Jimin Lee",
+        "Huiwon Jang",
+        "Myungkyu Koo",
+        "Jungwoo Park",
+        "Jinwoo Shin"
+      ],
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-14T09:40:53.704892Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-04-25T12:28:47Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2604.23272",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2604.23272",
+        "project_url": "https://jiminlx.github.io/MoSS"
+      },
+      "title": "Modular Sensory Stream for Integrating Physical Feedback in Vision-Language-Action Models",
+      "title_zh": "面向视觉-语言-动作模型的多模态传感流集成方法",
+      "updated_at": "2026-09-11T17:42:30Z",
+      "version": 2
+    }
+  },
   "analysis:v1:a249ca983900f3556e5f1fbd5b065a1c3c7584860e7e644d045a8c89c762203e": {
     "key": "analysis:v1:a249ca983900f3556e5f1fbd5b065a1c3c7584860e7e644d045a8c89c762203e",
     "record": {
@@ -62078,6 +62461,59 @@
       "title": "GUARD: Grounding Uncertainty and Ablation-Based Risk Detection for Diffusion-Based VLAs",
       "title_zh": "GUARD：针对扩散型视觉-语言-动作策略的接地不确定性与消融风险检测方法",
       "updated_at": "2026-08-05T06:48:15Z",
+      "version": 1
+    }
+  },
+  "analysis:v1:a984355c87dbfb90295d16f897e53de83ac930dc5a5f97110cf68ff8b9d9dc7c": {
+    "key": "analysis:v1:a984355c87dbfb90295d16f897e53de83ac930dc5a5f97110cf68ff8b9d9dc7c",
+    "record": {
+      "abstract": "A single SM utilization percentage can make an LLM inference workload look compute-saturated while hiding how much useful work is being done. The problem is not that the counter is wrong, but that it collapses several different mechanisms into one number. This is most severe during decode, where each request contributes only one new token and dense projection GEMMs become small-row matrix multiplications. On Hopper, the bfloat16 GMMA path executes these operations in fixed 64-row matrix fragments, so small-batch decode can fill only a small fraction of each fragment with real token rows. In this paper, we profile vLLM with FlashAttention-3 and cuBLASLt on an H100 NVL across cold prefill, warm prefill, and decode, sweeping sequence length and batch size. We replace the usual single utilization number with eight counter-validated views derived from raw Nsight Compute reports, each pinned to an NCU counter or explicit formula. Together, these views map utilization gaps to concrete mechanisms - fragment fill, occupancy limits, stall signatures, wave quantization, and kernel selection - across four production models and six per-layer kernel roles.",
+      "analysis": {
+        "key_results": "摘要未说明",
+        "limitations": "摘要未说明",
+        "main_contribution": "将传统单一SM利用率指标替换为八种基于NCU计数器的视图，以更准确地诊断大模型推理中GPU利用率的瓶颈机制。",
+        "method": "使用Nsight Compute在H100 NVL上对vLLM、FlashAttention-3和cuBLASLt进行剖析，覆盖冷预填充、暖预填充和解码阶段，并扫描序列长度和批量大小。",
+        "one_sentence_summary": "本文通过NVIDIA Hopper GPU上的分析，揭示了大模型推理中SM利用率指标的局限性，并提出八种基于计数器的视图来定位利用率缺口。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "该文专注于大模型推理的GPU利用效率分析，虽非直接针对VLA或WAM，但其剖析方法和对低效率机制的理解可间接用于优化机器人策略或世界模型在GPU上的推理性能。",
+        "relevance_score": 6,
+        "tags": [
+          "Efficient Inference",
+          "Model Quantization"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.PF",
+        "cs.AR",
+        "cs.DC",
+        "cs.LG"
+      ],
+      "arxiv_id": "2609.12923",
+      "authors": [
+        "Mohammad Siavashi",
+        "Gerald Q. Maguire Jr.",
+        "Dejan Kostic",
+        "Marco Chiesa"
+      ],
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-14T09:40:53.704892Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-11T14:49:05Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.12923",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.12923",
+        "project_url": null
+      },
+      "title": "Dissecting GPU Utilization for LLM Inference on Nvidia Hopper",
+      "title_zh": "剖析NVIDIA Hopper上大模型推理的GPU利用率",
+      "updated_at": "2026-09-11T14:49:05Z",
       "version": 1
     }
   },
@@ -74373,6 +74809,58 @@
       "version": 1
     }
   },
+  "analysis:v1:cad0caecc1b358251421e6fb69514526ab824af0babb2491b1969f667e087a76": {
+    "key": "analysis:v1:cad0caecc1b358251421e6fb69514526ab824af0babb2491b1969f667e087a76",
+    "record": {
+      "abstract": "Conversational AI agents are increasingly explored as creative partners, yet how conversation design shapes child-AI dialogue in co-creative settings remains underexplored. We present Tinker Tales, a tangible dialogue system for child-AI collaborative storytelling, in which educational frameworks (narrative development and social-emotional learning) are instantiated as conversation design, shaping how the agent engages children across four narrative stages. The system combines a physical storytelling board, NFC-embedded toys, and a mobile app mediating multimodal interaction through tangible manipulation and voice-based dialogue. We conducted a home-based user study with 10 children (ages 6-8) across two conversation design conditions varying in how the agent structured elaboration, with and without educational scaffolding. Our findings show that prompt framing shapes the form and consistency of children's narrative contributions, structuring how they participate in co-creative dialogue with AI.",
+      "analysis": {
+        "key_results": "提示框架影响了儿童叙事贡献的形式和一致性，塑造了他们在与AI共同创作对话中参与方式。",
+        "limitations": "摘要未说明",
+        "main_contribution": "开发了Tinker Tales系统，将教育框架实例化为对话设计，支持儿童与AI在四个叙事阶段进行共同创作。",
+        "method": "通过有形交互和语音对话，结合物理故事板、NFC嵌入玩具和移动应用，在两个对话设计条件下（有/无教育脚手架）进行家庭用户研究。",
+        "one_sentence_summary": "提出一种结合物理故事板、NFC玩具和移动应用的有形对话系统，支持儿童与AI进行共同创作故事。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该研究聚焦于儿童与AI共同创作故事的人机交互设计，不涉及视觉语言动作（VLA）模型、世界行动模型（WAM）或机器人控制，与本站主题无直接关系。",
+        "relevance_score": 5,
+        "tags": [
+          "Vision-Language",
+          "Robot Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.HC",
+        "cs.AI"
+      ],
+      "arxiv_id": "2602.04109",
+      "authors": [
+        "Nayoung Choi",
+        "Jiseung Hong",
+        "Peace Cyebukayire",
+        "Ikseon Choi",
+        "Jinho D. Choi"
+      ],
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-14T09:40:53.704892Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-02-04T00:48:12Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2602.04109",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2602.04109",
+        "project_url": null
+      },
+      "title": "Tinker Tales: A Tangible Dialogue System for Child-AI Co-Creative Storytelling",
+      "title_zh": "Tinker Tales：面向儿童与AI共同创作故事的有形对话系统",
+      "updated_at": "2026-09-11T14:44:59Z",
+      "version": 3
+    }
+  },
   "analysis:v1:cad4e9d589a6f64aefbc2da41f9edfa7ce36f630ac78e15ab7f867db22021147": {
     "key": "analysis:v1:cad4e9d589a6f64aefbc2da41f9edfa7ce36f630ac78e15ab7f867db22021147",
     "record": {
@@ -77784,6 +78272,66 @@
       "title": "Meshy T2: Fast Native Mesh Generation with Flow Matching",
       "title_zh": "Meshy T2：基于流匹配的快速原生网格生成框架",
       "updated_at": "2026-08-12T08:32:33Z",
+      "version": 3
+    }
+  },
+  "analysis:v1:d3c8c9f4bacbdde5a93d056cb6becca58bbfab61c598ee2bfbd73e46b906863a": {
+    "key": "analysis:v1:d3c8c9f4bacbdde5a93d056cb6becca58bbfab61c598ee2bfbd73e46b906863a",
+    "record": {
+      "abstract": "Vision-Language-Action (VLA) models are formulated to ground instructions in visual context and generate action sequences for robotic manipulation. Despite recent progress, VLA models still face structure-blind backbones, backbone-bound generalization, and flat single-objective optimization. To address these challenges, we propose a novel Neuro-Symbolic Vision-Language-Action (NS-VLA) framework. It introduces a Neuro-Symbolic Encoder for plan-constrained primitive inference, a Neuro-Symbolic Solver that conditions a backbone-agnostic policy on the active primitive, and Hierarchical Joint Policy Optimization with reward-granularity matching. Experiments on robotic manipulation benchmarks demonstrate that NS-VLA outperforms previous methods in both one-shot training and data-perturbed settings, while simultaneously exhibiting superior zero-shot generalizability and expanded exploration space. Our code is publicly available.",
+      "analysis": {
+        "key_results": "在机器人操作基准测试中，一次性训练和数据扰动设置下超越先前方法，同时展现出优越的零样本泛化能力和扩展的探索空间。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出神经符号视觉-语言-动作（NS-VLA）框架，引入神经符号编码器进行计划约束的基元推理、神经符号求解器在活动基元上条件化与骨干无关的策略，以及分层联合策略优化与奖励粒度匹配。",
+        "method": "神经符号编码器、神经符号求解器、分层联合策略优化，结合奖励粒度匹配。",
+        "one_sentence_summary": "提出一种神经符号视觉-语言-动作框架，通过神经符号编码器、求解器和分层联合策略优化，提升机器人操作的泛化性和探索空间。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "直接聚焦于VLA模型改进，通过神经符号方法增强结构理解和泛化性，与本站VLA主题高度相关。",
+        "relevance_score": 9,
+        "tags": [
+          "Robot Learning",
+          "Policy Learning",
+          "Robot Manipulation",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2603.09542",
+      "authors": [
+        "Ziyue Zhu",
+        "Shangyang Wu",
+        "Shuai Zhao",
+        "Zhiqiu Zhao",
+        "Jian Zhang",
+        "Shengjie Li",
+        "Yi Wang",
+        "Anh Tuan Luu",
+        "Xinliang Zhou",
+        "Fang Li",
+        "Haoran Luo"
+      ],
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-14T09:40:53.704892Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-03-10T11:51:54Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2603.09542",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2603.09542",
+        "project_url": "https://zuzuzzy.github.io/NS-VLA/"
+      },
+      "title": "NS-VLA: Towards Neuro-Symbolic Vision-Language-Action Models",
+      "title_zh": "NS-VLA：迈向神经符号视觉-语言-动作模型",
+      "updated_at": "2026-09-11T11:07:40Z",
       "version": 3
     }
   },
