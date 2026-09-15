@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-09T00:59:52.165970Z",
+  "generated_at": "2026-09-15T01:08:43.162935Z",
   "papers": [
     {
       "abstract": "Vision-Language-Action (VLA) models have demonstrated remarkable generalization capabilities in robotic manipulation tasks, yet their substantial computational overhead remains a critical obstacle to real-world deployment. Improving inference efficiency is therefore essential for practical robotic applications. Existing acceleration methods often rely on heuristic or static strategies--such as rule-based token caching or pruning--that are decoupled from task objectives and fail to adapt to dynamic scene changes. In this work, we reformulate inference acceleration as a learnable policy optimization problem and propose a novel framework that integrates a dynamic, task-aware decision-making process directly into the VLA model. At its core are two lightweight, cooperative modules: a Cached Token Selector, which determines which tokens should be reused, and a Cache Ratio Predictor, which controls how many tokens to reuse. Training these modules is non-trivial due to their discrete decisions. We address this by adopting a differentiable relaxation that allows gradient-based end-to-end optimization. Extensive experiments on the LIBERO and SIMPLER benchmarks, as well as real-robot evaluations, show that our method achieves a 1.76x wall-clock inference speedup while simultaneously improving the average success rate by 1.9 percentage points (from 75.0% to 76.9%) on LIBERO and by 5.0 percentage points on real-world tasks, significantly outperforming existing baselines. This work highlights the potential of learning task-aware computational allocation policies, paving the way for VLA models that are both powerful and efficient.",
@@ -92,6 +92,74 @@
       "title_zh": "通过自适应视觉令牌缓存学习加速视觉-语言-动作模型",
       "updated_at": "2026-08-26T04:24:45Z",
       "version": 2
+    },
+    {
+      "abstract": "Existing knowledge probing methods rely on pre-defined queries, limiting extraction to known concepts. We introduce DecompressionLM, a stateless framework for zero-shot concept graph extraction that discovers what language models encode without pre-specified queries or shared cross-sequence state. Our method targets three limitations of common decoding-based probing approaches: (i) cross-sequence coupling that concentrates probability mass on high-frequency prefixes, (ii) competitive decoding effects that suppress long-tail concepts, and (iii) scalability constraints arising from sequential exploration. Using Van der Corput low-discrepancy sequences with arithmetic decoding, DecompressionLM enables deterministic, embarrassingly parallel generation without shared state across sequences. Across two model families and five quantization variants, we find that activation-aware quantization (AWQ-4bit) expands concept coverage by 30-170%, while uniform quantization (GPTQ-Int4) induces 71-86% coverage collapse - divergent behaviors not reliably reflected by explanation-level perplexity. Corpus-based verification further reveals a 19.6-point hallucination gap between top- and bottom-ranked MMLU-Pro Law models. DecompressionLM establishes concept coverage as a complementary evaluation dimension for assessing knowledge breadth and factual grounding in compressed models intended for deployment. Code is available at https://github.com/ulab-uiuc/decompressionlm.",
+      "analysis": {
+        "key_results": "在两种模型家族和五种量化变体上，AWQ-4bit将概念覆盖范围扩展30-170%，而GPTQ-Int4导致71-86%的覆盖崩溃；MMLU-Pro Law模型排名前后存在19.6点的幻觉差距。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出DecompressionLM，一种无需预定义查询或共享状态即可提取概念图的零样本框架，并展示了其在评估量化模型知识覆盖范围方面的应用。",
+        "method": "利用Van der Corput低差异序列和算术解码，实现确定性、无共享状态、可并行化的生成，从而提取概念图。",
+        "one_sentence_summary": "本文提出DecompressionLM，一种无状态的零样本概念图提取框架，用于揭示语言模型在量化前后知识广度和事实基础的变化。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "该论文属于独立的模型量化分析，未直接涉及VLA、WAM或机器人领域。但其提出的概念覆盖评估方法和量化影响分析可为部署在机器人上的压缩语言模型提供参考。",
+        "relevance_score": 7,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CL"
+      ],
+      "arxiv_id": "2602.00377",
+      "authors": [
+        "Zhaochen Hong",
+        "Jiaxuan You"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-15T01:08:43.162935Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2602.00377/v3/fig1-panel1.png"
+            ],
+            "caption": "DecompressionLM pipeline. The Language Model is given a prompt asking for related concepts under a domain, while a VdC-based arithmetic decoding algorithm explores the distribution space and samples sequences faithfully; the sequences are parsed into chains of concepts and merged into a concept graph (left) and grounded against CourtListener for hallucination analysis (right).",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2602.00377v3"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2602.00377v3",
+        "recovery_checked_at": "2026-09-15T01:10:46.572376Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-15T01:08:43.162935Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-01-30T22:56:56Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2602.00377",
+        "code_url": "https://github.com/ulab-uiuc/decompressionlm",
+        "pdf_url": "https://arxiv.org/pdf/2602.00377",
+        "project_url": null
+      },
+      "title": "DecompressionLM: Deterministic, Diagnostic, and Zero-Shot Concept Graph Extraction from Language Models",
+      "title_zh": "DecompressionLM：从语言模型中确定性、诊断性和零样本的概念图提取",
+      "updated_at": "2026-09-12T04:06:38Z",
+      "version": 3
     },
     {
       "abstract": "Building a generalist robot policy requires continuously integrating new skills while preserving previously acquired behaviors. Directly optimizing a single policy over a growing task stream is difficult because robotic interaction is expensive, task distributions are heterogeneous, and sequential updates induce interference. To address these problems, we propose continual policy consolidation (CPC), a teacher--student framework that combines continual policy distillation with prioritized experience replay and expandable experts. This architecture separates skill acquisition from policy consolidation: teachers are trained independently through reinforcement learning, and their behaviors are continually distilled into a central generalist student. This decomposition retains the practical strength of reinforcement learning for task-specialized training while casting student-side consolidation as a supervised policy-learning problem. To balance stability and plasticity as the task stream grows, the student combines an expandable Transformer-based mixture-of-experts architecture with prioritized trajectory replay. Extensive experiments show that the student recovers a large proportion of teacher performance while achieving near-zero forgetting. These results demonstrate a scalable route for consolidating independently acquired robot skills into a continually growing generalist policy.",
@@ -684,7 +752,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2601.06519v2",
-        "recovery_checked_at": "2026-09-14T09:41:48.394869Z",
+        "recovery_checked_at": "2026-09-15T01:10:46.572376Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -936,7 +1004,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2601.04035v2",
-        "recovery_checked_at": "2026-09-14T00:39:32.732978Z",
+        "recovery_checked_at": "2026-09-15T01:10:46.572376Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -1012,7 +1080,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2601.02295v2",
-        "recovery_checked_at": "2026-09-14T00:39:32.732978Z",
+        "recovery_checked_at": "2026-09-15T01:10:46.572376Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -1323,19 +1391,21 @@
   "schema_version": "1",
   "stats": {
     "cache_hits": 0,
-    "completion_tokens": 3909,
-    "error_categories": {},
-    "failed": 0,
-    "fetched": 144,
-    "figure_available": 10,
+    "completion_tokens": 9670,
+    "error_categories": {
+      "ValidationError": 2
+    },
+    "failed": 2,
+    "fetched": 448,
+    "figure_available": 17,
     "figure_cache_hits": 0,
     "figure_failed": 0,
-    "figure_requests": 11,
-    "figure_unavailable": 1,
-    "model_calls": 12,
-    "prefiltered": 12,
-    "prompt_tokens": 10588,
-    "published": 11,
-    "total_tokens": 14497
+    "figure_requests": 25,
+    "figure_unavailable": 8,
+    "model_calls": 31,
+    "prefiltered": 31,
+    "prompt_tokens": 26444,
+    "published": 25,
+    "total_tokens": 36114
   }
 }
