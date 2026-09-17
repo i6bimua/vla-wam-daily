@@ -1,4 +1,51 @@
 {
+  "analysis:v1:00187b784b3a17b0bbf35f61f7cce4466b88b52b25cf42cbdd6de5aa715d9004": {
+    "key": "analysis:v1:00187b784b3a17b0bbf35f61f7cce4466b88b52b25cf42cbdd6de5aa715d9004",
+    "record": {
+      "abstract": "A game character should not have to reread its entire life before every conversation. For locally deployed language-model characters, however, revising a few memories can invalidate a long reusable prefix. The resulting preparation cost competes with both foreground dialogue and the maintenance of other characters. This matters especially when dialogue feeds game-defined actions and value judgments: a fluent but incorrect account of who owns an item, or whether a transfer has already happened, can corrupt the input to otherwise deterministic rules. We study incremental memory maintenance for long-lived game NPCs in a quantized Qwen hybrid recurrent-attention model. Our runtime removes superseded attention KV entries, computes replacement records at the true sequence tail, and preserves the continuing recurrent state and unchanged KV. Existing local experiments combine multi-update dialogue replays, fixed-input placement ablations, and attention diagnostics. Independent block composition weakens query-conditioned memory selection without a uniform chunk-initial attention collapse. True-tail updates preserve important current-state and historical bindings across eight scripted maintenance rounds; a placement case recovers the full-refill quantity in three reconstructions, while slot-preserving alternatives repeat a double-subtraction error. Attention-distribution proximity alone does not explain these semantic differences. The results motivate treating a character's inference state as a maintained, history-dependent resource, rather than only a disposable encoding of its latest memory text.",
+      "analysis": {
+        "key_results": "真实尾部更新在八轮脚本化维护中保留了重要的当前状态和历史绑定；一个放置案例在三次重建中恢复了全部补充量，而槽位保留替代方案重复了双重减法错误；注意力分布接近度单独无法解释语义差异。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出一种增量记忆维护方法，使用真实序列尾部计算替换记录，保留持续的循环状态和未更改的KV，避免重新处理整个前缀。",
+        "method": "在量化Qwen混合循环-注意力模型上，移除过时的注意力KV条目，在真实序列尾部计算替换记录，并保留持续的循环状态和未更改的KV。",
+        "one_sentence_summary": "研究量化Qwen混合循环-注意力模型在游戏NPC中进行增量记忆维护，以减少重复准备成本并保持语义一致性。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "该工作聚焦于游戏NPC对话记忆维护的本地推理效率，涉及量化模型和增量KV缓存管理，与VLA或WAM无直接关系，但其中针对历史绑定的维护策略对机器人世界模型中的长期状态一致性可能具有方法论启发。",
+        "relevance_score": 6,
+        "tags": [
+          "Efficient Inference",
+          "Model Quantization"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CL"
+      ],
+      "arxiv_id": "2609.18935",
+      "authors": [
+        "Zimu Xu"
+      ],
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-17T09:18:14.122892Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-16T17:09:05Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.18935",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.18935",
+        "project_url": null
+      },
+      "title": "Long-Lived Characters, Local Inference: Incremental Memory Maintenance for Game NPCs",
+      "title_zh": "长寿角色，本地推理：游戏NPC的增量记忆维护",
+      "updated_at": "2026-09-16T17:09:05Z",
+      "version": 1
+    }
+  },
   "analysis:v1:0022be4b890ec8098ef6df7e6575d16487aea5e57262275d65a111310cac0656": {
     "key": "analysis:v1:0022be4b890ec8098ef6df7e6575d16487aea5e57262275d65a111310cac0656",
     "record": {
@@ -17937,6 +17984,66 @@
       "version": 2
     }
   },
+  "analysis:v1:285fb837cd31e5c7e563c21f19beede5cd333fcb268f42255ae9d19194a63d55": {
+    "key": "analysis:v1:285fb837cd31e5c7e563c21f19beede5cd333fcb268f42255ae9d19194a63d55",
+    "record": {
+      "abstract": "Vision-Language-Action models and World Action Models have shown promising generalization in robotic manipulation but remain fragile in contact-rich tasks, where contact perturbations can cause failures that are difficult to detect from vision alone. Corrective post-training with tactile feedback can improve recovery, but scaling such supervision through human intervention is costly. World models can synthesize additional training data, yet vision-only generation may produce visually plausible but contact-inconsistent trajectories. We therefore introduce TACO, a scalable robot policy post-training framework built on a compositional tactile world model. Given real rollouts, TACO follows a Recognize--Imagine--Label loop: an inverse dynamics and value model identifies failure-adjacent states using progress estimates, a visuo-tactile generation model imagines local corrections by jointly generating video and tactile sequences, and the inverse dynamics and value model labels them with corrective actions and progress scores. Candidates are filtered for kinematic feasibility and tactile plausibility, then selected by predicted progress gain. TACO aggregates demonstrations, real rollouts, and selected corrections for iterative post-training. It combines knowledge-insulated tactile adaptation with CFG-RL using binary advantage labels while keeping the pretrained VLM backbone fixed. Experiments on real-world tasks show that TACO improves the average task score from 0.375 to 0.825 after two post-training iterations.",
+      "analysis": {
+        "key_results": "在真实世界任务中，经过两次后训练迭代，平均任务得分从0.375提高到0.825。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出TACO框架，利用组合式触觉世界模型结合逆动力学与价值模型，实现无需人工干预的可扩展机器人策略后训练。",
+        "method": "Recognize–Imagine–Label循环：先由逆动力学与价值模型识别失败邻近状态，再由视觉-触觉生成模型生成局部纠正轨迹，最后由模型标注动作与进步分数，并通过运动学可行性与触觉合理性过滤后用于迭代后训练。",
+        "one_sentence_summary": "TACO利用组合式触觉世界模型为接触丰富的机器人操作任务提供可扩展的策略后训练，通过识别-想象-标记循环合成纠正性数据，从而提升VLA策略的鲁棒性。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "论文直接针对 Vision-Language-Action 模型和世界动作模型在接触丰富任务中的脆弱性，构建融合触觉的世界模型，为 VLA 策略提供可扩展的后训练数据，核心贡献与 VLA 和 WAM 的交叉领域高度相关。",
+        "relevance_score": 9,
+        "tags": [
+          "Vision-Language",
+          "World Modeling",
+          "Robot Learning",
+          "Action Prediction"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2607.02840",
+      "authors": [
+        "Shengbang Liu",
+        "Yueru Jia",
+        "Yuyang Yan",
+        "Jiaming Liu",
+        "Xinran Zhang",
+        "Qiuxuan Feng",
+        "Yandong Guo",
+        "Shiji Zhou",
+        "Boxin Shi",
+        "Shanghang Zhang"
+      ],
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics",
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-17T09:18:14.122892Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-07-03T00:23:30Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2607.02840",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2607.02840",
+        "project_url": null
+      },
+      "title": "TACO: TActile World Model as a Self-COrrector for Scalable Robot Policy Post-Training",
+      "title_zh": "TACO：触觉世界模型作为可扩展机器人策略后训练的自纠器",
+      "updated_at": "2026-09-16T16:41:13Z",
+      "version": 2
+    }
+  },
   "analysis:v1:289bc443fc9272e4e63fb3181fae21fa49dffd7275ced118be49e33d41a85dfd": {
     "key": "analysis:v1:289bc443fc9272e4e63fb3181fae21fa49dffd7275ced118be49e33d41a85dfd",
     "record": {
@@ -29586,6 +29693,59 @@
       "version": 1
     }
   },
+  "analysis:v1:42afc2d7d6039482900995ac8b61fc49d8207ae52e53f7effecf2ea195a07029": {
+    "key": "analysis:v1:42afc2d7d6039482900995ac8b61fc49d8207ae52e53f7effecf2ea195a07029",
+    "record": {
+      "abstract": "Factory work is a promising early scenario for embodied AI: assigning repetitive manual jobs to robots has clear economic payoff, and a structured station keeps the jobs tractable for current policies. Vision-Language-Action (VLA) models now dominate as the policy paradigm for these robots. The inference latency of VLA models directly affects robot responsiveness and motion smoothness. However, existing VLA inference frameworks do not fully exploit the characteristics of embodied workloads or account for the distinct bottlenecks across different stages of VLA inference. In this paper, we first characterize embodied workloads and identify substantial task similarity across repeated robot executions. We further find that such similarity extends beyond observations and action trajectories to internal model states. Drawing on these observations, we present rMuscle, a real-time VLA inference framework inspired by human muscle memory. It exploits cross-execution similarity through a dual-phase muscle-memory cache. The Context Cache reuses visual-token outputs to reduce computation, while the Action Cache reuses neuron activation patterns to reduce weight accesses. We keep both the cache memory footprint and access overhead low through online cache recomputation, sliding-window cache retrieval, and mask sharing across consecutive denoising steps. rMuscle achieves 1.29-1.42X speedup on RTX 4090 and Jetson Thor across LIBERO, RoboTwin, and physical manipulation tasks, while maintaining the original success rates on real-world robots.",
+      "analysis": {
+        "key_results": "在RTX 4090和Jetson Thor上，于LIBERO、RoboTwin和物理操作任务中实现1.29-1.42倍加速，并保持真实机器人上的原始成功率。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出rMuscle框架，利用重复机器人执行中的跨执行相似性，通过双阶段肌肉记忆缓存（上下文缓存和动作缓存）加速VLA推理，同时保持原始任务成功率。",
+        "method": "通过上下文缓存重用视觉token输出以降低计算量，动作缓存重用神经元激活模式以减少权重访问；结合在线缓存重计算、滑动窗口缓存检索和连续去噪步骤间的掩码共享，控制缓存内存占用和访问开销。",
+        "one_sentence_summary": "提出rMuscle，受人类肌肉记忆启发的实时VLA推理框架，通过跨执行相似性缓存视觉token输出和神经元激活模式来加速机器人VLA模型推理。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "直接针对VLA模型的推理效率优化，利用跨执行相似性加速机器人操作任务中的VLA推理，对VLA的实时性有重要价值，但未涉及世界模型或WAM。",
+        "relevance_score": 9,
+        "tags": [
+          "Efficient Inference",
+          "Vision-Language",
+          "Robot Manipulation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.AI"
+      ],
+      "arxiv_id": "2609.19104",
+      "authors": [
+        "Kaijun Zhou",
+        "Zhiyang Li",
+        "Le Chen",
+        "Jinyu Gu"
+      ],
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-17T09:18:14.122892Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-16T17:34:43Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.19104",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.19104",
+        "project_url": null
+      },
+      "title": "rMuscle: Robotic Muscle Memory for Efficient Vision-Language-Action Model Inference",
+      "title_zh": "rMuscle：面向高效视觉-语言-动作模型推理的机器人肌肉记忆",
+      "updated_at": "2026-09-16T17:34:43Z",
+      "version": 1
+    }
+  },
   "analysis:v1:42db46e6b44577ea13e2856ac1c0e69b9a637e12315a7c04eb68e9e5e0a52eb9": {
     "key": "analysis:v1:42db46e6b44577ea13e2856ac1c0e69b9a637e12315a7c04eb68e9e5e0a52eb9",
     "record": {
@@ -30841,6 +31001,76 @@
       "title_zh": "MemRiskBench：面向长期LLM代理的踪迹感知风险保留评估",
       "updated_at": "2026-09-14T03:31:19Z",
       "version": 1
+    }
+  },
+  "analysis:v1:44c81cc3508d6396e40965407f90997e1bcced8ac1fc4b63446a49014a7be198": {
+    "key": "analysis:v1:44c81cc3508d6396e40965407f90997e1bcced8ac1fc4b63446a49014a7be198",
+    "record": {
+      "abstract": "Recent advancements in Large Language Models (LLMs) and Vision-Language Models (VLMs) have made them powerful tools in embodied navigation, enabling agents to leverage commonsense and spatial reasoning for efficient exploration in unfamiliar environments. Existing LLM-based approaches convert global memory, such as semantic or topological maps, into language descriptions to guide navigation. While this improves efficiency and reduces redundant exploration, the loss of geometric information in language-based representations hinders spatial reasoning, especially in intricate environments. To address this, VLM-based approaches directly process ego-centric visual inputs to select optimal directions for exploration. However, relying solely on a first-person perspective makes navigation a partially observed decision-making problem, leading to suboptimal decisions in complex environments. In this paper, we present a novel vision-language model (VLM)-based navigation framework that addresses these challenges by adaptively retrieving task-relevant cues from a global memory module and integrating them with the agent's egocentric observations. By dynamically aligning global contextual information with local perception, our approach enhances spatial reasoning and decision-making in long-horizon tasks. The proposed method surpasses previous state-of-the-art approaches by a significant margin on both the HSSD and HM3D benchmarks and demonstrates strong performance on a real robot.",
+      "analysis": {
+        "key_results": "在HSSD和HM3D基准上显著超越先前最先进方法，并在真实机器人上展示出强大性能。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出一种新颖的基于视觉语言模型的导航框架，通过自适应检索全局记忆模块中的任务相关线索并将其与智能体的自我中心观察相融合，以解决语言描述丢失几何信息和单视角部分观测的问题。",
+        "method": "自适应地从全局记忆模块中检索任务相关线索，并将这些全局上下文信息与局部自我中心感知动态对齐，以提升空间推理和长程任务决策。",
+        "one_sentence_summary": "提出一种基于视觉语言模型的导航框架，通过自适应检索全局记忆中的任务相关线索并与自我中心观察结合，增强长程任务中的空间推理与决策。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "核心为视觉语言模型在具身导航中的应用，研究全局记忆与自我中心感知融合的机制，对VLA在长程空间任务中的决策能力提升具有直接参考价值。",
+        "relevance_score": 9,
+        "tags": [
+          "Vision-Language",
+          "Robot Learning",
+          "Generalist Robotics"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.AI"
+      ],
+      "arxiv_id": "2502.14254",
+      "authors": [
+        "Lingfeng Zhang",
+        "Yuecheng Liu",
+        "Zhanguang Zhang",
+        "Matin Aghaei",
+        "Yixin Xiao",
+        "Yaochen Hu",
+        "Mohammad Ali Alomrani",
+        "David Gamaliel Arcos Bravo",
+        "Hongjian Gu",
+        "Zhiyuan Li",
+        "Yangzheng Wu",
+        "Zhanpeng Zhang",
+        "Raika Karimi",
+        "Atia Hamidizadeh",
+        "Guowei Huang",
+        "Haoping Xu",
+        "Tongtong Cao",
+        "Weichao Qiu",
+        "Xingyue Quan",
+        "Jianye Hao",
+        "Yuzheng Zhuang",
+        "Yingxue Zhang"
+      ],
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-17T09:18:14.122892Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2025-02-20T04:41:40Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2502.14254",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2502.14254",
+        "project_url": null
+      },
+      "title": "Mem2Ego: Empowering Vision-Language Models with Global-to-Ego Memory for Long-Horizon Embodied Navigation",
+      "title_zh": "Mem2Ego：用全局至自我记忆赋能视觉语言模型实现长程具身导航",
+      "updated_at": "2026-09-16T04:34:12Z",
+      "version": 3
     }
   },
   "analysis:v1:44dcddc6e6aac7dd76bf40d83d78aa9c4cba69a6e1d5edeaa1842abc64e78904": {
@@ -35105,6 +35335,70 @@
       "version": 1
     }
   },
+  "analysis:v1:4f65acdbcada9aef08cf10314ab699420e714519775c3abd4523fe799f2a41a5": {
+    "key": "analysis:v1:4f65acdbcada9aef08cf10314ab699420e714519775c3abd4523fe799f2a41a5",
+    "record": {
+      "abstract": "Enabling robots to adapt to unfamiliar environments as readily as humans remains a moonshot goal of embodied AI. No finite collection of demonstrations can cover every task and situation a robot will encounter, making the ability to learn from context at deployment essential for generalization. Such in-context learning (ICL), however, remains largely beyond the reach of existing robotic policies. The broad agentic capabilities of commercial vision-language models (VLMs), such as GPT-6 Astra, raise a compelling question: can these models learn from demonstrations, examples, and interaction feedback, then translate that information into executable and verifiable robot behavior from a new initial state without gradient updates or persistent changes to task-specific parameters? We introduce GPT-Policy, a general-agent framework for in-context robot learning. GPT-Policy integrates a context compiler that preserves task-relevant visual transitions, a VLM that proposes robot-tool actions, and a constrained controller that verifies and executes each action and reports its outcome. We evaluate its reliability and limitations through task success and efficiency metrics, matched comparisons across models, and controlled context ablations. In real-robot trials, human video demonstrations improve task completion even without robot action labels, while aligned action references yield further gains on contact-sensitive tasks. These findings position GPT-Policy as a step toward robot adaptation through in-context learning, providing an empirical foundation for translating the general-purpose capabilities of VLMs into physical behavior and clarifying the challenges that must be overcome for reliable deployment.",
+      "analysis": {
+        "key_results": "真实机器人试验中，人类视频演示即使没有机器人动作标签也能提高任务完成率；对齐的动作参考在接触敏感任务上带来额外收益。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出GPT-Policy框架，包含上下文编译器、VLM代理和约束控制器，实现机器人上下文学习。",
+        "method": "集成上下文编译器（保留任务相关视觉转换）、VLM（提出机器人工具动作）和约束控制器（验证并执行动作并报告结果）。",
+        "one_sentence_summary": "提出GPT-Policy框架，利用商用视觉语言模型（VLM）实现机器人的上下文学习，无需梯度更新即可将演示和交互反馈转化为可执行的物理行为。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该工作直接利用视觉语言模型作为机器人策略，在真实机器人上实现上下文学习，属于VLA（视觉-语言-动作）范畴，对基于大模型的机器人控制具有直接参考价值。",
+        "relevance_score": 9,
+        "tags": [
+          "Vision-Language",
+          "Robot Learning",
+          "Robot Manipulation",
+          "Generalist Robotics"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.RO"
+      ],
+      "arxiv_id": "2609.19138",
+      "authors": [
+        "Dongzhou Cheng",
+        "Taoran Yi",
+        "Ye Fang",
+        "Xingwu Zhang",
+        "Fan Feng",
+        "Yixuan Li",
+        "Gengxiong Zhuang",
+        "Rongze Wang",
+        "Shuai Yang",
+        "Wei Song",
+        "Weizhi Xue",
+        "Minyan Wu",
+        "Jie Gui",
+        "Jiaqi Wang",
+        "Tong Wu"
+      ],
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-17T09:18:14.122892Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-16T17:58:35Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.19138",
+        "code_url": "https://github.com/cheng-haha/GPT-Policy",
+        "pdf_url": "https://arxiv.org/pdf/2609.19138",
+        "project_url": "https://cheng-haha.github.io/GPT-Policy"
+      },
+      "title": "In-Context Robot Learning with VLM Agents",
+      "title_zh": "基于视觉语言模型代理的机器人上下文学习",
+      "updated_at": "2026-09-16T17:58:35Z",
+      "version": 1
+    }
+  },
   "analysis:v1:4f8a1f52417fad4cadca910dd5fe33269c84ac7b857d26da792f9c91de1e0d08": {
     "key": "analysis:v1:4f8a1f52417fad4cadca910dd5fe33269c84ac7b857d26da792f9c91de1e0d08",
     "record": {
@@ -38118,6 +38412,55 @@
       "title_zh": "预测后检索：基于视频前缀的跨实例未来状态检索",
       "updated_at": "2026-08-05T04:12:00Z",
       "version": 1
+    }
+  },
+  "analysis:v1:57fbe2644214ee68ebe3aff6232a14a2266ac75a2e38d11006886e332e7325c2": {
+    "key": "analysis:v1:57fbe2644214ee68ebe3aff6232a14a2266ac75a2e38d11006886e332e7325c2",
+    "record": {
+      "abstract": "This paper presents a comprehensive overview of the Ultralytics YOLO family, emphasizing architectural evolution, benchmarking, deployment, and emerging directions from YOLOv5 through YOLO27. The review begins with YOLO27 (or YOLOv27), which introduces a scale-adaptive dual-architecture strategy: compact YOLO27n/s detectors employ streamlined CNNs with dual-scale prediction, strengthened high-resolution features, foreground-alignment supervision, and conventional or NMS-free inference, whereas YOLO27m/l adopt query-based transformer decoding for native NMS-free detection. YOLO27l further incorporates an UltraViT backbone with deep-stage self-attention for global-context modeling. Preliminary COCO results span 42.3-60.4 mAP at 640-pixel resolution and 0.62-2.32 ms TensorRT 11 FP16 latency, with YOLO27l reaching 61.2 mAP at 800 pixels. The evolution is subsequently traced through YOLO26, including DFL removal, Progressive Loss Balancing, Small-Target-Aware Label Assignment, MuSGD optimization, and NMS-free inference; YOLO11, emphasizing efficiency and task integration; YOLOv8, introducing decoupled anchor-free detection; and YOLOv5, which established the modular PyTorch-based Ultralytics ecosystem. Comparative benchmarking examines accuracy, precision, recall, F1-score, mAP, latency, and computational complexity alongside representative contemporary detectors. The review further examines detection, segmentation, depth, classification, pose, oriented detection, tracking, export, quantization, and deployment across robotics, agriculture, surveillance, and manufacturing. Finally, challenges involving dense scenes, CNN-Transformer integration, open-vocabulary perception, domain generalization, and hardware-aware optimization are discussed as directions for future YOLO systems.",
+      "analysis": {
+        "key_results": "YOLO27系列在COCO上mAP为42.3-60.4（640像素），YOLO27l在800像素达61.2 mAP；TensorRT 11 FP16延迟0.62-2.32ms。",
+        "limitations": "摘要未说明",
+        "main_contribution": "对Ultralytics YOLO系列进行系统综述，涵盖架构演进、性能基准、部署及量化等方向。",
+        "method": "综述，比较各版本YOLO的架构、性能、推理延迟及量化等。",
+        "one_sentence_summary": "本文综述了YOLOv5至YOLO27的架构演进、基准测试、部署及量化等新兴方向。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "该论文聚焦通用目标检测器的量化与高效部署，并未直接涉及VLA或WAM，但其中的量化与效率优化技术可间接为机器人感知模块提供借鉴。",
+        "relevance_score": 6,
+        "tags": [
+          "Efficient Inference",
+          "Model Quantization"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "arxiv_id": "2510.09653",
+      "authors": [
+        "Ranjan Sapkota",
+        "Manoj Karkee"
+      ],
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-17T09:18:14.122892Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2025-10-06T23:28:44Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2510.09653",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2510.09653",
+        "project_url": null
+      },
+      "title": "Ultralytics YOLO Evolution: An Overview of YOLO27, YOLO26, YOLO11, YOLOv8, and YOLOv5 Object Detectors for Computer Vision and Pattern Recognition",
+      "title_zh": "Ultralytics YOLO演进：YOLO27至YOLOv5目标检测器综述",
+      "updated_at": "2026-09-16T16:04:32Z",
+      "version": 4
     }
   },
   "analysis:v1:58139c8842b6c70369f7936f39f955a9859b408c13421beb9d8918b2c3435fae": {
@@ -50348,6 +50691,59 @@
       "version": 2
     }
   },
+  "analysis:v1:77371edb50e41d5e7d566f4a90bc9dba6ca822e9cc339d4b08baa9bf16954480": {
+    "key": "analysis:v1:77371edb50e41d5e7d566f4a90bc9dba6ca822e9cc339d4b08baa9bf16954480",
+    "record": {
+      "abstract": "Active perception - the ability of a robot to proactively select viewpoints to acquire task-relevant information - is essential for robust operation in real-world environments. However, existing approaches are typically limited to fixed objectives or constrained settings, and struggle to generalize to open-ended perception intents specified in natural language. We propose I-Perceive, a foundation model for language-conditioned active perception in large-scale indoor environments. Given a query image, a set of context images, and a natural language instruction, I-Perceive predicts a 6D camera pose that fulfills the specified perception intent. The model integrates a vision-language pathway for semantic grounding with a geometric reasoning pathway for multi-view 3D understanding, connected via multi-layer semantic fusion to enable language-conditioned geometric reasoning. To support scalable training, we construct a large-scale dataset of language-viewpoint pairs from both real-world scene-scanning data and simulated environments using an automated pipeline. Extensive experiments demonstrate that I-Perceive significantly outperforms strong baselines on prediction accuracy, viewpoint feasibility, and instructions alignment. The model exhibits strong zero-shot generalization to unseen scenes and instructions, and enables closed-loop active perception, progressively refining viewpoints over sequential interactions.",
+      "analysis": {
+        "key_results": "在预测精度、视点可行性和指令对齐方面显著优于强基线，并展现出对未知场景和指令的零样本泛化能力及闭环主动感知能力。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出 I-Perceive 基础模型，实现语言条件下的主动感知，并构建大规模语言-视点数据集。",
+        "method": "视觉-语言通路与几何推理通路融合，通过多层语义融合实现语言条件下的几何推理，并使用自动化流程构建数据集。",
+        "one_sentence_summary": "提出 I-Perceive，一个在大型室内环境中根据自然语言指令预测 6D 相机位姿的主动感知基础模型。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该工作属于视觉-语言-动作（VLA）范畴，聚焦于主动感知中的视点选择，与机器人操作和世界建模相关，但与 WAM（世界模型）的直接关联较弱。",
+        "relevance_score": 7,
+        "tags": [
+          "Vision-Language",
+          "Robot Learning",
+          "Policy Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2603.00600",
+      "authors": [
+        "Yongxi Huang",
+        "Zhuohang Wang",
+        "Wenjing Tang",
+        "Xinyu He",
+        "Cewu Lu",
+        "Panpan Cai"
+      ],
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-17T09:18:14.122892Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-02-28T11:38:56Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2603.00600",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2603.00600",
+        "project_url": null
+      },
+      "title": "I-Perceive: A Foundation Model for Vision-Language Active Perception",
+      "title_zh": "I-Perceive：面向视觉语言主动感知的基础模型",
+      "updated_at": "2026-09-16T05:20:54Z",
+      "version": 3
+    }
+  },
   "analysis:v1:774003fecfbd4345b2c3663d2d41530d323bdc9ddec57786fdde10434d08dd32": {
     "key": "analysis:v1:774003fecfbd4345b2c3663d2d41530d323bdc9ddec57786fdde10434d08dd32",
     "record": {
@@ -57277,6 +57673,56 @@
       "title_zh": "FabriVLA：轻量级视觉-语言-动作模型与共形动作块不确定性校准",
       "updated_at": "2026-08-02T12:41:02Z",
       "version": 3
+    }
+  },
+  "analysis:v1:875bdf649dcc39d5ebe63b19c21c4f962923e287f6342f2e96782d5918a0cd26": {
+    "key": "analysis:v1:875bdf649dcc39d5ebe63b19c21c4f962923e287f6342f2e96782d5918a0cd26",
+    "record": {
+      "abstract": "Longitudinal electronic health records (EHRs) capture years of patient history across notes, codes, labs, and procedures, and contain evidence needed to reason about likely clinical outcomes. However, comprehensive clinician review of these records is impractical, and LLM-based processing is costly and often unreliable, missing some relevant observations while hallucinating others. We therefore propose EviGen, a three-layer framework for verifiable clinical rationale generation that addresses these challenges. The first layer is a patient-conditioned retriever that uses learnable queries to find evidence predictive of, not just textually relevant to, a clinical outcome and ranks it by prediction attribution scores. The second layer is an LLM generator that consumes this ranked evidence as a scaffold to produce a clinical rationale grounded in the retrieved spans. The third layer is a process-supervised verifier that checks the generated rationale at the reasoning-step level, flagging unreliable claims. Across three medical prediction datasets, EviGen improves prediction performance and rationale faithfulness over full-context LLM and RAG baselines, and is preferred by clinical reviewers in a usability evaluation.",
+      "analysis": {
+        "key_results": "在三个医疗预测数据集上，EviGen在预测性能和推理忠实度上优于全上下文LLM和RAG基线，并在可用性评估中受临床评审者青睐。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出EviGen三层框架，用于生成可验证的临床推理，包括患者条件检索器、LLM生成器和过程监督验证器。",
+        "method": "使用可学习查询检索预测性证据并进行排序，然后由LLM基于证据生成推理，最后通过过程监督验证器进行步骤级检查和标记不可靠声明。",
+        "one_sentence_summary": "提出EviGen框架，通过预测性证据检索、基于证据的生成和过程监督验证，生成可验证的临床推理。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "本文关注临床文本推理生成，与VLA（视觉语言动作）和WAM（世界模型）无直接关系，但过程监督验证和证据排序方法对提高机器人模型的可信推理可能具有借鉴意义。",
+        "relevance_score": 5,
+        "tags": [
+          "Evaluation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CL"
+      ],
+      "arxiv_id": "2609.18852",
+      "authors": [
+        "Fengnan Li",
+        "Heman Burre",
+        "Liwen Sun",
+        "Roshni Varma",
+        "Matthew M. Engelhard"
+      ],
+      "matched_rules": [
+        "composite:draft_verification_decoding"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-17T09:18:14.122892Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-16T15:55:41Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.18852",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.18852",
+        "project_url": null
+      },
+      "title": "EviGen: Predictive Evidence Scaffolding for Verifiable Clinical Rationale Generation",
+      "title_zh": "EviGen: 面向可验证临床推理生成的预测性证据支架框架",
+      "updated_at": "2026-09-16T15:55:41Z",
+      "version": 1
     }
   },
   "analysis:v1:877496c05916e7144110e374b2877f89128eaa736d5e2d731c062efd72d464ca": {
@@ -65492,6 +65938,59 @@
       "title_zh": "TEAM：面向MoE扩散语言模型加速的时空一致性引导专家激活",
       "updated_at": "2026-08-03T02:35:28Z",
       "version": 3
+    }
+  },
+  "analysis:v1:9e5cd6a88272d5b80c5c0ce3e940abeb84661ba85aaa8a94210b58684573cf01": {
+    "key": "analysis:v1:9e5cd6a88272d5b80c5c0ce3e940abeb84661ba85aaa8a94210b58684573cf01",
+    "record": {
+      "abstract": "Humanoid loco-manipulation requires robots to interpret task instructions and scene semantics while executing coordinated whole-body motions. We propose a hierarchical framework that uses motion keyframes as an intermediate representation between Vision-Language Model (VLM) planning and Reinforcement Learning (RL) control. Each keyframe specifies a target whole-body robot pose and, when applicable, an object pose. Given a language instruction, scene observations, and execution feedback, the VLM selects successive task-relevant keyframes from a predefined library. The selected keyframes are retargeted to the current scene to account for object poses and dimensions. A keyframe-conditioned whole-body policy then generates joint-level actions to reach these goals. We introduce a saliency-based keyframe sampling strategy for low-level policy training that improves end-to-end task success rate from 44% to 92% when using sparse VLM keyframes. We evaluate our framework on object pickup, transport, and placement tasks in simulation and on a Unitree G1 humanoid. The system successfully performs both one- and two-handed manipulation and generalises to placement locations beyond the training reference data.",
+      "analysis": {
+        "key_results": "端到端任务成功率从44%提升到92%（使用稀疏VLM关键帧时）；在仿真和Unitree G1人形机器人上完成物体拾取、搬运和放置任务，支持单手和双手操作，并泛化到训练参考数据之外的放置位置。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出KINO分层框架，使用预定义关键帧库在VLM规划与RL全身控制之间建立接口，并引入基于显著性的关键帧采样策略，将稀疏VLM关键帧下的端到端任务成功率从44%提升至92%。",
+        "method": "给定语言指令、场景观测和执行反馈，VLM从预定义库中选择任务相关的连续关键帧；关键帧根据当前场景中物体位姿和尺寸进行重定向；关键帧条件下的全身策略生成关节级动作。",
+        "one_sentence_summary": "提出KINO分层框架，以运动关键帧作为VLM规划与全身RL控制之间的中间表示，实现人形机器人移动操作。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该工作直接涉及VLA（Vision-Language-Action）式分层规划与控制：VLM作为高层规划器输出关键帧，低层RL策略执行全身控制，是VLA框架在人形移动操作中的具体实现，与本站VLA主题高度相关。",
+        "relevance_score": 9,
+        "tags": [
+          "Vision-Language",
+          "Policy Learning",
+          "Robot Manipulation",
+          "Robot Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2609.18869",
+      "authors": [
+        "Sitong Chen",
+        "Fatemeh Zargarbashi",
+        "Jin Cheng",
+        "Tianxu An",
+        "Stelian Coros"
+      ],
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-17T09:18:14.122892Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-16T16:07:33Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.18869",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.18869",
+        "project_url": null
+      },
+      "title": "KINO: A Keyframe Interface for VLM Planning and Whole-Body Control in Humanoid Loco-Manipulation",
+      "title_zh": "KINO：人形机器人运动-操作中面向VLM规划与全身控制的关键帧接口",
+      "updated_at": "2026-09-16T16:07:33Z",
+      "version": 1
     }
   },
   "analysis:v1:9e5cf02fc8fb6d3e156146bd47716e902e0f514a28c95796490b6346aa848ccb": {
