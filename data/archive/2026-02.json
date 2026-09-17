@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-07T00:38:47.084463Z",
+  "generated_at": "2026-09-17T01:03:22.953802Z",
   "papers": [
     {
       "abstract": "Active perception - the ability of a robot to proactively select viewpoints to acquire task-relevant information - is essential for robust operation in real-world environments. However, existing approaches are typically limited to fixed objectives or constrained settings, and struggle to generalize to open-ended perception intents specified in natural language. We propose I-Perceive, a foundation model for language-conditioned active perception in large-scale indoor environments. Given a query image, a set of context images, and a natural language instruction, I-Perceive predicts a 6D camera pose that fulfills the specified perception intent. The model integrates a vision-language pathway for semantic grounding with a geometric reasoning pathway for multi-view 3D understanding, connected via multi-layer semantic fusion to enable language-conditioned geometric reasoning. To support scalable training, we construct a large-scale dataset of language-viewpoint pairs from both real-world scene-scanning data and simulated environments using an automated pipeline. Extensive experiments demonstrate that I-Perceive significantly outperforms strong baselines on prediction accuracy, viewpoint feasibility, and instructions alignment. The model exhibits strong zero-shot generalization to unseen scenes and instructions, and enables closed-loop active perception, progressively refining viewpoints over sequential interactions.",
@@ -1440,6 +1440,95 @@
       "version": 3
     },
     {
+      "abstract": "Robot manipulation uses temporal context to select actions and visual foresight to assess their consequences, yet dense representations of past and future observations incur substantial processing costs. We introduce PACT-WAM, a world-action model that jointly generates a 16-step action trajectory and its temporally corresponding visual forecast through conditional flow sampling. Hierarchical history encoding assigns coarse spatial representations to earlier observations and finer representations to recent ones, retaining 16 observations with 256 tokens per view, 75% fewer than dense encoding of the same frames. A shared flow module jointly updates continuous action and visual states through two modality-specific heads under transition-wise causal attention, and a TiTok-VAE decoder reconstructs multi-view future images from the visual latents. Decoded forecasts also support Proposal Review (PR), a vision-language model component for execution-prefix selection and proposal rejection. Without PR, PACT-WAM achieves average success rates of 98.6%, 92.3%, and 78.0% on LIBERO, RoboTwin 2.0, and real-world Piper tasks, respectively. PR provides a test-time enhancement, raising these rates to 99.5%, 93.4%, and 86.7%. Ablations show that hierarchical history allocation and joint action-visual generation improve control success, while analyses of visual capacity and forecast-guided execution characterize the trade-offs between success and proposal-generation cost.",
+      "analysis": {
+        "key_results": "在没有PR的情况下，PACT-WAM在LIBERO、RoboTwin 2.0和真实世界Piper任务上的平均成功率分别为98.6%、92.3%和78.0%；加入PR后，成功率提升至99.5%、93.4%和86.7%。消融实验表明分层历史分配和联合动作-视觉生成改善了控制成功率。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出了PACT-WAM，一种联合生成动作轨迹和视觉预测的世界-动作模型，并通过分层历史编码和共享流模块实现高效计算。",
+        "method": "使用分层历史编码（较早观察用粗空间表示，近期观察用细粒度表示）以75%减少token数量；共享流模块联合更新连续动作和视觉状态；TiTok-VAE解码器重建多视角未来图像；并引入基于视觉语言模型的Proposal Review（PR）组件进行执行前缀选择和提案拒绝。",
+        "one_sentence_summary": "PACT-WAM是一种世界-动作模型，通过条件流采样同时生成16步动作轨迹和对应的多视角未来图像，以提高机器人操作效率和成功率。",
+        "primary_topic": "WAM",
+        "relation_to_vla_wam": "PACT-WAM直接针对世界-动作建模（WAM），通过联合预测动作轨迹和视觉预见来提升机器人操作性能，核心贡献在于紧凑时序编码下的世界模型和动作预测的结合。",
+        "relevance_score": 9,
+        "tags": [
+          "Action Prediction",
+          "Video Generation",
+          "World Modeling",
+          "Robot Manipulation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.AI"
+      ],
+      "arxiv_id": "2602.15882",
+      "authors": [
+        "Yushan Liu",
+        "Jingjing Fan",
+        "Shoujie Li",
+        "Yifan Xie",
+        "Xiao-Ping Zhang",
+        "Wenbo Ding"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-17T01:03:22.953802Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2602.15882/v2/fig1-panel1.png"
+            ],
+            "caption": "Paradigm comparison. Top: dense-history joint action–video generation incurs high representation costs, while visual forecasts remain separate from execution decisions. Bottom: PACT-WAM combines hierarchical history encoding with compact visual latents to jointly generate temporally paired actions and forecasts, using Proposal Review (PR) to guide execution.",
+            "image_urls": [
+              "https://arxiv.org/html/2602.15882v2/fig1.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2602.15882v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2602.15882/v2/fig2-panel1.png"
+            ],
+            "caption": "PACT-WAM architecture. (a) Hierarchical history encoder. DINOv3 features undergo recency-dependent compression and Qwen visual processing, yielding 4/16/64 tokens per image for the oldest eight, middle six, and latest two observations. (b) Joint action–visual generation. Sixteen multi-view history observations and a language instruction form fixed Qwen context. Given this context, noisy action/visual states, and flow time, the shared backbone predicts velocities through separate heads. Joint integration, inverse normalization, and TiTok-VAE decoding yield 16 actions and multi-view forecasts of the state after each action. (c) Transition-wise causal attention mask. In this subset, rows/columns denote queries/keys; colored cells allow the same or earlier transitions, and blank cells block later ones.",
+            "image_urls": [
+              "https://arxiv.org/html/2602.15882v2/fig3_1_cropped.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2602.15882v2#S2.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2602.15882v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:world-action-model",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-17T01:03:22.953802Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-02-05T14:27:43Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2602.15882",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2602.15882",
+        "project_url": null
+      },
+      "title": "PACT-WAM: Predicting Actions and Visual Foresight with Compact Temporal Encoding for Robot Manipulation",
+      "title_zh": "PACT-WAM：面向机器人操作的紧凑时序编码动作与视觉预见预测",
+      "updated_at": "2026-09-16T06:48:40Z",
+      "version": 2
+    },
+    {
       "abstract": "Bimanual dexterous manipulation relies on integrating multimodal inputs to perform complex real-world tasks. To address the challenges of effectively combining these modalities, we propose DECO, a decoupled multimodal diffusion transformer that disentangles vision, proprioception, and tactile signals through specialized conditioning pathways, enabling structured and controllable integration of multimodal inputs, with a lightweight adapter for parameter-efficient injection of additional signals. Alongside DECO, we release DECO-50 dataset for bimanual dexterous manipulation with tactile sensing, consisting of 50 hours of data and over 5M frames, collected via teleoperation on real dual-arm robots. We train DECO on DECO-50 and conduct extensive real-world evaluation with over 2,000 robot rollouts. Experimental results show that DECO achieves the best performance across all tasks, with a 72.25% average success rate and a 21% improvement over the baseline. Moreover, the tactile adapter brings an additional 10.25% average success rate across all tasks and a 20% gain on complex contact-rich tasks while tuning less than 10% of the model parameters.",
       "analysis": {
         "key_results": "在2000+次真实机器人rollouts中，DECO平均成功率为72.25%，比基线提升21%；触觉适配器在所有任务上带来额外10.25%的平均成功率提升，在复杂接触丰富型任务上提升20%，且仅需调整不到10%的模型参数。",
@@ -1953,20 +2042,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 0,
-    "completion_tokens": 5298,
-    "error_categories": {},
-    "failed": 0,
-    "fetched": 242,
-    "figure_available": 9,
-    "figure_cache_hits": 0,
+    "cache_hits": 93,
+    "completion_tokens": 22442,
+    "error_categories": {
+      "ValidationError": 3
+    },
+    "failed": 3,
+    "fetched": 1882,
+    "figure_available": 126,
+    "figure_cache_hits": 74,
     "figure_failed": 0,
-    "figure_requests": 14,
-    "figure_unavailable": 5,
-    "model_calls": 16,
-    "prefiltered": 16,
-    "prompt_tokens": 14299,
-    "published": 14,
-    "total_tokens": 19597
+    "figure_requests": 69,
+    "figure_unavailable": 17,
+    "model_calls": 70,
+    "prefiltered": 163,
+    "prompt_tokens": 59441,
+    "published": 143,
+    "total_tokens": 81883
   }
 }
