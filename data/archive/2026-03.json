@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-20T09:09:26.537035Z",
+  "generated_at": "2026-09-21T00:47:34.508451Z",
   "papers": [
     {
       "abstract": "Indoor 3D scenes are ultimately meant to be used: an embodied agent should be able to navigate, reach objects, and complete diverse activities. Yet whether a given scene actually supports these activities for a specific agent profile is rarely verified. Existing evaluations of indoor 3D scenes typically focus on visual quality and semantic plausibility. In contrast, the feasibility of an activity depends on geometric, agent-specific constraints such as reach, clearance, and navigable space availability. These properties are not captured by visual plausibility metrics, and, as we show, VLMs, which are increasingly used to reason about 3D scenes, often fail to determine action feasibility in a single shot. We present SceneTeract, a verification interface that separates semantic action understanding from physical feasibility. Given a scene, an activity, and an embodied agent profile, we decompose the activity into atomic actions on scene objects. Explicit geometric checks then decide whether each step is executable and return a diagnostic trace explaining failures. In synthetic indoor scenes, SceneTeract reveals widespread functional and accessibility failures across diverse agent profiles. Moreover, when benchmarked against our verification, we find that existing VLMs systematically over-predict action feasibility, highlighting limited awareness of embodied functional constraints. In response, we post-train a lightweight VLM with verifier feedback, improving its assessment of physical feasibility. Although trained only on renders of synthetic scenes, we demonstrate that scene understanding improvements also generalize to real-world scenes. We will release our verification suite, benchmark labels, and diagnostic trace datasets.",
@@ -595,7 +595,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2603.23617v2",
-        "recovery_checked_at": "2026-09-20T09:09:36.156581Z",
+        "recovery_checked_at": "2026-09-21T00:50:12.301284Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -619,6 +619,88 @@
       "title": "M3T: Discrete Multi-Modal Motion Tokens for Sign Language Production",
       "title_zh": "M3T：面向手语生成的离散多模态运动令牌",
       "updated_at": "2026-09-02T19:07:43Z",
+      "version": 2
+    },
+    {
+      "abstract": "Current trajectory prediction models are primarily trained in an open-loop manner, which often leads to covariate shift and compounding errors when deployed in real-world, closed-loop settings. In this work, we propose a closed-loop training paradigm for receding-horizon ego prediction and identify two design choices that are critical for it to succeed. First, closed-loop supervision must be on-policy: each predicted mode is rolled out and supervised only from the states its own execution produced, preserving the prediction accuracy that cross-mode supervision would otherwise degrade. Second, gradients must not flow across the executed state transition, as backpropagating through these transitions allows the model to retroactively adjust an earlier prediction so that the resulting state is easier to predict from, mathematically regretting a mistake rather than learning to recover from it. We show empirically that this shortcut couples the learned policy to the specific replanning rate used during training and degrades at other rates, whereas detaching the gradient forces the model to rectify drift instead, allowing it to generalize across replanning rates unseen during training. Evaluated across three benchmarks (nuScenes, DeepScenario, and Argoverse 2) and two architectures, a decoder-only adaptation of LMFormer and an unmodified implementation of QCNet, our approach matches open-loop baselines under single-shot evaluation and improves with higher replanning rates, reducing collisions by up to 35% and off-road rates by up to 67%.",
+      "analysis": {
+        "key_results": "在nuScenes、DeepScenario和Argoverse 2三个基准上，使用LMFormer和QCNet两种架构，方法在单次评估中与开环基线持平，并在更高重规划率下将碰撞率降低最多35%，偏离道路率降低最多67%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出一种闭环训练范式，并确定两个关键设计选择：在线策略监督和梯度不跨执行状态传递，从而提升模型在闭环部署中的鲁棒性。",
+        "method": "采用闭环重规划训练，每个预测模式从其自身执行产生的状态进行监督，同时阻断梯度通过执行状态转移的反向传播。",
+        "one_sentence_summary": "提出闭环在策略训练范式用于视界后退自我轨迹预测，解决开环训练的协变量偏移问题。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "该工作聚焦于自动驾驶场景下的闭环轨迹预测，虽不直接涉及VLA或世界模型，但其在线策略训练和梯度阻断策略对机器人策略学习中的闭环控制与高效推理具有方法学借鉴价值。",
+        "relevance_score": 8,
+        "tags": [
+          "Efficient Inference",
+          "Robot Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2603.23393",
+      "authors": [
+        "Harsh Yadav",
+        "Christian Bohn",
+        "and Tobias Meisen"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-21T00:47:34.508451Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2603.23393/v2/fig1-panel1.png"
+            ],
+            "caption": "On-policy closed-loop rollout for a single predicted mode. At t = 0 t{=}0 the model produces a full T pred T_{\\text{pred}} -horizon prediction from the logged state (open-loop sample). The first T sim T_{\\text{sim}} seconds are executed, advancing the ego to a drifted state; the model then re-predicts from this self-induced state (closed-loop sample at t = T sim t{=}T_{\\text{sim}} ). The process repeats at t = 2 ​ T sim t{=}2T_{\\text{sim}} . Surrounding agents advance via log replay. Gradients are detached at each state transition (Sec. III-B ), so each planning cycle is supervised independently. Every resulting prediction is supervised against the static ground truth over its remaining horizon (Green).",
+            "image_urls": [
+              "https://arxiv.org/html/2603.23393v2/images/Closed_loop-simulator.drawio.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2603.23393v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2603.23393/v2/fig2-panel1.png"
+            ],
+            "caption": "Collision rate vs. rollout duration on nuScenes. Under single-shot evaluation (left) the OL and CL curves coincide. At T sim = 0.5 s T_{\\text{sim}}=$0.5\\text{\\,}\\mathrm{s}$ (right) the curves are indistinguishable for the first 1.5 s 1.5\\text{\\,}\\mathrm{s} and then diverge, reaching a 1.7 1.7 pp gap at 6 s 6\\text{\\,}\\mathrm{s} . The gap is therefore not a constant improvement in prediction quality but a difference in the rate at which error compounds.",
+            "image_urls": [
+              "https://arxiv.org/html/2603.23393v2/images/nuS_val_col_rollout.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2603.23393v2#S5.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2603.23393v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-21T00:47:34.508451Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-03-24T16:28:09Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2603.23393",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2603.23393",
+        "project_url": null
+      },
+      "title": "Rectify, Don't Regret: On-Policy Closed-Loop Training for Multimodal Trajectory Prediction",
+      "title_zh": "修正而非后悔：面向多模态轨迹预测的在线闭环训练",
+      "updated_at": "2026-09-18T07:39:03Z",
       "version": 2
     },
     {
@@ -1132,7 +1214,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2603.19201v3",
-        "recovery_checked_at": "2026-09-20T00:35:44.834747Z",
+        "recovery_checked_at": "2026-09-21T00:50:12.301284Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -1294,7 +1376,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2603.18853v3",
-        "recovery_checked_at": "2026-09-20T09:09:36.156581Z",
+        "recovery_checked_at": "2026-09-21T00:50:12.301284Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1449,7 +1531,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2603.16105v4",
-        "recovery_checked_at": "2026-09-20T00:35:44.834747Z",
+        "recovery_checked_at": "2026-09-21T00:50:12.301284Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -1474,6 +1556,98 @@
       "title_zh": "频率至关重要：面向剪枝与量化的快速模型无关数据筛选",
       "updated_at": "2026-08-27T13:41:14Z",
       "version": 4
+    },
+    {
+      "abstract": "While recent Vision-Language-Action (VLA) models have begun to incorporate audio, they typically treat sound as static pre-execution prompts or focus exclusively on human speech. This leaves a significant gap in real-time, sound-centric manipulation where fleeting environmental acoustics provide critical state verification during task execution. Consequently, key sounds are easily missed due to low-frequency updates or system latency. This problem is exacerbated by action chunking with open-loop execution, which creates a Blind Execution Interval where acoustic events are lost between discrete audio observation windows. Recognizing the necessity of continuous auditory awareness, we formalize Vision-Sound-Language-Action (VSLA) as a continuous control paradigm conditioned on vision, streaming audio, language, and proprioception under delayed decision loops. As an instantiation, we introduce HEAR, a VSLA framework integrating four components: (i) a streaming Historizer to maintain a compact, causal audio context across execution gaps; (ii) an Envisioner adapted from omni foundation models to reason over multi-sensory inputs; (iii) an Advancer, formulated as an audio world model, to learn temporal dynamics by predicting near-future audio codes; and (iv) a flow-matching Realizer policy to generate smooth action chunks. To address the scarcity of pretraining data and evaluations for VSLA, we construct OpenX-Sound for pretraining, alongside HEAR-Bench, the first sound-centric manipulation benchmark with strict causal timing rules. Our results suggest that robust sound-centric manipulation necessitates causal persistence and explicit temporal learning. This framework provides a practical step toward multi-sensory foundation models for embodied agents, enabling robots to perceive and interact with dynamic environments. Code and videos are available at https://hear.irmv.top",
+      "analysis": {
+        "key_results": "摘要未说明具体数值结果，仅指出稳健的声音中心操作需要因果持久性和显式时序学习。",
+        "limitations": "摘要未说明",
+        "main_contribution": "形式化视觉-声音-语言-动作（VSLA）范式，提出HEAR框架，并构建OpenX-Sound预训练数据和HEAR-Bench声音中心操作基准。",
+        "method": "HEAR框架集成流式历史记录器、全模态基础模型的推理器、音频世界模型推进器、流匹配实现器，并引入因果时序规则。",
+        "one_sentence_summary": "提出VSLA范式及HEAR框架，通过流式听觉、音频世界模型和流匹配策略实现声音中心的操作。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "核心贡献是扩展VLA范式至声音模态，包含音频世界模型组件，并针对机器人操作中的延迟决策循环设计连续控制方案，直接推动多模态VLA发展。",
+        "relevance_score": 9,
+        "tags": [
+          "Robot Manipulation",
+          "Vision-Language",
+          "World Modeling",
+          "Robot Learning",
+          "Action Prediction"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.AI",
+        "cs.CV",
+        "cs.SD"
+      ],
+      "arxiv_id": "2603.16086",
+      "authors": [
+        "Chang Nie",
+        "Tianchen Deng",
+        "Guangming Wang",
+        "Zhe Liu",
+        "Hesheng Wang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-21T00:47:34.508451Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2603.16086/v2/fig1-panel1.jpg"
+            ],
+            "caption": "The HEAR framework for Vision-Sound-Language-Action (VSLA) manipulation. Scenarios: Sound-centric manipulation requires policies to use speech, trigger sounds, continuous process sounds, and interaction-generated sounds. Challenge: Extending VLA policies to VSLA introduces a timing bottleneck: transient acoustic cues can fall inside the Blind Execution Interval (BEI) created by system latency and open-loop action chunking. Solution: HEAR addresses this setting through causal audio memory ( Historizer ), omni-sensory reasoning ( Envisioner ), predictive audio dynamics ( Advancer ), and smooth flow-matching action generation ( Realizer ). Training & Evaluation: OpenX-Sound supports scalable robotics-specific pretraining, while HEAR-Bench and physical robot deployments provide sound-causal evaluation.",
+            "image_urls": [
+              "https://arxiv.org/html/2603.16086v2/images/headpic.jpg"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2603.16086v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2603.16086/v2/fig2-panel1.jpg"
+            ],
+            "caption": "The HEAR framework architecture. The Historizer processes audio packets with a Streaming Stateful Transformer that maintains a compact causal memory h t k h_{t_{k}} and bridges execution gaps, including the Blind Execution Interval induced by open-loop chunking. The Envisioner employs a hierarchical design. Its high-level omni-modal model integrates multimodal inputs, including vision, instruction, robot state, and audio context, and outputs a semantic latent z t k z_{t_{k}} and a key–value cache KV t k \\mathrm{KV}_{t_{k}} . It also predicts a text stage description y ^ t k json \\hat{y}^{\\text{json}}_{t_{k}} . Its low-level model reuses KV t k \\mathrm{KV}_{t_{k}} together with the current state and extracts a control feature u t k u_{t_{k}} . The Advancer is a decoder-only transformer that predicts a near-future audio code sequence 𝐳 t k → t k + 1 a \\mathbf{z}^{a}_{t_{k}\\rightarrow t_{k+1}} from z t k z_{t_{k}} during training. The Realizer synthesizes smooth action chunks via Conditional Flow Matching conditioned on u t k u_{t_{k}} .",
+            "image_urls": [
+              "https://arxiv.org/html/2603.16086v2/images/overview.jpg"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2603.16086v2#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2603.16086v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics",
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-21T00:47:34.508451Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-03-17T03:22:30Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2603.16086",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2603.16086",
+        "project_url": "https://hear.irmv.top/"
+      },
+      "title": "Towards the Vision-Sound-Language-Action Paradigm: The HEAR Framework for Sound-Centric Manipulation",
+      "title_zh": "迈向视觉-声音-语言-动作范式：面向声音中心操作的HEAR框架",
+      "updated_at": "2026-09-18T10:31:52Z",
+      "version": 2
     },
     {
       "abstract": "Tactile sensing is a crucial capability for Vision-Language-Action (VLA) architectures, as it enables dexterous and safe manipulation in contact-rich tasks. However, reliance on dedicated tactile hardware increases cost and reduces reproducibility across robotic platforms. We argue that tactile-aware manipulation can be learned offline and deployed without direct haptic feedback at inference. To this end, we present HapticVLA, which proceeds in two tightly coupled stages: Safety-Aware Reward-Weighted Flow Matching (SA-RWFM) and Tactile Distillation (TD). SA-RWFM trains a flow-matching action expert that incorporates precomputed, safety-aware tactile rewards penalizing excessive grasping force and suboptimal grasping trajectories. TD further transfers this tactile-aware capability into a conventional VLA: we distill a compact tactile token from the SA-RWFM teacher and train a student VLA to predict that token from vision and state modalities, enabling tactile-aware action generation at inference without requiring on-board tactile sensors. This design preserves contact-rich tactile-aware reasoning within VLA while removing the need for on-board tactile sensors during deployment. On real-world experiments, HapticVLA achieves a mean success rate of 86.7%, consistently outperforming baseline VLAs - including versions provided with direct tactile feedback during inference.",
@@ -1612,7 +1786,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2603.14254v2",
-        "recovery_checked_at": "2026-09-20T00:35:44.834747Z",
+        "recovery_checked_at": "2026-09-21T00:50:12.301284Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -1687,7 +1861,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2603.13966v3",
-        "recovery_checked_at": "2026-09-20T00:35:44.834747Z",
+        "recovery_checked_at": "2026-09-21T00:50:12.301284Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -1765,7 +1939,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2603.12665v4",
-        "recovery_checked_at": "2026-09-20T00:35:44.834747Z",
+        "recovery_checked_at": "2026-09-21T00:50:12.301284Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -1843,7 +2017,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2603.12665v3",
-        "recovery_checked_at": "2026-09-20T00:35:44.834747Z",
+        "recovery_checked_at": "2026-09-21T00:50:12.301284Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -2363,7 +2537,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2603.06084v2",
-        "recovery_checked_at": "2026-09-20T00:35:44.834747Z",
+        "recovery_checked_at": "2026-09-21T00:50:12.301284Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -2655,6 +2829,84 @@
       "version": 4
     },
     {
+      "abstract": "Achieving autonomous and versatile whole-body loco-manipulation remains a central barrier to making humanoids practically useful. Yet existing approaches are fundamentally constrained: retargeted data are often scarce or low-quality; methods struggle to scale to large skill repertoires; and, most importantly, they rely on tracking predefined motion references rather than generating behavior from perception and high-level task specifications. To address these limitations, we propose ULTRA, a unified framework with two key components. First, we introduce a physics-driven neural retargeting algorithm that translates large-scale motion capture to humanoid embodiments while preserving physical plausibility for contact-rich interactions. Second, we learn a unified multimodal controller that supports both dense references and sparse task specifications, under sensing ranging from accurate motion-capture state to noisy egocentric visual inputs. We distill a universal tracking policy into this controller, compress motor skills into a compact latent space, and apply reinforcement learning finetuning to expand coverage and improve robustness under out-of-distribution scenarios. This enables coordinated whole-body behavior from sparse intent without test-time reference motions. We evaluate ULTRA in simulation and on a real Unitree G1 humanoid. Results show that ULTRA generalizes to autonomous, goal-conditioned whole-body loco-manipulation from egocentric perception, consistently outperforming tracking-only baselines with limited skills.",
+      "analysis": {
+        "key_results": "在仿真和真实Unitree G1人形上评估，ULTRA能够从自我中心感知泛化到自主、目标条件的全身移动操作，并一致优于技能有限的仅跟踪基线。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出统一框架ULTRA，包含物理驱动的神经重定向算法和统一多模态控制器，能够从密集参考或稀疏任务规范以及不同传感输入中学习，无需测试时参考运动即可实现自主全身行为。",
+        "method": "物理驱动神经重定向将大规模动捕映射到人形本体；学习统一多模态控制器，支持密集参考与稀疏任务规范，接受精确动捕状态或嘈杂自我中心视觉输入；蒸馏通用跟踪策略，将运动技能压缩到紧凑潜在空间，并通过强化学习微调扩展覆盖范围与鲁棒性。",
+        "one_sentence_summary": "提出统一框架ULTRA，通过物理驱动的神经重定向和统一多模态控制器，使人形机器人从感知和高层任务出发实现自主全身移动操作。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "本文核心为视觉-语言-动作（VLA）策略学习在人形全身移动操作任务中的应用，通过多模态控制器从感知输入直接生成行为，属于机器人VLA与策略学习的直接相关研究。",
+        "relevance_score": 9,
+        "tags": [
+          "Action Prediction",
+          "Policy Learning",
+          "Robot Learning",
+          "Robot Manipulation",
+          "Simulation",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.CV"
+      ],
+      "arxiv_id": "2603.03279",
+      "authors": [
+        "Xialin He",
+        "Sirui Xu",
+        "Xinyao Li",
+        "Runpei Dong",
+        "Liuyu Bian",
+        "Yu-Xiong Wang",
+        "Liang-Yan Gui"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-21T00:47:34.508451Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2603.03279/v2/fig2-panel1.png"
+            ],
+            "caption": "ULTRA follows four stages: ( i ) Neural Retargeting: an RL policy converts MoCap data into physically feasible G1 rollouts with augmentation; ( ii ) Tracking: a privileged teacher tracks these rollouts using full state and references; ( iii ) Distillation: we distill the teacher into a multimodal student for realistic sensing and sparse goals, with additional RL finetuning; ( iv ) Deployment: the student runs under real sensing, supporting depth input or MoCap-based state estimation.",
+            "image_urls": [
+              "https://arxiv.org/html/2603.03279v2/method_new.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2603.03279v2#S2.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2603.03279v2",
+        "recovery_checked_at": "2026-09-21T00:50:12.301284Z",
+        "recovery_status": "not_found",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-21T00:47:34.508451Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-03-03T18:59:29Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2603.03279",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2603.03279",
+        "project_url": "https://ultra-humanoid.github.io/"
+      },
+      "title": "ULTRA: Unified Multimodal Control for Autonomous Humanoid Whole-Body Loco-Manipulation",
+      "title_zh": "ULTRA：面向自主人形全身移动操作的一体化多模态控制",
+      "updated_at": "2026-09-18T06:20:24Z",
+      "version": 2
+    },
+    {
       "abstract": "\\emph{Integrated communication and computation} (IC$^2$) has emerged as a new paradigm for enabling efficient edge inference in sixth-generation (6G) networks. However, the design of IC$^2$ technologies is hindered by the lack of a tractable theoretical framework for characterizing \\emph{end-to-end} (E2E) inference performance. The metric is highly complicated as it needs to account for both channel distortion and artificial intelligence (AI) model architecture and computational complexity. In this work, we address this challenge by developing a tractable analytical model for E2E inference accuracy and leveraging it to design a \\emph{channel-adaptive AI} algorithm that maximizes inference throughput, referred to as the edge processing rate (EPR), under latency and accuracy constraints. Specifically, we consider an edge inference system in which a server deploys a backbone model with early exit, which enables flexible computational complexity, to perform inference on data features transmitted by a mobile device. The proposed accuracy model characterizes high-dimensional feature distributions in the angular domain using a Mixture of von Mises (MvM) distribution. This leads to a desired closed-form expression for inference accuracy as a function of quantization bit-width and model traversal depth, which represents channel distortion and computational complexity, respectively. Building upon this accuracy model, we formulate and solve the EPR maximization problem under joint latency and accuracy constraints, leading to a channel-adaptive AI algorithm that achieves full IC$^2$ integration. The proposed algorithm jointly adapts transmit-side feature compression and receive-side model complexity according to channel conditions to maximize overall efficiency and inference throughput. Experimental results demonstrate its superior performance as compared with fixed-complexity counterparts.",
       "analysis": {
         "key_results": "实验结果表明所提算法优于固定复杂度方法。",
@@ -2827,20 +3079,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 34,
-    "completion_tokens": 0,
-    "error_categories": {},
-    "failed": 0,
-    "fetched": 352,
-    "figure_available": 29,
-    "figure_cache_hits": 31,
+    "cache_hits": 0,
+    "completion_tokens": 12050,
+    "error_categories": {
+      "ValidationError": 2
+    },
+    "failed": 2,
+    "fetched": 288,
+    "figure_available": 27,
+    "figure_cache_hits": 0,
     "figure_failed": 0,
-    "figure_requests": 0,
-    "figure_unavailable": 2,
-    "model_calls": 0,
-    "prefiltered": 34,
-    "prompt_tokens": 0,
-    "published": 31,
-    "total_tokens": 0
+    "figure_requests": 33,
+    "figure_unavailable": 6,
+    "model_calls": 39,
+    "prefiltered": 39,
+    "prompt_tokens": 32919,
+    "published": 33,
+    "total_tokens": 44969
   }
 }
