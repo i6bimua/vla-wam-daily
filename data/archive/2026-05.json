@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-21T00:47:34.508451Z",
+  "generated_at": "2026-09-21T09:45:10.635831Z",
   "papers": [
     {
       "abstract": "Behavior cloning with high-capacity generative policies achieves strong imitation performance, but is often limited by demonstration coverage and distribution shift. Direct reinforcement learning fine-tuning can improve performance, but updating large action decoders is frequently unstable and sample inefficient. We propose Lagrangian Perturbation Diffusion Steering (LP-DS), a lightweight adaptation method that improves a frozen generative policy by learning a compact noise-space perturbation before decoding. LP-DS optimizes this perturbation with a Lagrangian trust-region objective, improving downstream value while constraining deviation from the latent prior. Across RoboMimic manipulation, OpenAI Gym locomotion, and Adroit dexterous manipulation benchmarks, LP-DS improves sample efficiency, success, and return while maintaining higher action-space entropy than unconstrained noise-space steering, with return improvements of up to 25% over prior baselines. Additional evaluations with flow-matching backbones, a large vision-language-action model, and physical Franka deployment show that LP-DS is not limited to compact diffusion policies or simulated benchmarks. Project page: https://sites.google.com/view/lp-ds/home.",
@@ -1226,6 +1226,86 @@
       "version": 2
     },
     {
+      "abstract": "Speculative decoding accelerates large language model inference by pairing a target model with a lightweight draft model whose proposed tokens are verified in parallel. A common way to build draft models, like EAGLE3 or DFlash is supervised fine-tuning (SFT) on target-generated trajectories. However, we observe that SFT quickly plateaus: the draft model's acceptance length on test data stops improving. The reason is an offline-to-inference mismatch: In SFT, the drafter learns from fixed target-generated trajectories, whereas during speculative decoding it is evaluated on blocks proposed under its own policy. This motivates on-policy distillation (OPD), where the target model supervises the drafter on draft-induced states. Yet OPD remains difficult for draft models, as they cannot reliably roll out complete sequences independently, whereas target-assisted generation makes the collected sequences follow the target distribution and thus eliminates the on-policy signal. We therefore propose Draft-OPD, which uses target-assisted rollout for stable continuations and replays drafting from the verification-exposed error positions. This allows the drafter to learn from target feedback on both accepted and rejected proposals, focusing training on the draft-induced errors that limit speculative acceptance. Experiments show that Draft-OPD achieves over $5\\times$ lossless acceleration for thinking models across diverse tasks, improving over EAGLE-3 and DFlash by 23\\% and 13\\%.",
+      "analysis": {
+        "key_results": "在多种任务上，Draft-OPD 对思考模型实现超过 5 倍的无损加速，比 EAGLE-3 和 DFlash 分别提高 23% 和 13%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出 Draft-OPD 方法，解决草稿模型离线监督微调与推理不匹配的问题，通过目标辅助回滚和错误位置重放，使草稿模型能从接受和拒绝的提议中学习。",
+        "method": "Draft-OPD 使用目标模型辅助生成稳定延续，并在验证暴露的错误位置重放草稿过程，实现在线策略蒸馏。",
+        "one_sentence_summary": "针对投机解码中草稿模型监督微调效果停滞的问题，提出在线策略蒸馏方法 Draft-OPD，通过目标辅助回放暴露的错误位置来训练草稿模型，实现超过 5 倍的无损加速。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "本文专注于大规模语言模型的投机解码加速，未涉及 VLA、WAM 或机器人动作-世界建模，与本站主题无直接关系，但作为高效推理技术对未来的 VLA 推理优化可能有借鉴意义。",
+        "relevance_score": 8,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CL"
+      ],
+      "arxiv_id": "2605.29343",
+      "authors": [
+        "Haodi Lei",
+        "Yafu Li",
+        "Haoran Zhang",
+        "Shunkai Zhang",
+        "Qianjia Cheng",
+        "Xiaoye Qu",
+        "Ganqu Cui",
+        "Bowen Zhou",
+        "Ning Ding",
+        "Yun Luo",
+        "Yu Cheng"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-21T09:45:10.635831Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2605.29343/v3/fig2-panel1.png"
+            ],
+            "caption": "Why direct OPD is unsuitable for draft models. (a) Trajectories from draft model are repetitive. (b) Naive target-assisted rollout makes the sequence follow target distribution, losing informative errors from rejected tokens.",
+            "image_urls": [
+              "https://arxiv.org/html/2605.29343v3/main-1.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.29343v3#S4.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2605.29343v3",
+        "recovery_checked_at": "2026-09-21T09:47:14.882067Z",
+        "recovery_status": "not_found",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:speculative-decoding",
+        "exact:assisted-generation",
+        "composite:speculative_generation",
+        "composite:draft_verification_decoding"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-21T09:45:10.635831Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-05-28T04:30:22Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2605.29343",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2605.29343",
+        "project_url": null
+      },
+      "title": "Draft-OPD: On-Policy Distillation for Speculative Draft Models",
+      "title_zh": "Draft-OPD：面向投机草稿模型的在线策略蒸馏",
+      "updated_at": "2026-09-18T14:49:06Z",
+      "version": 3
+    },
+    {
       "abstract": "The NVIDIA Blackwell Ultra (B300) GPU cuts FP64 vector throughput $\\sim 30\\times$ while multiplying FP8 tensor throughput. After the recovery of FP64 GEMM via Ozaki Scheme II on FP8 tensor cores and the Tensor-Memory Equilibrium model of the companions (\"FP8 is All You Need, Part 1\" and \"Ozaki 2.5\") we ask whether the fifth canonical HPC primitive, the full-FP64 $1024^3$ 3-D FFT, can be carried by the same substrate, and answer with a design and its limit. It is a Bailey six-step transform with no FP64 arithmetic: FP8-tensor DFT GEMMs with fused twiddles, residue-domain Karatsuba combines and exact CRT reconstruction whose bulk is a small GEMM on the FP16 tensor path and whose remainder is a Kulisch fixed-point accumulation with a two-sided modulo-$M$ lift, so the only rounding is the final conversion; constants are machine-generated and verified bit-exactly. The central finding: the binding resource is not floating point but a per-output integer epilogue with floor $(c_{\\rm epi}/8),B_{\\rm mem}$, $c_{\\rm epi} \\approx 203$-$281$ instructions per output: on B300 it holds the transform at 63-87 ms against a 12.9 ms roof ($4.9$-$6.7\\times$ short); at most $1.3$-$1.9\\times$ faster than the collapsed native path, possibly no faster at realised issue rates; no software route reaches the roof; on the NVIDIA Rubin GPU emulation loses $8$-$11\\times$. An FP32 variant meets the same wall: the cause is per-scalar reconstruction, not FP64. Each floor term names its remedy: the NVIDIA B200 GPU's INT8 tensor core restored with a position-weighted cross-column accumulation primitive, a load-path deconstruction datapath shared with the companions, two ISA idioms and modular reduction at the MMA output give 16.0-23.5 ms with minor hardware and 12.9-15.0 ms with one moderate ask. All figures are projected floors, not measurements, with sensitivities and the FP8 layout condition given.",
       "analysis": {
         "key_results": "该变换在 B300 上预计耗时 63-87 ms，而理论峰值需 12.9 ms（相差 4.9-6.7 倍）；仅比原生路径快 1.3-1.9 倍，实际可能无加速；软件手段无法达到理论峰值；在 Rubin GPU 模拟上性能损失 8-11 倍。",
@@ -1538,7 +1618,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2605.28760v2",
-        "recovery_checked_at": "2026-09-21T00:50:12.301284Z",
+        "recovery_checked_at": "2026-09-21T09:47:14.882067Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -2329,7 +2409,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2605.22164v2",
-        "recovery_checked_at": "2026-09-21T00:50:12.301284Z",
+        "recovery_checked_at": "2026-09-21T09:47:14.882067Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -4322,22 +4402,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 0,
-    "completion_tokens": 12050,
+    "cache_hits": 2,
+    "completion_tokens": 7791,
     "error_categories": {
       "ValidationError": 2
     },
     "failed": 2,
-    "fetched": 288,
-    "figure_available": 27,
-    "figure_cache_hits": 0,
+    "fetched": 268,
+    "figure_available": 23,
+    "figure_cache_hits": 2,
     "figure_failed": 0,
-    "figure_requests": 33,
-    "figure_unavailable": 6,
-    "model_calls": 39,
-    "prefiltered": 39,
-    "prompt_tokens": 32919,
-    "published": 33,
-    "total_tokens": 44969
+    "figure_requests": 23,
+    "figure_unavailable": 2,
+    "model_calls": 26,
+    "prefiltered": 28,
+    "prompt_tokens": 21338,
+    "published": 25,
+    "total_tokens": 29129
   }
 }
