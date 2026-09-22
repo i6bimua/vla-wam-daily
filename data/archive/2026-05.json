@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-22T01:24:11.155516Z",
+  "generated_at": "2026-09-22T09:09:35.665530Z",
   "papers": [
     {
       "abstract": "Behavior cloning with high-capacity generative policies achieves strong imitation performance, but is often limited by demonstration coverage and distribution shift. Direct reinforcement learning fine-tuning can improve performance, but updating large action decoders is frequently unstable and sample inefficient. We propose Lagrangian Perturbation Diffusion Steering (LP-DS), a lightweight adaptation method that improves a frozen generative policy by learning a compact noise-space perturbation before decoding. LP-DS optimizes this perturbation with a Lagrangian trust-region objective, improving downstream value while constraining deviation from the latent prior. Across RoboMimic manipulation, OpenAI Gym locomotion, and Adroit dexterous manipulation benchmarks, LP-DS improves sample efficiency, success, and return while maintaining higher action-space entropy than unconstrained noise-space steering, with return improvements of up to 25% over prior baselines. Additional evaluations with flow-matching backbones, a large vision-language-action model, and physical Franka deployment show that LP-DS is not limited to compact diffusion policies or simulated benchmarks. Project page: https://sites.google.com/view/lp-ds/home.",
@@ -1618,7 +1618,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2605.28760v2",
-        "recovery_checked_at": "2026-09-22T01:28:47.909524Z",
+        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -2473,7 +2473,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2605.22164v2",
-        "recovery_checked_at": "2026-09-22T01:28:47.909524Z",
+        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -3557,6 +3557,91 @@
       "version": 2
     },
     {
+      "abstract": "Offline-to-online reinforcement learning (RL) improves sample efficiency by leveraging pre-collected datasets prior to online interaction. A key challenge, however, is learning an accurate critic in large state--action spaces with limited dataset coverage. To mitigate harmful updates from value overestimation, prior methods impose pessimism by down-weighting out-of-distribution (OOD) actions relative to dataset actions. While effective, this essentially acts as a behavior cloning anchor and can hinder downstream online policy improvement when dataset actions are suboptimal. We propose RankQ, an offline-to-online Q-learning objective that augments temporal-difference learning with a self-supervised multi-term ranking loss to enforce structured action ordering. By learning relative action preferences rather than uniformly penalizing unseen actions, RankQ shapes the Q-function such that action gradients are directed toward higher-quality behaviors. Across sparse-reward D4RL benchmarks, RankQ achieves competitive overall performance against seven baselines. In vision-based robot learning, RankQ enables effective offline-to-online fine-tuning of a pretrained vision-language-action (VLA) model in a low-data regime, achieving an average simulation success rate 38.2 percentage points higher than the next best method. In a high-data setting, RankQ improves simulation performance by 13.7 percentage points over the next best method and demonstrates strong sim-to-real transfer, increasing real-world cube stacking success from 43.1% to 88.9% relative to the VLA's initial performance.",
+      "analysis": {
+        "key_results": "在稀疏奖励D4RL基准上，RankQ与七个基线相比总体性能具有竞争力；在低数据视觉机器人学习中，RankQ对预训练VLA模型进行离线到在线微调，平均模拟成功率比次优方法高38.2个百分点；在高数据设置下，比次优方法高13.7个百分点，并在真实世界中将从43.1%提升至88.9%的立方体堆叠成功率。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出RankQ目标，通过自监督多任务排序损失增强时序差分学习，以结构化动作排序改善Q函数，并在离线到在线强化学习中提高样本效率和策略性能。",
+        "method": "在TD学习基础上增加自监督多任务排序损失，学习相对动作偏好而非惩罚OOD动作，从而引导动作梯度朝向高质量行为。",
+        "one_sentence_summary": "RankQ通过自监督动作排序损失改进离线到在线强化学习，并在视觉-语言-动作（VLA）模型的机器人学习微调中取得显著提升。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "RankQ直接用于微调预训练视觉-语言-动作（VLA）模型，在模拟和真实机器人任务中显著提升性能，表明其对VLA策略学习具有重要价值；虽然方法并非专门针对世界模型（WAM），但其在机器人学习中的离线到在线微调与VLA的适应密切相关。",
+        "relevance_score": 9,
+        "tags": [
+          "Policy Learning",
+          "Robot Learning",
+          "Generalist Robotics",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.AI",
+        "cs.RO"
+      ],
+      "arxiv_id": "2605.11151",
+      "authors": [
+        "Andrew Choi",
+        "Wei Xu"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-22T09:09:35.665530Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2605.11151/v3/fig1-panel1.png"
+            ],
+            "caption": "Toy example visualizing the Q-landscape for a fixed state s s and 2D action space ( a 0 , a 1 ) ∈ 𝒜 (a_{0},a_{1})\\in\\mathcal{A} under different critic objectives after offline training. The first row shows the 3D Q-manifold; the second row shows a 2D projection with eight sampled actions and their gradient ascent trajectories; and the third row shows ∂ Q / ∂ a \\partial Q/\\partial a magnitudes. By explicitly shaping the Q-landscape, RankQ enables the largest number of trajectories to converge toward the optimal action region.",
+            "image_urls": [
+              "https://arxiv.org/html/2605.11151v3/images/toy_example.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.11151v3#S2.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2605.11151/v3/fig2-panel1.png"
+            ],
+            "caption": "Success rate and average trajectory length results for the D4RL antmaze and adroit environments 2 2 2 Some results do not match those reported in [ 22 ] . Refer to Sec. B for details. . Curves start after offline RL training has concluded. Each algorithm is reported across 3 random seeds. Note that the average trajectory length metric is failure-inclusive.",
+            "image_urls": [
+              "https://arxiv.org/html/2605.11151v3/images/d4rl_results.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.11151v3#S4.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2605.11151v3",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-22T09:09:35.665530Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-05-11T18:58:49Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2605.11151",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2605.11151",
+        "project_url": "https://horizonrobotics.github.io/gail/projects/rankq/"
+      },
+      "title": "RankQ: Offline-to-Online Reinforcement Learning via Self-Supervised Action Ranking",
+      "title_zh": "RankQ：通过自监督动作排序实现离线到在线强化学习",
+      "updated_at": "2026-09-21T17:22:28Z",
+      "version": 3
+    },
+    {
       "abstract": "Existing imitation learning methods enable robots to interact autonomously with the physical environment. However, contact-rich manipulation tasks remain a significant challenge due to complex contact dynamics that demand high-precision force feedback and control. Although recent efforts have attempted to integrate force/torque sensing into policies, how to build a simple yet effective framework that achieves robust generalization under multimodal observations remains an open question. In this paper, we propose ForceFlow, a force-aware reactive framework built upon flow matching. For contact-stage policy design, we investigate force signal fusion mechanisms and adopt an asymmetric multimodal fusion architecture that treats force as a global regulatory signal, combined with a joint prediction paradigm that enhances the policy's understanding of instantaneous force and historical information, thereby achieving deep coupling between force and motion. For task-level hierarchical decomposition, we divide manipulation into a vision-dominant approach stage (VLM-based pointing for target localization) and a touch-dominant interaction stage (force-driven contact execution), with a Vision-to-Force (V2F) handover mechanism that explicitly decouples spatial generalization from contact regulation. Experimental results across six real-world contact-rich tasks demonstrate that ForceFlow achieves a 37% success rate improvement over the strong baseline ForceVLA while maintaining significantly lower cost. Moreover, ForceFlow exhibits accurate force signal prediction and demonstrates superior performance in contact force self-regulation and zero-shot out-of-distribution (OOD) generalization.",
       "analysis": {
         "key_results": "在六项真实世界接触丰富任务中，成功率比ForceVLA基线提高37%，同时成本更低，并表现出准确的力信号预测、接触力自调节和零样本OOD泛化能力。",
@@ -4182,6 +4267,89 @@
       "version": 2
     },
     {
+      "abstract": "Hard thresholds, quantization, and discrete routing can produce training losses with flat regions and jumps, where ordinary gradients vanish or are undefined. We introduce PolyStep, a forward-only optimizer that evaluates rotated polytope probes and moves parameter blocks along weighted averages of the probe directions. We derive the weights from one-sided entropic transport and use its uncoupled softmax solution in our primary experiments. Our analysis explains when variation among probe costs produces motion and when that motion decreases the loss. On a regular simplex, nonconstant costs always give a nonzero direction. For monotone ridge losses, the softmax update cannot increase the loss at any positive temperature; a perturbation bound gives sufficient conditions for descent near curved jumps. For bounded measurable losses, we randomize the probe radii and identify an exact smoothing whose gradient equals the expected linear cost-weighted direction up to scale. This identity yields a stationarity bound for an idealized fixed-temperature variant: under regularity and sampling assumptions stronger than those met by our trained configurations, the bound has an $O(T^{-1/2})$ term and a persistent bias floor. We evaluate the practical method on networks with hard operations, discrete optimization, and policy search. On MNIST with hard-threshold spiking neurons, PolyStep reaches $93.0 \\pm 0.2\\%$, compared with $79.6 \\pm 5.2\\%$ for the best-tuned gradient-free baseline at matched evaluations. These gains come with a query cost proportional to the search dimension per fresh step, which limits the number of updates available at a fixed budget.",
+      "analysis": {
+        "key_results": "在MNIST硬阈值脉冲神经元上达到93.0 ± 0.2%，对比最佳调优的无梯度基线79.6 ± 5.2%在匹配评估次数下；查询成本与搜索维度成正比，限制了固定预算下的更新数。",
+        "limitations": "查询成本与搜索维度成正比，限制了固定预算下的更新数。",
+        "main_contribution": "提出PolyStep：一种前向-only的优化器，通过旋转多面体探针和单向熵最优传输来计算参数更新方向，可用于训练具有硬阈值、量化等不可微操作的网络。",
+        "method": "评估旋转多面体探针，沿探针方向的加权平均移动参数块；权重由单向熵最优传输及其非耦合softmax解推导。",
+        "one_sentence_summary": "本文提出一种前向-only的优化器PolyStep，通过旋转多面体探针和单向熵最优传输来训练具有硬阈值、量化等不可微操作的网络。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "本文提出一种通用的不可微网络训练优化器，涉及量化但未针对VLA或机器人世界模型；其方法可潜在地用于训练带有硬阈值或量化操作的机器人策略网络，但无直接实验。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Model Quantization"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.NE",
+        "cs.RO",
+        "math.OC"
+      ],
+      "arxiv_id": "2605.01928",
+      "authors": [
+        "An T. Le"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-22T09:09:35.665530Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2605.01928/v3/fig1-panel1.png"
+            ],
+            "caption": "One PolyStep step without jitter. Top: subspace coordinates are divided into blocks, probed along rotated vertex directions, and updated by weighted barycenters. The displayed assignment is row softmax ( λ = 0 \\lambda=0 ), with probe fractions ξ k = k / ( K + 1 ) \\xi_{k}=k/(K+1) . Primes denote the updated variables. Bottom left: three block views superimposed schematically; diamonds are step vertices and open circles are barycentric updates. Shading and arrow widths are illustrative. Bottom right: a schematic column-penalty continuum. At fixed costs and temperature, KL ( q λ ∥ b ) \\mathrm{KL}(q_{\\lambda}\\|b) is nonincreasing and tends to zero (Theorem A.1 ).",
+            "image_urls": [
+              "https://arxiv.org/html/2605.01928v3/method_diagram_full.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.01928v3#S3.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2605.01928/v3/fig2-panel1.png"
+            ],
+            "caption": "Hard-LIF SNN on MNIST (five seeds, mean sample std). (a) Test accuracy at the validation- ± selected checkpoint; dots show individual seeds and labels give evaluation budgets. Adam† trains a smooth forward relaxation. (b,c) Logged validation accuracy for all seven gradient-free methods against optimizer updates and candidate evaluations. Curves linearly interpolate logs within the five seeds’ shared support.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2605.01928v3"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2605.01928v3",
+        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-22T09:09:35.665530Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-05-03T15:20:56Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2605.01928",
+        "code_url": "https://github.com/anindex/polystep",
+        "pdf_url": "https://arxiv.org/pdf/2605.01928",
+        "project_url": null
+      },
+      "title": "Training Non-Differentiable Networks via Optimal Transport",
+      "title_zh": "通过最优传输训练不可微网络",
+      "updated_at": "2026-09-21T15:54:02Z",
+      "version": 3
+    },
+    {
       "abstract": "We present TT4D, a large-scale, high-fidelity table tennis dataset. It provides $140+$ hours of reconstructed singles and doubles gameplay from monocular broadcast videos, featuring multimodal annotations like high-quality camera calibrations, precise 3D ball positions, ball spin, time segmentation, and 3D human meshes over time. This rich data provides a new foundation for virtual replay, in-depth player analysis, and robot learning. The dataset's combination of scale and precision is achieved through a novel reconstruction pipeline. Prior methods first partition a game sequence into individual shot segments based on the 2D ball track, and only then attempt reconstruction. However, 2D-based time segmentation collapses under occlusion and varied camera viewpoints, preventing reliable reconstruction. We invert this paradigm by first lifting the entire unsegmented 2D ball track to 3D through a learned lifting network. This 3D trajectory then allows us to reliably perform time segmentation. The learned lifting network also infers the ball's spin, handles unreliable ball detections, and successfully reconstructs the ball trajectory in cases of high occlusion. This lift-first design is necessary, as our pipeline is the only method capable of reconstructing table tennis gameplay from general-view broadcast monocular videos. We demonstrate the dataset's fidelity through two downstream tasks: estimating the racket's pose \\& velocity at impact, and training a generative model of competitive rallies.",
       "analysis": {
         "key_results": "该流程是唯一能从普通视角单目广播视频重建乒乓球比赛的方法；数据集质量通过两个下游任务验证：估计球拍在击球瞬间的位姿与速度，以及训练对抗回合的生成模型。",
@@ -4466,22 +4634,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 0,
-    "completion_tokens": 20142,
+    "cache_hits": 45,
+    "completion_tokens": 24824,
     "error_categories": {
-      "ValidationError": 5
+      "ValidationError": 7
     },
-    "failed": 5,
-    "fetched": 602,
-    "figure_available": 48,
-    "figure_cache_hits": 0,
+    "failed": 7,
+    "fetched": 1186,
+    "figure_available": 92,
+    "figure_cache_hits": 43,
     "figure_failed": 0,
-    "figure_requests": 57,
-    "figure_unavailable": 9,
-    "model_calls": 65,
-    "prefiltered": 65,
-    "prompt_tokens": 52538,
-    "published": 57,
-    "total_tokens": 72680
+    "figure_requests": 66,
+    "figure_unavailable": 17,
+    "model_calls": 80,
+    "prefiltered": 125,
+    "prompt_tokens": 65319,
+    "published": 109,
+    "total_tokens": 90143
   }
 }

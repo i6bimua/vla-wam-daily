@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-18T08:53:02.586894Z",
+  "generated_at": "2026-09-22T09:09:35.665530Z",
   "papers": [
     {
       "abstract": "Test-time scaling strategies for Large Language Models predominantly rely on either reinforcement learning with sparse outcome rewards or search-based methods guided by static Process Reward Models. However, outcome-based RL often suffers from training instability and sample inefficiency, while static PRMs require expensive step-wise supervision and are susceptible to reward hacking due to distributional shifts. In this paper, we introduce AIRL-S, a unified framework that integrates Adversarial Inverse Reinforcement Learning with Group Relative Policy Optimization. By inferring a dense, step-wise reward model directly from reference trajectories, AIRL-S eliminates the dependency on labeled process data and uses the same learned PRM as both a training signal and a verifier for search-based TTS. Extensive evaluations across eight benchmarks in mathematics, science, and code generation demonstrate that our policy model improves average performance by 9\\% over the base model, matching GPT-4o. We further analyze how the AIRL and GRPO objectives complement each other and how the learned PRM transfers across generators and search algorithms, establishing a robust and cost-effective methodology for scaling test-time computation in complex reasoning tasks.",
@@ -603,6 +603,95 @@
       "version": 2
     },
     {
+      "abstract": "Large language models (LLMs) have demonstrated remarkable capabilities across diverse language tasks, motivating their extension to vision-language models (VLMs) for multimodal understanding. However, billion-parameter VLMs incur substantial memory and computational costs that hinder deployment in resource-constrained settings. Post-training quantization (PTQ) compresses models and accelerates inference without retraining, yet remains underexplored for VLMs. We identify two intrinsic VLM activation properties in PTQ: (1) visual over-representation, where vision tokens are excessive and often redundant, and (2) the modality gap separating text and vision tokens in the latent feature space. Prior methods largely overlook these properties, leading to quantization performance degradation. To address this mismatch, we propose SalQ-VLM, an importance-aware PTQ framework that prioritizes salient tokens and suppresses redundant vision tokens during calibration. We derive a gradient-driven importance factor that captures token-level importance variance and is theoretically grounded in the relationship among loss perturbation, activation errors, and output gradients. SalQ-VLM obtains this factor through a single lightweight block-wise gradient-caching pass and incorporates it into the layer-wise reconstruction objective. Because SalQ-VLM modifies only calibration, it adds no inference-time operations and remains compatible with existing high-performance kernels. Extensive evaluations across benchmarks and backbones show that SalQ-VLM consistently outperforms strong PTQ baselines, especially under ultra-low-bit quantization. Notably, it improves MME-RealWorld accuracy by 16.45% under INT2g128 quantization.",
+      "analysis": {
+        "key_results": "在多个基准和骨干网络上，SalQ-VLM一致优于强PTQ基线，尤其在超低比特量化下；在INT2g128量化下，MME-RealWorld准确率提升16.45%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出SalQ-VLM，一种重要性感知的后训练量化框架，利用梯度驱动的重要性因子在标定过程中区分token重要性，从而改善视觉语言模型的低比特量化效果。",
+        "method": "通过块级梯度缓存计算梯度驱动的重要性因子，并将其集成到逐层重构目标中；该方法仅修改标定过程，不增加推理时操作。",
+        "one_sentence_summary": "SalQ-VLM是一种重要性感知的视觉语言模型后训练量化框架，通过突出显著token和抑制冗余视觉token来提升量化性能。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文以视觉语言模型的量化压缩为独立主题，不直接涉及机器人学中的VLA（视觉-语言-动作）或世界模型（WAM）。但其提出的重要性感知量化方法及视觉token冗余抑制机制，对资源受限场景下的多模态模型部署具有潜在借鉴价值。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Model Quantization",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.AI",
+        "cs.CL"
+      ],
+      "arxiv_id": "2508.03351",
+      "authors": [
+        "Yufei Xue",
+        "Yushi Huang",
+        "Lunjie Zhu",
+        "Jiawei Shao",
+        "Jun Zhang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-22T09:09:35.665530Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2508.03351/v3/fig1-panel1.png"
+            ],
+            "caption": "Token-level importance and PCA-distribution ( Shlens, 2014 ) . The plotted tokens are activations from the query projection of the 20-th layer in Qwen2-VL-7B-Instruct.",
+            "image_urls": [
+              "https://arxiv.org/html/2508.03351v3/teaser.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2508.03351v3#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2508.03351/v3/fig2-panel1.png"
+            ],
+            "caption": "Visualization of normalized token-wise output-error and gradient magnitudes. The red circle indicates salient vision tokens. Output-error magnitudes remain relatively stable across tokens, whereas gradient magnitudes vary substantially across tokens and modalities.",
+            "image_urls": [
+              "https://arxiv.org/html/2508.03351v3/err_grad_comparison.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2508.03351v3#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2508.03351v3",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:post-training-quantization",
+        "exact:low-bit-quantization",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-22T09:09:35.665530Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2025-08-05T11:57:03Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2508.03351",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2508.03351",
+        "project_url": null
+      },
+      "title": "SalQ-VLM: Fine-Grained Saliency-Guided Quantization for Vision-Language Models",
+      "title_zh": "SalQ-VLM：面向视觉语言模型的细粒度显著性引导量化",
+      "updated_at": "2026-09-21T07:47:27Z",
+      "version": 3
+    },
+    {
       "abstract": "Large language models represent significant investments in computation, data, and engineering expertise, making them extraordinarily valuable intellectual assets. Nevertheless, these AI assets remain vulnerable to unauthorized redistribution and commercial exploitation through fine-tuning or black-box deployment. Current fingerprinting approaches face a fundamental trade-off: intrinsic methods require full parameter access, while backdoor-based techniques employ statistically anomalous triggers easily detected and filtered by adversaries. To address these limitations, we introduce FPEdit, a novel framework that leverages knowledge editing to inject semantically coherent natural language fingerprints through sparse, targeted modifications to model weights. Our approach introduces Promote-Suppress Value Vector Optimization, which simultaneously enhances target token likelihood while suppressing competing tokens, ensuring robust fingerprint integration without degrading core model functionality. Extensive experiments show that FPEdit achieves 94-100% fingerprint retention under both full-parameter fine-tuning and parameter-efficient adaptation, while preserving performance on downstream benchmarks. Moreover, FPEdit remains robust under quantization, pruning, and stochastic decoding, and can embed 10 fingerprint pairs into LLaMA2-7B in under 2 minutes using less than 30 GB of GPU memory, which represents a substantial reduction in resource requirements. These advances establish FPEdit as the first fingerprinting approach to simultaneously achieve robustness against adaptation, resistance to detection, and preservation of model utility, thereby providing a minimally invasive solution for reliable provenance verification of large language models in adversarial deployment scenarios.",
       "analysis": {
         "key_results": "在完全微调和参数高效适配下保持94-100%指纹保留率；对量化、剪枝、随机解码鲁棒；可在2分钟内用<30GB GPU内存向LLaMA2-7B嵌入10对指纹。",
@@ -689,22 +778,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 148,
-    "completion_tokens": 8111,
+    "cache_hits": 45,
+    "completion_tokens": 24824,
     "error_categories": {
-      "ValidationError": 1
+      "ValidationError": 7
     },
-    "failed": 1,
-    "fetched": 1812,
-    "figure_available": 148,
-    "figure_cache_hits": 134,
+    "failed": 7,
+    "fetched": 1186,
+    "figure_available": 92,
+    "figure_cache_hits": 43,
     "figure_failed": 0,
-    "figure_requests": 25,
-    "figure_unavailable": 11,
-    "model_calls": 25,
-    "prefiltered": 173,
-    "prompt_tokens": 21100,
-    "published": 159,
-    "total_tokens": 29211
+    "figure_requests": 66,
+    "figure_unavailable": 17,
+    "model_calls": 80,
+    "prefiltered": 125,
+    "prompt_tokens": 65319,
+    "published": 109,
+    "total_tokens": 90143
   }
 }
