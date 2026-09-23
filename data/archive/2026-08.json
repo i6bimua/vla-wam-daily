@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-22T09:09:35.665530Z",
+  "generated_at": "2026-09-23T01:11:22.968019Z",
   "papers": [
     {
       "abstract": "Large language models (LLMs) are being used as policies for autonomous decision-making and planning in many domains. Despite their strong reasoning capabilities, LLMs struggle with long-horizon tasks, especially under partial observability. World models are a promising way to enhance policy performance, both during training and inference. During inference, agents currently use world models to simulate the consequences of candidate actions before committing to an action, which can improve decision-making. However, we argue that simulation alone is an incomplete interface for decision-making under partial observability: simulation doesn't adequately capture uncertainty about the current state, which agents may need for accurate decision-making. We address this limitation with Belief-Based World Models (BB-WMs), which model and maintain a belief that LLMs can query to access information on what is known and uncertain about the current state. Before developing methods to learn accurate BB-WMs, we first ask a more fundamental question: does exposing a world model's belief directly to an LLM policy improve decision-making? Our results show that giving LLM agents access to world model beliefs improves task performance under partial observability, while remaining complementary to existing simulation-based world models. Code is released at https://github.com/skumar-ml/belief-world-models.",
@@ -99,6 +99,84 @@
       "version": 1
     },
     {
+      "abstract": "Block Quantization (BQ) enables efficient LLM inference by quantizing both weights and activations, but its design space remains underexplored. Through hardware-accuracy design space exploration, we identify block size as a key trade-off: larger blocks improve hardware efficiency by amortizing dequantization and accumulation costs, but degrade accuracy. Motivated by this insight, we propose Hierarchical Block Quantization (HBQ), which combines large blocks with low-overhead significand (SIG) scaling for second-level quantization. SIG scaling effectively compensates for large-block quantization errors while accounting for distinct weight and activation distributions. HBQ-A achieves W4A16-level accuracy with W4A5 and lower area than NVFP4, while HBQ-E further reduces hardware cost by 17% while outperforming existing BQ methods in accuracy. We implement HBQ for weights, activations, and KV cache in a 28nm ASIC accelerator and introduce partial-sum BQ to reduce EMA energy. At comparable accuracy, HBQ achieves 2.3x/4.6x higher area/energy efficiency than state-of-the-art weight-only quantization and 1.6-3.3x lower system energy with 1.5-3x speedup over prior BQ methods. Our implementation is publicly available at: https://github.com/SeoLabCornell/HBQ.git.",
+      "analysis": {
+        "key_results": "HBQ-A在W4A5配置下实现W4A16级精度，面积低于NVFP4；HBQ-E硬件成本降低17%且精度优于现有BQ方法；在相当精度下，HBQ的面积/能效比state-of-the-art仅权重量化高2.3x/4.6x；相比此前BQ方法，系统能量降低1.6-3.3x，速度提升1.5-3x。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出HBQ，结合大块与低开销尾数缩放实现二级量化，在达到W4A16级精度下仅需W4A5，且硬件成本低于NVFP4。",
+        "method": "分层块量化（HBQ）：大块量化配合尾数（SIG）缩放；HBQ-A用于权重和激活，HBQ-E进一步降低硬件成本；并实现权重、激活和KV缓存的块量化，加入部分和BQ以降低EMA能量。",
+        "one_sentence_summary": "提出分层块量化（HBQ）方法，通过二级缩放补偿大块量化误差，在保持精度同时提升硬件效率，并在ASIC加速器上验证了能效优势。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "不直接涉及VLA或WAM；但提出的量化方法可应用于多种模型，包括潜在机器人策略模型，从而为VLA/WAM的硬件高效推理提供技术基础。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Model Quantization"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.AR"
+      ],
+      "arxiv_id": "2609.00450",
+      "authors": [
+        "Chun-Ting Chen",
+        "Dongmin Han",
+        "Hangyeol Mun",
+        "Jake Hyun",
+        "Arnab Raha",
+        "Amit Agarwal",
+        "Mark Anders",
+        "Mohamed Abdelfattah",
+        "Jae-sun Seo"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-23T01:11:22.968019Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2609.00450/v2/fig1-panel1.png"
+            ],
+            "caption": "LLM inference accuracy-efficiency trade-off for WoQ, BQ, and HBQ. W4A16-level accuracy using only a W4A5 setting while requiring",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2609.00450v2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2609.00450v2",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:weight-only-quantization",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-23T01:11:22.968019Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-08-31T22:39:52Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.00450",
+        "code_url": "https://github.com/SeoLabCornell/HBQ.git",
+        "pdf_url": "https://arxiv.org/pdf/2609.00450",
+        "project_url": null
+      },
+      "title": "HBQ: Hierarchical Scaling Block Quantization with Hardware-Efficiency-Aware Design for Accurate LLM Inference",
+      "title_zh": "HBQ：面向精确LLM推理的硬件效率感知分层缩放块量化",
+      "updated_at": "2026-09-21T18:52:07Z",
+      "version": 2
+    },
+    {
       "abstract": "Block Quantization (BQ) is a promising approach for efficient deployment of large language models (LLMs), enabling low-precision computation with controlled accuracy degradation. Compared to scalar weight-only quantization (WoQ), BQ quantizes both weight and activation, offering higher hardware efficiency and end-to-end inference on a unified datapath, but its design space, spanning bit-width, block size, scaling, and numeric formats, remains underexplored. We provide hardware/benchmark results through design space exploration (DSE). We find that increasing block size improves hardware efficiency by amortizing dequantization and accumulation costs, but degrades accuracy. This trade-off limits conventional BQ methods. Motivated by this insight, we propose Hierarchical Block Quantization (HBQ). Unlike prior methods [1], [2], which use small blocks and conventional Power-of-Two (PoT) or integer-based scaling, HBQ uses large blocks to maximize efficiency and introduces low-overhead significand (SIG) scaling for second-level quantization. By allocating quantization levels effectively and accounting for distinct activation and weight distributions, SIG scaling compensates for large-block errors more effectively than prior PoT and INT schemes. HBQ-A (accurate) achieves W4A16-level accuracy using only W4A5 while requiring less silicon area than NVFP4. HBQ-E (efficient) further reduces hardware cost by 17% while maintaining higher accuracy than all existing BQ methods. We implemented a 28nm ASIC accelerator applying HBQ to weights, activations, and KV cache, and integrated a novel partial-sum BQ scheme to further reduce EMA energy. Compared to state-of-the-art WoQ, HBQ delivers $2.3\\times$/$4.6\\times$ higher area/energy efficiency at the same accuracy level; $1.6$--$3.3\\times$ system energy reduction and $1.5$--$3.0\\times$ speedup over prior BQ methods while providing best accuracy.",
       "analysis": {
         "key_results": "HBQ-A达到W4A16级精度仅用W4A5，且面积小于NVFP4；HBQ-E进一步降低硬件成本17%同时精度优于现有BQ方法；28nm ASIC实现相比最先进WoQ提升2.3倍/4.6倍面积/能效，相比之前BQ方法系统能耗降低1.6-3.3倍，速度提升1.5-3.0倍。",
@@ -149,7 +227,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2609.00450v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -2204,7 +2282,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.30564v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -2714,7 +2792,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.30428v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -4413,7 +4491,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.29897v2",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -5015,7 +5093,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.29667v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -5089,7 +5167,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2609.00052v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -5574,7 +5652,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.29432v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -6948,7 +7026,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.28099v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -7186,7 +7264,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.27929v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -8854,7 +8932,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.26788v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -9182,7 +9260,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.26659v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -10323,7 +10401,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.26013v2",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -10397,7 +10475,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.26004v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -11956,7 +12034,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.26214v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -12026,7 +12104,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.25428v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -12246,7 +12324,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.25395v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -13464,7 +13542,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.24658v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -15307,7 +15385,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.24040v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -15380,7 +15458,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.24004v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -15796,7 +15874,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.23843v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -17032,7 +17110,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.23200v4",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -17106,7 +17184,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.23200v3",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -17179,7 +17257,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.23200v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -17351,7 +17429,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.23144v2",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -18357,7 +18435,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.22926v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -18433,7 +18511,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.22883v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -18857,7 +18935,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.22761v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -19088,7 +19166,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.22472v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -19249,7 +19327,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.22421v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -22017,7 +22095,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.20975v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -23698,6 +23776,61 @@
     {
       "abstract": "World models construct latent states that support prediction, planning, and reasoning about an underlying system. Joint-embedding predictive architectures (JEPAs) offer a direct way to learn such states by predicting targets in representation space instead of reconstructing every detail of the observation. Standard JEPAs, however, organize all predictable content through one target embedding and one prediction pathway. In complex systems, this monolithic state can allocate redundant capacity to dominant signals while providing weak or conflicting gradients to less dominant predictive structure. We introduce \\method, a latent world-modeling framework based on orthogonal predictive factorization. Learned basis matrices analyze each target state into multiple components, and a dedicated prediction branch estimates each component from a shared context representation. Predictive regression preserves the factor magnitudes required for state synthesis, an orthogonality objective discourages repeated directions, factor-activity regularization maintains variation in projected targets, and online variance regularization discourages coordinate-wise encoder collapse. Predicted components are synthesized into a complete latent state that can be used by a readout, decoder, planner, or autoregressive rollout. The same predictive-state mechanism applies when the target is temporally future, spatially hidden, or another partial observation of the same system. Experiments on controlled vision, single-cell transcriptomics, longitudinal health records, continuous control, and molecular dynamics evaluate representation quality, forecasting, planning, and long-horizon stability.",
       "analysis": {
+        "key_results": "摘要未说明",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出正交JEPA（Orthogonal JEPA）框架，通过正交预测分解学习多个预测组件，避免单一潜在状态对主导信号的冗余分配，并改善对弱势预测结构的学习。",
+        "method": "正交预测分解：使用学习到的基矩阵将目标状态分解为多个组件，每个组件由共享上下文表示的专用预测分支估计；通过正交性、因子活动正则化和在线方差正则化防止冗余和编码器坍缩。",
+        "one_sentence_summary": "提出正交JEPA框架，通过正交预测分解将潜在状态分解为多个预测组件，以提升世界模型对复杂系统的表示与预测能力。",
+        "primary_topic": "World Model",
+        "relation_to_vla_wam": "该工作属于世界模型范畴，提出的潜在状态分解与预测机制对机器人世界建模（WAM）和多组件状态表示具有方法学价值，但未直接涉及视觉语言动作（VLA）模型。",
+        "relevance_score": 6,
+        "tags": [
+          "World Modeling",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG"
+      ],
+      "arxiv_id": "2608.20065",
+      "authors": [
+        "Taoyong Cui",
+        "Pheng Ann Heng",
+        "Wanli Ouyang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-23T01:11:22.968019Z",
+        "figures": [],
+        "html_url": "https://arxiv.org/html/2608.20065v2",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
+        "recovery_status": "not_found",
+        "recovery_version": 3,
+        "status": "html_unavailable"
+      },
+      "matched_rules": [
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-23T01:11:22.968019Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-08-20T13:59:57Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2608.20065",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2608.20065",
+        "project_url": null
+      },
+      "title": "Orthogonal JEPA: Factorized Predictive States for Latent World Models",
+      "title_zh": "正交JEPA：面向潜在世界模型的分解预测状态",
+      "updated_at": "2026-09-21T23:38:09Z",
+      "version": 2
+    },
+    {
+      "abstract": "World models construct latent states that support prediction, planning, and reasoning about an underlying system. Joint-embedding predictive architectures (JEPAs) offer a direct way to learn such states by predicting targets in representation space instead of reconstructing every detail of the observation. Standard JEPAs, however, organize all predictable content through one target embedding and one prediction pathway. In complex systems, this monolithic state can allocate redundant capacity to dominant signals while providing weak or conflicting gradients to less dominant predictive structure. We introduce \\method, a latent world-modeling framework based on orthogonal predictive factorization. Learned basis matrices analyze each target state into multiple components, and a dedicated prediction branch estimates each component from a shared context representation. Predictive regression preserves the factor magnitudes required for state synthesis, an orthogonality objective discourages repeated directions, factor-activity regularization maintains variation in projected targets, and online variance regularization discourages coordinate-wise encoder collapse. Predicted components are synthesized into a complete latent state that can be used by a readout, decoder, planner, or autoregressive rollout. The same predictive-state mechanism applies when the target is temporally future, spatially hidden, or another partial observation of the same system. Experiments on controlled vision, single-cell transcriptomics, longitudinal health records, continuous control, and molecular dynamics evaluate representation quality, forecasting, planning, and long-horizon stability.",
+      "analysis": {
         "key_results": "在受控视觉、单细胞转录组学、纵向健康记录、连续控制、分子动力学等任务上评估了表示质量、预测、规划和长期稳定性，但摘要未报告具体数值结果。",
         "limitations": "摘要未说明",
         "main_contribution": "提出正交预测分解框架，将目标状态分解为多个组件，并通过专用预测分支和正交性、因子活动、在线方差等正则化来学习更丰富的潜在世界模型。",
@@ -23889,7 +24022,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.19891v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -23962,7 +24095,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.19804v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -24922,7 +25055,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.19066v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -25675,7 +25808,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.18627v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -27763,7 +27896,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.18182v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -27915,7 +28048,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.17336v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -28298,7 +28431,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.17162v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -28699,7 +28832,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16889v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -28884,7 +29017,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16843v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -28959,7 +29092,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16978v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -29462,7 +29595,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16686v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -30072,7 +30205,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.16263v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -31543,7 +31676,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.15574v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -32805,7 +32938,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.15139v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -33463,7 +33596,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.14191v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -33533,7 +33666,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.14149v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -34144,7 +34277,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.14016v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -34380,7 +34513,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.13756v2",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -36931,7 +37064,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.12695v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -37965,7 +38098,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.11981v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -38087,7 +38220,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.11786v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -38797,7 +38930,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.11588v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -42206,7 +42339,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.09595v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -45216,7 +45349,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.08081v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -46575,6 +46708,79 @@
     {
       "abstract": "Spiking neural networks (SNNs) enable sparse and event-driven computation, but their low-bit deployment remains incomplete because recurrent membrane states are commonly retained in floating point even after weight quantization. Quantizing these states is challenging because their distributions differ across channels and from the preceding weights, while small perturbations near the firing threshold may alter spike decisions and accumulate over time. We propose PTQ4SNN, a membrane-aware post-training quantization framework that jointly quantizes weights and recurrent membrane states using only a small calibration set. First, a channel-wise Unified Scale Bridge constrains the membrane scale as s_mem,c = s_w,c * 2^k_c, adapting to membrane distributions while enabling shift-compatible scale conversion. Second, Mixed-Precision Bit Allocation assigns 2/4/8-bit precision to membrane channels according to firing activity and quantization sensitivity under an average-bit budget. The framework operates on reusable projection-LIF pairs and supports both convolutional SNNs and spike-driven Transformers without backbone retraining. Experiments on static and event-based classification and semantic segmentation show that PTQ4SNN effectively preserves model accuracy under W4 quantization and approximately 4-bit membrane precision.",
       "analysis": {
+        "key_results": "在静态和事件驱动分类及语义分割任务上，W4量化和约4位膜精度下有效保持模型精度。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出膜感知训练后量化框架PTQ4SNN，通过通道级统一尺度桥和混合精度位分配联合量化权重与循环膜状态。",
+        "method": "通道级统一尺度桥将膜尺度约束为s_mem,c = s_w,c * 2^k_c；混合精度位分配根据发放活动和量化敏感度为膜通道分配2/4/8位精度。",
+        "one_sentence_summary": "提出PTQ4SNN框架，通过联合量化权重和循环膜状态，在仅用少量校准集的情况下保持脉冲神经网络在低比特部署中的精度。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "该工作专注于脉冲神经网络的训练后量化，不直接涉及视觉-语言-动作模型（VLA）或世界-动作模型（WAM）。但其量化方法可推广到基于脉冲神经网络的机器人策略或高效推理，与本站主题存在间接关联。",
+        "relevance_score": 7,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.AI"
+      ],
+      "arxiv_id": "2608.07066",
+      "authors": [
+        "Hui Xie",
+        "Tong Shi",
+        "Haotong Qin",
+        "Aishan Liu",
+        "Xiaode Liu",
+        "Jinyang Guo"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-23T01:11:22.968019Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2608.07066/v2/fig2-panel1.png"
+            ],
+            "caption": "Overview of PTQ4SNN. For each projection–LIF pair, channel-wise membrane statistics provide firing-rate and sensitivity estimates for mixed-bit allocation. The Unified Scale Bridge then couples each membrane scale to the preceding weight scale through shift-compatible conversion, conditioned on the assigned membrane bit width.",
+            "image_urls": [
+              "https://arxiv.org/html/2608.07066v2/main.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2608.07066v2#Sx1.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2608.07066v2",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
+        "recovery_status": "fetch_failed",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:post-training-quantization",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-23T01:11:22.968019Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-08-07T10:16:25Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2608.07066",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2608.07066",
+        "project_url": null
+      },
+      "title": "PTQ4SNN: Membrane-Aware Post-Training Quantization for Spiking Neural Networks",
+      "title_zh": "PTQ4SNN：面向脉冲神经网络的膜感知训练后量化",
+      "updated_at": "2026-09-22T15:13:18Z",
+      "version": 2
+    },
+    {
+      "abstract": "Spiking neural networks (SNNs) enable sparse and event-driven computation, but their low-bit deployment remains incomplete because recurrent membrane states are commonly retained in floating point even after weight quantization. Quantizing these states is challenging because their distributions differ across channels and from the preceding weights, while small perturbations near the firing threshold may alter spike decisions and accumulate over time. We propose PTQ4SNN, a membrane-aware post-training quantization framework that jointly quantizes weights and recurrent membrane states using only a small calibration set. First, a channel-wise Unified Scale Bridge constrains the membrane scale as s_mem,c = s_w,c * 2^k_c, adapting to membrane distributions while enabling shift-compatible scale conversion. Second, Mixed-Precision Bit Allocation assigns 2/4/8-bit precision to membrane channels according to firing activity and quantization sensitivity under an average-bit budget. The framework operates on reusable projection-LIF pairs and supports both convolutional SNNs and spike-driven Transformers without backbone retraining. Experiments on static and event-based classification and semantic segmentation show that PTQ4SNN effectively preserves model accuracy under W4 quantization and approximately 4-bit membrane precision.",
+      "analysis": {
         "key_results": "在静态和事件驱动的分类与语义分割任务上，PTQ4SNN在W4量化和约4比特膜精度下有效保持模型准确率。",
         "limitations": "摘要未说明",
         "main_contribution": "提出膜感知训练后量化框架PTQ4SNN，通过统一尺度桥和混合精度分配，有效量化脉冲神经网络的权重和膜状态。",
@@ -47314,7 +47520,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.06564v3",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -50951,7 +51157,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.04768v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -51831,7 +52037,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.04488v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -52089,7 +52295,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.04425v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -52908,7 +53114,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.03854v4",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -52976,7 +53182,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.03854v3",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -53044,7 +53250,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.03854v2",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -53113,7 +53319,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.03854v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -55459,7 +55665,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.03052v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -57655,7 +57861,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.01851v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -59534,7 +59740,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.07557v2",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -60411,7 +60617,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.01013v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -60547,7 +60753,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2608.00859v1",
-        "recovery_checked_at": "2026-09-22T09:16:22.297318Z",
+        "recovery_checked_at": "2026-09-23T01:15:49.866826Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -61590,22 +61796,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 45,
-    "completion_tokens": 24824,
+    "cache_hits": 96,
+    "completion_tokens": 19741,
     "error_categories": {
-      "ValidationError": 7
+      "ValidationError": 4
     },
-    "failed": 7,
-    "fetched": 1186,
-    "figure_available": 92,
-    "figure_cache_hits": 43,
+    "failed": 4,
+    "fetched": 1649,
+    "figure_available": 121,
+    "figure_cache_hits": 88,
     "figure_failed": 0,
-    "figure_requests": 66,
-    "figure_unavailable": 17,
-    "model_calls": 80,
-    "prefiltered": 125,
-    "prompt_tokens": 65319,
-    "published": 109,
-    "total_tokens": 90143
+    "figure_requests": 52,
+    "figure_unavailable": 19,
+    "model_calls": 62,
+    "prefiltered": 158,
+    "prompt_tokens": 51908,
+    "published": 140,
+    "total_tokens": 71649
   }
 }
