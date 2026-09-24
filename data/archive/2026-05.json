@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-23T09:10:10.782993Z",
+  "generated_at": "2026-09-24T01:01:30.835035Z",
   "papers": [
     {
       "abstract": "Behavior cloning with high-capacity generative policies achieves strong imitation performance, but is often limited by demonstration coverage and distribution shift. Direct reinforcement learning fine-tuning can improve performance, but updating large action decoders is frequently unstable and sample inefficient. We propose Lagrangian Perturbation Diffusion Steering (LP-DS), a lightweight adaptation method that improves a frozen generative policy by learning a compact noise-space perturbation before decoding. LP-DS optimizes this perturbation with a Lagrangian trust-region objective, improving downstream value while constraining deviation from the latent prior. Across RoboMimic manipulation, OpenAI Gym locomotion, and Adroit dexterous manipulation benchmarks, LP-DS improves sample efficiency, success, and return while maintaining higher action-space entropy than unconstrained noise-space steering, with return improvements of up to 25% over prior baselines. Additional evaluations with flow-matching backbones, a large vision-language-action model, and physical Franka deployment show that LP-DS is not limited to compact diffusion policies or simulated benchmarks. Project page: https://sites.google.com/view/lp-ds/home.",
@@ -1618,7 +1618,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2605.28760v2",
-        "recovery_checked_at": "2026-09-23T09:11:25.333909Z",
+        "recovery_checked_at": "2026-09-24T01:05:03.091068Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -2190,6 +2190,102 @@
       "version": 2
     },
     {
+      "abstract": "Manipulating fragile deformable containers, such as disposable plastic cups filled with liquid, demands real-time grip-force adaptation within an extremely narrow force margin: insufficient force causes slip, while excessive force irreversibly deforms the thin wall. Existing approaches struggle to achieve such force-sensitive manipulation tasks. We propose a noise-statistics-based calibration-driven reflex control paradigm with vision-based tactile sensing: by analyzing the sensor's intrinsic noise characteristics (via a brief static-hold-and-unload protocol), we directly derive all controller thresholds, eliminating external force calibration, trial-and-error manual tuning, or material-specific physical models. Instantiating this paradigm, we present TactileReflex, a three-channel closed-loop controller that extracts three image-level proxies, shear intensity ($S_y$), contact intensity ($F_n$), and center of pressure ($C$), from dual visuo-tactile sensors and drives prioritized reflex channels at ~12 Hz for slip suppression, weight-adaptive release, and force protection. Each channel closes the loop directly on its proxy via noise-derived thresholds. Ablation demonstrates that only the full three-channel system is able to prevent irreversible container deformation (5/5 success vs. at most 1/5 for partial configurations). In a dynamic pouring task, fixed-effort baselines fail in all 10 attempts due to pose drift, while TactileReflex achieves 9/10 success across two water volumes. As a self-contained and interpretable controller, TactileReflex can serve as a plug-and-play safety layer beneath high-level manipulation pipelines, including haptic-free VR teleoperation and vision-language-action (VLA) policies.",
+      "analysis": {
+        "key_results": "在防止容器不可逆变形任务中达到5/5成功率，在动态倾倒任务中达9/10成功率，优于固定力基线（0/10）。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出基于噪声统计的标定驱动反射控制范式，无需外部力标定或模型即可从视觉触觉传感器中导出控制器阈值。",
+        "method": "通过短暂静置-卸载协议分析传感器固有噪声特性，直接导出控制器阈值，并利用双视觉触觉传感器提取剪切强度、接触强度和压力中心三个图像级代理，构建三通道闭环控制器。",
+        "one_sentence_summary": "TactileReflex利用噪声统计标定的反射控制，通过视觉触觉传感在极窄力范围内实时调整抓握力，实现易碎容器操作和动态倾倒任务。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "该工作作为即插即用的安全层，可部署于高层操作管道（包括视觉-语言-动作（VLA）策略）之下，但本身不直接涉及VLA或WAM的理论或训练。",
+        "relevance_score": 6,
+        "tags": [
+          "Robot Manipulation",
+          "Vision-Language",
+          "Robot Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.SY",
+        "eess.SY"
+      ],
+      "arxiv_id": "2605.23568",
+      "authors": [
+        "Ziyan Feng",
+        "Yulong Fu",
+        "Zheng Li",
+        "Yuxin He",
+        "Jieji Ren",
+        "Yudong Zhong",
+        "Lujia Wang",
+        "Jinni Zhou",
+        "Qiang Nie"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-24T01:01:30.835035Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2605.23568/v4/fig1-panel1.png",
+              "/figures/2605.23568/v4/fig1-panel2.jpg",
+              "/figures/2605.23568/v4/fig1-panel3.png"
+            ],
+            "caption": "System overview. (a) The TactileReflex layer sits beneath a high-level policy (VLA/teleop/trajectory), which provides the arm joint trajectory 𝐪 ⁡ ( t ) \\mathbf{q}(t) and a nominal grasp effort e init e_{\\mathrm{init}} . It extracts three image-level proxies (shear intensity S y S_{y} , contact intensity F n F_{n} , center of pressure 𝑪 \\boldsymbol{C} ) from dual MC-Tac sensors and feeds them into three prioritized reflex channels (anti-slip, release, force-protect) that jointly adjust gripper effort e e and stroke position p p . The anti-slip channel tightens the grasp by increasing e e while decreasing p p , whereas the release and force-protect channels loosen it by decreasing e e while increasing p p ; force-protect can override the other two channels. (b) Hardware and experiment setup with MC-Tac sensors on the Piper gripper. (c) Processed tactile images from the left and right finger sensors, showing proxy extraction and real-time monitoring.",
+            "image_urls": [
+              "https://arxiv.org/html/2605.23568v4/images/system.png",
+              "https://arxiv.org/html/2605.23568v4/images/setup.jpg",
+              "https://arxiv.org/html/2605.23568v4/images/software2.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.23568v4#S3.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2605.23568/v4/fig2-panel1.png"
+            ],
+            "caption": "Exp. 2 liftoff trial (soft cup). Upon liftoff, S y S_{y} spikes above θ s \\theta_{s} , triggering three successive anti-slip responses that raise effort from 1 200 to 2 100 within ∼ {\\sim} 0.34 s.",
+            "image_urls": [
+              "https://arxiv.org/html/2605.23568v4/logs/analyze_liftoff/trial3_E1E2_soft_cup_liftoff_04_timeseries.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.23568v4#S5.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2605.23568v4",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-24T01:01:30.835035Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-05-22T12:35:28Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2605.23568",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2605.23568",
+        "project_url": null
+      },
+      "title": "TactileReflex: Noise-Statistics-Driven Vision-Tactile Reflex Control for Force-Sensitive Manipulation",
+      "title_zh": "TactileReflex：基于噪声统计驱动的视觉-触觉反射控制用于力敏感操作",
+      "updated_at": "2026-09-23T11:00:41Z",
+      "version": 4
+    },
+    {
       "abstract": "RequestRouter is a lightweight request-boundary controller for reducing the latency and energy cost of single-GPU large language model inference. Rather than serving all requests with one static configuration, the system uses cheap request-level features to select one fixed inference mode per request, including FP16, quantized inference, speculative decoding, prefix caching, continuous batching, and hybrid modes such as GPTQ plus prefix caching and INT8 plus continuous batching. We evaluate RequestRouter using an 8B instruction-tuned language model served through vLLM on NVIDIA A100 GPUs. Across the full-scale A100 evaluation--26,500 fixed-mode evaluations followed by 3,500 online-controller evaluations, for 30,000 measured inference executions in total--the controller achieves a 2.10x mean latency speedup over FP16 and a 0.48x energy ratio on deployment-style workloads. A smaller matched evaluation with repeated measurements provides a controlled statistical check of this result: RequestRouter retains a 1.93x latency speedup (95% CI: 1.88--1.98x) and a 0.523 energy ratio (95% CI: 0.506--0.540), showing that the gains persist under a more tightly controlled protocol. On a separate expanded automatic benchmark evaluation, the routed policy retains 99.6% of FP16 macro accuracy. A 100,000-call CPU microbenchmark measures only 0.00475 ms mean routing overhead (0.00532 ms p99). Thus, simple request-aware routing can recover substantial serving efficiency without retraining or modifying the underlying LLM.",
       "analysis": {
         "key_results": "在NVIDIA A100 GPU上使用8B指令微调模型通过vLLM服务进行的全规模评估中，控制器在部署式负载上实现了2.10倍的平均延迟加速（相对于FP16）和0.48倍的能耗比；更严格匹配的重复测量评估中，延迟加速为1.93倍（95% CI: 1.88–1.98），能耗比为0.523（95% CI: 0.506–0.540）；在独立扩展自动基准评估中，路由策略保留了FP16宏精度的99.6%；100,000次调用的CPU微基准测试中平均路由开销为0.00475毫秒（p99为0.00532毫秒）。",
@@ -2473,7 +2569,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2605.22164v2",
-        "recovery_checked_at": "2026-09-23T09:11:25.333909Z",
+        "recovery_checked_at": "2026-09-24T01:05:03.091068Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -3485,6 +3581,98 @@
       "version": 3
     },
     {
+      "abstract": "Vision-Language-Action (VLA) models are often brittle in fine-grained manipulation, where minor action errors during the critical phases can rapidly escalate into irrecoverable failures. Since existing VLA models rely predominantly on successful demonstrations for training, they lack an explicit awareness of failure during these critical phases. To address this, we propose DreamAvoid, a critical-phase test-time dreaming framework that enables VLA models to anticipate and avoid failures. We also introduce an autonomous boundary learning paradigm to refine the system's understanding of the subtle boundary between success and failure. Specifically, we (1) utilize a Dream Trigger to determine whether the execution has entered a critical phase, (2) sample multiple candidate action chunks from the VLA via an Action Proposer, and (3) employ a Dream Evaluator, jointly trained on mixed data (success, failure, and boundary cases), to \"dream\" the short-horizon futures corresponding to the candidate actions, evaluate their values, and select the optimal action. We conduct extensive evaluations on real-world manipulation tasks and simulation benchmarks. The results demonstrate that DreamAvoid can effectively avoid failures, thereby improving the overall task success rate. Across four real-world tasks, DreamAvoid achieves 72.5% success, compared with 48.8% for the base policy and 54.4% for GPC-RANK. Our code is available at https://github.com/XianzheFan/DreamAvoid.",
+      "analysis": {
+        "key_results": "在四个真实世界任务中，DreamAvoid实现了72.5%的成功率，而基础策略为48.8%，GPC-RANK为54.4%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出DreamAvoid，一个关键阶段测试时梦境框架，使VLA模型能够预测并避免失败；同时引入自主边界学习范式来细化成功与失败之间的微妙边界。",
+        "method": "采用Dream Trigger判断是否进入关键阶段，Action Proposer采样多个候选动作块，Dream Evaluator基于混合数据训练来\"梦\"想候选动作的短期未来并选择最优动作。",
+        "one_sentence_summary": "DreamAvoid通过关键阶段测试时梦境的框架，使VLA模型能够预测并避免精细操作中的失败。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该论文直接针对VLA模型在精细操作中的失败问题，通过测试时规划提升动作选择的可靠性和任务成功率，与本站VLA主题高度相关。",
+        "relevance_score": 9,
+        "tags": [
+          "Robot Learning",
+          "Robot Manipulation",
+          "Action Prediction",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.AI",
+        "cs.CL",
+        "cs.CV"
+      ],
+      "arxiv_id": "2605.11750",
+      "authors": [
+        "Xianzhe Fan",
+        "Yuxiang Lu",
+        "Shenyuan Gao",
+        "Xiaoyang Wu",
+        "Ruihua Han",
+        "Manling Li",
+        "Hengshuang Zhao"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-24T01:01:30.835035Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2605.11750/v2/fig1-panel1.png"
+            ],
+            "caption": "We propose DreamAvoid , (a) a critical-phase test-time dreaming framework that enables the VLA to anticipate and avoid failure. This framework consists of a Dream Trigger, an Action Proposer, and a Dream Evaluator. (b) We also introduce an autonomous boundary learning paradigm to equip the world model-based Dream Evaluator with failure awareness.",
+            "image_urls": [
+              "https://arxiv.org/html/2605.11750v2/dreamavoid_teaser.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.11750v2#S0.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2605.11750/v2/fig2-panel1.png"
+            ],
+            "caption": "Qualitative example of the Dream Trigger ( β = 5 ​ frames \\beta=5\\ \\text{frames} in the soft label y ~ t \\tilde{y}_{t} ).",
+            "image_urls": [
+              "https://arxiv.org/html/2605.11750v2/dream_trigger_value.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.11750v2#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2605.11750v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-24T01:01:30.835035Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-05-12T08:27:16Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2605.11750",
+        "code_url": "https://github.com/XianzheFan/DreamAvoid",
+        "pdf_url": "https://arxiv.org/pdf/2605.11750",
+        "project_url": null
+      },
+      "title": "DreamAvoid: Critical-Phase Test-Time Dreaming to Avoid Failures in VLA Policies",
+      "title_zh": "DreamAvoid：VLA策略中的关键阶段测试时梦境规避失败框架",
+      "updated_at": "2026-09-23T11:44:35Z",
+      "version": 2
+    },
+    {
       "abstract": "Quantization is an effective strategy to reduce the storage and computation footprint of large language models (LLMs). Post-training quantization (PTQ) is a leading approach for compressing LLMs. Popular weight quantization procedures, including GPTQ and RTN, suffer in model utility, especially at aggressive quantization levels (sub-4-bit). We propose ADMM-Q, a novel weight quantization algorithm that considers the layer-wise quantization problem. Our algorithm is based on a combinatorial variant of the Alternating Direction Method of Multipliers (ADMM). Our operator-splitting procedure updates weights continuously to minimize the layer-wise reconstruction error, while gradually enforcing the quantization constraints with convergence guarantees. We propose additional algorithmic enhancements (e.g., penalty scheduling, preconditioning, and a local search post-processing step) to make ADMM-Q efficient at LLM scale. ADMM-Q is modular and can be used as a drop-in replacement for any weight quantizer within existing quantization pipelines: ADMM-Q is fully composable with existing techniques including range clipping, learned or random rotations, and activation scaling. Using ADMM-Q in place of GPTQ on Qwen3-8B, we decrease WikiText-2 perplexity in: (i) the W3A16 weight-only setting (12.85 $\\rightarrow$ 10.06); (ii) the W4A8 SmoothQuant procedure (9.29 $\\rightarrow$ 8.68); and (iii) the W2A4KV4 SpinQuant procedure (66.11 $\\rightarrow$ 19.42).",
       "analysis": {
         "key_results": "在使用ADMM-Q替代GPTQ后，Qwen3-8B的WikiText-2困惑度在W3A16权重仅量化设置下降至10.06（原12.85），W4A8 SmoothQuant设置下降至8.68（原9.29），W2A4KV4 SpinQuant设置下降至19.42（原66.11）。",
@@ -4007,6 +4195,97 @@
       "title_zh": "原生FP4硬件上使用MXFP4预训练大语言模型",
       "updated_at": "2026-08-12T13:15:17Z",
       "version": 4
+    },
+    {
+      "abstract": "Pretrained video diffusion models provide powerful spatiotemporal generative priors, making them a natural foundation for robotic world models. While recent world-action models jointly optimize future videos and actions, they predominantly treat video generation as an auxiliary representation for policy learning. Consequently, they insufficiently explore the inverse problem: leveraging action signals to guide video synthesis, thereby often failing to preserve precise robot spatial geometry and fine-grained robot-object interaction dynamics in the generated rollouts. To bridge this gap, we present EA-WM, an Event-Aware Generative World Model that effectively closes the loop between kinematic control and visual perception. Rather than injecting joint or end-effector actions as abstract, low-dimensional tokens, EA-WM projects actions and kinematic states directly into the target camera view as Structured Kinematic-to-Visual Action Fields. To fully exploit this geometrically grounded representation, we introduce event-aware bidirectional fusion blocks that modulate cross-branch attention, capturing object state changes and interaction dynamics. Evaluated on the comprehensive WorldArena benchmark, EA-WM achieves state-of-the-art performance, outperforming existing baselines by a significant margin.",
+      "analysis": {
+        "key_results": "在 WorldArena 基准上取得最先进性能，显著优于现有基线方法。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出 EA-WM，一种事件感知生成式世界模型，通过结构化运动-视觉动作场和事件感知双向融合模块，将动作信号直接用于引导视频合成，克服现有方法将视频生成仅作为策略学习辅助表示而忽略动作对视频生成的引导作用的问题。",
+        "method": "将关节或末端执行器动作与运动学状态直接投影到目标相机视角，形成结构化运动-视觉动作场；引入事件感知双向融合模块调制跨分支注意力，捕捉物体状态变化和交互动态。",
+        "one_sentence_summary": "该论文提出事件感知生成式世界模型 EA-WM，通过将动作与运动学状态投影到相机视角的结构化运动-视觉动作场，增强视频生成中的机器人空间几何和交互动态保真度。",
+        "primary_topic": "World Model",
+        "relation_to_vla_wam": "该论文直接聚焦于机器人世界模型（WAM），创新性地将动作和运动学信息以结构化视觉形式注入视频扩散模型，以提升生成 rollout 的几何和交互保真度，对 VLA/WAM 领域的感知-动作闭环建模具有核心推动作用。",
+        "relevance_score": 10,
+        "tags": [
+          "World Modeling",
+          "Video Generation",
+          "Action Prediction",
+          "Robot Learning",
+          "Generalist Robotics",
+          "Robot Manipulation",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.AI",
+        "cs.RO"
+      ],
+      "arxiv_id": "2605.06192",
+      "authors": [
+        "Zhaoyang Yang",
+        "Yurun Jin",
+        "Lizhe Qi",
+        "Cong Huang",
+        "Kai Chen"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-24T01:01:30.835035Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2605.06192/v2/fig1-panel1.png"
+            ],
+            "caption": "Comparison between direct low-dimensional action conditioning and the proposed Structured Kinematic-to-Visual Action Fields (KVAFs).",
+            "image_urls": [
+              "https://arxiv.org/html/2605.06192v2/figure/fig1_.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.06192v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2605.06192/v2/fig2-panel1.png"
+            ],
+            "caption": "Overview of EA-WM. Robot actions and kinematic states are first lifted into camera-aligned KVAFs. RGB videos and KVAFs are encoded into the shared Wan2.2 latent space and processed by a video branch and a KVAF branch. Sparse event-aware bidirectional fusion exchanges information between the two branches, while EDLS guides the model to attend to motion and interaction changes.",
+            "image_urls": [
+              "https://arxiv.org/html/2605.06192v2/figure/fig2_final.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2605.06192v2#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2605.06192v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-24T01:01:30.835035Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-05-07T13:06:19Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2605.06192",
+        "code_url": "https://github.com/Shownx-c/EA-WM",
+        "pdf_url": "https://arxiv.org/pdf/2605.06192",
+        "project_url": null
+      },
+      "title": "EA-WM: Event-Aware Generative World Model with Structured Kinematic-to-Visual Action Fields",
+      "title_zh": "EA-WM：基于结构化运动-视觉动作场的事件感知生成式世界模型",
+      "updated_at": "2026-09-23T12:22:01Z",
+      "version": 2
     },
     {
       "abstract": "State-of-the-art model-based Reinforcement Learning (RL) approaches either use gradient-free, population-based methods for planning, learned policy networks, or a combination of policy networks and planning. Hybrid approaches that combine Model Predictive Control (MPC) with a learned model and a policy prior to leverage the advantages of both paradigms have shown promising results. However, these approaches typically rely on gradient-free optimization methods, which can be computationally expensive for high-dimensional control tasks. While gradient-based methods are a promising alternative, recent works have empirically shown that gradient-based methods often perform worse than their gradient-free counterparts. We propose Dream-MPC, a novel approach that generates few candidate trajectories from a rolled-out policy and optimizes each trajectory by gradient ascent using a learned world model, uncertainty regularization and amortization of optimization iterations over time by reusing previously optimized actions. Our results on 24 continuous control tasks show that Dream-MPC can significantly improve the performance of the underlying policy and can outperform gradient-free MPC and state-of-the-art baselines. Code and videos are available at https://dream-mpc.github.io.",
@@ -4634,22 +4913,23 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 141,
-    "completion_tokens": 3108,
+    "cache_hits": 117,
+    "completion_tokens": 13632,
     "error_categories": {
-      "ValidationError": 2
+      "DeepSeekResponseError": 1,
+      "ValidationError": 4
     },
-    "failed": 2,
-    "fetched": 1589,
+    "failed": 5,
+    "fetched": 1838,
     "figure_available": 122,
-    "figure_cache_hits": 123,
+    "figure_cache_hits": 106,
     "figure_failed": 0,
-    "figure_requests": 13,
-    "figure_unavailable": 14,
-    "model_calls": 11,
-    "prefiltered": 152,
-    "prompt_tokens": 8151,
-    "published": 136,
-    "total_tokens": 11259
+    "figure_requests": 35,
+    "figure_unavailable": 19,
+    "model_calls": 46,
+    "prefiltered": 163,
+    "prompt_tokens": 36074,
+    "published": 141,
+    "total_tokens": 49706
   }
 }
