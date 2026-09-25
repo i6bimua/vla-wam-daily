@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-25T01:07:05.147634Z",
+  "generated_at": "2026-09-25T09:28:20.303576Z",
   "papers": [
     {
       "abstract": "Vision-language models (VLMs) have recently emerged as a promising paradigm for end-to-end autonomous driving, enabling agents to map multimodal inputs and high-level navigation instructions directly to executable trajectories. However, in practice, these models exhibit a persistent command-following gap: predicted trajectories often show weak sensitivity to navigation commands, resulting in incorrect behavior at critical decision points. We identify this issue as a form of conditional policy collapse, where regression-based training under multimodal trajectory distributions encourages the model to rely on dominant visual priors while marginalizing the language-conditioned signal. To address this issue, we introduce a principled formulation of classifier-free guidance (CFG) for regression-based vision-language driving. We show that CFG can be interpreted as isolating the instruction-induced residual in the action space by contrasting conditional and unconditional predictions, thereby explicitly amplifying the effect of the navigation command at inference time. However, a standard two-pass CFG introduces prohibitive latency for real-time control and produces noisy instance-level guidance directions. Building on a mean-shift interpretation of CFG, we propose Latent-Centroid Steering (LCS), a single-pass guidance mechanism that replaces instance-level residuals with class-level latent shifts. By projecting conditional representations toward precomputed command-specific centroids, LCS performs class-level latent steering based on cluster geometry that is both more stable and computationally efficient. We demonstrate that LCS reduces inference latency by approximately 50% while achieving stronger command adherence and improved driving performance on both closed-loop (Bench2Drive) and open-loop (nuScenes) benchmarks. Code are available at https://github.com/codingmlinprocess/LCS.",
@@ -615,7 +615,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.29221v2",
-        "recovery_checked_at": "2026-09-25T01:11:21.247108Z",
+        "recovery_checked_at": "2026-09-25T09:30:07.211653Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -967,7 +967,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.28624v1",
-        "recovery_checked_at": "2026-09-25T01:11:21.247108Z",
+        "recovery_checked_at": "2026-09-25T09:30:07.211653Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1129,7 +1129,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.28589v1",
-        "recovery_checked_at": "2026-09-25T01:11:21.247108Z",
+        "recovery_checked_at": "2026-09-25T09:30:07.211653Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -2036,7 +2036,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.28226v1",
-        "recovery_checked_at": "2026-09-25T01:11:21.247108Z",
+        "recovery_checked_at": "2026-09-25T09:30:07.211653Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -4593,7 +4593,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.27269v1",
-        "recovery_checked_at": "2026-09-25T01:11:21.247108Z",
+        "recovery_checked_at": "2026-09-25T09:30:07.211653Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -5293,7 +5293,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.26579v1",
-        "recovery_checked_at": "2026-09-25T01:11:21.247108Z",
+        "recovery_checked_at": "2026-09-25T09:30:07.211653Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -5814,7 +5814,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.26055v1",
-        "recovery_checked_at": "2026-09-25T01:11:21.247108Z",
+        "recovery_checked_at": "2026-09-25T09:30:07.211653Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -8630,7 +8630,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.20129v2",
-        "recovery_checked_at": "2026-09-25T01:11:21.247108Z",
+        "recovery_checked_at": "2026-09-25T09:30:07.211653Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -10255,7 +10255,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.14021v3",
-        "recovery_checked_at": "2026-09-24T09:09:09.104033Z",
+        "recovery_checked_at": "2026-09-25T09:30:07.211653Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -10712,6 +10712,76 @@
       "title": "Jetson-PI: Towards Onboard Real-Time Robot Control via Foresight-Aligned Asynchronous Inference",
       "title_zh": "Jetson-PI：基于前瞻对齐异步校正的高效机载VLA部署方法",
       "updated_at": "2026-08-03T09:54:44Z",
+      "version": 4
+    },
+    {
+      "abstract": "The key-value (KV) cache is the dominant memory bottleneck in long-context language model inference. Existing compression methods apply low-rank factorization or quantization independently, without jointly allocating rank and precision under a shared storage budget. We introduce JoLT, a training-free compressor that treats grouped prefill caches as fourth-order tensors and applies partial Tucker decomposition along the token and feature modes, the two axes that carry low-rank structure, while leaving the head and layer modes intact. A rotated low-bit quantizer captures the truncation residual, and a single Lagrangian dual allocates per-group Tucker ranks and residual bit-widths under a global byte constraint. FlashJoLT replaces the exact token-mode SVD with a randomized approximation that matches JoLT within the free zone at a fraction of the compression cost, and a fused Triton decode kernel evaluates attention directly over the stored factors without materializing dense KV tensors. Across five models from four architecture families, covering multi-head attention, grouped-query attention, and mixture-of-experts architecture, JoLT achieves 2 - 3x compression with less than 0.2% perplexity degradation, without retraining. On RULER at 64K context with LLaMA-3.1-8B, retrieval accuracy remains near-lossless through 3x and declines by only 0.90 and 2.40pp at 4x and 5x, respectively. JoLT demonstrates that tensor-aware low-rank decomposition and quantized residuals, unified under a single storage budget, achieve near-lossless KV-cache compression across diverse model architectures without retraining.",
+      "analysis": {
+        "key_results": "在5个模型（涵盖MHA、GQA和MoE架构）上实现2-3倍压缩，困惑度退化低于0.2%；在RULER 64K上下文下，LLaMA-3.1-8B的检索准确率在3x时接近无损，4x和5x时分别下降0.90和2.40个百分点。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出JoLT，将分组的预填充缓存视为四阶张量，在token和特征模式上进行部分Tucker分解，并对截断残差使用旋转低比特量化，同时通过单个拉格朗日对偶在全局字节约束下联合分配每组的Tucker秩和残差位宽。",
+        "method": "训练无关；对分组预填充缓存进行部分Tucker分解（token和特征模式），保留head和layer模式；旋转低比特量化器捕获截断残差；通过拉格朗日对偶进行联合秩-位分配；FlashJoLT使用随机化SVD近似和融合Triton解码核。",
+        "one_sentence_summary": "本文提出JoLT，一种训练无关的KV缓存压缩方法，通过联合分配低秩分解秩和残差量化位宽，在全局字节约束下实现近无损压缩。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "本文专注于通用LLM的KV缓存压缩，未涉及VLA或WAM。但其提出的联合低秩-量化压缩方法可潜在地应用于机器人世界模型或VLA中的长上下文推理，以提高推理效率，但摘要未明确此类应用。",
+        "relevance_score": 8,
+        "tags": [
+          "Efficient Inference",
+          "Model Quantization"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.CL",
+        "math.OC"
+      ],
+      "arxiv_id": "2607.12550",
+      "authors": [
+        "Rahul Krishnan",
+        "Volker Schulz"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-25T09:28:20.303576Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2607.12550/v4/fig1-panel1.png"
+            ],
+            "caption": "Overview of JoLT. Each cell (one layer group’s keys or values) is compressed in two stages, with a single B Lagrangian allocator splitting the byte budget across Tucker ranks and residual bit-widths for all cells jointly.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2607.12550v4"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2607.12550v4",
+        "recovery_checked_at": "2026-09-25T09:30:07.211653Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-25T09:28:20.303576Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-07-14T09:23:20Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2607.12550",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2607.12550",
+        "project_url": null
+      },
+      "title": "A JoLT for the KV cache: Near-Lossless KV Cache Compression via Joint Rank-bit Allocation",
+      "title_zh": "KV缓存的一次JoLT：通过联合秩-位分配实现近无损压缩",
+      "updated_at": "2026-09-24T15:49:22Z",
       "version": 4
     },
     {
@@ -11369,6 +11439,90 @@
       "version": 2
     },
     {
+      "abstract": "Long-horizon robotic rearrangement is commonly formulated as a skill-sequencing problem, where distinct behaviors are explicitly represented and coordinated by a planner or high-level policy. We investigate whether such explicit behavior identities and sequencing interfaces are necessary at all. We introduce implicit behavior coordination from sub-task demonstrations, where separately collected behaviors are coordinated without behavior identity labels, complete-task demonstrations, or task-ordering supervision. Our key observation is that overlap between sub-task demonstrations induces multimodal action distributions that need not be resolved through explicit behavior partitioning. Instead, this overlap-induced multimodality can be exploited as a coordination resource. We instantiate this idea with a shared Flow Matching policy that preserves multiple action modes and critic-guided in-sample planning that propagates task value across demonstrations and selects task-relevant modes. Experiments in Habitat and on a real robot show that implicit behavior coordination remains effective under reduced cross-behavior overlap, larger behavior mixtures, longer horizons, and execution failures, supporting the idea that long-horizon coordination can emerge directly from sub-task demonstrations without explicitly recovering or sequencing behavior identities.",
+      "analysis": {
+        "key_results": "在减少跨行为重叠、增大行为混合规模、延长任务时程和执行失败等条件下，隐式行为协调仍保持有效。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出隐式行为协调方法，通过共享流匹配策略和评论家引导的样本内规划，利用子任务示范重叠产生的多模态动作分布，无需行为标签、完整任务示范或任务顺序监督即可实现长时程协调。",
+        "method": "采用共享Flow Matching策略保留多种动作模式，结合评论家引导的样本内规划传播任务价值并选择相关模式，在Habitat模拟器和真实机器人上进行实验验证。",
+        "one_sentence_summary": "本文提出一种隐式行为协调方法，利用子任务示范间的动作多模态性实现长时程机器人重排，无需显式行为身份或排序监督。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "本文属于机器人操作策略学习，使用视觉-语言-动作(VLA)策略解决长时程重排任务，直接涉及机器人动作预测与策略学习，与本站主题高度相关。",
+        "relevance_score": 9,
+        "tags": [
+          "Robot Manipulation",
+          "Policy Learning",
+          "Action Prediction"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2607.09234",
+      "authors": [
+        "Ahmed Shokry",
+        "Usama Ahmed Siddiquie",
+        "Sicong Pan",
+        "Maren Bennewitz"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-25T09:28:20.303576Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2607.09234/v2/fig1-panel1.png"
+            ],
+            "caption": "Similar observation contexts can occur across demonstrations of different behaviors and prescribe different continuations. This overlap-induced multimodality gives rise to a coordination problem: the agent must determine which plausible behavior continuation is relevant to the long-horizon task. We address this by using a Flow Matching policy to preserve the multimodal behavior continuations and value-guided selection to choose the continuation with the highest expected return for the current task objective.",
+            "image_urls": [
+              "https://arxiv.org/html/2607.09234v2/Figures/modifed_cover_figure.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2607.09234v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2607.09234/v2/fig2-panel1.jpg"
+            ],
+            "caption": "The Flow Matching policy samples multiple candidate action chunks from a learned multimodal distribution conditioned on the current observation context. At overlapping contexts, these candidates may correspond to different behavior continuations. The critic scores each candidate according to the task objective, and the action chunk with the highest expected return is selected for execution.",
+            "image_urls": [
+              "https://arxiv.org/html/2607.09234v2/Figures/framework_icra.jpg"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2607.09234v2#S2.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2607.09234v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-25T09:28:20.303576Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-07-10T09:26:38Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2607.09234",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2607.09234",
+        "project_url": null
+      },
+      "title": "Implicit Behavior Coordination from Sub-Task Demonstrations by Exploiting Overlap-Induced Multimodality",
+      "title_zh": "利用重叠诱导多模态的隐式行为协调：从子任务示范直接实现长时程机器人重排",
+      "updated_at": "2026-09-24T15:42:12Z",
+      "version": 2
+    },
+    {
       "abstract": "Exploration is essential to RL since a policy cannot improve by repeatedly sampling the behaviors it already prefers. Standard methods inject stochasticity in the action space, but such jitter only yields rollouts close to the original. Escaping a weak policy often requires global perturbations that action noise cannot produce. Large language models (LLMs) and vision-language-action (VLA) models offer a pathway: they condition the policy on a natural language prompt, and since the rollout follows from it, modifying the prompt induces global changes. The challenge is finding prompts that induce useful global changes. With a weak policy that rarely succeeds, reward is too sparse to select on. Our idea is to refine prompts from the rollouts themselves: a vision-language model (VLM) reasons over the rollout video, diagnoses how the policy responded, and rewrites the prompt to elicit better behavior next time. This procedure resembles posterior sampling, a classical RL exploration framework, at the level of prompts: the VLM maintains an implicit distribution over useful prompts and updates it from observed rollouts. We call this strategy Prompt-Driven Exploration (PDE). Across manipulation and reasoning tasks, PDE enables RL to learn successful policies even from zero-reward starts, and improves sample efficiency more broadly. Our website is available at https://xinyunsunshine.github.io/prompt-rl.",
       "analysis": {
         "key_results": "在操作和推理任务中，PDE使RL即使从零奖励开始也能学习成功策略，并更广泛地提高了样本效率。",
@@ -11982,6 +12136,105 @@
       "title_zh": "FabriVLA：轻量级视觉-语言-动作模型与共形动作块不确定性校准",
       "updated_at": "2026-08-02T12:41:02Z",
       "version": 3
+    },
+    {
+      "abstract": "Language-conditioned manipulation requires both precise contact-rich control and robust reasoning over language, scenes, and long horizons. End-to-end Vision-Language-Action (VLA) models provide strong local visuomotor skills, but they are trained on in-distribution task trajectories and often fail under deployment perturbations such as semantic retargeting, goal re-binding, spatial-layout shifts, and unstable local contacts. LLM coding agents provide complementary semantic and compositional reasoning, but purely analytic primitives struggle with irregular grasping, constrained placement, and articulated-object interaction. We present Harness VLA, a memory-augmented agentic framework that exposes a frozen VLA as a retryable contact-rich primitive and composes it with a small fixed library of analytic primitives for grounding, staging, transport, navigation, and release. Rather than expanding the skill library, the harness learns the operating range of these fixed primitives from task-specific execution traces, global success rules, and failure models. By lifting semantic re-grounding, non-contact execution, and VLA re-staging to the planner while reserving the frozen VLA for local contact-rich phases, Harness VLA extends pretrained VLAs beyond their original trajectory distribution without finetuning. Across perturbed tabletop, household kitchen, and clean-to-randomized bimanual manipulation, Harness VLA improves over the strongest relevant baselines by 38.6 and 25.4 percentage points on LIBERO-Pro and RoboCasa365, respectively, and reaches 58.4% on RoboTwin C2R. Real-world demonstrations on dual-Franka robots further show target redirection, grasp recovery, and new task compositions with the same frozen VLA. Code is available at https://github.com/RLinf/RPent.",
+      "analysis": {
+        "key_results": "在 LIBERO-Pro 和 RoboCasa365 上分别比最强基线提高了38.6和25.4个百分点，在 RoboTwin C2R 上达到58.4%的成功率；在双Franka机器人上展示了目标重定向、抓取恢复和新任务组合。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出一个记忆增强的智能体框架，将冻结的VLA模型作为可重试的接触丰富原语，与小型固定的解析原语库组合，通过从执行轨迹和成功/失败规则中学习操作范围，实现无需微调的VLA任务泛化。",
+        "method": "Harness VLA 将语义重接地、非接触执行和VLA重排提升到规划器层面，将冻结的VLA保留用于局部接触丰富阶段，并利用任务特定执行轨迹、全局成功规则和失败模型来学习固定原语的操作范围。",
+        "one_sentence_summary": "提出 Harness VLA 框架，将冻结的视觉-语言-动作（VLA）模型作为可重试的接触丰富操作原语，与少量解析原语组合，通过记忆引导的规划器提升在分布外扰动下的操作可靠性。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "直接扩展VLA模型的部署能力，通过智能体框架与解析原语组合提升分布外泛化，对VLA在机器人操作中的应用具有核心价值。",
+        "relevance_score": 10,
+        "tags": [
+          "Robot Learning",
+          "Robot Manipulation",
+          "Vision-Language",
+          "Policy Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2607.08448",
+      "authors": [
+        "Yixian Zhang",
+        "Huanming Zhang",
+        "Feng Gao",
+        "Xiao Li",
+        "Zhihao Liu",
+        "Yi Nie",
+        "Chunyang Zhu",
+        "Jiaxing Qiu",
+        "Yuchen Yan",
+        "Jiyuan Liu",
+        "Wenhao Tang",
+        "Jiaji Rao",
+        "Zhengru Fang",
+        "Changxu Wei",
+        "Yu Wang",
+        "Wenbo Ding",
+        "Chao Yu"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-09-25T09:28:20.303576Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2607.08448/v5/fig1-panel1.png"
+            ],
+            "caption": "Harness VLA system overview. Given a task description, RGB-D observations, and robot state, the agentic planner selects structured calls from a fixed primitive library rather than emitting low-level actions directly. The library exposes the frozen VLA as vla_act for contact-rich behaviors and uses analytic primitives such as move_to , rotate , and set_gripper for perception-conditioned staging, transport, posture adjustment, and release. Task Specific Memory stores successful command traces from reference-seed exploration for few-shot re-grounding, while Global Memory stores reusable success rules and failure models. The right panels summarize benchmark results, and the command strip illustrates the interleaving of VLA calls and analytic control. The bottom row contrasts frozen-VLA basket placement with target redirection, visual sorting, grasp recovery, and ordered placement by Harness VLA on dual-Franka robots.",
+            "image_urls": [
+              "https://arxiv.org/html/2607.08448v5/figures/scheme.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2607.08448v5#S0.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2607.08448/v5/fig2-panel1.png"
+            ],
+            "caption": "Primitive composition extends a frozen VLA beyond its trajectory distribution. Deployment perturbations expand the possible task configurations beyond the in-distribution trajectories covered by the frozen VLA. A direct VLA rollout may attempt to bridge the perturbed space and fail before reaching the target. Harness VLA instead decomposes the task into local contact-rich VLA invocations and analytic primitive control: analytic primitives perceive the current target, re-ground task bindings, and move the robot between VLA-compatible local regions, while vla_act is invoked only for contact-rich phases inside those regions.",
+            "image_urls": [
+              "https://arxiv.org/html/2607.08448v5/figures/Abstract_figure.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2607.08448v5#S1.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2607.08448v5",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-09-25T09:28:20.303576Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-07-09T13:08:54Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2607.08448",
+        "code_url": "https://github.com/RLinf/RPent",
+        "pdf_url": "https://arxiv.org/pdf/2607.08448",
+        "project_url": null
+      },
+      "title": "Harness VLA: Steering Frozen VLAs into Reliable Manipulation Primitives via Memory-Guided Agents",
+      "title_zh": "Harness VLA：通过记忆引导的智能体将冻结视觉-语言-动作模型转化为可靠操作原语",
+      "updated_at": "2026-09-24T16:56:40Z",
+      "version": 5
     },
     {
       "abstract": "Language-conditioned manipulation requires both precise contact-rich control and robust reasoning over language, scenes, and long horizons. End-to-end Vision-Language-Action (VLA) models provide strong local visuomotor skills, but they are trained on in-distribution task trajectories and often fail under deployment perturbations such as semantic retargeting, goal re-binding, spatial-layout shifts, and unstable local contacts. LLM coding agents provide complementary semantic and compositional reasoning, but purely analytic primitives struggle with irregular grasping, constrained placement, and articulated-object interaction. We present Harness VLA, a memory-augmented agentic framework that exposes a frozen VLA as a retryable contact-rich primitive and composes it with a small fixed library of analytic primitives for grounding, staging, transport, navigation, and release. Rather than expanding the skill library, the harness learns the operating range of these fixed primitives from task-specific execution traces, global success rules, and failure models. By lifting semantic re-grounding, non-contact execution, and VLA re-staging to the planner while reserving the frozen VLA for local contact-rich phases, Harness VLA extends pretrained VLAs beyond their original trajectory distribution without finetuning. Across perturbed tabletop, household kitchen, and clean-to-randomized bimanual manipulation, Harness VLA improves over the strongest relevant baselines by 38.6 and 25.4 percentage points on LIBERO-Pro and RoboCasa365, respectively, and reaches 58.4% on RoboTwin C2R. Code is available at https://github.com/RLinf/RPent.",
@@ -12849,7 +13102,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2607.04745v2",
-        "recovery_checked_at": "2026-09-25T01:11:21.247108Z",
+        "recovery_checked_at": "2026-09-25T09:30:07.211653Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -13740,22 +13993,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 106,
-    "completion_tokens": 17855,
+    "cache_hits": 133,
+    "completion_tokens": 6060,
     "error_categories": {
       "ValidationError": 2
     },
     "failed": 2,
-    "fetched": 1885,
-    "figure_available": 118,
-    "figure_cache_hits": 92,
+    "fetched": 1754,
+    "figure_available": 116,
+    "figure_cache_hits": 111,
     "figure_failed": 0,
-    "figure_requests": 45,
-    "figure_unavailable": 19,
-    "model_calls": 55,
-    "prefiltered": 161,
-    "prompt_tokens": 47087,
-    "published": 137,
-    "total_tokens": 64942
+    "figure_requests": 18,
+    "figure_unavailable": 13,
+    "model_calls": 19,
+    "prefiltered": 152,
+    "prompt_tokens": 15119,
+    "published": 129,
+    "total_tokens": 21179
   }
 }
