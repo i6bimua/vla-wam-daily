@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-26T01:08:34.444047Z",
+  "generated_at": "2026-10-04T02:21:08.950158Z",
   "papers": [
     {
       "abstract": "Modeling 4D human-object interaction (HOI) is a compelling challenge in computer vision and an essential technology powering virtual and mixed-reality applications. While existing works have achieved promising results on specific HOI tasks-such as text-conditioned HOI generation and human motion generation from object motion, they typically rely on task-specific architectures and lack a unified framework capable of handling diverse conditional inputs. Building on this, we propose Uni-HOI, a unified framework that learns the joint distribution among text, human motion, and object motion. By leveraging large language models (LLMs) and two motion-specific vector quantized variational autoencoders (VQ-VAEs), we convert heterogeneous motion data into token sequences compatible with LLM inputs, enabling seamless integration and joint modeling of all three modalities. We introduce a two-stage training strategy: the first stage performs multi-task learning on a large-scale HOI dataset to capture the underlying correlations among the three modalities, while the second stage fine-tunes the model on specific tasks to further enhance performance. Extensive experiments demonstrate that Uni-HOI achieves remarkable performances on multiple HOI-related tasks including text-driven HOI generation, object motion-driven human motion generation (optionally with text) and human motion-driven object motion prediction within a unified framework.",
@@ -1226,6 +1226,92 @@
       "version": 2
     },
     {
+      "abstract": "Fine-tuning pre-trained Vision-Language Models (VLMs) for robotic manipulation introduces a fundamental stability-plasticity dilemma: continuous flow-matching action experts backpropagate concentrated, low-rank regression gradients into transformer backbones trained on high-dimensional cross-entropy objectives. This cross-modal gradient asymmetry rapidly degrades pre-trained visual reasoning. Existing solutions either disconnect continuous gradient flow via stop-gradients or constrain updates via LoRA, which restricts update rank but remains directionally blind to semantic corruption; both typically rely on mixed-batch VQA co-training, doubling training compute. We introduce AEGIS (Anchor-Enforced Gradient Isolation System), a buffer-free, layer-wise orthogonal gradient projection framework enabling continuous flow-matching fine-tuning while isolating pre-trained representations from destructive parameter updates. Prior to training, AEGIS estimates per-layer Gaussian activation statistics from pre-training data as a static reference anchor. During fine-tuning, a closed-form Wasserstein-2 transport penalty generates an anchor-restoration gradient through the active computation graph. A sequential dual-backward pass applies layer-wise Gram-Schmidt orthogonalization, projecting task gradients onto the orthogonal complement of the restoration vector during directional conflict. We establish an exact energy preservation bound for layer-wise orthogonal projection, showing that AEGIS sheds only 0.62% of gradient energy empirically while halting cumulative feature drift. On PaliGemma2-3B fine-tuned on the LIBERO manipulation benchmark, AEGIS fully preserves pre-trained Visual Question Answering performance and baseline holdout loss while matching continuous action convergence, without replay buffers, teacher models, or co-training data.",
+      "analysis": {
+        "key_results": "在PaliGemma2-3B上微调LIBERO基准时，AEGIS完全保持预训练VQA性能和基线保留损失，同时达到连续动作收敛；经验上仅损失0.62%梯度能量，阻止累积特征漂移。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出AEGIS（锚定梯度隔离系统），一种无缓冲、逐层正交梯度投影方法，在连续流匹配微调期间隔离预训练表示，防止视觉推理退化，无需重放缓冲、教师模型或协同训练数据。",
+        "method": "在训练前从预训练数据估计逐层高斯激活统计作为静态参考锚点；微调时通过闭式Wasserstein-2传输惩罚生成锚定恢复梯度，并在方向冲突时逐层执行Gram-Schmidt正交化，将任务梯度投影到恢复向量的正交补空间。",
+        "one_sentence_summary": "提出AEGIS框架，通过逐层正交梯度投影隔离预训练表示，实现VLA模型连续流匹配微调同时保持预训练知识。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "论文直接针对VLA模型（PaliGemma2-3B）在机器人操作（LIBERO基准）上的微调，解决跨模态梯度不对称导致的预训练知识遗忘问题，属于VLA高效微调方法，与本站主题高度相关。",
+        "relevance_score": 9,
+        "tags": [
+          "Efficient Inference",
+          "Policy Learning",
+          "Robot Manipulation",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.CV"
+      ],
+      "arxiv_id": "2604.16067",
+      "authors": [
+        "Guransh Singh"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-10-04T02:21:08.950158Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2604.16067/v2/fig1-panel1.png"
+            ],
+            "caption": "Empirical evidence of cross-modal gradient asymmetry. Singular-value spectrum of real gradients extracted from an intermediate feed-forward down-projection layer (Layer 16) of PaliGemma2-3B. The VQA cross-entropy gradient (red) maintains substantial energy across high-order singular dimensions, spanning the broad semantic manifold required for 257,000 257{,}000 -class vocabulary prediction. The robotic flow-matching MSE gradient (blue) exhibits steep spectral collapse, concentrating > 90 % >90\\% of its energy in the top ∼ 20 \\sim 20 singular dimensions corresponding to 7 7 -DoF physical regression.",
+            "image_urls": [
+              "https://arxiv.org/html/2604.16067v2/figures/fig_spectral_mismatch.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2604.16067v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2604.16067/v2/fig2-panel1.png",
+              "/figures/2604.16067/v2/fig2-panel2.png"
+            ],
+            "caption": "Mechanistic evidence of representation preservation and gradient conflict. (a) 2D PCA projection of last-layer hidden states onto the catastrophic-drift plane. Base (blue) is ground truth; Naive FT (red) collapses into a degenerate cluster; AEGIS (green) firmly anchors representations to the pre-trained distribution. (b) Microscopic per-neuron cosine similarity between task and anchor gradients at Layer 16. Pervasive negative alignment ( [ − 1 , 0 ) [-1,0) ) demonstrates why orthogonal projection is necessary to halt cumulative drift.",
+            "image_urls": [
+              "https://arxiv.org/html/2604.16067v2/figures/fig_manifold_preservation.png",
+              "https://arxiv.org/html/2604.16067v2/figures/fig_gradient_conflict.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2604.16067v2#S6.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2604.16067v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-04T02:21:08.950158Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-04-17T13:49:57Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2604.16067",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2604.16067",
+        "project_url": null
+      },
+      "title": "AEGIS: Anchor-Enforced Gradient Isolation for Knowledge-Preserving Vision-Language-Action Fine-Tuning",
+      "title_zh": "AEGIS：锚定梯度隔离实现知识保持的视觉-语言-动作微调",
+      "updated_at": "2026-10-01T11:13:03Z",
+      "version": 2
+    },
+    {
       "abstract": "Current post-training methodologies for adapting Large Vision-Language Models (LVLMs) generally fall into two paradigms: Supervised Fine-Tuning (SFT) and Reinforcement Learning (RL). Despite their prevalence, both approaches suffer from inefficiencies when applied in isolation. SFT forces the model's generation along a single expert trajectory, often inducing catastrophic forgetting of general multimodal capabilities due to distributional shifts. Conversely, RL explores multiple generated trajectories but frequently encounters optimization collapse - a cold-start problem where an unaligned model fails to spontaneously sample any domain-valid trajectories in sparse-reward visual tasks. In this paper, we propose Supervised Group Relative Policy Optimization (S-GRPO), a unified post-training framework that integrates the guidance of imitation learning into the multi-trajectory exploration of preference optimization. Tailored for direct-generation visual tasks, S-GRPO introduces Conditional Ground-Truth Trajectory Injection (CGI). When a binary verifier detects a complete exploratory failure within a sampled group of trajectories, CGI injects the verified ground-truth trajectory into the candidate pool. By assigning a deterministic maximal reward to this injected anchor, S-GRPO enforces a positive signal within the group-relative advantage estimation. This mechanism reformulates the supervised learning objective as a high-advantage component of the policy gradient, compelling the model to dynamically balance between exploiting the expert trajectory and exploring novel visual concepts. Theoretical analysis and empirical results demonstrate that S-GRPO gracefully bridges the gap between SFT and RL, drastically accelerates convergence, and achieves superior domain adaptation while preserving the base model's general-purpose capabilities.",
       "analysis": {
         "key_results": "S-GRPO弥合SFT与RL的差距，大幅加速收敛，在保持基座模型通用能力的同时实现更优的领域适应。",
@@ -1538,7 +1624,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2604.13824v2",
-        "recovery_checked_at": "2026-09-28T10:41:40.660598Z",
+        "recovery_checked_at": "2026-10-04T02:25:48.538536Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -3571,7 +3657,7 @@
         "checked_at": "2026-08-13T05:41:39.833674Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2604.02047v2",
-        "recovery_checked_at": "2026-09-28T10:41:40.660598Z",
+        "recovery_checked_at": "2026-10-04T02:25:48.538536Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -3686,20 +3772,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 120,
-    "completion_tokens": 682,
-    "error_categories": {},
-    "failed": 0,
-    "fetched": 1275,
-    "figure_available": 96,
-    "figure_cache_hits": 95,
+    "cache_hits": 0,
+    "completion_tokens": 22841,
+    "error_categories": {
+      "ValidationError": 2
+    },
+    "failed": 2,
+    "fetched": 862,
+    "figure_available": 52,
+    "figure_cache_hits": 0,
     "figure_failed": 0,
-    "figure_requests": 8,
+    "figure_requests": 59,
     "figure_unavailable": 7,
-    "model_calls": 2,
-    "prefiltered": 122,
-    "prompt_tokens": 1749,
-    "published": 103,
-    "total_tokens": 2431
+    "model_calls": 71,
+    "prefiltered": 71,
+    "prompt_tokens": 61599,
+    "published": 59,
+    "total_tokens": 84440
   }
 }
