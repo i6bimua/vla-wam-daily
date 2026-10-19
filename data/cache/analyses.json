@@ -1,4 +1,59 @@
 {
+  "analysis:v1:000e16c804135a1f345466058f91a254858f26914de85b439fd981492971f2c6": {
+    "key": "analysis:v1:000e16c804135a1f345466058f91a254858f26914de85b439fd981492971f2c6",
+    "record": {
+      "abstract": "Deploying Large Language Models (LLMs) on mobile devices enhances privacy and reduces latency, but is severely constrained by hardware inefficiencies. We present the first comprehensive, cross-layer measurement study of mobile LLM inference, spanning five mainstream frameworks (e.g., llama.cpp and GENIE) and three hardware backends (CPU, GPU, and NPU). To enable this analysis, we develop PowerBench, a fine-grained profiling tool that measures LLM throughput and provides the first backend-specific energy attribution for mobile LLM inference, going beyond traditional device-level measurements. We further conduct hardware microbenchmarks to characterize the memory-system performance and compute capabilities of mobile CPUs, GPUs, and NPUs. Our study yields three critical insights: (1) Framework-induced performance gaps are substantially amplified on NPUs, reaching up to $10\\times$ due to differences in offloading strategies, hardware-underutilizing operators, and activation quantization strategies. (2) We identify a distinct ``phase split,'' in which NPUs excel at compute-bound prefilling, while CPUs outperform all other backends in memory-bound decoding. This split is driven by NPUs' preference for large, fixed-shape workloads, which conflicts with the small-kernel, dynamic nature of decoding. (3) Backend-specific profiling uncovers substantial scheduling headroom missed by prior work. Suboptimal thread configurations, uncoordinated NPU sleep latencies, and CPU polling intervals result in unnecessary energy consumption. For example, tuning CPU frequency alone reduces energy consumption by up to $39.7\\%$. Leveraging these findings, we estimate that an energy-oriented configuration can reduce energy consumption by up to $53.2\\%$ on the NPU backend across three datasets, highlighting the substantial potential for further efficiency improvements in mobile LLM deployment.",
+      "analysis": {
+        "key_results": "NPU上框架引起的性能差距可达10倍；NPU在计算密集的预填充阶段表现出色，而CPU在内存密集的解码阶段优于其他后端；通过调优CPU频率可降低能耗高达39.7%，针对NPU后端的能耗导向配置可降低53.2%的能耗。",
+        "limitations": "摘要未说明",
+        "main_contribution": "首次对移动LLM推理进行了全面的跨层测量研究，开发了PowerBench工具以提供后端特定的能耗归因，并识别出NPU上框架引发的性能差距、预填充与解码阶段的相位分裂以及调度余量等关键瓶颈。",
+        "method": "跨层测量研究：使用PowerBench工具进行细粒度分析，结合硬件微基准测试，对五个框架和三种硬件后端进行比较。",
+        "one_sentence_summary": "本文对移动端LLM推理进行了跨层测量研究，揭示了框架、硬件后端（CPU/GPU/NPU）和配置对性能和能耗的影响，并提出了节能优化配置。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文专注于移动设备上的LLM推理效率，未直接涉及视觉-语言-动作（VLA）模型或世界-动作模型（WAM）。但其对量化、硬件后端特性和能耗优化的分析，对在移动端部署机器人策略模型或世界模型可能具有方法论参考价值。",
+        "relevance_score": 6,
+        "tags": [
+          "Efficient Inference",
+          "Model Quantization"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.AR",
+        "cs.AI"
+      ],
+      "arxiv_id": "2607.05475",
+      "authors": [
+        "Guanyu Cai",
+        "Ruiming Tian",
+        "Lang Yang",
+        "Zhouhong Ren",
+        "Jinliang Yuan",
+        "Lingkun Li",
+        "Jiliang Wang"
+      ],
+      "matched_rules": [
+        "exact:activation-quantization",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-19T00:44:19.807797Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-07-06T09:42:34Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2607.05475",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2607.05475",
+        "project_url": null
+      },
+      "title": "Is Your NPU Ready for LLMs? Dissecting the Hidden Efficiency Bottlenecks in Mobile LLM Inference",
+      "title_zh": "你的NPU准备好迎接LLM了吗？剖析移动LLM推理中隐藏的效率瓶颈",
+      "updated_at": "2026-10-16T07:18:47Z",
+      "version": 2
+    }
+  },
   "analysis:v1:00187b784b3a17b0bbf35f61f7cce4466b88b52b25cf42cbdd6de5aa715d9004": {
     "key": "analysis:v1:00187b784b3a17b0bbf35f61f7cce4466b88b52b25cf42cbdd6de5aa715d9004",
     "record": {
@@ -26135,6 +26190,54 @@
       "version": 2
     }
   },
+  "analysis:v1:27ce0452ffcedcbb85240f9e797c2275755a2e85ff8f9bd205b1562db3f5166e": {
+    "key": "analysis:v1:27ce0452ffcedcbb85240f9e797c2275755a2e85ff8f9bd205b1562db3f5166e",
+    "record": {
+      "abstract": "Camera-only end-to-end (E2E) driving models are nearing deployment, where the camera stream is degraded by blur, noise, low light, weather, frame loss, and memory faults. How much a policy tolerates before its driving breaks is unclear. Corruption-robustness benchmarks target detection or bird's-eye-view perception, not the planning output that drives the car. We present DriveDegrade, a benchmark for image-degradation tolerance in camera-only E2E driving. Sixteen corruption families at five severities are injected on the fly inside the image loader, one operator reaching fifteen policies, and we evaluate open-loop planning on nuScenes and NAVSIM plus a CARLA closed-loop anchor. First, mild degradation barely affects planning, and the families that break it have a clear threshold at mid severity. Second, fragility is corruption-dependent: blur, JPEG, and raindrop damage planning most, while weather and bit error are tolerated far into the range. Third, a flat curve is ambiguous, so we separate corruptions that degrade the image from those that remove it. A planner that reads its camera must lose accuracy when information is deleted, whatever it does under quality loss. On these two axes the planners separate sharply, quantifying the ego-status shortcut without mistaking indifference for robustness. A released vision-language-action planner is flat on both axes, and blinding all six of its cameras costs it only 11.5 percent.",
+      "analysis": {
+        "key_results": "轻度退化几乎不影响规划；模糊、JPEG和雨滴破坏最大，天气和比特错误容忍度较高；发布的一个视觉-语言-动作规划器在信息删除轴上表现平稳，遮盲全部六路摄像头仅损失11.5%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出DriveDegrade基准，用于测量纯摄像头端到端驾驶模型在16类图像退化下的规划容忍度，并揭示腐败依赖性、阈值效应及自我状态捷径等特性。",
+        "method": "在图像加载器中在线注入16类、5种严重程度的图像退化，对15个策略在nuScenes和NAVSIM上进行开环规划评估，并以CARLA闭环作为锚点。",
+        "one_sentence_summary": "提出DriveDegrade基准，系统评估纯摄像头端到端驾驶策略在16类图像腐蚀下的规划容忍度。",
+        "primary_topic": "Benchmark",
+        "relation_to_vla_wam": "包含端到端驾驶和视觉-语言-动作规划器的评估，间接与VLA模型在退化条件下的鲁棒性相关；不涉足世界模型，但与机器人感知-规划系统的鲁棒性评估有方法论价值。",
+        "relevance_score": 8,
+        "tags": [
+          "Evaluation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2608.29005",
+      "authors": [
+        "Haohua Que",
+        "Handong Yao"
+      ],
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-19T00:44:19.807797Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-08-29T02:34:47Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2608.29005",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2608.29005",
+        "project_url": null
+      },
+      "title": "When Does Corruption Break the Plan? A Degradation-Tolerance Benchmark for Camera-Only End-to-End Driving",
+      "title_zh": "何时腐蚀会破坏规划？面向纯摄像头端到端驾驶的图像退化容忍度基准",
+      "updated_at": "2026-10-16T04:01:56Z",
+      "version": 3
+    }
+  },
   "analysis:v1:27d05007a4d73e5ed22736e642f6df72ba6e6b145fec5c42c71dd6c975f18819": {
     "key": "analysis:v1:27d05007a4d73e5ed22736e642f6df72ba6e6b145fec5c42c71dd6c975f18819",
     "record": {
@@ -30933,6 +31036,68 @@
       "version": 4
     }
   },
+  "analysis:v1:305bcc92d24755a8c33f7fb325dbe597b7e7f86b7ac657c3132b0a132dac2af0": {
+    "key": "analysis:v1:305bcc92d24755a8c33f7fb325dbe597b7e7f86b7ac657c3132b0a132dac2af0",
+    "record": {
+      "abstract": "Due to the high cost of hardware experiments, robot policies are predominantly evaluated by comparing their empirical performance on a limited number of hardware trials. However, finite-sample statistical uncertainty can lead to erroneous conclusions, especially when ranking multiple policies using a fixed batch of evaluation data. We propose AnyRank: a sequential method for multi-policy ranking that (i) adaptively allocates trials to hard-to-separate policies, (ii) provides (partial) rankings at any stopping time while bounding the probability of an incorrect ranking, and (iii) optionally exploits prior information to prioritize hardware evaluations more efficiently. This prior information could be informed from expert intuition, a small set of held-out hardware evaluations, or from policy rollouts in a simulator or an action-conditioned video world model. Notably, the prior can be imperfect; while a strong prior can provide efficiency gains on hardware, any inaccuracies in prior policy rankings do not invalidate the statistical assurances of AnyRank. We achieve the aforementioned properties through novel theoretical contributions that combine sequential testing with multiple-hypothesis graphical testing approaches. Experiments in simulation and real-world policy evaluation benchmarks show that AnyRank requires up to 50% fewer hardware evaluations compared to existing statistically rigorous approaches, while guarding against the incorrect rankings produced by heuristic methods used by state-of-the-art benchmarks.",
+      "analysis": {
+        "key_results": "在仿真和真实世界政策评估基准中，AnyRank相比现有统计严格方法所需硬件评估次数减少高达50%，同时规避了启发式方法的错误排名。",
+        "limitations": "摘要未说明",
+        "main_contribution": "AnyRank是一种基于序贯检验和多重假设图检验的多策略排名方法，具有自适应试验分配、随时提供部分排名且错误概率有界、可利用可能不完美的先验信息等特性。",
+        "method": "结合序贯检验与多重假设图形化检验，实现自适应试验分配，并可融合专家直觉、少量硬件评估、模拟器或动作条件视频世界模型中的先验信息。",
+        "one_sentence_summary": "提出了一种序贯多策略排名方法AnyRank，在保证排名错误概率有界的同时，自适应分配硬件试验并利用先验信息减少评估成本。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "AnyRank可用于高效评估机器人策略排名，其先验信息来源可包括动作条件视频世界模型或模拟器，因此与VLA（机器人策略评估）以及世界模型（作为先验信息提供者）直接相关。虽然本文重点在于策略评估方法而非策略学习本身，但能有效减少硬件试验次数，对机器人学习领域的可靠评估具有重要意义。",
+        "relevance_score": 9,
+        "tags": [
+          "Robot Learning",
+          "Evaluation",
+          "Policy Learning",
+          "World Modeling",
+          "Simulation",
+          "Robot Manipulation",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.SY",
+        "eess.SY"
+      ],
+      "arxiv_id": "2610.14603",
+      "authors": [
+        "Apurva Badithela",
+        "David Snyder",
+        "Tenny Yin",
+        "Jade Sceats",
+        "George Pappas",
+        "Nikolai Matni",
+        "Masha Itkina",
+        "Haruki Nishimura",
+        "Anirudha Majumdar"
+      ],
+      "matched_rules": [
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-19T00:44:19.807797Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-10-10T05:42:57Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2610.14603",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2610.14603",
+        "project_url": null
+      },
+      "title": "AnyRank: Reliable Anytime Policy Ranking via Sequential Testing",
+      "title_zh": "AnyRank：通过序贯检验实现可靠的多策略随时排名",
+      "updated_at": "2026-10-16T01:16:08Z",
+      "version": 2
+    }
+  },
   "analysis:v1:3069196d401af2b93f85537e5cb697424c0c0196844bf2060b90a65b6fd7d8eb": {
     "key": "analysis:v1:3069196d401af2b93f85537e5cb697424c0c0196844bf2060b90a65b6fd7d8eb",
     "record": {
@@ -33402,6 +33567,61 @@
       "title_zh": "PreResQ-R1：面向鲁棒视觉质量评估的响应-偏好解耦排序与评分强化优化",
       "updated_at": "2026-08-26T14:18:32Z",
       "version": 2
+    }
+  },
+  "analysis:v1:344700ab2aa6a5fb8e279543ad9b5f7c0d09e5cbc51b10aa6c1fe8e4c157e706": {
+    "key": "analysis:v1:344700ab2aa6a5fb8e279543ad9b5f7c0d09e5cbc51b10aa6c1fe8e4c157e706",
+    "record": {
+      "abstract": "Vision-language-action (VLA) models have shown strong promise for generalist robotic manipulation, but their inference cost remains a major bottleneck for real-time control. This limitation is especially pronounced in flow-matching VLAs such as $\\pi_{0.5}$, where the action expert is evaluated repeatedly during iterative denoising. We introduce MambaAct, an efficient Mamba action expert for flow-matching VLA policies. MambaAct retains the pretrained visual-language prefix encoder of $\\pi_{0.5}$, while replacing its transformer-based action expert with a compact Mamba-based action expert. Within this expert, Mamba serves as the action mixer that models dependencies across the noisy continuous-action sequence. To preserve visual-language conditioning without repeated token-level cross-attention, MambaAct uses a lightweight Context Compressor to map Vision-language model (VLM) prefix tokens into a compact conditioning signal that gates and modulates each Mamba action block. MambaAct uses a $10\\times$ smaller action expert and reduces flow-matching denoising latency by $64.8\\%$ on LIBERO and $58.8\\%$ in real-world deployment, while improving mean LIBERO success by $1.08$ percentage points across three independent fine-tuning seeds and maintaining gains on LIBERO-Plus and real-world benchmarks. Our code and model weights are publicly available at https://github.com/giakhuyendihoc/MambaAct.",
+      "analysis": {
+        "key_results": "动作专家减小10倍，LIBERO上流匹配去噪延迟降低64.8%，真实世界部署延迟降低58.8%，LIBERO平均成功率在三个独立微调种子下提升1.08个百分点，并在LIBERO-Plus和真实世界基准上保持增益。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出MambaAct，一种高效的Mamba动作专家，用于流匹配VLA策略，在保留预训练视觉-语言前缀编码器的同时，将Transformer动作专家替换为紧凑的Mamba架构。",
+        "method": "用基于Mamba的动作专家替换π0.5中的Transformer动作专家，并引入轻量级上下文压缩器，将VLM前缀token映射为紧凑的条件信号来门控和调制Mamba块。",
+        "one_sentence_summary": "MambaAct通过将π0.5流匹配VLA中的Transformer动作专家替换为紧凑的Mamba动作专家，降低推理延迟并保持或提升性能。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该论文直接针对VLA模型进行高效推理优化，通过用Mamba替换动作专家并压缩条件信号，在不损失性能的前提下显著降低延迟，与VLA主题高度相关。",
+        "relevance_score": 9,
+        "tags": [
+          "Efficient Inference",
+          "Robot Learning",
+          "Robot Manipulation",
+          "Vision-Language",
+          "Policy Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.CV"
+      ],
+      "arxiv_id": "2610.22951",
+      "authors": [
+        "Khuyen Pham",
+        "Tran Nguyen Le",
+        "Edoardo Fazzari",
+        "Cesare Stefanini"
+      ],
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-19T00:44:19.807797Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-10-16T05:20:45Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2610.22951",
+        "code_url": "https://github.com/giakhuyendihoc/MambaAct",
+        "pdf_url": "https://arxiv.org/pdf/2610.22951",
+        "project_url": null
+      },
+      "title": "MambaAct: Efficient Mamba Action Experts for Flow-Matching Vision-Language-Action Models",
+      "title_zh": "MambaAct：面向流匹配视觉-语言-动作模型的高效Mamba动作专家",
+      "updated_at": "2026-10-16T05:20:45Z",
+      "version": 1
     }
   },
   "analysis:v1:345e5f480d15566802fc5d4ec42dc0aac08b1ea82e5f82588dff3ffa9e58751e": {
@@ -42158,6 +42378,57 @@
       "version": 1
     }
   },
+  "analysis:v1:425cf1e403ad2f3efdbc93df08fc2d16095f16cd04379dc91065f3b21bcebb7a": {
+    "key": "analysis:v1:425cf1e403ad2f3efdbc93df08fc2d16095f16cd04379dc91065f3b21bcebb7a",
+    "record": {
+      "abstract": "Poor illumination and occlusion obscure clothing cues in indoor work sites, while diverse clothing styles complicate workwear compliance judgments. Although vision-language models (VLMs) support localization and semantic reasoning, their predictions often lack explicit supporting evidence, and a single confidence score cannot distinguish visual uncertainty from ambiguity in compliance judgments. We propose DICL-Qwen3VL, a decoupled interpretable VLM that integrates structured workwear detection, evidence generation, and separate visual and reasoning confidence estimates. First, low-rank adaptation (LoRA) adapts Qwen3-VL to localize visible upper-body clothing and identify workwear. Second, decoupled calibration separates visual observations from compliance reasoning and assigns a confidence score to each. Token entropy and sensitivity to image perturbations provide supervision for visual confidence, linking confidence estimation to the generated observations and their dependence on image content. Finally, group relative policy optimization (GRPO) jointly optimizes detection accuracy, output validity, and confidence calibration. Experiments on the company-collected Indoor Construction Site Workwear Dataset (ICSWD) and the web-collected Indoor Construction Workwear Dataset (WICWD) yield mAP@50 values of 0.730 and 0.753, respectively, outperforming the evaluated LoRA-adapted VLM baselines, including Qwen3-VL. The framework also provides explicit evidence and separate confidence scores to support manual review in industrial safety monitoring. WICWD is publicly available at https://github.com/DaErwen1/WICWD.",
+      "analysis": {
+        "key_results": "在自建ICSWD和公开WICWD数据集上，mAP@50分别为0.730和0.753，优于LoRA适配的Qwen3-VL等VLM基线。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出DICL-Qwen3VL框架，将工装检测与置信度解耦，生成显式证据并分别估计视觉与推理置信度，通过GRPO联合优化检测、有效性和校准。",
+        "method": "基于Qwen3-VL，使用LoRA适配定位上衣并识别工装；通过令牌熵和图像扰动敏感性监督视觉置信度；利用组相对策略优化（GRPO）联合优化检测精度、输出有效性和置信度校准。",
+        "one_sentence_summary": "提出DICL-Qwen3VL，通过解耦视觉与推理置信度、证据生成和GRPO联合优化，提升室内施工工装检测的可解释性与置信度校准。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "本文聚焦于工业安全监控中的可解释视觉检测与置信度校准，与VLA（视觉-语言-动作）或WAM（世界-动作模型）无直接关联，但其解耦置信度校准和GRPO优化思想对VLA中可靠决策与不确定性估计具有潜在方法论参考价值。",
+        "relevance_score": 6,
+        "tags": [
+          "Efficient Inference",
+          "Vision-Language",
+          "Evaluation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV"
+      ],
+      "arxiv_id": "2610.22929",
+      "authors": [
+        "Meng Wang",
+        "Wu Zeng",
+        "Mei Li",
+        "and Chao He"
+      ],
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-19T00:44:19.807797Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-10-16T04:46:20Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2610.22929",
+        "code_url": "https://github.com/DaErwen1/WICWD",
+        "pdf_url": "https://arxiv.org/pdf/2610.22929",
+        "project_url": null
+      },
+      "title": "DICL-Qwen3VL: Decoupled Confidence Calibration for Interpretable Workwear Detection",
+      "title_zh": "DICL-Qwen3VL：面向可解释工装检测的解耦置信度校准",
+      "updated_at": "2026-10-16T04:46:20Z",
+      "version": 1
+    }
+  },
   "analysis:v1:427568b0cbad3fa31ad84d8e66aae6230a1bf8323e5301b53b6c117046635615": {
     "key": "analysis:v1:427568b0cbad3fa31ad84d8e66aae6230a1bf8323e5301b53b6c117046635615",
     "record": {
@@ -50788,6 +51059,61 @@
       "version": 1
     }
   },
+  "analysis:v1:50cd9daeca42700400b54eee1cae762084fbc5a7df5437177c7adfbf0a5feb56": {
+    "key": "analysis:v1:50cd9daeca42700400b54eee1cae762084fbc5a7df5437177c7adfbf0a5feb56",
+    "record": {
+      "abstract": "On neuromorphic chips, spiking neural networks (SNNs) consume far less energy than artificial neural networks (ANNs), but the limited memory of these chips requires low-bit synaptic weights and membrane potentials. Existing post-training quantization (PTQ) methods provide them without retraining and, like those for ANNs, minimize numerical errors such as the mean squared error (MSE). In an SNN, however, a quantization error reaches later layers only through the spikes it flips. We find that errors of equal MSE can cause very different accuracy losses, whereas errors that flip the same fraction of spikes cause the same loss. We therefore propose SpikeQ, a spike-guided PTQ framework. For weights, we select the level of each weight by simulating the downstream neurons and minimizing their spike errors. For membrane potentials, most existing methods quantize the state after the reset, whereas neuromorphic chips compare the threshold with the membrane potential stored at a fixed bit width. We target this pre-fire quantization and build a reset-aware grid that places the threshold on a rounding boundary, so rounding never flips the spike at the current time step. We evaluate SpikeQ on seven benchmarks of image classification, semantic segmentation, and object detection. With 2-bit pre-fire membrane potentials, every existing grid collapses, whereas SpikeQ retains most of the full-precision accuracy. With both at 4 bits, the models stay within 2.59 points of full precision, shrink their memory footprint 7.8--7.9 times, and use 6.4--6.9 times less energy.",
+      "analysis": {
+        "key_results": "在七个图像分类、语义分割和目标检测基准上，2比特预触发膜电位量化下，现有网格方法崩溃而SpikeQ保持大部分全精度准确率；4比特权重和膜电位量化下，模型准确率与全精度相差不超过2.59个百分点，存储占用缩小7.8–7.9倍，能耗降低6.4–6.9倍。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出SpikeQ脉冲引导训练后量化框架，从最小化脉冲翻转误差的角度出发，分别对权重和膜电位进行量化。",
+        "method": "对权重，通过模拟下游神经元并最小化脉冲误差来选择量化层级；对膜电位，设计重置感知网格，将阈值置于舍入边界上以避免当前时间步的脉冲翻转。",
+        "one_sentence_summary": "该论文提出SpikeQ，一种针对脉冲神经网络的脉冲引导训练后量化框架，通过最小化脉冲翻转误差而非传统数值误差来提升低比特量化效果。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "该论文专注于脉冲神经网络的高效推理量化，未直接涉及VLA、WAM或机器人动作世界建模。但量化作为高效推理的关键技术，可用于后续在机器人平台上部署脉冲神经网络模型，对结合量化的VLA/WAM或机器人策略具有潜在方法学价值。",
+        "relevance_score": 7,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.NE",
+        "cs.AI",
+        "cs.CV"
+      ],
+      "arxiv_id": "2610.23046",
+      "authors": [
+        "Kai Sun",
+        "Peibo Duan",
+        "Zhanglu Yan",
+        "Guowei Zhang",
+        "Yongsheng Huang",
+        "Levin Kuhlmann"
+      ],
+      "matched_rules": [
+        "exact:post-training-quantization",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-19T00:44:19.807797Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-10-16T07:24:52Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2610.23046",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2610.23046",
+        "project_url": null
+      },
+      "title": "SpikeQ: Spike-Guided Post-Training Quantization for Spiking Neural Networks",
+      "title_zh": "SpikeQ：面向脉冲神经网络的脉冲引导训练后量化",
+      "updated_at": "2026-10-16T07:24:52Z",
+      "version": 1
+    }
+  },
   "analysis:v1:50d18157055f58e2b823eacc570eb8728148e5741cc65154a3f8e6e5d56b7aa8": {
     "key": "analysis:v1:50d18157055f58e2b823eacc570eb8728148e5741cc65154a3f8e6e5d56b7aa8",
     "record": {
@@ -52937,6 +53263,61 @@
       "version": 1
     }
   },
+  "analysis:v1:55588b97b4dde1c7bb804165e9494fbb746f2149a11733156b5e7f71159aae8e": {
+    "key": "analysis:v1:55588b97b4dde1c7bb804165e9494fbb746f2149a11733156b5e7f71159aae8e",
+    "record": {
+      "abstract": "Reliable contact-rich manipulation requires detecting execution deviations early enough for corrective action. Yet most monitoring methods are reactive, identifying anomalies only after they become observable. Anticipating such anomalies is challenging because visual observations only partially reveal physical interaction, while planned actions describe intended motion rather than their actual physical consequences. We address this problem with MAIA, a multimodal framework for anomaly anticipation. Its vision-action-force world model learns nominal interaction dynamics and predicts the visual and force responses of planned actions, while a lightweight anomaly head predicts impending interaction anomalies. To enable systematic evaluation, we introduce CRIA, a real-world multimodal dataset of 2,852 trajectories spanning 18 contact-rich manipulation tasks, with frame-level annotations of anomaly onset and evolution. Experiments on both seen and novel tasks show that MAIA achieves more accurate anomaly discrimination than representative baselines while providing earlier warnings, with bACC scores of 0.765 and 0.710 and median anticipation lead times of 28.0 and 25.1 steps, respectively. Moreover, using these predictions for anomaly-aware action selection improves end-to-end task success from 52.6% to 61.5% without retraining the underlying manipulation policy. These results highlight the value of modeling future physical consequences for proactive anomaly anticipation.",
+      "analysis": {
+        "key_results": "在已见和未见任务上，MAIA的bACC分别为0.765和0.710，中位预警提前步数分别为28.0和25.1；用于异常感知动作选择可将端到端任务成功率从52.6%提升至61.5%，无需重新训练底层策略。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出MAIA多模态异常预测框架，并引入CRIA真实世界多模态数据集，包含2,852条轨迹、18个接触丰富操作任务及帧级异常标注。",
+        "method": "使用视觉-动作-力的世界模型学习名义交互动力学，预测规划动作的视觉和力响应，并通过轻量级异常头预测即将发生的交互异常。",
+        "one_sentence_summary": "提出MAIA框架，利用视觉-动作-力的世界模型预测未来物理后果，实现接触丰富操作中的异常提前预测。",
+        "primary_topic": "World Model",
+        "relation_to_vla_wam": "高度相关：该工作属于机器人世界模型范畴，通过建模动作的未来物理后果（视觉和力响应）来预测异常，可直接为VLA或WAM中的前瞻性决策提供支持。",
+        "relevance_score": 9,
+        "tags": [
+          "World Modeling",
+          "Vision-Language",
+          "Robot Manipulation",
+          "Action Prediction",
+          "Data"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2610.21686",
+      "authors": [
+        "Yi Qiao",
+        "Maolin Zheng",
+        "Haoran Sun",
+        "Lujia Dong",
+        "Wenzhao Lian"
+      ],
+      "matched_rules": [
+        "composite:vision_language_robotics",
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-19T00:44:19.807797Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-10-15T11:11:27Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2610.21686",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2610.21686",
+        "project_url": null
+      },
+      "title": "MAIA: Anticipating Interaction Anomalies in Contact-Rich Manipulation via Multimodal World Models",
+      "title_zh": "MAIA：基于多模态世界模型的接触丰富操作异常预测",
+      "updated_at": "2026-10-16T02:37:45Z",
+      "version": 2
+    }
+  },
   "analysis:v1:55936750919de166403b2bc1ac054de1d52c424613df76b4c79ca00a0c6415cb": {
     "key": "analysis:v1:55936750919de166403b2bc1ac054de1d52c424613df76b4c79ca00a0c6415cb",
     "record": {
@@ -54524,6 +54905,55 @@
       "title": "Fractional Power-of-Two Quantization for Efficient and Effective Multiplier-Free LLM Inference",
       "title_zh": "分数二幂量化：高效且有效的无乘法器大语言模型推理",
       "updated_at": "2026-10-15T04:50:03Z",
+      "version": 1
+    }
+  },
+  "analysis:v1:576bef4cb2afece8d7388ca1af2d3f1fbba25219e71673aeb12548cca2f746a9": {
+    "key": "analysis:v1:576bef4cb2afece8d7388ca1af2d3f1fbba25219e71673aeb12548cca2f746a9",
+    "record": {
+      "abstract": "Automated research ideation has advanced rapidly, with multi-agent workflows that generate whole research ideas end to end. These frameworks leave largely unexamined the step that seeds a good idea: identifying an actionable limitation from literature. In this paper, we focus on this first step in the research ideation pipeline. Starting from a pilot study, we find that as large language models (LLMs) scale from 0.6B to 32B parameters, they become far better at recognizing which limitation later work addressed, but no better at generating one, suggesting that the bottleneck lies in the supervision signal rather than model capacity. We therefore construct ActLim-Bench from forward citations, yielding 18,279 evidence-linked supervision triples with human verification. On this signal, we propose a three-stage post-training pipeline: supervised fine-tuning, verifier-filtered rejection-sampling fine-tuning, and reinforcement learning with the verifier as an online dense reward. Experimental results show that our method achieves the highest recall score compared to existing methods among all frontier models. We further show that our generated limitations are preferred in 64.9% of non-tied human comparisons and improve downstream ideation systems. We will release our data and code upon publication.",
+      "analysis": {
+        "key_results": "方法在所有前沿模型中取得最高召回率；生成的局限在非平局人类比较中64.9%被偏好；能改进下游构思系统。",
+        "limitations": "摘要未说明",
+        "main_contribution": "构建了包含18,279条证据链接监督样本的ActLim-Bench数据集，并提出三阶段后训练流程以生成可操作的研究局限。",
+        "method": "利用前向引用构建监督数据，结合监督微调、验证器过滤的拒绝采样微调和强化学习进行模型训练。",
+        "one_sentence_summary": "论文通过前向引用构建数据集，并训练模型生成可操作的研究局限，与VLA/WAM及高效推理主题无直接关联。",
+        "primary_topic": "Dataset",
+        "relation_to_vla_wam": "不涉及VLA、WAM或机器人动作-世界建模，与本站主题无直接关系。",
+        "relevance_score": 1,
+        "tags": [
+          "Data",
+          "Evaluation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.AI"
+      ],
+      "arxiv_id": "2610.23038",
+      "authors": [
+        "Liyang Zhao",
+        "Yong Cao",
+        "Haibin Ling"
+      ],
+      "matched_rules": [
+        "composite:draft_verification_decoding"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-19T00:44:19.807797Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-10-16T07:14:34Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2610.23038",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2610.23038",
+        "project_url": null
+      },
+      "title": "Where Research Ideation Begins: Forward-Citation Supervision for Actionable Limitation Generation",
+      "title_zh": "研究构思始于何处：通过前向引用监督生成可操作的研究局限",
+      "updated_at": "2026-10-16T07:14:34Z",
       "version": 1
     }
   },
@@ -65556,6 +65986,59 @@
       "version": 2
     }
   },
+  "analysis:v1:6883afe55a35af93fc0b9bff04195186d17576ac5f866ed84e4247e2b57fc6ae": {
+    "key": "analysis:v1:6883afe55a35af93fc0b9bff04195186d17576ac5f866ed84e4247e2b57fc6ae",
+    "record": {
+      "abstract": "Reasoning rerankers write a rationale before ranking a candidate slate, and existing systems read item metadata to do so, even though generative recommenders increasingly represent items as compact Semantic IDs (SIDs). Ranking from SIDs alone has two appeals: SID prompts are far shorter than the matched item text, and although item codes are fixed from content, the backbone learns their token embeddings in part from user-item interaction sequences, so the tokens can carry behavioral signal that item text lacks. That training targets next-item generation, and whether it supports ranking a supplied slate from SIDs alone is untested. We build ReRankID, a controlled testbed in which models reason and rank from a history and slate shown only as SIDs, varying item rendering, history length, and slate size one at a time. On this testbed, such models often copy the input order instead of reranking, and readable metadata does not repair the failure. We compare supervised fine-tuning, rejection-sampled self-training, on-policy distillation, and verifier-based reinforcement learning as post-training methods and find that they elicit the missing behavior. The strongest post-trained model, the 8B model trained with a graded ranking reward, gives the best SID-only ranking and matches strong text-reading LLMs whose prompts are about 20x longer. It ranks above random with no history at all, where a caption-reading reference does not, and it keeps its gains at long histories, where text prompts pass 50k tokens and the caption-reading reference stops improving. In a paired rationale audit, this model argues trade-offs better than that reference but describes items less accurately. The common post-training methods we test thus elicit ranking from SIDs but not faithful item descriptions, which calls for post-training that improves the reasoning itself, not only the ranking it produces.",
+      "analysis": {
+        "key_results": "最强的 8B 模型在 SID-only 排序上最佳，性能匹配文本提示长约 20 倍的 LLM；在无历史条件下优于随机，长历史时文本参考停止改进而该模型仍保持增益；但模型描述物品不如文本参考准确。",
+        "limitations": "后训练方法可引出排序行为，但未能引出忠实的物品描述。",
+        "main_contribution": "构建 ReRankID 测试平台，证明仅用语义 ID 进行推理排序可行，且多个后训练方法能促使模型获得排序能力。",
+        "method": "ReRankID 受控测试平台；对比监督微调、拒绝采样自训练、策略蒸馏和基于验证器的强化学习。",
+        "one_sentence_summary": "构建 ReRankID 测试平台，研究仅用语义 ID 进行推理排序的能力，并发现多种后训练方法能促使模型掌握排序行为。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "该工作聚焦于高效推理中的紧凑项目表示与排序，而非 VLA/WAM 或机器人领域，但与本站关心的模型推理效率及重排序技术有方法论上的间接联系。",
+        "relevance_score": 6,
+        "tags": [
+          "Efficient Inference",
+          "Evaluation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.IR",
+        "cs.CL",
+        "cs.LG"
+      ],
+      "arxiv_id": "2610.22797",
+      "authors": [
+        "Zhenwei Tang",
+        "Jintao Liu",
+        "Di Bai",
+        "Xidong Wu",
+        "Xinwu Cheng"
+      ],
+      "matched_rules": [
+        "composite:draft_verification_decoding"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-19T00:44:19.807797Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-10-16T01:21:47Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2610.22797",
+        "code_url": "https://github.com/lilv98/ReRankID",
+        "pdf_url": "https://arxiv.org/pdf/2610.22797",
+        "project_url": "https://huggingface.co/datasets/lilvjosephtang/ReRankID"
+      },
+      "title": "Reasoning Reranking with Semantic IDs as the Sole Item Representation",
+      "title_zh": "仅以语义 ID 为项目表示的推理排序",
+      "updated_at": "2026-10-16T01:21:47Z",
+      "version": 1
+    }
+  },
   "analysis:v1:68aa9073514c512498b7239409533120ed614432f11a8308f6a895098eff648a": {
     "key": "analysis:v1:68aa9073514c512498b7239409533120ed614432f11a8308f6a895098eff648a",
     "record": {
@@ -69642,6 +70125,59 @@
       "version": 2
     }
   },
+  "analysis:v1:6f82d8f145b91f88dd38b72bf95b294097b8c8ab0e5be8b9a88ba7762aa164d9": {
+    "key": "analysis:v1:6f82d8f145b91f88dd38b72bf95b294097b8c8ab0e5be8b9a88ba7762aa164d9",
+    "record": {
+      "abstract": "LLM-based agents can improve themselves across tasks by reusing and revising the skills they orchestrate into executable procedures. Flow-based training fits this loop: it samples procedures in proportion to reward, and the flow through each skill credits it for the next library revision. Three obstacles stand in the way of making this self-improvement reliable: flow training suffers strategy collapse over tree-structured histories; nonnegative flow-based credit rewards frequent use as if it were benefit; and library edits rest on the task reward the policy optimizes. We introduce R$^2$ Flow, a recursive self-improvement framework that alternates policy learning, independent verification, and versioned skill-library updates on a shared-state orchestration graph. The graph merges histories that differ only in the order of independent steps, allowing flow training to pool evidence across equivalent executions. A flow-share readout of the trained flow, invariant to the backward policy, and a separate signed utility rank which skills to change, verifier evidence decides whether an edit is warranted, and a residual-variance plateau sets when to update. Committed edits reshape the graph the next policy learns on, realizing recursive skill evolution. Across question answering, mathematical reasoning, interactive decision making, and code generation, R$^2$ Flow improves task accuracy and library-edit precision over heuristic orchestration, reinforcement learning, and skill-evolution baselines, and transfers across executors. Code is available at https://github.com/beita6969/r2flow.",
+      "analysis": {
+        "key_results": "在问答、数学推理、交互决策和代码生成任务上，R² Flow在任务准确率和库编辑精度上超过了启发式编排、强化学习和技能进化基线，并能在不同执行器间迁移。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出R² Flow框架，通过策略学习、独立验证和版本化技能库更新的交替进行，解决流程训练中的策略崩溃、非负信用分配和库编辑依赖任务奖励等障碍。",
+        "method": "使用共享状态编排图合并历史、流份额读出、独立验证和残差方差平台等方法，递归更新技能库。",
+        "one_sentence_summary": "R² Flow是一个递归自我改进框架，交替进行策略学习、独立验证和版本化技能库更新，在共享状态编排图上实现递归技能进化。",
+        "primary_topic": "Dataset",
+        "relation_to_vla_wam": "本文关注LLM-based agent的技能自改进，未涉及VLA、WAM或机器人动作-世界模型；虽然其自改进思想可能对机器人策略学习有启发，但无直接关系。",
+        "relevance_score": 5,
+        "tags": [
+          "Policy Learning",
+          "Evaluation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.AI"
+      ],
+      "arxiv_id": "2609.33867",
+      "authors": [
+        "Mingda Zhang",
+        "Qiang Huang",
+        "Yanjin Li",
+        "Zijia Wang",
+        "Qika Lin",
+        "Xiaoying Tang",
+        "Tiesunlong Shen"
+      ],
+      "matched_rules": [
+        "composite:draft_verification_decoding"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-19T00:44:19.807797Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-27T19:43:15Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.33867",
+        "code_url": "https://github.com/beita6969/r2flow",
+        "pdf_url": "https://arxiv.org/pdf/2609.33867",
+        "project_url": null
+      },
+      "title": "R$^2$ Flow: Recursive Self-Improvement via Recursive Skill Evolution",
+      "title_zh": "R² Flow：通过递归技能进化的递归自我改进",
+      "updated_at": "2026-10-16T05:17:19Z",
+      "version": 2
+    }
+  },
   "analysis:v1:6f9cd55e44bf06a065b1a633d60e06249661e519f5091a76c67f351994faf66a": {
     "key": "analysis:v1:6f9cd55e44bf06a065b1a633d60e06249661e519f5091a76c67f351994faf66a",
     "record": {
@@ -70305,6 +70841,64 @@
       "title_zh": "ZOTTA：基于零阶优化且无梯度的测试时自适应框架",
       "updated_at": "2026-08-24T02:18:04Z",
       "version": 2
+    }
+  },
+  "analysis:v1:7138f22d6ba95007826e5abb7d9ce2d0c3cb7aaae140cb848cde47b49f5f8c88": {
+    "key": "analysis:v1:7138f22d6ba95007826e5abb7d9ce2d0c3cb7aaae140cb848cde47b49f5f8c88",
+    "record": {
+      "abstract": "Zero-shot object navigation (ZSON) requires robots to find target objects in unseen environments without task-specific fine-tuning or pre-built maps, a key capability for general-purpose service robots. Yet methods that perform well in simulation often degrade in cluttered real-world scenes with severe occlusion and latent hazards, where large unseen regions make single-scene inference brittle and unsafe. We propose Schr\\\"odinger's Navigator, a belief-aware framework that reasons at inference time over multiple trajectory-conditioned imagined 3D futures. Given candidate paths, a trajectory-conditioned 3D world model predicts hypothetical observations and maintains a superposition of plausible scene realizations rather than committing to one map. An adaptive occluder-aware sampler directs imagination to uncertainty-critical regions, while a Future-Aware Value Map (FAVM) aggregates imagined futures for robust, proactive action selection. Experiments in simulation and on a physical Go2 quadruped show that Schr\\\"odinger's Navigator outperforms strong ZSON baselines, improving hidden-target discovery and risk-aware waypoint selection in occlusion-heavy navigation scenarios. These results highlight imagined 3D futures as a scalable and generalizable strategy for zero-shot navigation in uncertain real-world environments.",
+      "analysis": {
+        "key_results": "在模拟和真实四足机器人Go2上的实验表明，该方法优于强零样本物体导航基线，在遮挡密集场景中提高了隐藏目标发现率和风险感知航点选择能力。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出Schrödinger's Navigator，一个 belief-aware 框架，在推理时利用轨迹条件3D世界模型生成多种想象的未来场景，并通过自适应遮挡感知采样和未来感知价值图进行鲁棒、主动的动作选择，以提升零样本物体导航在真实杂乱环境中的性能与安全性。",
+        "method": "利用候选路径的轨迹条件3D世界模型预测假设观测，维持多种可信场景的叠加态；采用自适应遮挡感知采样器引导想象至不确定性关键区域；未来感知价值图（FAVM）聚合想象未来进行动作选择。",
+        "one_sentence_summary": "提出一个基于信念感知的框架，通过轨迹条件3D世界模型想象多种未来场景，实现零样本物体导航中的鲁棒和主动动作选择。",
+        "primary_topic": "WAM",
+        "relation_to_vla_wam": "该工作直接属于机器人世界模型（WAM）范畴，通过轨迹条件3D世界模型进行未来想象和不确定性估计，为机器人导航策略提供态势感知和动作选择依据，对VLA和WAM的研究具有重要参考价值。",
+        "relevance_score": 9,
+        "tags": [
+          "World Modeling",
+          "Robot Learning",
+          "Action Prediction",
+          "Generalist Robotics"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.AI",
+        "cs.CV"
+      ],
+      "arxiv_id": "2512.21201",
+      "authors": [
+        "Yu He",
+        "Da Huang",
+        "Zhenyang Liu",
+        "Zixiao Gu",
+        "Qiang Sun",
+        "Guangnan Ye",
+        "Yanwei Fu",
+        "Yu-Gang Jiang"
+      ],
+      "matched_rules": [
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-19T00:44:19.807797Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2025-12-24T14:28:17Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2512.21201",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2512.21201",
+        "project_url": null
+      },
+      "title": "Schr\\\"odinger's Navigator: Imagining an Ensemble of Futures for Zero-Shot Object Navigation",
+      "title_zh": "薛定谔的导航器：为零样本物体导航想象多种未来",
+      "updated_at": "2026-10-16T07:12:44Z",
+      "version": 5
     }
   },
   "analysis:v1:713a542574caed6b689f4fed41022a449c96057adbd8de62c1baf4526679076a": {
@@ -72991,6 +73585,58 @@
       "version": 1
     }
   },
+  "analysis:v1:75e75e2faf5ac2430f0ab1233c8025d91d485be7969a15a9329009573e9d5167": {
+    "key": "analysis:v1:75e75e2faf5ac2430f0ab1233c8025d91d485be7969a15a9329009573e9d5167",
+    "record": {
+      "abstract": "Speed-limit sign recognition on an automotive camera system-on-chip (SoC) must fit a detector and a classifier (the reader) into the memory, arithmetic, and energy budgets of the device. In our two-stage recognizer, the detector, a YOLO-family network with ReLU and hard-sigmoid operators, is compressed by channel replay: an iterative pruning cascade identifies the channels to remove, the recorded deletions are replayed on the original task-trained network, the parent, and one continuous knowledge-distillation recovery follows. On a YOLOv5n, replay removes 60.3% of the parameters at the accuracy of the parent and, in validation mAP50-95 over five matched seeds, outperforms iterative pruning and training from scratch, and its per-step variant (per-step replay) is the most accurate pruning method. On a YOLOv8n, replay and per-step replay outperform every other method and the unpruned parent. The reader, a five-layer CNN with 18k parameters, and the post-processing of the YOLOv5n and YOLOv8n heads use integer arithmetic only. With 4-bit weights and 8-bit activations (W4A8), the reader matches FP32 accuracy in 12.1 KB of on-chip memory, and an executable streaming model reproduces the INT8 class predictions of its runtime on all 9,850 test crops. On a Jetson AGX Orin, INT8 is faster than FP16 only in the implicit formulation of TensorRT, and the replay detector runs fastest on the deep-learning accelerator (DLA). Trained on public data only, the combined system of 0.72 M parameters recognizes 95.2% of the signs of a held-out automotive camera at 90% precision and 94 frames per second.",
+      "analysis": {
+        "key_results": "YOLOv5n重放剪枝移除60.3%参数且保持父网络精度，在验证mAP50-95上优于迭代剪枝和从头训练；W4A8分类器以12.1 KB片上内存匹配FP32精度；INT8可执行流模型在9850个测试裁剪块上重现运行时INT8类预测；在Jetson AGX Orin上，重放检测器在DLA上运行最快，系统以0.72M参数在90%精度下识别95.2%的测试标志，帧率94 FPS。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出通道重放剪枝方法，并结合W4A8量化与整数后处理，在车载SoC上实现高精度、低资源的限速标志识别系统。",
+        "method": "两阶段识别器：YOLO检测器使用通道重放剪枝（迭代剪枝确定要删除的通道，在原始任务训练网络上重放删除，随后进行连续知识蒸馏恢复）；分类器使用5层CNN，权重4比特、激活8比特（W4A8）量化，后处理仅用整数算术。",
+        "one_sentence_summary": "本文提出通道重放剪枝与少比特整数推理，用于在车载SoC上实现高效的限速标志识别。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文专注于高效推理中的模型量化与剪枝，应用于车载相机限速标志识别，未涉及VLA或WAM；但文中提出的量化与压缩技术在机器人视觉系统中具有潜在借鉴价值。",
+        "relevance_score": 7,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.AR",
+        "cs.LG"
+      ],
+      "arxiv_id": "2610.22811",
+      "authors": [
+        "Se Un Park",
+        "Kyungkeon Chung",
+        "Huigeol Kim",
+        "and Junyoung Park"
+      ],
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-19T00:44:19.807797Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-10-16T01:41:06Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2610.22811",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2610.22811",
+        "project_url": null
+      },
+      "title": "Replay Pruning and Few-Bit Integer Inference for Hardware-Efficient Speed-Sign Recognition",
+      "title_zh": "面向硬件高效限速标志识别的重放剪枝与少比特整数推理",
+      "updated_at": "2026-10-16T01:41:06Z",
+      "version": 1
+    }
+  },
   "analysis:v1:75fd2efa7ddd079dd73dc0d3e8724e09b77222feeb9326d090b6b7169f0a5e5a": {
     "key": "analysis:v1:75fd2efa7ddd079dd73dc0d3e8724e09b77222feeb9326d090b6b7169f0a5e5a",
     "record": {
@@ -74622,6 +75268,72 @@
       "title_zh": "多智能体目标存在性验证与学习式掩码几何细化：8th LSVOS Challenge 2026 MeViS-Text赛道冠军报告",
       "updated_at": "2026-08-11T21:47:52Z",
       "version": 1
+    }
+  },
+  "analysis:v1:78a0567b6e0ddc0f193199a96a00dd16a3d0008fec87b4a3433939d6fa17b719": {
+    "key": "analysis:v1:78a0567b6e0ddc0f193199a96a00dd16a3d0008fec87b4a3433939d6fa17b719",
+    "record": {
+      "abstract": "We introduce WorldOracle, a benchmark specifically designed to evaluate action-conditioned world models (ACWMs) against paired real-world executions. Given the same initial observation and low-level action sequence, WorldOracle asks whether a predicted rollout reproduces what happens in the real world, including physical consequences and task-state transitions. We evaluate models along four complementary dimensions: physical state correctness, interaction spatial alignment, key interaction area fidelity, and multi-view action coherence. To support this evaluation, we curate real-world training and evaluation suites that cover different interaction dynamics and embodiments. The evaluation suite contains long, multi-segment episodes with both successful and failed executions, enabling evaluation across varied action outcomes and behavior distributions. Experiments on seven representative ACWMs reveal distinct model strengths and failure modes. WorldOracle provides a systematic foundation for measuring and advancing action-conditioned world modeling for manipulation. We release the datasets, evaluation code, and leaderboard: https://worldoracle-benchmark.github.io/.",
+      "analysis": {
+        "key_results": "对七个代表性ACWMs的实验揭示了各自的优势与失效模式。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出了WorldOracle基准，通过将预测的 rollout 与真实执行配对，系统评估ACWMs在物理状态正确性、交互空间对齐、关键交互区域保真度和多视角动作一致性四个维度的表现。",
+        "method": "构建真实世界训练与评估套件，包含不同交互动力学和具身形态的长序列、多段、成功与失败执行数据，并使用四维指标评估动作条件世界模型。",
+        "one_sentence_summary": "WorldOracle是一个用于评估动作条件世界模型（ACWMs）是否准确再现真实机器人操作执行结果的基准。",
+        "primary_topic": "World Model",
+        "relation_to_vla_wam": "该工作直接聚焦于动作条件世界模型（WAM）的评估与基准建设，属于机器人操作中世界建模的核心方向，对本站WAM主题具有高度相关性。",
+        "relevance_score": 9,
+        "tags": [
+          "World Modeling",
+          "Evaluation",
+          "Robot Manipulation",
+          "Action Prediction",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.CV"
+      ],
+      "arxiv_id": "2610.18826",
+      "authors": [
+        "Haoyi Duan",
+        "Liliang Chen",
+        "Nan Wang",
+        "Yang Zhang",
+        "Yuhang Lu",
+        "Xiaotong Chen",
+        "Wei-Cheng Tseng",
+        "Shenyuan Gao",
+        "Zhaoshuo Li",
+        "Jingyi Jin",
+        "Pooya Jannaty",
+        "Dhruv Shah",
+        "Yuke Zhu",
+        "Ming-Yu Liu",
+        "Maoqing Yao",
+        "Guanghui Ren"
+      ],
+      "matched_rules": [
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-19T00:44:19.807797Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-10-13T17:52:55Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2610.18826",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2610.18826",
+        "project_url": "https://worldoracle-benchmark.github.io/"
+      },
+      "title": "WorldOracle: Benchmarking Action-Conditioned World Models against Real-World Executions",
+      "title_zh": "WorldOracle：面向真实执行的动作条件世界模型基准",
+      "updated_at": "2026-10-16T03:19:16Z",
+      "version": 2
     }
   },
   "analysis:v1:78a2dac9114786b996542a6f3d4f738d2146fd51963914430e7b9f6afb159607": {
@@ -92067,6 +92779,59 @@
       "version": 3
     }
   },
+  "analysis:v1:94f5dc476be6cba2b2db26ef14d84da465b41a7db08c32f7fd14b5a5968c32ae": {
+    "key": "analysis:v1:94f5dc476be6cba2b2db26ef14d84da465b41a7db08c32f7fd14b5a5968c32ae",
+    "record": {
+      "abstract": "Physical AI requires models to ground visual and linguistic understanding in real-world environments while accounting for environmental constraints and execution feedback. We introduce MachEmbodied-VLM (ME-VLM), a unified vision-language model with two variants, 4B and 35B-A3B, that brings together embodied cognition and multimodal agent capabilities. Our work emphasizes physical perception and spatiotemporal reasoning, together with planning, interaction, and outcome assessment in both digital and physical environments. We construct training data spanning embodied and multimodal agent tasks, including execution observations and feedback to support outcome assessment and decision refinement. The training pipeline comprises embodied capability injection, separate reinforcement learning of embodied and multimodal-agent experts, and multi-teacher on-policy distillation that consolidates their complementary capabilities into a single model. Experiments show competitive performance on both embodied and agent benchmarks, as well as on autonomous-driving and embodied-navigation tasks. For edge deployment, visual token compression, W4A8 quantization, and hardware-software co-optimization enable on-device inference of the 4B variant on the M100, reducing prefill latency from 400 ms to 188 ms. Project Page: https://machembodied.com/ME-Brain/ME-VLM.html Code Repository: https://github.com/MachEmbodied/ME-VLM",
+      "analysis": {
+        "key_results": "在具身和智能体基准上表现有竞争力，在自动驾驶和具身导航任务上也表现出色；4B变体在M100上预填充延迟从400ms降至188ms。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出一个统一的视觉语言模型ME-VLM，具备物理感知、时空推理、规划、交互和结果评估能力，并通过训练和压缩实现边缘部署。",
+        "method": "构建涵盖具身和多模态智能体任务的数据，采用具身能力注入、分别强化学习以及多教师在线蒸馏的训练流程；部署时使用视觉token压缩、W4A8量化和软硬件协同优化。",
+        "one_sentence_summary": "提出统一的视觉语言模型ME-VLM，具备具身认知和多模态智能体能力，并通过量化等方法实现边缘部署。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "本文提出一个统一的视觉语言模型，直接面向具身智能和机器人学习任务，具备动作规划与交互能力，属于VLA范畴；同时结合模型量化实现高效边缘推理，与本站主题高度相关。",
+        "relevance_score": 9,
+        "tags": [
+          "Vision-Language",
+          "Robot Learning",
+          "Model Quantization",
+          "Efficient Inference",
+          "Policy Learning",
+          "Action Prediction"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV"
+      ],
+      "arxiv_id": "2609.24526",
+      "authors": [
+        "Foundation Model",
+        "Li Auto Inc"
+      ],
+      "matched_rules": [
+        "composite:vision_language_robotics",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-19T00:44:19.807797Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-21T12:59:59Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.24526",
+        "code_url": "https://github.com/MachEmbodied/ME-VLM",
+        "pdf_url": "https://arxiv.org/pdf/2609.24526",
+        "project_url": "https://machembodied.com/ME-Brain/ME-VLM.html"
+      },
+      "title": "ME-VLM: A Unified VLM for Embodied Cognition and Agent Coordination",
+      "title_zh": "ME-VLM：面向具身认知与智能体协调的统一视觉语言模型",
+      "updated_at": "2026-10-16T07:41:58Z",
+      "version": 4
+    }
+  },
   "analysis:v1:94fb68d016adb4faacdfb28103f9db8ae5644b0f441ee5e3c1ea17c5022cee56": {
     "key": "analysis:v1:94fb68d016adb4faacdfb28103f9db8ae5644b0f441ee5e3c1ea17c5022cee56",
     "record": {
@@ -95191,6 +95956,55 @@
       "title_zh": "EpiWorld：将LLM政策智能体建立在流行病学世界模型中",
       "updated_at": "2026-10-02T03:16:28Z",
       "version": 1
+    }
+  },
+  "analysis:v1:9b8514fcaaec1db9b8732b3afed689ee87675dee1520e82123b4a35b724c954e": {
+    "key": "analysis:v1:9b8514fcaaec1db9b8732b3afed689ee87675dee1520e82123b4a35b724c954e",
+    "record": {
+      "abstract": "Low-precision Transformer systems increasingly quantize attention matrix multiplications, while softmax often remains at higher precision. During pretraining, an approximate softmax changes the gradients that train the model as well as its forward computation. We study this interaction with K-interval attention, which approximates the exponential using K+1 grid values. We vary per-row grid calibration, interpolation versus hard rounding, and the placement of a straight-through surrogate relative to normalization. We derive the corresponding backward rules, including calibration derivatives, and compare these choices in pretraining experiments matched on model, data, and optimizer. Detaching the row extrema leaves the forward computation unchanged but produces a delayed increase in validation loss. With hard rounding at K=4, min-max calibration and a pre-normalization surrogate incur a large loss gap; changing either choice substantially reduces it. At 124M parameters and 2.5B training tokens, fixed-window calibration with a post-normalization surrogate yields a validation loss gap of +0.019 nats relative to softmax at K=4, and with a pre-normalization surrogate yields +0.004 nats at K=16.",
+      "analysis": {
+        "key_results": "在124M参数、2.5B训练token的预训练实验中，固定窗口校准结合后归一化代理在K=4时验证损失差距为+0.019 nats，结合前归一化代理在K=16时为+0.004 nats。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出了K间隔注意力机制，通过K+1个网格值近似指数函数，并系统研究了校准、插值与硬舍入、直通估计器位置等设计选择及其反向传播规则。",
+        "method": "K间隔注意力，使用K+1个网格值近似softmax中的指数，结合逐行网格校准、插值/硬舍入以及直通估计器位置的选择。",
+        "one_sentence_summary": "研究了在预训练Transformer时将注意力中的softmax进行低精度量化的交互影响，并提出K间隔注意力近似方法。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文专注于Transformer架构中的softmax量化，与视觉-语言-动作模型或世界模型无直接关联，但其低精度计算技术可能为VLA/WAM的高效推理提供借鉴。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Model Quantization"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG"
+      ],
+      "arxiv_id": "2609.33591",
+      "authors": [
+        "Shangzhen Zhu",
+        "Muyan Hu",
+        "Tomasz Kozlowski"
+      ],
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-19T00:44:19.807797Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-27T14:09:52Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2609.33591",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2609.33591",
+        "project_url": null
+      },
+      "title": "Pretraining Transformers with Quantized Softmax in Attention",
+      "title_zh": "注意力中使用量化softmax的Transformer预训练",
+      "updated_at": "2026-10-16T05:42:16Z",
+      "version": 2
     }
   },
   "analysis:v1:9b89ad903f5eb1e6ef5dcceb46f80857bd189187de2d5cfd452fc6cf142c6755": {
@@ -101958,6 +102772,59 @@
       "version": 1
     }
   },
+  "analysis:v1:a672f2a94b5ad8dd47ddf5a6f45eae820e340c5e4e3a0483ae9b4a1df1d9c0a7": {
+    "key": "analysis:v1:a672f2a94b5ad8dd47ddf5a6f45eae820e340c5e4e3a0483ae9b4a1df1d9c0a7",
+    "record": {
+      "abstract": "Vision-language-action (VLA) models and world-action models (WAMs) have emerged as promising approaches to robot learning and control. These models integrate multimodal perception and action generation, but differ in their architectures, output representations, and learning objectives. In this paper, we present a unified, architecture-agnostic probabilistic formulation for embodied foundation models based on stochastic kernels. Our formulation has two key components: (i) we characterize embodied foundation models through conditional output distributions and action-realization kernels, which together induce task-conditioned robot policies; and (ii) we connect pretraining and post-training to policy deployment, accommodating model-specific pretraining objectives and offline or online post-training strategies. We instantiate the formulation for OpenVLA and DreamZero, covering autoregressive action-token prediction and joint video-action generation.",
+      "analysis": {
+        "key_results": "摘要未说明",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出统一的、架构无关的概率表述，用于具身基础模型，将条件输出分布和动作实现核结合，并连接预训练/后训练与策略部署。",
+        "method": "基于随机核的概率表述，包括条件输出分布和动作实现核，并实例化于OpenVLA和DreamZero。",
+        "one_sentence_summary": "本文提出了一种架构无关的概率表述，通过随机核统一VLA和WAM，并连接预训练、后训练与策略部署。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "论文直接以VLA和WAM为核心对象，提出统一理论框架，并实例化到OpenVLA和DreamZero，对本站主题高度相关。",
+        "relevance_score": 9,
+        "tags": [
+          "Vision-Language",
+          "Policy Learning",
+          "Robot Learning",
+          "World Modeling"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "arxiv_id": "2610.23053",
+      "authors": [
+        "Xinyi Hong",
+        "Mingyang Ren"
+      ],
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-19T00:44:19.807797Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-10-16T07:30:52Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2610.23053",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2610.23053",
+        "project_url": null
+      },
+      "title": "Unifying Embodied Foundation Models via a Model-to-Policy Formulation",
+      "title_zh": "通过模型到策略的统一表述统一具身基础模型",
+      "updated_at": "2026-10-16T07:30:52Z",
+      "version": 1
+    }
+  },
   "analysis:v1:a6963e5493f134cb0a817e22d881e2b4908550f33ac02f9fee517fb4f399354b": {
     "key": "analysis:v1:a6963e5493f134cb0a817e22d881e2b4908550f33ac02f9fee517fb4f399354b",
     "record": {
@@ -102453,6 +103320,64 @@
       "title_zh": "提示驱动的探索：将语言作为VLA强化学习的探索空间",
       "updated_at": "2026-09-18T01:02:43Z",
       "version": 4
+    }
+  },
+  "analysis:v1:a7786c6091a593105290f2ecea991ba760ee46b44ee07ca9fd0f23facfcc33f4": {
+    "key": "analysis:v1:a7786c6091a593105290f2ecea991ba760ee46b44ee07ca9fd0f23facfcc33f4",
+    "record": {
+      "abstract": "World models have shown considerable promise in sequential decision-making by anticipating the consequences of actions and providing predictive foresight for policy learning. However, learning to reason about counterfactual actions remains challenging, since predictive objectives may underemphasize information critical for action evaluation, while unexecuted actions lack observed futures for direct supervision. To address these challenges, we propose the World Action Critic (WAC) Model, which proposes multimodal action candidates and jointly learns candidate-conditioned future prediction and consequence evaluation. In our proposed framework, critic supervision directly shapes intermediate predictive representations during rollout, encouraging them to retain information needed to distinguish action quality. Observed futures supervise prediction for executed actions, while external task-quality targets provide evaluation signals for counterfactual candidates. Through joint optimization, critic signals from these candidates propagate into predictive representations without requiring their observed futures. Our theoretical analysis characterizes critic-guided feature retention and bounds candidate-selection regret. Applied to autonomous driving, WAC achieves 93.4 PDMS on NAVSIM-v1, demonstrating the effectiveness of jointly learning predictive foresight and consequence evaluation.",
+      "analysis": {
+        "key_results": "在NAVSIM-v1自动驾驶任务上达到93.4 PDMS。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出WAC模型，联合学习候选条件未来预测和后果评估，利用评论家监督塑造中间预测表示，以保留区分动作质量所需信息，并实现反事实候选的评估。",
+        "method": "提出多模态动作候选，联合学习候选条件未来预测和后果评估；在 rollout 过程中，评论家监督直接塑造中间预测表示；执行动作的未来观测用于监督预测，外部任务质量目标为反事实候选提供评估信号。",
+        "one_sentence_summary": "提出世界动作评论家（WAC）模型，通过联合学习动作条件未来预测与后果评估，提升策略学习中的反事实推理能力。",
+        "primary_topic": "WAM",
+        "relation_to_vla_wam": "直接属于世界动作模型（WAM）研究，旨在增强世界模型对反事实动作的推理和评估能力，对机器人策略学习具有重要价值。",
+        "relevance_score": 9,
+        "tags": [
+          "World Modeling",
+          "Policy Learning",
+          "Action Prediction",
+          "Generalist Robotics"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.AI"
+      ],
+      "arxiv_id": "2610.22825",
+      "authors": [
+        "Xiangteng Zhang",
+        "Haoyuan Liu",
+        "Yang Guan",
+        "Jingliang Duan",
+        "Yao Lyu",
+        "Tao Zhang",
+        "Shuai Zhang",
+        "Kehua Sheng",
+        "Bo Zhang",
+        "Shengbo Eben Li"
+      ],
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-19T00:44:19.807797Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-10-16T02:05:03Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2610.22825",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2610.22825",
+        "project_url": null
+      },
+      "title": "World Action Critic (WAC) Model: Joint Foresight and Criticism for Policy Learning",
+      "title_zh": "世界动作评论家模型：联合前瞻与批评的策略学习",
+      "updated_at": "2026-10-16T02:05:03Z",
+      "version": 1
     }
   },
   "analysis:v1:a784da436080a766d099150f7570cc14c24fdb636dab95ba692b846e6a15e295": {
@@ -103338,6 +104263,59 @@
       "title": "Toward the Cognitive--Physical Limits of Embodied Intelligence through a World-Model-Centric Autonomous Racing Agent",
       "title_zh": "通过世界模型中心的自驾赛车智能体探索具身智能的认知-物理极限",
       "updated_at": "2026-08-11T08:01:35Z",
+      "version": 1
+    }
+  },
+  "analysis:v1:a8d15b1156d2188337d246740e061b485571d71c88354505e8bf2800585c02cd": {
+    "key": "analysis:v1:a8d15b1156d2188337d246740e061b485571d71c88354505e8bf2800585c02cd",
+    "record": {
+      "abstract": "Experience-driven self-evolution offers a promising path for large language model (LLM) agents to continually improve through interaction. Yet existing approaches often rely on successful trajectories or external evaluation signals, leaving unclear whether agents can evolve when such positive anchors are unavailable. We study this question through Cold-Start Failure-Only Evolution (CFOE), where agents start without accumulated experience and learn only from failed interactions without privileged guidance. Across three self-evolving paradigms, multiple LLM backbones, and four interactive environments, we uncover a consistent repair-generalization gap: failure-derived experience can help repair previously failed tasks, but rarely yields sustained improvements on unseen tasks. Further analysis shows that agents often misinterpret failures, while even verified-correct experience remains difficult to transfer. Relaxing CFOE reveals that verifier feedback and additional interaction provide limited gains, whereas successful trajectories substantially improve transfer. These findings suggest that current self-evolving agents are better at repairing observed failures than building generalizable capabilities from failure.",
+      "analysis": {
+        "key_results": "验证器反馈和增加交互仅带来有限提升；成功轨迹能显著改善迁移。智能体常误解失败，即使经验已验证正确也难迁移。",
+        "limitations": "摘要未说明",
+        "main_contribution": "通过冷启动仅失败进化（CFOE）实验设置，揭示自进化智能体存在“修复-泛化差距”：失败经验能修复失败任务，但很少带来对未见任务的持续改进。",
+        "method": "在三种自进化范式、多个LLM骨干和四个交互环境中，仅使用失败交互（无成功轨迹或外部评价）进行学习；并通过放松CFOE条件（添加验证器反馈、更多交互、成功轨迹）进行对照分析。",
+        "one_sentence_summary": "研究自进化智能体在仅从失败交互中学习且无外部评价信号时的能力，发现失败经验可修复失败但难以泛化到未见任务。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "本文研究LLM智能体的自进化和经验迁移，不涉及视觉-语言-动作模型（VLA）或世界-动作模型（WAM），与本网站研究的机器人学习或高效推理技术无直接关系。",
+        "relevance_score": 3,
+        "tags": [
+          "Evaluation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CL"
+      ],
+      "arxiv_id": "2610.22984",
+      "authors": [
+        "Weixiang Zhao",
+        "Yichen Zhang",
+        "Yanyan Zhao",
+        "Jinming Bai",
+        "Bin Liang",
+        "Ruifeng Xu",
+        "Bing Qin",
+        "Ting Liu"
+      ],
+      "matched_rules": [
+        "composite:draft_verification_decoding"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-19T00:44:19.807797Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-10-16T06:10:01Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2610.22984",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2610.22984",
+        "project_url": null
+      },
+      "title": "Self-Evolving Agents Can Repair Failures but Struggle to Generalize from Them",
+      "title_zh": "自进化智能体能修复失败但难以从中泛化",
+      "updated_at": "2026-10-16T06:10:01Z",
       "version": 1
     }
   },
@@ -110301,6 +111279,58 @@
       "title_zh": "通过自适应视觉令牌缓存学习加速视觉-语言-动作模型",
       "updated_at": "2026-08-26T04:24:45Z",
       "version": 2
+    }
+  },
+  "analysis:v1:b3b50379dd62c80bcd8adb963c6b277efd2bb27035f2cfea763f9e5cf94dff34": {
+    "key": "analysis:v1:b3b50379dd62c80bcd8adb963c6b277efd2bb27035f2cfea763f9e5cf94dff34",
+    "record": {
+      "abstract": "Recent advances in multimodal foundation models have significantly improved the ability to operate real-world software through graphical user interfaces (GUIs) using visual observations and natural language instructions. However, maintaining strong performance on unseen applications remains challenging, as practical tasks often require long-horizon procedural knowledge and application-specific operation patterns. In addition, constructing executable tasks and collecting corresponding trajectories for training still heavily rely on human-annotated data, incurring substantial cost. In this paper, we propose MAGE (Manual-augmented computer use AGent Execution and learning), a framework that leverages user manuals as a scalable source of procedural knowledge to improve both inference and training. During execution, MAGE retrieves task-relevant manual content and uses a planner to generate explicit procedural guidance for CUAs. To further account for the discrepancies between manuals and actual GUI environments, such as version differences or user settings, MAGE also adapts the agent policy through environment interaction. During training, MAGE converts manuals into executable task-plan pairs and uses the plans to guide environment rollouts toward task-relevant states; the resulting trajectories are then used to optimize the policy without human-authored demonstrations. This unified design enables effective utilization of manuals for both task execution and training, reducing reliance on human-authored training data. Experimental results across six applications demonstrate improvements in task success rates over strong baselines, highlighting the effectiveness of manual-guided planning and policy adaptation in new software environments. We provide the code and reproduction scripts at https://github.com/ku-autoai/MAGE.",
+      "analysis": {
+        "key_results": "在六个应用上的实验结果表明，任务成功率优于强基线，展示了在新软件环境中手册引导规划和策略适应的有效性。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出MAGE（Manual-augmented computer use AGent Execution and learning）框架，利用用户手册作为可扩展的程序性知识来源，同时改进计算机使用智能体的推理与训练，减少对人工标注数据的依赖。",
+        "method": "在执行阶段，MAGE检索任务相关的手册内容并使用规划器生成显式程序指导；针对手册与实际GUI环境之间的差异，通过环境交互来适应智能体策略。在训练阶段，MAGE将手册转换为可执行的(task, plan)对，利用计划引导环境滚动到任务相关状态，并使用生成的轨迹优化策略，无需人工编写的演示。",
+        "one_sentence_summary": "提出了一个利用用户手册提升计算机使用智能体推理和训练效果的框架MAGE，通过检索手册内容生成程序性指导，并将手册转化为可执行的(task, plan)对来引导环境交互以优化策略。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "本文专注于GUI操作智能体，与常见的机器人VLA或世界模型不同，但采用了视觉-语言策略学习和从程序性知识中学习的范式，这些方法可能对机器人操作任务中的技能获取和策略适应具有一定借鉴意义。",
+        "relevance_score": 4,
+        "tags": [
+          "Vision-Language",
+          "Policy Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.AI"
+      ],
+      "arxiv_id": "2610.23012",
+      "authors": [
+        "Chulhoon Yoon",
+        "Kyungri Park",
+        "Jinyeong Yun",
+        "Daeyun Jeong",
+        "Sukmin Yun",
+        "Woohwan Jung"
+      ],
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-19T00:44:19.807797Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-10-16T06:44:56Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2610.23012",
+        "code_url": "https://github.com/ku-autoai/MAGE",
+        "pdf_url": "https://arxiv.org/pdf/2610.23012",
+        "project_url": null
+      },
+      "title": "Adaptation of Computer Use Agents to New Software with User Manuals",
+      "title_zh": "基于用户手册的计算机使用智能体对新软件的适应",
+      "updated_at": "2026-10-16T06:44:56Z",
+      "version": 1
     }
   },
   "analysis:v1:b3bdd43bee95f18f6d54d94351428565ffe2e0c2a4beecc263c3ddd7e34e2a3a": {
@@ -120541,6 +121571,59 @@
       "version": 3
     }
   },
+  "analysis:v1:c54160ef3e767f1c36e0b7524c73459f479012e1bf523366eeff780a313fd786": {
+    "key": "analysis:v1:c54160ef3e767f1c36e0b7524c73459f479012e1bf523366eeff780a313fd786",
+    "record": {
+      "abstract": "The rise of large language models (LLMs) has opened a path toward generalist embodied AI, raising the question of how LLMs can act in the physical world. One straightforward approach is training the model to generate actions: collect robot-action data and video demonstration, refine LLM architecture with an action head, and train a vision-language-action (VLA) model at scale. However, we argue that coding agents have the potential to realize generalist embodied manipulation. All they need is a simple yet effective robot harness. We present RoboHarness: a robotic harness that gives LLM agents a visual-geometric control panel so that they can directly understand and invoke embodied tasks. With RoboHarness, Qwen3.8-Flash-Next outperforms state-of-the-art VLA models on BEHAVIOR Challenge 2025 tasks. The implementation is open source.",
+      "analysis": {
+        "key_results": "在BEHAVIOR Challenge 2025任务中，RoboHarness搭配Qwen3.8-Flash-Next优于最先进的VLA模型。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出RoboHarness，一种赋予LLM编码代理直接理解和调用具体操作任务的机器人集成框架。",
+        "method": "使用视觉几何控制面板作为机器人挂钩，使LLM代理能够直接理解和调用具体操作任务，无需训练VLA模型。",
+        "one_sentence_summary": "本文提出RoboHarness，一个为LLM编码代理提供视觉几何控制面板的简单机器人集成框架，使其在BEHAVIOR Challenge 2025任务中超越VLA模型。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "本文通过提供一种无需训练VLA模型的框架，与VLA模型形成直接对比，并在基准测试中展现优越性能，对VLA及世界动作模型的研究具有重要意义。",
+        "relevance_score": 9,
+        "tags": [
+          "Generalist Robotics",
+          "Robot Manipulation",
+          "Robot Learning",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.AI"
+      ],
+      "arxiv_id": "2610.14018",
+      "authors": [
+        "Bince Qu",
+        "Wei Chen",
+        "Bo Zhang"
+      ],
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-19T00:44:19.807797Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-09-29T11:36:07Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2610.14018",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2610.14018",
+        "project_url": null
+      },
+      "title": "RoboHarness: A Simple Harness Outperforms VLA and World Action Models",
+      "title_zh": "RoboHarness：一种简单机器人挂钩超越VLA与世界动作模型",
+      "updated_at": "2026-10-16T06:15:19Z",
+      "version": 2
+    }
+  },
   "analysis:v1:c56fd977deb4126375597a81a00ab7a0149e133d5f795b285647458da5059acd": {
     "key": "analysis:v1:c56fd977deb4126375597a81a00ab7a0149e133d5f795b285647458da5059acd",
     "record": {
@@ -123215,6 +124298,59 @@
       "title_zh": "FARM：从冻结机器人世界模型的内部预测状态中读取失败信号",
       "updated_at": "2026-09-10T12:14:37Z",
       "version": 1
+    }
+  },
+  "analysis:v1:c9ee4c800ad2300054fbd36984d0fd7efed2c72029a693b23e0c53aeef1f6c1d": {
+    "key": "analysis:v1:c9ee4c800ad2300054fbd36984d0fd7efed2c72029a693b23e0c53aeef1f6c1d",
+    "record": {
+      "abstract": "We address the problem of understanding when and why Vision-Language-Action models struggle with contact-rich manipulation tasks that require precise physical interaction. Prior work has primarily focused on addressing contact failures through force-augmented architectures and training-time regularizers, yet the factors contributing to these failures remain underexplored. We identify two distinct failure modes underlying this gap. Precision failures occur when policies struggle to produce the small, accurate corrective actions required during contact and force failures occur when policies fail to respond to contact forces. To address these failures, we propose FACT. During post-training, FACT increases low noise sampling to improve fine action prediction and incorporates structured force conditioning to guide action generation using contact state and force history. FACT achieves an average success rate of 66% across five contact-rich tasks against 41% for the best prior baseline, in an evaluation spanning almost 2,500 real-world rollouts.",
+      "analysis": {
+        "key_results": "在五个接触丰富任务上，FACT的平均成功率为66%，而最佳先前基线为41%；评估涵盖近2500次真实世界rollouts。",
+        "limitations": "摘要未说明",
+        "main_contribution": "识别出VLA模型在接触丰富任务中的两类失败模式：精度失败和力失败，并提出后训练方法FACT来修复这些失败。",
+        "method": "FACT在训练后通过增加低噪声采样来改善精细动作预测，并引入结构化的力条件，利用接触状态和力历史来指导动作生成。",
+        "one_sentence_summary": "该论文分析了VLA模型在需要精细物理交互的接触丰富任务中的失败原因，并提出了后训练修正方法FACT。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该论文直接针对VLA模型在接触丰富操作任务中的性能问题，通过分析失败原因并改进训练后策略，与VLA主题高度相关。",
+        "relevance_score": 9,
+        "tags": [
+          "Robot Manipulation",
+          "Policy Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.AI"
+      ],
+      "arxiv_id": "2608.01402",
+      "authors": [
+        "Carlota Par\\'es-Morlans",
+        "Nils Kuhn",
+        "Y. Isabel Liu",
+        "Alberta Longhini",
+        "Jeannette Bohg"
+      ],
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-19T00:44:19.807797Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-08-02T17:34:19Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2608.01402",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2608.01402",
+        "project_url": null
+      },
+      "title": "Demystifying When and Why VLAs Fail in Contact-Rich Tasks and How to Fix Them",
+      "title_zh": "揭开VLA在接触丰富任务中失败之谜及其修复方法",
+      "updated_at": "2026-10-16T06:10:02Z",
+      "version": 2
     }
   },
   "analysis:v1:c9f8a3c438522529b969b58f76842997a59e7fa9632625a9fc8bab5697df04dd": {
@@ -127801,6 +128937,62 @@
       "title_zh": "Causeway：恢复VLA策略在指令切换中的任务可达性",
       "updated_at": "2026-09-25T07:25:19Z",
       "version": 1
+    }
+  },
+  "analysis:v1:d0ef24a37e36e5534c57def138083f316a741d3b9a037074e8e5196750b89d81": {
+    "key": "analysis:v1:d0ef24a37e36e5534c57def138083f316a741d3b9a037074e8e5196750b89d81",
+    "record": {
+      "abstract": "Can vision-language models turn 2D observations into 3D understanding that supports precise action? This requires inferring object geometry, anticipating the effects of rotation, and refining actions through visual feedback. We introduce RoTA-Bench to evaluate these abilities through interactive 3D-to-2D projection alignment. Given a target silhouette, a model observes a rotated object and chooses successive rotations to recover the target projection within a limited action budget. Our automated pipeline constructs silhouette-preserving 3D objects from 2D icons and uses reversible initialization to guarantee solvability, yielding 674 tasks and a stratified 100-task test set. Empirically, we find that (i) a substantial human-model gap persists: GPT-5.6-Sol succeeds on only 17% of tasks, whereas 20 undergraduate participants collectively complete the test set four times with a 100% success rate; (ii) image-space and pose-space progress can diverge: at matched states, the model more often improves silhouette overlap while worsening pose alignment than humans (19.4% vs. 10.9%); and (iii) fine-grained control is sensitive to interaction history: removing it leaves 96.8% of the model's actions at a coarse 30-degree step size and sharply reduces observed task success. These findings highlight the challenge of converting visual evidence into precise 3D control, beyond recognizing or matching individual images.",
+      "analysis": {
+        "key_results": "GPT-5.6-Sol成功率为17%，人类参与者为100%；模型在改善剪影重叠的同时恶化姿态对齐的比例为19.4%，高于人类的10.9%；移除交互历史后，96.8%的模型动作处于粗糙的30度步长，成功率显著下降。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出RoTA-Bench基准，用于评估模型从2D观察推断3D几何和通过交互实现精确3D控制的能力。",
+        "method": "基于剪影保持的自动流水线从2D图标构建3D物体，并采用可逆初始化保证可解性，生成674个任务和100个分层测试任务。",
+        "one_sentence_summary": "该基准测试通过交互式3D到2D投影对齐任务评估视觉语言模型的3D空间推理能力。",
+        "primary_topic": "Benchmark",
+        "relation_to_vla_wam": "该工作不直接涉及VLA或世界模型，但评估视觉语言模型的3D空间推理和交互控制能力，对机器人操作中的感知与规划具有方法学参考价值。",
+        "relevance_score": 6,
+        "tags": [
+          "Evaluation",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.AI"
+      ],
+      "arxiv_id": "2610.17665",
+      "authors": [
+        "Qingchuan Ma",
+        "Yuexiao Ma",
+        "Xiang Meng",
+        "Yixuan Zou",
+        "Tianyu Xie",
+        "Wang Chen",
+        "Yuhui Zeng",
+        "Yuhang Wu",
+        "Rongrong Ji",
+        "Xiawu Zheng"
+      ],
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-19T00:44:19.807797Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-10-13T03:46:48Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2610.17665",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2610.17665",
+        "project_url": null
+      },
+      "title": "RoTA-Bench: Evaluating 3D Spatial Reasoning through Interactive Projection Alignment",
+      "title_zh": "RoTA-Bench：通过交互式投影对齐评估3D空间推理",
+      "updated_at": "2026-10-16T07:18:17Z",
+      "version": 3
     }
   },
   "analysis:v1:d0f6912b9f12f924735820a448a10645c4229cd06de937d523f44b2d915b4956": {
@@ -139814,6 +141006,57 @@
       "version": 1
     }
   },
+  "analysis:v1:e365f07e01c6ea1aa4735591ace5b1b30c18974f2fc295593d3aec9966dab251": {
+    "key": "analysis:v1:e365f07e01c6ea1aa4735591ace5b1b30c18974f2fc295593d3aec9966dab251",
+    "record": {
+      "abstract": "We use a frozen frontier vision-language model, GPT-6-Astra, directly as the robot policy on RoboMME, a benchmark of 16 memory-dependent manipulation tasks spanning temporal, spatial, object, and procedural memory. The model keeps the whole episode in context and outputs every end-effector waypoint and gripper command, with no RoboMME-specific training. On the 800 test episodes it succeeds in 92.1%, above the previously reported human score of 90.5%, which was obtained with an oracle skill interface, and far ahead of the best leaderboard entry (60.8%) and of a hierarchical system that pairs the same model with a RoboMME-trained policy (79.1%). It matches or exceeds the human score on 13 of the 16 tasks. Its 63 failures concentrate in two tasks and are mostly premature completions and mistimed or unintended button presses. These results blur the usual division between long-horizon planning, memory and end-effector control, and raise the question of how much of this stack a single general-purpose model can take over in embodied systems. Project website: https://embodied-astra.github.io. Code, prompts and all episode logs: https://github.com/jackbjed/embodied-astra-robomme.",
+      "analysis": {
+        "key_results": "在800个测试回合中成功率为92.1%，超过先知技能界面的人类得分90.5%，远高于最佳排行榜条目60.8%和同模型与RoboMME训练策略的分层系统79.1%；在16项任务中的13项达到或超过人类得分。",
+        "limitations": "63次失败集中在两项任务上，主要是过早完成和误时或非预期的按钮按下。",
+        "main_contribution": "证明一个冻结的前沿视觉语言模型，无需针对RoboMME的训练，即可直接作为端到端机器人策略，在记忆依赖型操作任务上超越人类基准和已有最佳系统。",
+        "method": "使用冻结的GPT-6-Astra模型作为机器人策略，将整个回合上下文输入模型，直接输出末端执行器路径点和夹爪指令，无RoboMME特定训练。",
+        "one_sentence_summary": "将冻结的前沿VLM GPT-6-Astra直接作为机器人策略，在16项记忆依赖型操作基准RoboMME上取得92.1%成功率，超越人类基准成绩。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "核心研究：将通用VLM直接作为VLA策略，测试其在长期规划、记忆和末端控制一体化任务中的能力，为VLA发展提供重要实验证据。",
+        "relevance_score": 10,
+        "tags": [
+          "Robot Manipulation",
+          "Vision-Language",
+          "Policy Learning",
+          "Evaluation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2610.17350",
+      "authors": [
+        "Jack B. Jedlicki",
+        "Amish Sethi",
+        "Heng Yang"
+      ],
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-19T00:44:19.807797Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-10-12T20:00:10Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2610.17350",
+        "code_url": "https://github.com/jackbjed/embodied-astra-robomme",
+        "pdf_url": "https://arxiv.org/pdf/2610.17350",
+        "project_url": "https://embodied-astra.github.io/"
+      },
+      "title": "Can a Frontier VLM Serve as a Robot Policy for Memory-Dependent Manipulation?",
+      "title_zh": "前沿视觉语言模型能否充当记忆依赖型操作的机器人策略？",
+      "updated_at": "2026-10-16T02:37:38Z",
+      "version": 2
+    }
+  },
   "analysis:v1:e38998e07e0878fe695f3bbfd3bc1d8fe06f3b311b0edba1d406bfe1799b2336": {
     "key": "analysis:v1:e38998e07e0878fe695f3bbfd3bc1d8fe06f3b311b0edba1d406bfe1799b2336",
     "record": {
@@ -144438,6 +145681,62 @@
       "title": "KV Cache Compression Through the Lens of Transform Coding",
       "title_zh": "通过变换编码视角实现KV缓存压缩",
       "updated_at": "2026-08-14T11:08:01Z",
+      "version": 1
+    }
+  },
+  "analysis:v1:eb61ec0f42b48d7308dfcf6c21986d621186aae51243e1de9c8135e94d26a014": {
+    "key": "analysis:v1:eb61ec0f42b48d7308dfcf6c21986d621186aae51243e1de9c8135e94d26a014",
+    "record": {
+      "abstract": "Vision-language-action (VLA) models are rapidly expanding what individual robots can accomplish, yet many real-world manipulation settings require multiple arms to operate as a coordinated system. Existing approaches organize multi-arm coordination in different ways, including centralized joint policies, high-level task or role assignment, and locally executed policies that react to teammates. However, how complete action-producing VLAs should explicitly interact with one another during action generation remains largely unexplored. We introduce VLA-Fabric, which organizes one complete VLA per arm while preserving local perception and action ownership, and enables coordination through learned interaction across policy boundaries. We first systematically study where such interaction should occur, how peer information should be aggregated, and how the interaction should be learned, revealing complementary coordination functions spanning shared context, peer-specific latent information, and action-stage interaction. We then re-instantiate these functions in a structurally different VLA architecture, showing that the coordination principle is not tied to a particular tensor layout or backbone implementation. Finally, we compose teams of three and four arms and evaluate them in simulation and physical experiments. On all four physical tasks, Full interaction improves success over independently trained local policies by 16--40 percentage points. Together, these results suggest that explicit interaction among complete VLA policies offers a scalable path toward networked embodied intelligence.",
+      "analysis": {
+        "key_results": "在全部四项物理任务中，全交互相比独立训练的局部策略将成功率提高了16到40个百分点。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出VLA-Fabric框架，将每个机械臂的完整VLA策略组织起来，保留局部感知和动作所有权，并通过学习跨策略边界的交互实现多臂协调；系统性研究了交互位置、信息聚合方式和学习方式，证明了协调原则可迁移到不同VLA架构，并在三臂和四臂组合的仿真与物理实验中验证了效果。",
+        "method": "为每个机械臂部署一个完整的VLA策略，在策略间引入可学习的交互机制，包括共享上下文、对等体特定潜在信息以及动作阶段交互，并对交互位置和聚合方式进行系统研究。",
+        "one_sentence_summary": "提出VLA-Fabric，为多臂机器人系统组织每个机械臂一个完整的VLA策略，并通过策略间学习到的交互实现协调控制。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该工作直接面向VLA模型在多臂机器人协同操作中的应用，属于VLA在机器人学习与操作领域的核心研究，与本站高度相关。",
+        "relevance_score": 9,
+        "tags": [
+          "Robot Learning",
+          "Robot Manipulation",
+          "Policy Learning",
+          "Generalist Robotics",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2610.23018",
+      "authors": [
+        "Chenglong Zhang",
+        "Shuaijun Liu",
+        "Feiyang You",
+        "Shuyang Hao",
+        "Chengyu Wu",
+        "Ningxin Su"
+      ],
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-19T00:44:19.807797Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-10-16T06:52:37Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2610.23018",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2610.23018",
+        "project_url": "https://nebulis-lab.com/VLA-Fabric/"
+      },
+      "title": "VLA-Fabric: Learning Interaction for Composable Multi-Arm VLA Agents",
+      "title_zh": "VLA-Fabric：为可组合多臂VLA智能体学习交互",
+      "updated_at": "2026-10-16T06:52:37Z",
       "version": 1
     }
   },
