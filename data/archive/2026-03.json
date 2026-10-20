@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T01:29:32.756996Z",
+  "generated_at": "2026-10-20T09:16:34.214810Z",
   "papers": [
     {
       "abstract": "Indoor 3D scenes are ultimately meant to be used: an embodied agent should be able to navigate, reach objects, and complete diverse activities. Yet whether a given scene actually supports these activities for a specific agent profile is rarely verified. Existing evaluations of indoor 3D scenes typically focus on visual quality and semantic plausibility. In contrast, the feasibility of an activity depends on geometric, agent-specific constraints such as reach, clearance, and navigable space availability. These properties are not captured by visual plausibility metrics, and, as we show, VLMs, which are increasingly used to reason about 3D scenes, often fail to determine action feasibility in a single shot. We present SceneTeract, a verification interface that separates semantic action understanding from physical feasibility. Given a scene, an activity, and an embodied agent profile, we decompose the activity into atomic actions on scene objects. Explicit geometric checks then decide whether each step is executable and return a diagnostic trace explaining failures. In synthetic indoor scenes, SceneTeract reveals widespread functional and accessibility failures across diverse agent profiles. Moreover, when benchmarked against our verification, we find that existing VLMs systematically over-predict action feasibility, highlighting limited awareness of embodied functional constraints. In response, we post-train a lightweight VLM with verifier feedback, improving its assessment of physical feasibility. Although trained only on renders of synthetic scenes, we demonstrate that scene understanding improvements also generalize to real-world scenes. We will release our verification suite, benchmark labels, and diagnostic trace datasets.",
@@ -426,6 +426,103 @@
       "version": 3
     },
     {
+      "abstract": "We introduce Latent-WAM, an efficient end-to-end autonomous driving framework that achieves strong trajectory planning through spatially-aware and dynamics-informed latent world representations. Existing world-model-based planners suffer from inadequately compressed representations, limited spatial understanding, and underutilized temporal dynamics, resulting in sub-optimal planning under constrained data and compute budgets. Latent-WAM addresses these limitations with two core modules: a Spatial-Aware Compressive World Encoder (SCWE) that distills geometric knowledge from a foundation model and compresses multi-view images into compact scene tokens via learnable queries, and a Dynamic Latent World Model (DLWM) that employs a causal Transformer to autoregressively predict future world status conditioned on historical visual and ego status representations. Extensive experiments on NAVSIM v2 and HUGSIM demonstrate new state-of-the-art results: 89.3 EPDMS on NAVSIM v2 and 28.9 HD-Score on HUGSIM, surpassing the best prior perception-free method by 3.2 EPDMS with significantly less training data and a compact 104M-parameter model. The code and model weights have been open-sourced at https://github.com/yukki555/Latent-WAM.",
+      "analysis": {
+        "key_results": "NAVSIM v2上89.3 EPDMS，HUGSIM上28.9 HD-Score，超越最佳先前感知自由方法3.2 EPDMS，使用显著更少的训练数据和104M参数模型。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出Latent-WAM框架，结合空间感知压缩世界编码器和动态潜在世界模型，在NAVSIM v2和HUGSIM上取得新SOTA，以104M参数和更少训练数据超越先前最佳感知自由方法。",
+        "method": "空间感知压缩世界编码器（SCWE）蒸馏基础模型几何知识，将多视图图像压缩为紧凑场景token；动态潜在世界模型（DLWM）使用因果Transformer自回归预测未来世界状态。",
+        "one_sentence_summary": "提出Latent-WAM，通过空间感知压缩世界编码器和动态潜在世界模型，在紧凑模型与少数据下实现端到端自动驾驶的先进轨迹规划。",
+        "primary_topic": "WAM",
+        "relation_to_vla_wam": "论文以潜在世界动作建模（WAM）为核心，通过压缩世界表示和动态预测实现自动驾驶规划，与本站WAM主题高度相关，并关注数据和计算效率。",
+        "relevance_score": 9,
+        "tags": [
+          "World Modeling",
+          "Robot Learning",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.RO"
+      ],
+      "arxiv_id": "2603.24581",
+      "authors": [
+        "Linbo Wang",
+        "Yupeng Zheng",
+        "Qiang Chen",
+        "Shiwei Li",
+        "Yichen Zhang",
+        "Zebin Xing",
+        "Qichao Zhang",
+        "Xiang Li",
+        "Deheng Qian",
+        "Pengxuan Yang",
+        "Yihang Dong",
+        "Ce Hao",
+        "Xiaoqing Ye",
+        "Junyu Han",
+        "Yifeng Pan",
+        "Dongbin Zhao"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-10-20T09:16:34.214810Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2603.24581/v2/fig1-panel1.png"
+            ],
+            "caption": "Performance vs. training data scale on NAVSIM v2. Bubble size indicates model parameters. Our Latent-WAM achieves the highest EPDMS with significantly fewer training data and smaller model size, demonstrating superior data efficiency over existing world-model-based methods. World4Drive is marked separately as it employs an additional ViT-L depth estimator.",
+            "image_urls": [
+              "https://arxiv.org/html/2603.24581v2/teaser.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2603.24581v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2603.24581/v2/fig2-panel1.png"
+            ],
+            "caption": "Overall architecture of Latent-WAM. The framework consists of three modules: (1) Spatial-Aware Compressive World Encoder (SCWE) compresses images into compact scene tokens with geometric distillation for spatial understanding; (2) Dynamic Latent World Model (DLWM) predicts future world states from historical scene representations and ego status; (3) Trajectory Decoder forecasts 4-second trajectories. SCWE and DLWM jointly optimize the vision backbone. Notably, DLWM is used only during training and discarded at inference, while its prediction objective enriches the vision backbone, enabling the trajectory decoder to directly use SCWE representations for planning.",
+            "image_urls": [
+              "https://arxiv.org/html/2603.24581v2/architecture.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2603.24581v2#S1.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2603.24581v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-20T09:16:34.214810Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-03-25T17:56:07Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2603.24581",
+        "code_url": "https://github.com/yukki555/Latent-WAM",
+        "pdf_url": "https://arxiv.org/pdf/2603.24581",
+        "project_url": null
+      },
+      "title": "Latent-WAM: Latent World Action Modeling for End-to-End Autonomous Driving",
+      "title_zh": "Latent-WAM：面向端到端自动驾驶的潜在世界动作建模",
+      "updated_at": "2026-10-18T10:02:09Z",
+      "version": 2
+    },
+    {
       "abstract": "Zero-shot object navigation requires agents to locate unseen targets in unfamiliar environments without prior maps or task-specific training. Despite the commonsense reasoning ability of vision-language models (VLMs), existing mapless navigators often suffer from repeated exploration and premature stopping caused by limited historical context and false-positive target predictions. We propose ReMemNav, a training-free framework that combines lightweight semantic grounding, memory-based decision correction, and target verification. RAM-derived semantic priors guide panoramic direction selection, while a geometry-triggered correction mechanism retrieves historical scene descriptions when the selected direction points toward previously visited regions. When a target is predicted to be visible, ReMemNav verifies the corresponding single-view observation before the final approach. Depth-based action sampling then converts the high-level decision into collision-free motion. Experiments on HM3D and MP3D show that ReMemNav achieves higher success rates and path efficiency than existing training-free zero-shot baselines. Specifically, ReMemNav achieves absolute SR/SPL gains of 1.7%/5.3% on HM3D v0.1, 18.2%/11.1% on HM3D v0.2, and 8.7%/6.9% on MP3D.",
       "analysis": {
         "key_results": "在HM3D和MP3D上，ReMemNav的SR/SPL绝对增益分别为：HM3D v0.1上1.7%/5.3%，HM3D v0.2上18.2%/11.1%，MP3D上8.7%/6.9%。",
@@ -650,7 +747,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2603.23617v2",
-        "recovery_checked_at": "2026-10-20T01:34:04.540704Z",
+        "recovery_checked_at": "2026-10-20T09:23:12.726516Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1190,6 +1287,78 @@
       "version": 3
     },
     {
+      "abstract": "A fine-tuned Vision-Language-Action (VLA) policy can easily place the alphabet soup in the basket on command, just as it saw during fine-tuning. However, if the basket is shifted five centimeters to the left, it drops the soup off the table. We developed an interpretability pipeline to investigate what such a policy is computing. Injecting task A's activations into the action expert while the policy looks at task B's scene makes pi0.5 execute task A's motor trajectory in 99.6\\% of episodes ($n{=}1{,}968$). The injected program is bound to absolute workspace coordinates and ignores the visible scene, which provides a mechanistic account of the perturbation brittleness that concurrent benchmarks report. The binding holds on a physical UR10e: directed replay redirects the commanded task in 26/26 rollouts in one direction and 18/26 in the other, with no-injection and random-direction controls at the floor, and once the source object is moved 10--15\\,cm the arm grasps and releases at the recorded coordinates in 50/50 trials, picking up the wrong block when one sits there and closing on empty air when none does. Applying the same interventions to six VLAs on LIBERO, MetaWorld, SimplerEnv, and ALOHA over 420{,}000+ rollouts yields three further findings: every architecture encodes the instruction, and four of the five weight it below vision whenever the scene alone identifies the goal; under the standard replacement write-back the SAE pooling that preserves behavior is architecture-specific (pi0.5 per-token, X-VLA mean-pool, SmolVLA indifferent), and goal selection and motor generation separate into VLM and expert pathways wherever the two are distinguishable. We release \\textbf{Action Atlas} (https://action-atlas.com), an interactive platform covering all 520+ trained SAEs, 79 identified concepts, and the scored UR10e rollouts. Code: https://github.com/CWRU-AISM/action-atlas",
+      "analysis": {
+        "key_results": "注入导致pi0.5在99.6%的回合中执行任务A的运动轨迹；在物理UR10e上，定向重放分别以26/26和18/26的成功率重定向任务；将源物体移动10-15厘米后，机械臂在50/50试验中在记录的坐标处抓取和释放；所有架构都编码指令，五个中的四个在场景单独识别目标时将视觉权重低于视觉；SAE池化保留行为是架构特定的；目标选择和运动生成分离为VLM和专家路径。",
+        "limitations": "摘要未说明",
+        "main_contribution": "开发了一个可解释性流程，用于探究VLA策略的计算机制，并发布Action Atlas平台，涵盖520多个SAE、79个识别的概念以及UR10e评分实验。",
+        "method": "通过将任务A的激活注入动作专家，同时让策略观察任务B的场景，来研究VLA策略；在LIBERO、MetaWorld、SimplerEnv和ALOHA上对六个VLA进行干预。",
+        "one_sentence_summary": "该研究通过可解释性流程揭示了微调后的视觉-语言-动作（VLA）策略将任务绑定到绝对工作空间坐标，而非视觉场景，从而解释了其对扰动的脆弱性。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该研究直接针对VLA模型，深入解析其内部表征与计算机制，揭示了动作生成对绝对坐标的依赖，对机器人操作模型的鲁棒性和可解释性具有重要价值。",
+        "relevance_score": 9,
+        "tags": [
+          "Vision-Language",
+          "Robot Learning",
+          "Evaluation",
+          "Action Prediction"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2603.19233",
+      "authors": [
+        "Bryce Grant",
+        "Xijia Zhao",
+        "Peng Wang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-10-20T09:16:34.214810Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2603.19233/v3/fig1-panel1.png"
+            ],
+            "caption": "Methodology overview. Top: record a VLA’s activations during a successful rollout, then replay them under cross-task injection and counterfactual prompts, reading causality from whether behavior follows the new scene or the recorded source-task motor program. Middle: per-token SAEs decompose the same activations into features. Bottom: cluster, search, and causally validate features via ablation and steering (browsable via Action Atlas).",
+            "image_urls": [
+              "https://arxiv.org/html/2603.19233v3/figures/fig_system_arch.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2603.19233v3#S3.F1"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2603.19233v3",
+        "recovery_checked_at": "2026-10-20T09:23:12.726516Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-20T09:16:34.214810Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-03-19T17:59:55Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2603.19233",
+        "code_url": "https://github.com/CWRU-AISM/action-atlas",
+        "pdf_url": "https://arxiv.org/pdf/2603.19233",
+        "project_url": "https://action-atlas.com/"
+      },
+      "title": "Not All Features Are Created Equal: A Mechanistic Study of Vision-Language-Action Models",
+      "title_zh": "并非所有特征生而平等：视觉-语言-动作模型的机理研究",
+      "updated_at": "2026-10-19T15:47:27Z",
+      "version": 3
+    },
+    {
       "abstract": "There are two major categories of embodied navigation: Vision-Language Navigation (VLN), where agents navigate by following natural language instructions; and Object-Goal Navigation (OGN), where agents navigate to a specified target object. However, existing work primarily evaluates model performance under nominal conditions, overlooking the potential corruptions that arise in real-world settings. To address this gap, we present NavTrust, a unified benchmark that systematically corrupts input modalities, including RGB, depth, and instructions, in realistic scenarios and evaluates their impact on navigation performance. To our best knowledge, NavTrust is the first benchmark that exposes embodied navigation agents to diverse RGB-Depth corruptions and instruction variations in a unified framework. Our extensive evaluation of seven state-of-the-art approaches reveals substantial performance degradation under realistic corruptions, which highlights critical robustness gaps and provides a roadmap toward more trustworthy embodied navigation systems. Furthermore, we systematically evaluate four distinct mitigation strategies to enhance robustness against RGB-Depth and instruction corruptions. Our base models include Uni-NaVid and ETPNav. We deployed them on a real mobile robot and observed improved robustness to corruptions. The project website is: https://navtrust.github.io/.",
       "analysis": {
         "key_results": "在现实损坏下，七种最先进方法均表现出显著的性能下降；四种缓解策略可提升鲁棒性，并在真实移动机器人上验证。",
@@ -1504,7 +1673,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2603.18853v3",
-        "recovery_checked_at": "2026-10-20T01:34:04.540704Z",
+        "recovery_checked_at": "2026-10-20T09:23:12.726516Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -3710,22 +3879,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 0,
-    "completion_tokens": 20262,
+    "cache_hits": 50,
+    "completion_tokens": 25846,
     "error_categories": {
-      "ValidationError": 1
+      "ValidationError": 4
     },
-    "failed": 1,
-    "fetched": 745,
-    "figure_available": 50,
-    "figure_cache_hits": 0,
+    "failed": 4,
+    "fetched": 1493,
+    "figure_available": 100,
+    "figure_cache_hits": 48,
     "figure_failed": 0,
-    "figure_requests": 58,
-    "figure_unavailable": 8,
-    "model_calls": 61,
-    "prefiltered": 61,
-    "prompt_tokens": 52766,
-    "published": 58,
-    "total_tokens": 73028
+    "figure_requests": 64,
+    "figure_unavailable": 12,
+    "model_calls": 80,
+    "prefiltered": 130,
+    "prompt_tokens": 67601,
+    "published": 112,
+    "total_tokens": 93447
   }
 }
