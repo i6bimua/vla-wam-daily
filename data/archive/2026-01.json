@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-04T02:21:08.950158Z",
+  "generated_at": "2026-10-21T01:13:30.665326Z",
   "papers": [
     {
       "abstract": "Vision-Language-Action (VLA) models have demonstrated remarkable generalization capabilities in robotic manipulation tasks, yet their substantial computational overhead remains a critical obstacle to real-world deployment. Improving inference efficiency is therefore essential for practical robotic applications. Existing acceleration methods often rely on heuristic or static strategies--such as rule-based token caching or pruning--that are decoupled from task objectives and fail to adapt to dynamic scene changes. In this work, we reformulate inference acceleration as a learnable policy optimization problem and propose a novel framework that integrates a dynamic, task-aware decision-making process directly into the VLA model. At its core are two lightweight, cooperative modules: a Cached Token Selector, which determines which tokens should be reused, and a Cache Ratio Predictor, which controls how many tokens to reuse. Training these modules is non-trivial due to their discrete decisions. We address this by adopting a differentiable relaxation that allows gradient-based end-to-end optimization. Extensive experiments on the LIBERO and SIMPLER benchmarks, as well as real-robot evaluations, show that our method achieves a 1.76x wall-clock inference speedup while simultaneously improving the average success rate by 1.9 percentage points (from 75.0% to 76.9%) on LIBERO and by 5.0 percentage points on real-world tasks, significantly outperforming existing baselines. This work highlights the potential of learning task-aware computational allocation policies, paving the way for VLA models that are both powerful and efficient.",
@@ -135,7 +135,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2602.00377v3",
-        "recovery_checked_at": "2026-10-20T09:23:12.726516Z",
+        "recovery_checked_at": "2026-10-21T01:18:31.541059Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -991,6 +991,88 @@
       "version": 2
     },
     {
+      "abstract": "Post-training quantization (PTQ) methods for large language models compress pretrained weights to low bit-widths without retraining by optimizing layer-local proxy objectives. Activation-aware scaling methods such as AWQ protect input channels with large activation norms, whereas second-order error-compensation methods such as GPTQ redistribute rounding error using the inverse of the unweighted input covariance matrix. We show that both paradigms -- along with diagonal Fisher quantization, block reconstruction, and Hadamard rotation methods -- are special cases of minimizing a single loss-derived quadratic form governed by gradient-weighted activation sensitivity. From a Gauss-Newton expansion of the task loss at a linear layer $Y = X W^\\top$, we prove that under isotropic output curvature the expected excess loss from weight perturbation $\\Delta W$ reduces to $\\frac{1}{2 d_{\\mathrm{out}}}\\operatorname{Tr}(\\Delta W H_D \\Delta W^\\top)$, where $H_D = \\frac{1}{n} X^\\top D X$ weights each calibration token's outer product by its squared output-gradient norm $D_{tt} = \\|\\nabla_{y_t}\\mathcal{L}\\|_2^2$. Within this framework, AWQ corresponds to a diagonal approximation of $H_D$ with uniform token weights ($D = I_n$) optimized via channel scaling, while GPTQ corresponds to Cholesky error compensation on $H_D$ under $D = I_n$. We derive closed-form optimal scaling exponents for diagonal sensitivity protection, formulate sensitivity-weighted Cholesky quantization (SAQ-GPTQ) on $H_D$, and prove bounds on token-gradient heterogeneity bias, cross-layer error amplification across residual blocks, and finite-sample calibration concentration. Controlled numerical simulations confirm that under token-gradient heterogeneity, replacing $X^\\top X$ with $X^\\top D X$ preserves $>99\\%$ top-channel saliency recall and reduces INT3/INT4 excess loss by roughly $3\\times$ over unweighted GPTQ.",
+      "analysis": {
+        "key_results": "在控制数值模拟中，在 token 梯度异质性条件下，用 X^T D X 替换 X^T X 可保留超过99%的顶级通道显著性召回率，并将 INT3/INT4 超额损失减少约3倍（相较于未加权 GPTQ）。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出了一个统一的框架，将AWQ、GPTQ等多种训练后量化方法解释为最小化由梯度加权激活灵敏度所控制的同一二次形式，并证明在输出曲率各向同性的条件下，期望超额损失可简化为基于加权输入协方差矩阵的表达式。",
+        "method": "通过高斯-牛顿展开与推导，构造了由梯度加权的激活灵敏度矩阵 H_D = X^T D X / n，其中 D 为输出梯度平方范数作为对角权重。在此框架下，AWQ 被解释为具有均匀 token 权重的对角近似，GPTQ 则是在该矩阵上的 Cholesky误差补偿；进而推导出对角灵敏度保护的最优缩放指数公式，并提出灵敏度加权的 Cholesky 量化方法 SAQ-GPTQ。",
+        "one_sentence_summary": "该论文将多种训练后量化方法统一为最小化由梯度加权激活灵敏度控制的损失导出二次形式，并基于此提出灵敏度加权的Cholesky量化（SAQ-GPTQ）。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "该论文专注于大型语言模型的训练后量化，属于独立的模型压缩效率主题，未涉及 VLA、世界模型或机器人学。其方法对量化模型推理具有普遍价值，可能为后续在机器人策略上的应用提供基础，但摘要中未建立直接联系。",
+        "relevance_score": 7,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "arxiv_id": "2601.11663",
+      "authors": [
+        "Bruce Changlong Xu"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-10-21T01:13:30.665326Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2601.11663/v2/fig1-panel1.png"
+            ],
+            "caption": "Hierarchy of post-training quantization proxy objectives derived from the Kronecker- factored Gauss–Newton Hessian (Theorem 2.1). Each arrow labels the exact simplifying H",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2601.11663v2"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2601.11663/v2/fig2-panel1.png"
+            ],
+            "caption": "Channel saliency prediction accuracy as a function of token-gradient heterogeneity [0,2.0]. Spearman rank correlation with true channel excess loss ∆L . σ ∈",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2601.11663v2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2601.11663v2",
+        "recovery_checked_at": "2026-10-21T01:18:31.541059Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:post-training-quantization",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-21T01:13:30.665326Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-01-15T22:27:19Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2601.11663",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2601.11663",
+        "project_url": null
+      },
+      "title": "Activation Sensitivity as a Unifying Principle for Post-Training Quantization",
+      "title_zh": "激活灵敏度作为训练后量化的统一原则",
+      "updated_at": "2026-10-20T06:57:59Z",
+      "version": 2
+    },
+    {
       "abstract": "Open-vocabulary 3D Scene Graph (3DSG) can enhance various downstream tasks in robotics by leveraging structured semantic representations, yet current 3DSG construction methods suffer from semantic inconsistencies caused by noisy cross-image aggregation under occlusions and constrained viewpoints. To mitigate the impact of such inconsistency, we propose RAG-3DSG, which introduces re-shot guided uncertainty estimation. By measuring the semantic consistency between original limited viewpoints and re-shot optimal viewpoints, this method quantifies the underlying semantic ambiguity of each graph object. Based on this quantification, we devise an Object-level Retrieval-Augmented Generation (RAG) that leverages low-uncertainty objects as semantic anchors to retrieve more reliable contextual knowledge, enabling a Vision-Language Model to rectify the predictions of uncertain objects and optimize the final 3DSG. Extensive evaluations across three challenging benchmarks and real-world robot trials demonstrate that RAG-3DSG achieves superior recall and precision, effectively mitigating semantic noise to provide highly reliable scene representations for robotics tasks.",
       "analysis": {
         "key_results": "在三个挑战性基准和真实世界机器人试验中，RAG-3DSG取得了更高的召回率和精确度，有效减轻了语义噪声。",
@@ -1125,7 +1207,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2601.06519v2",
-        "recovery_checked_at": "2026-10-20T09:23:12.726516Z",
+        "recovery_checked_at": "2026-10-21T01:18:31.541059Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1763,22 +1845,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 0,
-    "completion_tokens": 22841,
+    "cache_hits": 102,
+    "completion_tokens": 23805,
     "error_categories": {
-      "ValidationError": 2
+      "ValidationError": 5
     },
-    "failed": 2,
-    "fetched": 862,
-    "figure_available": 52,
-    "figure_cache_hits": 0,
+    "failed": 5,
+    "fetched": 2011,
+    "figure_available": 128,
+    "figure_cache_hits": 90,
     "figure_failed": 0,
-    "figure_requests": 59,
-    "figure_unavailable": 7,
-    "model_calls": 71,
-    "prefiltered": 71,
-    "prompt_tokens": 61599,
-    "published": 59,
-    "total_tokens": 84440
+    "figure_requests": 58,
+    "figure_unavailable": 20,
+    "model_calls": 75,
+    "prefiltered": 177,
+    "prompt_tokens": 62622,
+    "published": 148,
+    "total_tokens": 86427
   }
 }
