@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T09:43:04.584820Z",
+  "generated_at": "2026-10-22T09:14:46.696062Z",
   "papers": [
     {
       "abstract": "Deploying large language models (LLMs) is challenging due to their massive parameters and high computational costs. Ultra low-bit quantization can significantly reduce storage and accelerate inference, but extreme compression (i.e., mean bit-width <= 2) often leads to severe performance degradation. To address this, we propose Squeeze10-LLM, effectively \"squeezing\" 16-bit LLMs' weights by 10 times. Specifically, Squeeze10-LLM is a staged mixed-precision post-training quantization (PTQ) framework and achieves an average of 1.6 bits per weight by quantizing 80% of the weights to 1 bit and 20% to 4 bits. We introduce Squeeze10LLM with two key innovations: Post-Binarization Activation Robustness (PBAR) and Full Information Activation Supervision (FIAS). PBAR is a refined weight significance metric that accounts for the impact of quantization on activations, improving accuracy in low-bit settings. FIAS is a strategy that preserves full activation information during quantization to mitigate cumulative error propagation across layers. Experiments on LLaMA and LLaMA2 show that Squeeze10-LLM achieves state-of-the-art performance for sub-2bit weight-only quantization, improving average accuracy from 43% to 56% on six zero-shot classification tasks--a significant boost over existing PTQ methods.",
@@ -91,6 +91,90 @@
       "title_zh": "Squeeze10-LLM：通过分阶段混合精度量化方法将LLM权重压缩十倍",
       "updated_at": "2026-09-08T06:41:59Z",
       "version": 2
+    },
+    {
+      "abstract": "For large language models (LLMs), post-training quantization (PTQ) significantly reduces memory and computational overhead. Despite rapid advancements, existing papers often lack experiments on the same ground. In addition, since quantization solutions typically contain multiple components, it is important to analyze the connections among numerous existing methods to gain an in-depth understanding of this field. To bridge these gaps, we conduct an up-to-date and extensive review of the state-of-the-art methods and perform comprehensive evaluations of low-bit quantization on representative text-only LLMs on the same ground to ensure fair comparisons. To our knowledge, this fair and extensive investigation remains critically important yet significantly underexplored in the research community. To better understand the connections, we first decouple published quantization into two steps: pre-quantization transformation to reduce outliers, and quantization error mitigation to offset performance loss. Second, we extensively evaluate the impact of quantization settings, including granularity and symmetry. Third, we analyze the performance of the latest MXFP4 and NVFP4 data formats. Our experimental results first demonstrate that optimizing rotation and scaling yields the best pre-quantization transformation, while combining low-rank compensation with GPTQ occasionally outperforms using GPTQ alone. Second, we verify that finer granularity improves performance at the cost of storage and asymmetric quantization benefits activations significantly more than weights. Third, we find that the format and precision of scaling factors have a significant impact on performance; notably, rotation-based transformation is effective for INT4 but demonstrates little improvement for MXFP4 and NVFP4, inspiring further investigation in this field.",
+      "analysis": {
+        "key_results": "旋转和缩放结合是最优的预量化变换；低秩补偿与GPTQ结合有时优于单独使用GPTQ；更细粒度提升性能但增加存储；非对称量化对激活值的益处大于权重；缩放因子的格式和精度显著影响性能；旋转变换对INT4有效，但对MXFP4和NVFP4提升甚微。",
+        "limitations": "摘要未说明",
+        "main_contribution": "在统一基准上对现有低比特量化方法进行全面评估，并将量化流程解耦为预量化变换和量化误差缓解两个步骤，深入分析各组件之间的关联。",
+        "method": "对代表性纯文本大语言模型进行低比特量化，解耦量化方法为预量化变换（旋转、缩放）与量化误差缓解（低秩补偿、GPTQ等），并评估量化设置（粒度、对称性）及MXFP4/NVFP4格式。",
+        "one_sentence_summary": "本文对大语言模型的低比特后训练量化方法进行了公平、全面的评估，并解耦现有技术以分析其内在联系。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "该工作专注于通用大语言模型的量化评估，未直接涉及VLA、WAM或机器人领域；但作为独立效率主题，其量化方法和评估框架对VLA/WAM中的模型压缩具有潜在参考价值。",
+        "relevance_score": 7,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG"
+      ],
+      "arxiv_id": "2507.17417",
+      "authors": [
+        "Yutong Liu",
+        "Cairong Zhao",
+        "Guosheng Hu"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-10-22T09:14:46.696062Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2507.17417/v4/fig1-panel1.png"
+            ],
+            "caption": "Pre-quantization transformation: a process that transforms activations and weights to make them easier to quantize. The left graph illustrates a tensor that is difficult to quantize due to the presence of numerous outliers, while the right graph shows that after the pre-quantization transformation, the tensor becomes more uniformly distributed, making quantization easier.",
+            "image_urls": [
+              "https://arxiv.org/html/2507.17417v4/transformation.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2507.17417v4#S2.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2507.17417/v4/fig2-panel1.png"
+            ],
+            "caption": "Quantization error mitigation: compensate the error produced by quantization. Here, dq(W_q) denotes dequantizing W_q back to the original precision value space, for computational purposes.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_source",
+            "source_url": "https://arxiv.org/e-print/2507.17417v4"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2507.17417v4",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:post-training-quantization",
+        "exact:low-bit-quantization",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-22T09:14:46.696062Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2025-07-23T11:21:21Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2507.17417",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2507.17417",
+        "project_url": null
+      },
+      "title": "A Comprehensive Evaluation on Quantization Techniques for Large Language Models",
+      "title_zh": "大语言模型量化技术的综合评估",
+      "updated_at": "2026-10-21T11:02:39Z",
+      "version": 4
     },
     {
       "abstract": "Trustworthy robot behavior requires not only high levels of task success but also that the robot can reliably quantify how likely it is to succeed. To this end, we present a first-of-its-kind study of confidence calibration in vision-language-action (VLA) foundation models, which map visual observations and natural language instructions to low-level robot motor commands. We establish a confidence estimation baseline for VLAs, examine how task success relates to calibration error and how calibration evolves over time, and introduce two lightweight techniques to remedy the miscalibration we observe: prompt ensembles and action-wise Platt scaling. Our aim in this study is to begin to develop the tools and conceptual understanding necessary to render VLAs trustworthy via reliable uncertainty quantification.",
@@ -313,7 +397,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2507.22920v2",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -386,7 +470,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2507.12399v3",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -632,7 +716,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2507.04453v4",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -661,22 +745,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 0,
-    "completion_tokens": 9880,
+    "cache_hits": 134,
+    "completion_tokens": 28416,
     "error_categories": {
-      "ValidationError": 1
+      "ValidationError": 6
     },
-    "failed": 1,
-    "fetched": 390,
-    "figure_available": 20,
-    "figure_cache_hits": 0,
+    "failed": 6,
+    "fetched": 2353,
+    "figure_available": 163,
+    "figure_cache_hits": 104,
     "figure_failed": 0,
-    "figure_requests": 28,
-    "figure_unavailable": 8,
-    "model_calls": 31,
-    "prefiltered": 31,
-    "prompt_tokens": 26996,
-    "published": 28,
-    "total_tokens": 36876
+    "figure_requests": 86,
+    "figure_unavailable": 27,
+    "model_calls": 91,
+    "prefiltered": 225,
+    "prompt_tokens": 75815,
+    "published": 190,
+    "total_tokens": 104231
   }
 }

@@ -1,6 +1,106 @@
 {
-  "generated_at": "2026-10-21T09:12:28.049746Z",
+  "generated_at": "2026-10-22T09:14:46.696062Z",
   "papers": [
+    {
+      "abstract": "Traditional robot programming is notoriously challenging: it requires orchestrating multimodal perception, managing physical contact dynamics, and handling diverse environment configurations and execution failures. We introduce ASPIRE (Agentic Skill Programming through Iterative Robot Exploration), a continual learning system that autonomously writes and refines robot control programs in a code-as-policy paradigm while compounding experience into a reusable skill library. ASPIRE operates in an open-ended learning loop, consisting of three components: (1) a closed-loop robot execution engine that exposes fine-grained multimodal traces, enabling the agent to autonomously diagnose failures, synthesize repairs, and validate outcomes; (2) a continually expanding skill library that distills validated fixes into reusable, transferable robotic knowledge; and (3) an evolutionary search procedure that generates diverse programs, systematically debugging them to explore beyond single-trajectory refinement. ASPIRE surpasses prior methods by up to 77% on manipulation tasks under perturbation, 72% on Robosuite's bimanual handover task, and up to 32% on long-horizon household tasks. The accumulated skill library further enables zero-shot generalization: on representative unseen long-horizon tasks, ASPIRE achieves 31% success, outperforming the 4% success rate of prior methods. Performance scales with the capabilities of frontier models. With Claude Opus 5.5, ASPIRE nearly saturates these benchmarks, achieving 99% average success across all 80 LIBERO-Pro tasks and 100% success on representative Robosuite and BEHAVIOR-1K tasks. Beyond simulation, skills discovered in simulation reduce real-world robot programming effort across embodiments and robot APIs, while skills acquired through online interaction with physical robots enable ASPIRE to solve a Rubik's Cube with progressively improving efficiency.",
+      "analysis": {
+        "key_results": "在扰动操控任务上比之前方法提高最多77%，在 Robosuite 双手交接任务上提高72%，在长程家庭任务上提高最多32%；在未见的代表性长程任务上达到31%的成功率（之前方法为4%）；使用 Claude Opus 5.5 时在全部80个 LIBERO-Pro 任务上平均成功率达99%，并在精选 Robosuite 和 BEHAVIOR-1K 任务上达到100%成功率。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出 ASPIRE 系统，通过开放循环的探索、闭环执行反馈和进化搜索，自主生成并持续优化机器人技能程序，并构建可复用的技能库，显著提升操控任务性能和零样本泛化能力。",
+        "method": "系统由三部分组成：闭环机器人执行引擎提供细粒度多模态轨迹用于自动诊断和修复；持续扩展的技能库将验证过的修复提炼为可迁移知识；进化搜索过程生成多样程序并系统调试以超越单轨迹改进。",
+        "one_sentence_summary": "ASPIRE 是一个通过自主编写和迭代修正机器人控制代码、积累可复用技能库的持续学习系统，在仿真和真实机器人任务中大幅超越以往方法。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该工作以代码即策略（code-as-policy）范式实现自主机器人技能学习，涉及视觉-语言模型、机器人操控和技能库构建，与 VLA 和机器人世界模型的研究主题高度相关，但不直接涉及高效推理或量化技术。",
+        "relevance_score": 8,
+        "tags": [
+          "Robot Learning",
+          "Policy Learning",
+          "Vision-Language",
+          "Robot Manipulation",
+          "World Modeling"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.AI",
+        "cs.MA"
+      ],
+      "arxiv_id": "2607.00272",
+      "authors": [
+        "Runyu Lu",
+        "Yubo Wu",
+        "Ethan Kou",
+        "Haotian Lin",
+        "Letian Fu",
+        "Wenli Xiao",
+        "Ajay Mandlekar",
+        "Yinzhen Xu",
+        "Guanya Shi",
+        "Ken Goldberg",
+        "Ang Chen",
+        "Mosharaf Chowdhury",
+        "Jan Kautz",
+        "Yuke Zhu",
+        "Linxi \"Jim\" Fan",
+        "Guanzhi Wang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-10-22T09:14:46.696062Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2607.00272/v2/fig1-panel1.png"
+            ],
+            "caption": "ASPIRE system overview. A coordinator spawns an actor agent (coding agent) per task, enabling parallel learning across tasks. Each actor refines and validates robot programs through iterative debugging with the robot execution engine , which exposes per-primitive multimodal traces for failure attribution and repair. Evolutionary search samples diverse candidate programs ( π 0 , … , π k \\pi_{0},\\ldots,\\pi_{k} ), sends each through the engine, and conditions the next generation ( π 0 ′ , … , π k ′ \\pi^{\\prime}_{0},\\ldots,\\pi^{\\prime}_{k} ) on surviving programs and residual failure traces. The coordinator writes validated repairs into a shared skill library , which future actors retrieve as in-context guidance; skills discovered in simulation can also be adapted as cross-embodiment guidance for real-robot programming.",
+            "image_urls": [
+              "https://arxiv.org/html/2607.00272v2/system_design.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2607.00272v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2607.00272/v2/fig2-panel1.png"
+            ],
+            "caption": "Robot execution engine. Trace-guided debugging on a BEHAVIOR-1K navigate-and-pick-up-radio task. (a) Ego-view keyframes and overlays show the robot locating the radio but failing to approach it. (b) The primitive trace localizes the failure to repeated PLANNING_ERROR s: candidate navigation goals fall inside the table’s collision-avoidance buffer. (c) The agent patches the program with a multi-angle approach routine, re-perceives the radio from a reachable side, and completes the grasp. The validated repair is admitted as a reusable Multi-Angle Approach skill.",
+            "image_urls": [
+              "https://arxiv.org/html/2607.00272v2/coding_dojo.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2607.00272v2#S2.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2607.00272v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-22T09:14:46.696062Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-06-30T23:38:46Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2607.00272",
+        "code_url": "https://github.com/NVlabs/ASPIRE",
+        "pdf_url": "https://arxiv.org/pdf/2607.00272",
+        "project_url": "https://research.nvidia.com/labs/gear/aspire/"
+      },
+      "title": "ASPIRE: Agentic /Skills Discovery for Robotics",
+      "title_zh": "ASPIRE：基于迭代探索的自主机器人技能编程与库构建",
+      "updated_at": "2026-10-20T17:41:12Z",
+      "version": 2
+    },
     {
       "abstract": "Despite rapid progress in interactive world models (IWMs), short-horizon performance does not establish sustained action following, visual stability, physical plausibility, or memory. We introduce WorldRoamBench, an open-world benchmark for long-horizon stability across four dimensions, each with innovations: (i) Action: per-frame action metric bypassing cross-model semantic scale disparity and exposing failures hidden by trajectory; (ii) Vision: sliding-window drift metric capturing non-monotonic mid-sequence collapse missed by start-vs-end comparisons; (iii) Physics: evaluation of physical plausibility across mechanics, optics, and 3D consistency, gated by camera-motion and subject-tracking checks; (iv) Memory: a trajectory-aware protocol reducing confounding from action-following errors, evaluating scene memory via transition-localized 3D point-cloud reconstruction and subject memory via tracking-plus-VLM reasoning. The benchmark comprises 1000+ test cases across Nature, Urban, and Indoor scenes in first/third-person views with WASD 10-60 s continuous interaction. Evaluating 10+ open/closed-source models reveals none reliably satisfies all dimensions; even the best achieves only moderate scores. Advances on WorldRoamBench are steps toward IWMs that are stable, physically grounded, memory-faithful, and deployable in real-world applications.",
       "analysis": {
@@ -57,7 +157,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.31672v5",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -140,7 +240,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.31672v4",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -303,7 +403,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.30639v2",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -627,7 +727,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.28712v2",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -968,7 +1068,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.27163v3",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -1397,7 +1497,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.25987v2",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1821,7 +1921,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.24169v2",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -2325,7 +2425,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.21600v2",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -2402,7 +2502,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.21496v2",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -2475,7 +2575,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.21386v2",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -2548,7 +2648,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.21372v2",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -2780,7 +2880,7 @@
         "checked_at": "2026-08-25T04:40:41.852701Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2606.20274v2",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "html_unavailable"
@@ -3195,7 +3295,7 @@
         "checked_at": "2026-09-28T01:22:00.215010Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2606.18974v6",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "html_unavailable"
@@ -3270,7 +3370,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.18974v5",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -3344,7 +3444,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.18974v4",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -3418,7 +3518,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.18974v3",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -3672,7 +3772,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.18250v2",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -4620,6 +4720,109 @@
       "version": 2
     },
     {
+      "abstract": "Safe control is a prerequisite for real-world embodied intelligence, for which safe reinforcement learning has emerged as a promising paradigm. However, existing safe reinforcement learning methods either require costly real-world exploration or depend on hand-crafted safety functions. Neither scales to vision-language-action models deployed in open-world physical environments. We propose SafeDojo, a model-based safe reinforcement learning framework that improves vision-language-action policies through world-model imagination. SafeDojo performs online reinforcement learning on top of an interactive video world model. A ResNet success classifier scores predicted future frames, while a lightweight safety head predicts per-step contact probabilities from the current latent context and proposed action chunk, jointly assessing task execution and trajectory safety. These decoupled signals are balanced through Lagrangian-constrained GRPO. On SafeLIBERO Level I, SafeDojo improves average safe-success rate by 8.25 percentage points over the strongest baseline; on the zero-shot Level II setting, it is competitive with the strongest model-free baseline. Real-world Franka deployment further shows the best average task and safe-success rates across five tasks. These results support world-model-based safe reinforcement learning as a promising path toward safer embodied intelligence.",
+      "analysis": {
+        "key_results": "在SafeLIBERO Level I上，平均安全成功率比最强基线提高8.25个百分点；在零样本Level II设置上与最强无模型基线相当；真实Franka部署在五个任务中取得最佳平均任务成功率和安全成功率。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出SafeDojo框架，利用交互式视频世界模型进行在线强化学习，通过解耦的任务成功和轨迹安全信号以及拉格朗日约束的GRPO来提升VLA策略的安全性。",
+        "method": "在交互式视频世界模型上进行在线强化学习；使用ResNet成功分类器对预测未来帧评分，轻量安全头从潜在上下文和动作块预测逐步接触概率；通过拉格朗日约束的GRPO平衡两个信号。",
+        "one_sentence_summary": "SafeDojo提出基于世界模型想象的安全强化学习框架，在不依赖真实探索或手工安全函数的情况下提升VLA策略的安全成功率。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "论文直接关注视觉-语言-动作（VLA）模型在开放世界物理环境中的安全控制，属于VLA核心主题；同时引入世界模型作为想象环境，与本站的WAM主题高度相关，是安全强化学习与VLA/WAM交叉的典型工作。",
+        "relevance_score": 9,
+        "tags": [
+          "Robot Learning",
+          "Policy Learning",
+          "World Modeling",
+          "Vision-Language",
+          "Robot Manipulation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2606.20698",
+      "authors": [
+        "Kai Tang",
+        "Peidong Jia",
+        "Zhong Chu",
+        "Jiajun Cao",
+        "Jixian Wu",
+        "Bohua Zhang",
+        "Rui Ma",
+        "Fangyuan Zhao",
+        "Sixiang Chen",
+        "Yichen Guo",
+        "Xiaowei Chi",
+        "Chun-Kai Fan",
+        "Kevin Zhang",
+        "Jinchang Xu",
+        "Fubing Yang",
+        "Weishi Mi",
+        "Xiaozhu Ju",
+        "Jian Tang",
+        "Shanghang Zhang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-10-22T09:14:46.696062Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2606.20698/v2/fig1-panel1.png"
+            ],
+            "caption": "Overview of SafeDojo. SafeDojo enhances VLA policies with world-model-based reward–cost evaluation and safe GRPO, boosting safe success and efficiency in simulation and real-world scenarios. The performance panels compare against all baselines; complete comparisons are reported in Tables 1 and 2 .",
+            "image_urls": [
+              "https://arxiv.org/html/2606.20698v2/teaser.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2606.20698v2#S0.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2606.20698/v2/fig2-panel1.png"
+            ],
+            "caption": "Detailed SafeDojo Pipeline. SafeDojo optimizes VLA policies entirely inside an interactive video world model by rolling out candidate action trajectories into imagined future dynamics. Task reward and safety cost are decoupled and optimized via Lagrangian-based constrained GRPO, improving task success while reducing safety risks without potentially damaging real-world rollouts.",
+            "image_urls": [
+              "https://arxiv.org/html/2606.20698v2/method_v3.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2606.20698v2#S4.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2606.20698v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics",
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-22T09:14:46.696062Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-06-15T08:58:37Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2606.20698",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2606.20698",
+        "project_url": null
+      },
+      "title": "SafeDojo: Safe Reinforcement Learning for VLA via Interactive World Model",
+      "title_zh": "SafeDojo：通过交互式世界模型实现VLA的安全强化学习",
+      "updated_at": "2026-10-21T10:06:03Z",
+      "version": 2
+    },
+    {
       "abstract": "The local deployment of large language models (LLMs) is gaining traction due to privacy concerns and the desire for on-premise inference. However, the energy costs on consumer hardware remain poorly characterized, as most benchmarks focus solely on accuracy. This paper presents a reproducible, hardware-level energy benchmark of 18 open-source LLMs (0.5B to 7B parameters) executed on a single consumer GPU (RTX 4060ti 16GB). Using the Ollama inference engine, GPU power draw was sampled at 2hz via nvidia-smi across a fixed prompt set. We evaluate mean/peak power, total energy per prompt (J/prompt), energy per output token (J/tok), and throughput (tok/s). Our findings suggest that factors beyond raw parameter count, including model architecture and quantization strategy, drive energy efficiency. Specifically, qwen2.5:0.5b and tinyllama:1.1b achieve the lowest energy cost (0.2747 J/tok and 0.3234 J/tok) and the highest throughput (>325 tok/s). In contrast, the 7B-Mistral model consumes up to 8.6x more energy per token than the most efficient model. Notably, qwen3.5:0.8b(on) exhibits anomalously high per-prompt energy due to extended internal reasoning, highlighting the need to distinguish between token generation modes in efficiency metrics.",
       "analysis": {
         "key_results": "qwen2.5:0.5b和tinyllama:1.1b实现最低能耗（0.2747 J/tok和0.3234 J/tok）和最高吞吐量（>325 tok/s）；7B-Mistral模型每token能耗是最高效模型的8.6倍；qwen3.5:0.8b(on)因扩展内部推理导致每提示能耗异常高。",
@@ -4651,7 +4854,7 @@
         "checked_at": "2026-09-28T01:22:00.215010Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2608.00008v2",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -4889,7 +5092,7 @@
         "checked_at": "2026-08-28T06:28:28.076086Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2606.13856v2",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "html_unavailable"
@@ -4915,6 +5118,97 @@
       "title_zh": "输出级正则化消除单GPU视觉-语言-动作模型微调中的种子彩票问题",
       "updated_at": "2026-08-25T06:54:20Z",
       "version": 2
+    },
+    {
+      "abstract": "World models that capture how actions induce physical change enable scalable robot learning without reliance on embodiment-specific action labels. Pixel-space video models provide broad visual priors but expend model capacity on dense appearance reconstruction, while direct action models require embodiment-specific labels that hinder scalability. We present $\\mu_0$, a scalable world model based on 3D traces. Rather than predicting dense pixels or directly modeling actions, $\\mu_0$ forecasts smooth 3D trajectories for salient interaction points such as objects, tools, hands, and contact regions, yielding a compact, embodiment-agnostic motion interface. To enable training from diverse video sources, our TraceExtract system automatically extracts 3D supervision by selecting keypoints, constructing globally aligned traces, and associating motion segments with hierarchical language captions. This TraceExtract supervision pretrains $\\mu_0$ by combining a pretrained vision-language backbone with a modular trace expert, which represents each query via B-spline control points and predicts future traces. Experiments show that $\\mu_0$ outperforms baselines in both 2D and 3D trace prediction, including trace prediction models and tokenized VLM methods. Because $\\mu_0$ is frozen and reusable, it can be paired with action experts for downstream robot embodiments. Despite action-free pretraining, the resulting trace-conditioned policies achieve performance competitive with VLA models pretrained with action supervision, such as $\\pi_0$. These results establish 3D traces as a scalable and transferable representation for cross-embodiment manipulation.",
+      "analysis": {
+        "key_results": "μ₀在2D和3D轨迹预测上优于基线模型（包括轨迹预测模型和token化VLM方法）；与动作专家配对后，其策略在性能上与带动作监督的VLA模型（如π₀）相当。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出一个基于3D交互轨迹的可扩展世界模型μ₀，以及自动提取3D监督的TraceExtract系统，实现无动作监督的预训练并支持跨实施例操作。",
+        "method": "用TraceExtract自动提取3D关键点、构建全局对齐轨迹并关联语言描述；μ₀结合预训练视觉语言骨干与模块化轨迹专家，用B样条控制点表示查询并预测未来轨迹。",
+        "one_sentence_summary": "提出μ₀，一种通过预测3D交互轨迹而非像素或动作来建模物理变化的世界模型，并在无动作监督下实现跨实施例操作。",
+        "primary_topic": "World Model",
+        "relation_to_vla_wam": "该工作直接属于世界模型（WAM）范畴，以3D交互轨迹作为紧凑、跨实施例的表示，用视频数据训练并用于机器人操作，与VLA/WAM主题高度相关。",
+        "relevance_score": 10,
+        "tags": [
+          "World Modeling",
+          "Robot Manipulation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.CV",
+        "cs.LG"
+      ],
+      "arxiv_id": "2606.13769",
+      "authors": [
+        "Seungjae Lee",
+        "Yoonkyo Jung",
+        "Jusuk Lee",
+        "Jonghun Shin",
+        "Amir Hossein Shahidzadeh",
+        "Yao-Chih Lee",
+        "H. Jin Kim",
+        "Jia-Bin Huang",
+        "Furong Huang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-10-22T09:14:46.696062Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2606.13769/v3/fig1-panel1.png"
+            ],
+            "caption": "From videos to reusable action priors. TraceExtract extracts event-captioned 3D interaction traces from heterogeneous videos by selecting entity-centric keypoints, lifting them into globally aligned 3D, and pairing motion events with language. This supervision pretrains μ 0 \\mu_{0} as a world model that predicts compact future trajectories for interaction points, instead of dense pixels or robot-specific actions. Once pretrained, the frozen μ 0 \\mu_{0} can be reused with any downstream action expert, which consumes trace features to produce executable robot action chunks.",
+            "image_urls": [
+              "https://arxiv.org/html/2606.13769v3/new_teaser_3.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2606.13769v3#S0.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2606.13769/v3/fig2-panel1.png"
+            ],
+            "caption": "Overview of TraceExtract. From an uncurated human or robot manipulation video, TraceExtract selects DINOv2 entity keypoints (Sec. ), tracks and lifts them into globally aligned 3D traces with chunk-wise reconstruction (Sec. ), and segments traces into motion-centric events for hierarchical VLM captioning (Sec. ), producing event-captioned 3D trace supervision for μ 0 \\mu_{0} .",
+            "image_urls": [
+              "https://arxiv.org/html/2606.13769v3/datapip_v16.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2606.13769v3#S2.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2606.13769v3",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics",
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-22T09:14:46.696062Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-06-11T17:59:56Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2606.13769",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2606.13769",
+        "project_url": "https://mu0-wm.github.io/"
+      },
+      "title": "$\\mu_0$: A Scalable 3D Interaction-Trace World Model",
+      "title_zh": "μ₀：基于3D交互轨迹的可扩展世界模型",
+      "updated_at": "2026-10-20T18:48:49Z",
+      "version": 3
     },
     {
       "abstract": "On-policy distillation (OPD) has recently become a prominent post-training recipe by combining two desirable ingredients: on-policy student-generated trajectories and dense token-level teacher supervision. Yet how this hybrid training regime shapes a model remains poorly understood. We characterize the sparsity and geometry of OPD parameter updates across several language and vision-language model pairs and application settings. OPD updates are small and coordinate-sparse at checkpoint precision, while remaining distributed across layers and modules. This sparse support is operationally meaningful: masked training on the discovered subnetwork nearly recovers full-training performance. At the matrix level, the updates are numerically full-rank but spectrally concentrated. Their visible supports avoid coordinates emphasized by the source's principal structure and favor low-magnitude source coordinates, while the source singular-value spectra change little. Together, these findings show that OPD exhibits important weight-space signatures of on-policy post-training despite using dense teacher supervision.",
@@ -6121,7 +6415,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.08653v3",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -6203,7 +6497,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.08653v2",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -6455,7 +6749,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.08094v2",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -6530,7 +6824,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.08015v5",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -6590,7 +6884,7 @@
         "checked_at": "2026-09-11T00:47:49.532444Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2606.08015v4",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -6848,7 +7142,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.07710v2",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -6919,7 +7213,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.06837v2",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -7310,6 +7604,99 @@
       "version": 3
     },
     {
+      "abstract": "One-step generation from standard diffusion or Flow-Matching training is rarely effective for text-to-image or video generation without distillation or specialized one-step objectives. We find that VLA action generation behaves strikingly differently. Biasing only the training timestep distribution toward the noise endpoint yields strong one-step policies across LIBERO, LIBERO-Plus, LIBERO-Pro, and real-world robot tasks. Moreover, for open-source VLA models with different architectures, simply replacing iterative decoding with a single forward pass often performs comparably to the original multi-step decoding on benchmarks such as LIBERO, CALVIN, and SimplerEnv. We attribute this difference to the condition-target structure of VLA generation, which is closer to image-to-text than text-to-image: rich observations strongly constrain a comparatively compact target. We formalize this intuition through the irreducible velocity loss $R_v(t,c)$ of standard Flow Matching, which becomes much smaller toward the noise endpoint for VLA, whereas image-generation models usually exhibit a U-shaped profile. The geometry induced by the learned generative map shows the same contrast: the Jacobian of this map with respect to the initial noise has a substantially smaller largest singular value for action generation than for image generation. Together, these results suggest that VLA's condition-target structure makes one-step generation unusually accessible to standard Flow Matching. Code and training configurations for this paper are available at https://github.com/bondtesty/let-it-be-simple.",
+      "analysis": {
+        "key_results": "在LIBERO、LIBERO-Plus、LIBERO-Pro、CALVIN、SimplerEnv及真实世界机器人任务上，单步策略表现强劲，且与原始多步解码性能相当。",
+        "limitations": "摘要未说明",
+        "main_contribution": "发现VLA动作生成在标准Flow Matching框架下特别适合单步生成，仅通过偏置训练时间步分布即可获得强单步策略，并在多个基准上验证了其有效性。",
+        "method": "偏置训练时间步分布向噪声端点，并使用单步前向传播替代迭代解码；通过不可约速度损失和生成映射的雅可比奇异值分析解释其可行性。",
+        "one_sentence_summary": "通过将训练时间步分布偏向噪声端点，视觉-语言-动作模型可以用单步前向传播替代迭代解码，在多个机器人基准上实现性能相当的动作生成。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "本文直接针对VLA模型的推理效率，提出单步动作生成方法，对机器人动作生成任务具有直接价值。",
+        "relevance_score": 9,
+        "tags": [
+          "Action Prediction",
+          "Efficient Inference",
+          "Robot Learning",
+          "Policy Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.AI",
+        "cs.LG",
+        "cs.RO"
+      ],
+      "arxiv_id": "2606.05737",
+      "authors": [
+        "Yitong Chen",
+        "Shiduo Zhang",
+        "Jingjing Gong",
+        "Xipeng Qiu"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-10-22T09:14:46.696062Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2606.05737/v3/fig1-panel1.png"
+            ],
+            "caption": "Each column shows the target geometry (left) and the analytical/trained risk profiles (right), from weak to strong conditioning.",
+            "image_urls": [
+              "https://arxiv.org/html/2606.05737v3/condition-strength-combined.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2606.05737v3#S3.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2606.05737/v3/fig2-panel1.png",
+              "/figures/2606.05737/v3/fig2-panel2.png",
+              "/figures/2606.05737/v3/fig2-panel3.png"
+            ],
+            "caption": "Diagnostics on image-to-text MNIST (a–c) and class-to-image CIFAR-10 (d). (a) Input grid. (b) Empirical velocity MSE over flow time t t . (c) Exact-match accuracy across training time distributions (uniform, high-noise Beta, and pure noise). (d) Pure-noise training loss contrast.",
+            "image_urls": [
+              "https://arxiv.org/html/2606.05737v3/figures/MNIST-example.png",
+              "https://arxiv.org/html/2606.05737v3/figures/256d-4L-mnist-time-schedule-ablation.png",
+              "https://arxiv.org/html/2606.05737v3/figures/cifar10-comparison-pure-noise-and-interpolation-train-loss.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2606.05737v3#S4.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2606.05737v3",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-22T09:14:46.696062Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-06-04T05:58:30Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2606.05737",
+        "code_url": "https://github.com/bondtesty/let-it-be-simple",
+        "pdf_url": "https://arxiv.org/pdf/2606.05737",
+        "project_url": null
+      },
+      "title": "Let It Be Simple: One-Step Action Generation for Vision-Language-Action Models",
+      "title_zh": "简单就好：视觉-语言-动作模型的单步动作生成",
+      "updated_at": "2026-10-21T10:31:33Z",
+      "version": 3
+    },
+    {
       "abstract": "We propose a sensor-guided adaptive contrastive learning framework for visual representation learning in PointGoal navigation. During training, privileged LiDAR sensing guides the contrastive objective through a geometry-aware similarity metric and adaptive temperature scaling, encouraging visual embeddings to capture navigation-relevant structure rather than scene-specific appearance. The resulting encoder is pretrained independently, frozen, and used as the perceptual backbone for reinforcement learning, decoupling representation learning from policy optimization. We further introduce a cross-stage domain mismatch between representation pretraining and policy learning to suppress environment-specific shortcuts and promote reliance on task-relevant features. Extensive experiments in high-fidelity simulation demonstrate that our approach significantly improves policy-level scene transfer across diverse indoor and outdoor environments. At deployment, the agent relies only on monocular RGB observations together with standard task-related inputs such as goal position and proprioceptive signals, without access to LiDAR or other privileged sensors. Our method outperforms large pretrained vision models and standard contrastive baselines under severe appearance and semantic shifts. We also release a multimodal dataset to support future research on privileged-guided visual representation learning for navigation. The code is available at:",
       "analysis": {
         "key_results": "在仿真实验中，方法在多种室内外环境的策略级场景迁移上显著优于大规模预训练视觉模型和标准对比基线。",
@@ -7627,7 +8014,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.03603v2",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -7907,7 +8294,7 @@
         "checked_at": "2026-08-15T23:15:45.718160Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2606.03089v3",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -8062,7 +8449,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.02857v2",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "available"
@@ -8686,7 +9073,7 @@
         "checked_at": "2026-08-11T05:11:29.152139Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2606.09864v2",
-        "recovery_checked_at": "2026-10-21T09:15:30.986135Z",
+        "recovery_checked_at": "2026-10-22T09:22:36.571601Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "html_unavailable"
@@ -8716,22 +9103,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 161,
-    "completion_tokens": 11560,
+    "cache_hits": 134,
+    "completion_tokens": 28416,
     "error_categories": {
-      "ValidationError": 1
+      "ValidationError": 6
     },
-    "failed": 1,
-    "fetched": 2139,
-    "figure_available": 151,
-    "figure_cache_hits": 137,
+    "failed": 6,
+    "fetched": 2353,
+    "figure_available": 163,
+    "figure_cache_hits": 104,
     "figure_failed": 0,
-    "figure_requests": 32,
-    "figure_unavailable": 18,
-    "model_calls": 35,
-    "prefiltered": 196,
-    "prompt_tokens": 31023,
-    "published": 169,
-    "total_tokens": 42583
+    "figure_requests": 86,
+    "figure_unavailable": 27,
+    "model_calls": 91,
+    "prefiltered": 225,
+    "prompt_tokens": 75815,
+    "published": 190,
+    "total_tokens": 104231
   }
 }
