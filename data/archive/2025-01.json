@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-24T08:44:22.865239Z",
+  "generated_at": "2026-10-27T01:47:54.060887Z",
   "papers": [
     {
       "abstract": "Spatial intelligence, encompassing 3D perception and reasoning, is the essential next frontier of AI. Scaling current 3D vision-language models (VLMs) that rely on dense Transformers for spatial tasks incurs prohibitive computational costs. In this paper, we introduce 3D-MoE, a 3D VLM leveraging an efficient mixture-of-experts architecture with a modality- and spatial-context-aware probabilistic routing scheme, stably cultivated by a novel routing curriculum. To seamlessly extend 3D-MoE to embodied AI, we integrate a diffusion-based action head, Pose-DiT, transforming 3D-MoE into a 3D vision-language-action (VLA) model. By employing a rectified flow framework, Pose-DiT generates precise 6D pose actions in a single sampling step. Extensive experiments demonstrate that 3D-MoE achieves superior performance on diverse 3D vision-language benchmarks with drastically fewer activated parameters and yields higher success rates while enabling real-time inference for robot manipulation tasks.",
@@ -87,6 +87,77 @@
       "title_zh": "3D-MoE：面向空间智能的专家混合模型，用于3D推理与动作生成",
       "updated_at": "2026-09-20T08:15:30Z",
       "version": 2
+    },
+    {
+      "abstract": "Splat-based radiance fields have rapidly diversified in primitive type, kernel support, and appearance parameterization. This diversity makes compression difficult: most codecs are single-rate, requiring a separately optimized model for each target bitrate, while progressive codecs remain tied to representation-specific assumptions that do not transfer across backbones. We introduce GoDe (Gaussians on Demand), a progressive compression framework whose central contribution is backbone agnosticism. It reorganizes any trained differentiable splat representation into a single scalable bitstream without modifying the backbone or re-deriving the compression structure for each new primitive type. GoDe builds a nested level-of-detail hierarchy via masked-gradient importance ranking, refines all levels with one quantization-aware fine-tuning stage, and stores the base layer and enhancement layers as progressive chunks compressed with shared entropy dictionaries. Any decoded prefix is directly renderable, so one training pipeline provides multiple rate-distortion operating points without per-rate retraining. Across five heterogeneous backbones and three standard benchmarks, GoDe achieves competitive rate-distortion performance while enabling faster rendering and substantially faster progressive decoding than existing methods. Project page: https://gaussians-on-demand.github.io/",
+      "analysis": {
+        "key_results": "在五个异构主干和三个标准基准上，GoDe 在率失真性能上具有竞争力，同时渲染速度更快，渐进解码速度显著快于现有方法。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出主干无关的渐进压缩框架 GoDe，通过掩码梯度重要性排序构建嵌套层次细节，结合一次性量化感知微调和共享熵字典的渐进码流，实现无需按率重训的多码率压缩。",
+        "method": "掩码梯度重要性排序构建嵌套层次细节，量化感知微调优化所有层级，存储为渐进分块并使用共享熵字典压缩。",
+        "one_sentence_summary": "GoDe 提出一种主干无关的渐进压缩框架，可将任意可微分裂表示组织为单一可扩展比特流，无需修改主干或按新基元重新推导压缩结构。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "该工作针对分裂基辐射场的压缩，与 VLA（视觉-语言-动作）或 WAM（世界模型）无直接关系，但其量化感知渐进压缩框架对高效推理具有方法学参考价值。",
+        "relevance_score": 6,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV"
+      ],
+      "arxiv_id": "2501.13558",
+      "authors": [
+        "Francesco Di Sario",
+        "Riccardo Renzulli",
+        "Marco Grangetto",
+        "Akihiro Sugimoto",
+        "Enzo Tartaglione"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-10-27T01:47:54.060887Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2501.13558/v5/fig1-panel1.png"
+            ],
+            "caption": "One training run, a full rate curve. GoDe constructs a progressive hierarchy from any trained splat representation; each decoded prefix yields a distinct quality–size–speed operating point with no per-rate retraining.",
+            "image_urls": [
+              "https://arxiv.org/html/2501.13558v5/figures/teaser.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2501.13558v5#S1.F1"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2501.13558v5",
+        "recovery_checked_at": "2026-10-27T01:54:49.369239Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-27T01:47:54.060887Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2025-01-23T11:05:45Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2501.13558",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2501.13558",
+        "project_url": "https://gaussians-on-demand.github.io/"
+      },
+      "title": "GoDe: Gaussians on Demand for Backbone-Agnostic Progressive Compression",
+      "title_zh": "GoDe：面向主干无关渐进压缩的按需高斯表示",
+      "updated_at": "2026-10-25T21:32:24Z",
+      "version": 5
     },
     {
       "abstract": "While ML model training and inference are both GPU-intensive, CPU-based data processing is often the bottleneck. Existing distributed data processing systems assume homogeneous resource requirements. They excel at CPU-based computation but either under-utilize heterogeneous resources or impose high overheads on failure and reconfiguration. We introduce Ray Data, a scalable system for heterogeneous workloads spanning batch inference and ML training. The key idea is to combine dynamic task creation for memory efficiency with dynamic task placement for operator elasticity. Making both decisions dynamically allows the system to adapt to heterogeneous pipelines where the memory and compute requirements per operator are unknown and variable over time. Ray Data addresses two challenges: (1) leveraging dynamic task creation for memory-efficient pipelining, and (2) designing a task placement policy that jointly allocates heterogeneous compute and memory resources to maximize throughput while limiting memory usage. Ray Data improves throughput on heterogeneous batch inference pipelines by 2.6-12$\\times$ compared to traditional data processing systems. By leveraging heterogeneous clusters, Ray Data improves end-to-end training time for multimodal models such as Stable Diffusion by 31% compared to popular ML data loaders.",
@@ -186,20 +257,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 122,
-    "completion_tokens": 0,
-    "error_categories": {},
-    "failed": 0,
-    "fetched": 1260,
-    "figure_available": 103,
-    "figure_cache_hits": 105,
+    "cache_hits": 0,
+    "completion_tokens": 30083,
+    "error_categories": {
+      "ValidationError": 4
+    },
+    "failed": 4,
+    "fetched": 1029,
+    "figure_available": 62,
+    "figure_cache_hits": 0,
     "figure_failed": 0,
-    "figure_requests": 1,
-    "figure_unavailable": 3,
-    "model_calls": 0,
-    "prefiltered": 122,
-    "prompt_tokens": 0,
-    "published": 106,
-    "total_tokens": 0
+    "figure_requests": 83,
+    "figure_unavailable": 21,
+    "model_calls": 93,
+    "prefiltered": 93,
+    "prompt_tokens": 79620,
+    "published": 83,
+    "total_tokens": 109703
   }
 }

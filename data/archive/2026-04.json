@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-25T09:01:14.521600Z",
+  "generated_at": "2026-10-27T01:47:54.060887Z",
   "papers": [
     {
       "abstract": "Vision-and-Language Navigation (VLN) aims to enable an embodied agent to follow natural-language instructions and navigate to a target location in unseen 3D environments. We argue that adapting VLMs to VLN requires endowing them with two complementary capabilities for acquiring such awareness, namely backward action reasoning (why) and forward transition prediction~(how). Based on this insight, we propose SpaAct, a simple yet effective training framework that activates the dynamic spatial awareness in VLMs. Specifically, SpaAct introduces two spatial activation tasks: Action Retrospection, which asks the model to infer the executed action sequence from visual transitions, and Future Frame Selection, which forces the model to predict the visual transitions conditioned on history and action. These two objectives provide lightweight supervision on both backward action reasoning and forward transition prediction, encouraging the model to build dynamic spatial awareness in a VLM-friendly way. To further stabilize adaptation, we design TriPA, a Tri-factor Progressive Adaptive curriculum learning method that organizes training samples from easy to hard, allowing the model to gradually acquire navigation skills from basic locomotion to long-horizon reasoning. Experiments on standard VLN-CE benchmarks show that SpaAct consistently improves VLM-based navigation and achieves state-of-the-art performance. We will release the code and models to support future research.",
@@ -1766,6 +1766,92 @@
       "version": 2
     },
     {
+      "abstract": "Vision-language-action (VLA) models have emerged as generalist robotic controllers that map visual observations and language instructions to continuous actions. However, pretrained VLAs typically provide limited information about the reliability of their generated actions, making deployment challenging when execution failures must be anticipated. We address this problem by introducing SentryVLA, a lightweight runtime wrapper for frozen VLA policies. At the action level, SentryVLA uses conformalized quantile regression to estimate a calibrated upper bound on the deviation between sampled VLA actions and expert-like behavior under the calibration distribution. The predicted deviation is then used to rank multiple stochastic candidates for action selection. At the execution-monitoring level, SentryVLA applies a Mahalanobis-distance-based anomaly score to the contextualized latent execution state extracted before final action prediction, providing a complementary signal for detecting abnormal execution states during closed-loop control. The framework does not require retraining or architectural modification of the underlying VLA policy. Experiments in simulation and on a physical robot show that SentryVLA improves action selection and provides useful runtime warning signals for abnormal execution states. These findings demonstrate the practical value of post-hoc reliability scoring for improving the runtime behavior of pretrained VLA policies. Project webpage: https://robotic-vision-lab.github.io/sentryvla/.",
+      "analysis": {
+        "key_results": "在仿真和实体机器人上的实验表明，SentryVLA改善了动作选择，并为异常执行状态提供了有用的运行时警告信号。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出SentryVLA框架，在不重新训练或修改底层VLA策略的情况下，提供动作级可靠性评分和执行级异常检测，改善预训练VLA策略的运行时行为。",
+        "method": "在动作级使用保形分位数回归估计采样动作与专家行为偏差的校准上界，用于动作候选排序；在执行级基于上下文潜在状态的马氏距离异常分数监测异常执行状态。",
+        "one_sentence_summary": "SentryVLA为冻结的VLA策略提供轻量级运行时包装器，通过不确定性估计增强动作选择和执行状态监测，无需额外训练。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "论文直接针对VLA模型，提出一种通用的运行时可靠性增强方法，可应用于机器人动作预测，与本站VLA主题高度相关。",
+        "relevance_score": 10,
+        "tags": [
+          "Robot Learning",
+          "Action Prediction",
+          "Evaluation",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.AI"
+      ],
+      "arxiv_id": "2604.16677",
+      "authors": [
+        "Zongyao Lyu",
+        "Lingling Chen",
+        "William J. Beksi"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-10-27T01:47:54.060887Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2604.16677/v2/fig1-panel1.png"
+            ],
+            "caption": "The SentryVLA framework consists of two main components: (i) SMD Monitoring computes a Mahalanobis-distance anomaly score over contextualized latent execution states to detect abnormal execution contexts; (ii) CQR Action Selection ranks multiple noise-conditioned action candidates by their learned action-deviation scores and selects the lowest-scoring candidate. Together, these components enable uncertainty-guided action selection and state-aware execution monitoring for VLA-based robotic control.",
+            "image_urls": [
+              "https://arxiv.org/html/2604.16677v2/architecture_updated.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2604.16677v2#S0.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2604.16677/v2/fig2-panel1.png"
+            ],
+            "caption": "The CQR pipeline for calibrated action-deviation scoring. Throughout training, a quantile regression model learns to predict an upper quantile of the deviation between a sampled action and its expert-reference action using offline data. During calibration, a held-out set is used to compute the conformal correction offset. During testing, the offset is added to the quantile prediction to score each sampled candidate, and the candidate",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2604.16677v2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2604.16677v2",
+        "recovery_checked_at": "2026-10-27T01:54:49.369239Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-27T01:47:54.060887Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-04-17T20:20:43Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2604.16677",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2604.16677",
+        "project_url": "https://robotic-vision-lab.github.io/sentryvla/"
+      },
+      "title": "SentryVLA: Uncertainty-Guided Action Selection and State Monitoring for Vision-Language-Action Robotic Control",
+      "title_zh": "SentryVLA：面向视觉-语言-动作机器人控制的不确定性引导动作选择与状态监测",
+      "updated_at": "2026-10-25T02:55:19Z",
+      "version": 2
+    },
+    {
       "abstract": "Fine-tuning pre-trained Vision-Language Models (VLMs) for robotic manipulation introduces a fundamental stability-plasticity dilemma: continuous flow-matching action experts backpropagate concentrated, low-rank regression gradients into transformer backbones trained on high-dimensional cross-entropy objectives. This cross-modal gradient asymmetry rapidly degrades pre-trained visual reasoning. Existing solutions either disconnect continuous gradient flow via stop-gradients or constrain updates via LoRA, which restricts update rank but remains directionally blind to semantic corruption; both typically rely on mixed-batch VQA co-training, doubling training compute. We introduce AEGIS (Anchor-Enforced Gradient Isolation System), a buffer-free, layer-wise orthogonal gradient projection framework enabling continuous flow-matching fine-tuning while isolating pre-trained representations from destructive parameter updates. Prior to training, AEGIS estimates per-layer Gaussian activation statistics from pre-training data as a static reference anchor. During fine-tuning, a closed-form Wasserstein-2 transport penalty generates an anchor-restoration gradient through the active computation graph. A sequential dual-backward pass applies layer-wise Gram-Schmidt orthogonalization, projecting task gradients onto the orthogonal complement of the restoration vector during directional conflict. We establish an exact energy preservation bound for layer-wise orthogonal projection, showing that AEGIS sheds only 0.62% of gradient energy empirically while halting cumulative feature drift. On PaliGemma2-3B fine-tuned on the LIBERO manipulation benchmark, AEGIS fully preserves pre-trained Visual Question Answering performance and baseline holdout loss while matching continuous action convergence, without replay buffers, teacher models, or co-training data.",
       "analysis": {
         "key_results": "在PaliGemma2-3B上微调LIBERO基准时，AEGIS完全保持预训练VQA性能和基线保留损失，同时达到连续动作收敛；经验上仅损失0.62%梯度能量，阻止累积特征漂移。",
@@ -2164,7 +2250,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2604.13824v2",
-        "recovery_checked_at": "2026-10-26T09:55:18.091793Z",
+        "recovery_checked_at": "2026-10-27T01:54:49.369239Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -4585,20 +4671,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 39,
-    "completion_tokens": 0,
-    "error_categories": {},
-    "failed": 0,
-    "fetched": 431,
-    "figure_available": 30,
-    "figure_cache_hits": 31,
+    "cache_hits": 0,
+    "completion_tokens": 30083,
+    "error_categories": {
+      "ValidationError": 4
+    },
+    "failed": 4,
+    "fetched": 1029,
+    "figure_available": 62,
+    "figure_cache_hits": 0,
     "figure_failed": 0,
-    "figure_requests": 0,
-    "figure_unavailable": 1,
-    "model_calls": 0,
-    "prefiltered": 39,
-    "prompt_tokens": 0,
-    "published": 31,
-    "total_tokens": 0
+    "figure_requests": 83,
+    "figure_unavailable": 21,
+    "model_calls": 93,
+    "prefiltered": 93,
+    "prompt_tokens": 79620,
+    "published": 83,
+    "total_tokens": 109703
   }
 }
