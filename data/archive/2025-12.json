@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-27T09:41:17.756325Z",
+  "generated_at": "2026-10-28T01:59:52.267280Z",
   "papers": [
     {
       "abstract": "A long-standing challenge in AI is to develop agents capable of solving a wide range of physical tasks and generalizing to new, unseen tasks and environments. A popular recent approach involves training a world model from state-action trajectories and subsequently use it with a planning algorithm to solve new tasks. Planning is commonly performed in the input space, but a recent family of methods has introduced planning algorithms that optimize in the learned representation space of the world model, with the promise that abstracting irrelevant details yields more efficient planning. In this work, we characterize models from this family as JEPA-WMs and investigate the technical choices that make algorithms from this class work. We propose a comprehensive study of several key components with the objective of finding the optimal approach within the family. We conducted experiments using both simulated environments and real-world robotic data, and studied how the model architecture, the training objective, and the planning algorithm affect planning success. We combine our findings to propose a model that outperforms two established baselines, DINO-WM and V-JEPA-2-AC, in both navigation and manipulation tasks. Code, data and checkpoints are available at https://github.com/facebookresearch/jepa-wms.",
@@ -205,6 +205,99 @@
       "title_zh": "World In Your Hands：面向野外人类中心操作学习的大规模开源生态系统",
       "updated_at": "2026-09-21T21:08:20Z",
       "version": 4
+    },
+    {
+      "abstract": "Vision-Language-Action (VLA) models have shown remarkable generalization by mapping web-scale knowledge to robotic control, yet they remain blind to physical contact. Consequently, they struggle with contact-rich manipulation tasks that require reasoning about force, texture, and slip. While some approaches incorporate low-dimensional tactile signals, they fail to capture the high-resolution dynamics essential for such interactions. To address this limitation, we introduce DreamTacVLA, a framework that grounds VLA models in contact physics by learning to feel the future. Our model adopts a hierarchical perception scheme in which high-resolution tactile images serve as micro-vision inputs coupled with wrist-camera local vision and third-person macro vision. To reconcile these multi-scale sensory streams, we first train a unified policy with a Hierarchical Spatial Alignment (HSA) loss that aligns tactile tokens with their spatial counterparts in the wrist and third-person views. To further deepen the model's understanding of fine-grained contact dynamics, we finetune the system with a tactile world model that predicts future tactile signals. To mitigate tactile data scarcity and the wear-prone nature of tactile sensors, we construct a hybrid large-scale dataset sourced from both high-fidelity digital twin and real-world experiments. By anticipating upcoming tactile states, DreamTacVLA acquires a rich model of contact physics and conditions its actions on both real observations and imagined consequences. Across contact-rich manipulation tasks, it outperforms state-of-the-art VLA baselines, achieving up to 95% success, highlighting the importance of understanding physical contact for robust, touch-aware robotic agents.",
+      "analysis": {
+        "key_results": "在接触丰富操作任务上，超越最先进的VLA基线，成功率最高达95%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出DreamTacVLA框架，将高分辨率触觉图像作为微视觉输入，与腕部相机局部视觉和第三人称宏观视觉结合，并通过预测未来触觉信号来深化模型对接触动态的理解，从而提升接触丰富操作任务的性能。",
+        "method": "采用层级感知方案，利用Hierarchical Spatial Alignment (HSA)损失对齐多尺度感觉流，先训练统一策略，再用触觉世界模型微调以预测未来触觉信号，并构建混合大规模数据集以缓解数据稀缺。",
+        "one_sentence_summary": "DreamTacVLA通过层级感知和对齐多尺度视觉触觉信息，并结合预测未来触觉状态的世界模型，增强了VLA模型在接触丰富操作任务中的表现。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "本文直接扩展VLA模型以处理接触丰富操作，通过引入触觉世界模型预测未来触觉状态，将世界模型思想融入VLA，核心关注机器人操作中的动作预测与物理接触理解，与本站VLA和WAM主题高度相关。",
+        "relevance_score": 9,
+        "tags": [
+          "Action Prediction",
+          "Efficient Inference",
+          "Policy Learning",
+          "Robot Manipulation",
+          "Simulation",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.CV"
+      ],
+      "arxiv_id": "2512.23864",
+      "authors": [
+        "Guo Ye",
+        "Zexi Zhang",
+        "Xu Zhao",
+        "Shang Wu",
+        "Haoran Lu",
+        "Shihan Lu",
+        "Han Liu"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-10-28T01:59:52.267280Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2512.23864/v5/fig1-panel1.png"
+            ],
+            "caption": "Hybrid tactile dataset and DreamTacVLA inference pipeline. (Top) We collect a large-scale tactile dataset spanning four manipulation tasks and nine objects, comprising 2 million tactile frames. (Bottom) Our Think–Dream–Act employs a two-pass inference process. In the Think stage, the policy proposes a draft action based on the current observation and a null tactile prediction. In the Dream stage, a frozen V-JEPA 2 world model forecasts the tactile outcome of the draft action. In the Act stage, the policy integrates both the current observation and predicted tactile outcome to refine the action, enabling fine-grained corrections during contact-rich manipulation.",
+            "image_urls": [
+              "https://arxiv.org/html/2512.23864v5/first_figure.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2512.23864v5#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2512.23864/v5/fig2-panel1.png"
+            ],
+            "caption": "The proposed framework operates in two stages. Stage 1: A multimodal encoder E ψ E_{\\psi} processes diverse inputs. This stage employs Hierarchical Spatial Alignment (HSA) to effectively fuse the features from different modalities, guided by the ℒ HSA \\mathcal{L}_{\\mathrm{HSA}} and ℒ W \\mathcal{L}_{W} losses. A policy π θ \\pi_{\\theta} is trained to output an initial draft action a draft ( t ) a^{(t)}_{\\mathrm{draft}} . Stage 2: A world model W ϕ W_{\\phi} is trained to predict future tactile image sequences. The policy “dreams” the future tactile feeling (e.g., H dream ( t + N ) H^{(t+N)}_{\\mathrm{dream}} ) that would result from its draft action. This predicted future is fed into an MLP, allowing the policy to refine its plan and output a more refined final action a final ( t ) a^{(t)}_{\\mathrm{final}} .",
+            "image_urls": [
+              "https://arxiv.org/html/2512.23864v5/framework_2_v4-comp.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2512.23864v5#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2512.23864v5",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics",
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-28T01:59:52.267280Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2025-12-29T21:06:33Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2512.23864",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2512.23864",
+        "project_url": null
+      },
+      "title": "Learning to Feel the Future: DreamTacVLA for Contact-Rich Manipulation",
+      "title_zh": "学习感受未来：面向接触丰富操作的DreamTacVLA",
+      "updated_at": "2026-10-27T03:45:28Z",
+      "version": 5
     },
     {
       "abstract": "Speculative decoding (SD) accelerates large language model (LLM) inference by using a lightweight draft model to propose tokens and a stronger target model to verify them. However, standard SD is mainly designed for acceleration, and its output quality is typically constrained by the target model. In this work, we propose Entropy-Aware Speculative Decoding (EASD), a lightweight and training-free extension of SD that improves reasoning quality through token-level entropy-guided rejection. EASD detects cases where both draft and target models exhibit high uncertainty while strongly overlapping in their top predictions. In such uncertain-agreement cases, EASD rejects the aligned token and resamples from the target distribution, preventing low-confidence errors from propagating. Experiments on challenging reasoning benchmarks show that EASD consistently improves accuracy over standard SD and reward-guided variants while maintaining comparable inference efficiency. Notably, EASD can surpass the standalone performance of the target model, suggesting that speculative decoding can serve not only as an acceleration method but also as an effective mechanism for improving reasoning quality. The code is available at https://github.com/ECNU-Text-Computing/EASD.",
@@ -824,6 +917,103 @@
       "version": 2
     },
     {
+      "abstract": "Diffusion Policy (DP) excels in embodied control but suffers from high inference latency and computational cost due to multiple iterative denoising steps. Existing diffusion model (DMs) acceleration methods improve inference speed by reducing computational overhead, as DMs for image generation are computation-bound. In this work, we reveal that DP are I/O bound, and thus propose using speculative decoding, a parallel computing framework, to accelerate DP for the first time. However, it is non-trivial to address the following challenges: (1) How to preserve the denoising quality of the base model at reduced computational cost under time-varying task difficulty in embodied settings; and (2) How to dynamically allocate computation according to task difficulty in such environments. Therefore, we propose Temporal-aware Reinforcement-based Speculative Diffusion Policy (TS-DP), the first framework that enables speculative decoding for DP with temporal adaptivity. First, to handle dynamic environments where task difficulty varies over time, we distill a Transformer-based drafter to imitate the base model and replace its costly denoising calls. Second, an RL-based scheduler further adapts to the time-varying task difficulty by adjusting speculative parameters to maintain accuracy while improving efficiency. Extensive experiments show that TS-DP achieves up to a 4.17x NFE reduction and a 3.2x wall-clock speedup with a draft acceptance rate of over 85% in simulation. Real-world experiments further demonstrate a 3.8x NFE reduction while improving success rates on real-time tasks (e.g., a 23% gain on the conveyor-belt task), reaching an inference frequency of 26 Hz and enabling real-time control while maintaining comparable task performance. The code is available at https://github.com/ChildTang/TS-DP.",
+      "analysis": {
+        "key_results": "仿真中 NFE 降低最高 4.17 倍，墙钟时间加速 3.2 倍，草案接受率超过 85%；真实世界中 NFE 降低 3.8 倍，实时任务成功率提升（如传送带任务提升 23%），推理频率达 26 Hz。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出 TS-DP 框架，首次将推测解码引入扩散策略，并通过蒸馏 Transformer 起草模型和 RL 调度器实现时序自适应，在保持性能的同时大幅降低推理延迟。",
+        "method": "蒸馏 Transformer 起草模型替代代价高昂的去噪调用；利用强化学习调度器动态调整推测参数以适应任务难度变化；采用推测解码并行计算框架加速扩散策略推理。",
+        "one_sentence_summary": "本文首次将推测解码应用于扩散策略（DP）的加速，通过蒸馏起草模型和强化学习调度器实现时序自适应的高效推理，在仿真和真实机器人任务中显著降低计算量并提升实时性能。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "本文直接针对机器人操作中的扩散策略（DP）推理加速，属于高效推理与机器人策略学习的交叉，对 VLA/WAM 中基于扩散的动作生成模型具有直接借鉴意义。",
+        "relevance_score": 9,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding",
+          "Robot Manipulation",
+          "Policy Learning",
+          "Action Prediction"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "arxiv_id": "2512.15773",
+      "authors": [
+        "Ye Li",
+        "Jiahe Feng",
+        "Yuan Meng",
+        "Kangye Ji",
+        "Chen Tang",
+        "Jiajun Fan",
+        "Xinwan Wen",
+        "Jiawei Li",
+        "Wenwu Zhu",
+        "Shu-Tao Xia",
+        "Xin Wang",
+        "Zhi Wang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-10-28T01:59:52.267280Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2512.15773/v2/fig1-panel1.png"
+            ],
+            "caption": "Vanilla Diffusion Policy (DP) vs. Our TS-DP . For embodied tasks, DP completes a task through multiple interactions with the environment, generating several segments of actions. Each segment typically requires hundreds of model calls for denoising, making the process highly time-consuming. TS-DP introduces a customized speculative decoding framework for temporal-complexity-aware accelerating DP. A lightweight drafter generates multiple denoising results, which are verified in parallel by the DP for near-lossless acceleration. A scheduler further adjusts key speculative decoding parameters—such as the number of drafts and the acceptance rate—based on the complexity of different task phases, achieving adaptive and efficient acceleration.",
+            "image_urls": [
+              "https://arxiv.org/html/2512.15773v2/overview.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2512.15773v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2512.15773/v2/fig2-panel1.png"
+            ],
+            "caption": "The framework of TS-DP . TS-DP is the first temporal-aware speculative decoding framework designed to accelerate Diffusion Policy. ① Decision stage: A PPO-based scheduler evaluates time-varying task difficulty using past observations and actions, and produces adaptive speculative parameters. It operates in parallel with the observation encoder, adding no extra inference latency. ② Denoising stage: Guided by the scheduler, a lightweight drafter executes multiple denoising steps sequentially, effectively replacing expensive DP calls and reducing computational load. ③ Verification stage: DP verifies all drafted steps in parallel, accepting those that pass validation and correcting the first rejected draft via reflection-maximal coupling to better align it with the target distribution. ④ Reward generation: Based on task progress, the framework provides process rewards that encourage the scheduler to produce more valid drafts, and a final success-driven reward upon task completion, jointly guiding the scheduler toward efficient and successful task execution.",
+            "image_urls": [
+              "https://arxiv.org/html/2512.15773v2/framework.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2512.15773v2#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2512.15773v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:speculative-decoding",
+        "composite:speculative_generation",
+        "composite:draft_verification_decoding"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-28T01:59:52.267280Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2025-12-13T07:53:14Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2512.15773",
+        "code_url": "https://github.com/ChildTang/TS-DP",
+        "pdf_url": "https://arxiv.org/pdf/2512.15773",
+        "project_url": null
+      },
+      "title": "TS-DP: Reinforcement Speculative Decoding For Temporal Adaptive Diffusion Policy Acceleration",
+      "title_zh": "TS-DP：面向时序自适应扩散策略加速的强化推测解码",
+      "updated_at": "2026-10-27T02:37:43Z",
+      "version": 2
+    },
+    {
       "abstract": "Humans can intuitively parallelise complex activities, but can a model predict this from observing a single person? Given one egocentric video, we introduce the N-Body Problem: predicting how N individuals, can hypothetically perform the same set of tasks. The goal is to maximise speed-up, but naive assignment of video segments to individuals often violates real-world constraints, leading to physically impossible scenarios like two people using the same object or occupying the same space. To quantify this, we formalise the N-Body Problem and propose a suite of metrics to evaluate both performance (speed-up, task coverage) and feasibility (spatial collisions, object conflicts and causal constraints). As a proof of concept, we introduce a structured prompting strategy that guides a Vision-Language Model (VLM) to reason about the 3D environment, object usage, and temporal dependencies, producing a viable parallel execution. On 100 videos from EPIC-Kitchens and HD-EPIC, for $N = 2$, our structured prompt improves action coverage by 45% over a baseline prompt for Gemini 2.5 Pro, while simultaneously slashing collision rates, object and causal conflicts by 51%, 52% and 55% respectively.",
       "analysis": {
         "key_results": "在EPIC-Kitchens和HD-EPIC的100个视频上，对于N=2，结构化提示相比基线提示将动作覆盖率提高45%，同时将碰撞率、物体冲突率和因果冲突率分别降低51%、52%和55%（基于Gemini 2.5 Pro）。",
@@ -868,7 +1058,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2512.11393v3",
-        "recovery_checked_at": "2026-10-27T09:45:22.300025Z",
+        "recovery_checked_at": "2026-10-28T02:06:15.523496Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1209,7 +1399,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2512.07419v3",
-        "recovery_checked_at": "2026-10-27T09:45:22.300025Z",
+        "recovery_checked_at": "2026-10-28T02:06:15.523496Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1499,6 +1689,78 @@
       "version": 3
     },
     {
+      "abstract": "Safeguarding the Intellectual Property (IP) of Large Language Models (LLMs) against model theft represents a critical challenge in contemporary AI research. Although fingerprinting is essential for establishing forensic evidence for model derivation, existing methods are susceptible to false claim attacks, weight manipulations, or high false positive rates, undermining their utility. To overcome these limitations, we propose SELF, \\rev{a novel intrinsic weight-based fingerprinting scheme tailored for robust IP forensics via adversarial model lineage verification}. SELF eliminates dependency on input and inherently resists false claims, achieving robust \\rev{provenance detection} through unique, scalable and transformation-invariant fingerprint extraction via singular value and eigenvalue decomposition of LLM attention weights. Experimental results demonstrate that SELF maintains high IP infringement detection accuracy while significantly outperforming state-of-the-art baselines in reducing false positives and showing strong robustness against various downstream modifications, including quantization, pruning, and fine-tuning attacks. Our code is available at https://github.com/HanxiuZhang/SELF_v4.",
+      "analysis": {
+        "key_results": "实验结果表明 SELF 在保持高侵权检测准确率的同时，显著优于最先进基线，降低误报率，并对量化、剪枝、微调等下游修改表现出强鲁棒性。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出了一种新的基于权重的内在指纹方案 SELF，通过奇异值和特征值分解提取独特、可扩展且变换不变的指纹，消除对输入的依赖并抵抗虚假声明攻击，实现强鲁棒性溯源。",
+        "method": "对 LLM 注意力权重进行奇异值和特征值分解，提取独特、可扩展且变换不变的指纹。",
+        "one_sentence_summary": "摘要介绍了一种基于大语言模型注意力权重奇异值和特征值分解的固有指纹方案，用于鲁棒的知识产权侵权检测。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "论文聚焦于大语言模型指纹与知识产权保护，未涉及 VLA、世界模型或机器人学习；其与本站主题仅因涉及量化（下游修改攻击之一）而具有一般的推理效率关联，无直接 VLA/WAM 关系。",
+        "relevance_score": 6,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CR",
+        "cs.AI",
+        "cs.CL",
+        "cs.LG"
+      ],
+      "arxiv_id": "2512.03620",
+      "authors": [
+        "Hanxiu Zhang",
+        "Qiang Xu",
+        "Yue Zheng"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-10-28T01:59:52.267280Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2512.03620/v2/fig1-panel1.png"
+            ],
+            "caption": "Model provenance verification pipeline using SELF. After training the target model, the owner can extract the model fingerprint for lineage tracking. Even if the derived model has been modified to evade detection, the owner can still verify provenance by extracting and comparing the models’ fingerprints. A high fingerprint similarity provides evidence of derivation from the foundational target model.",
+            "image_urls": [
+              "https://arxiv.org/html/2512.03620v2/introduction.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2512.03620v2#S1.F1"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2512.03620v2",
+        "recovery_checked_at": "2026-10-28T02:06:15.523496Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-28T01:59:52.267280Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2025-12-03T09:53:47Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2512.03620",
+        "code_url": "https://github.com/HanxiuZhang/SELF_v4",
+        "pdf_url": "https://arxiv.org/pdf/2512.03620",
+        "project_url": null
+      },
+      "title": "SELF: A Robust Singular Value and Eigenvalue Approach for LLM Fingerprinting",
+      "title_zh": "SELF：基于奇异值与特征值的鲁棒大语言模型指纹识别方法",
+      "updated_at": "2026-10-27T03:24:28Z",
+      "version": 2
+    },
+    {
       "abstract": "We study how explicit world-modeling objectives affect the internal representations and downstream capability of Transformers, using Rubik's Cubes as our training domain. We ask: (1) how does explicitly pretraining a world model affect a model's latent representations, (2) how does world-model quality affect post-training performance, and (3) how should a finite data budget be split between pretraining and task-specific fine-tuning? We compare standard action-prediction fine-tuning with two strategies that add explicit state-prediction supervision: state pretraining followed by fine-tuning, and joint action and state training. We measure task accuracy after Group Relative Policy Optimization (GRPO). We further find that explicit world-modeling yields better representations in terms of higher probing accuracy and steerability of the model, and that better representations yield larger gains from GRPO, especially on harder cube states. Finally, when the fine-tuning budget is held fixed, probe accuracy strongly predicts the GRPO improvement. Under a fixed total data budget, accuracy is maximized by allocating only a small fraction to pretraining.",
       "analysis": {
         "key_results": "显式世界模型带来更高的探测准确率和可操纵性；更好的表征在GRPO中带来更大增益，尤其针对较难状态；当微调预算固定时，探测准确率能强烈预测GRPO提升；在固定总数据预算下，仅分配少量预训练数据即可最大化准确率。",
@@ -1676,6 +1938,91 @@
       "title_zh": "EmbodiedDiffusion：面向异构机器人导航的端到端可通行性引导视觉扩散框架",
       "updated_at": "2026-09-20T17:13:06Z",
       "version": 5
+    },
+    {
+      "abstract": "Existing Vision-Language Navigation (VLN) agents based on Large Vision-Language Models (LVLMs) often suffer from errors of perception, reasoning, and planning, which significantly hinder their navigation performance. To address these limitations, a novel VLN agent framework, named SeeNav-Agent, is proposed. First, to reduce hallucinations of the visual module of the VLN agent, a dual-view Visual Prompt (VP) technique is introduced, which can also improve the agent's understanding of current spatial states. Subsequently, a novel step-level Reinforcement Fine-Tuning (RFT) method, Step Reward Group Policy Optimization (SRGPO), is designed for post-training. In SRGPO, we first define verifiable process rewards for navigation, and then perform efficient step-level advantage estimation by randomly grouping navigation steps. SRGPO provides dense reward signals for the RFT of the VLN agent and enhances its planning capability. Experiments on both the EmbodiedBench Navigation (Embench-Nav) and VLN-CE validate the effectiveness of the proposed method. By introducing the zero-shot VP module, the GPT-4.1 achieves a navigation success rate of 86.7%, surpassing the current best LVLM by approximately 20 percentage points (pp) on Embench-Nav and achieves an 11.1 pp improvement on VLN-CE compared to the base model. With VP+SRGPO, the Qwen2.5-VL-3B model reaches a navigation success rate of 72.3%, outperforming the best existing LVLM model by 5.6 pp on Embench-Nav and achieves 8.9 pp improvement on VLN-CE compared to the baseline method. Moreover, compared to GRPO and GiGPO, the proposed SRGPO demonstrates significant improvements in training stability, convergence efficiency, and generalization capability.",
+      "analysis": {
+        "key_results": "GPT-4.1在Embench-Nav上导航成功率达86.7%，比当前最佳LVLM提升约20个百分点；Qwen2.5-VL-3B达72.3%，比最佳LVLM提升5.6个百分点；在VLN-CE上分别比基线提升11.1和8.9个百分点。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出SeeNav-Agent框架，包括双视图视觉提示（VP）技术和步级强化微调方法SRGPO，以减少视觉幻觉并提供密集奖励。",
+        "method": "双视图视觉提示（VP）和步级奖励组策略优化（SRGPO），后者通过随机分组导航步骤进行步级优势估计。",
+        "one_sentence_summary": "提出SeeNav-Agent框架，通过双视图视觉提示和步级强化微调SRGPO，提升基于LVLM的视觉语言导航智能体的感知、推理与规划能力。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该工作聚焦视觉语言导航智能体，属于VLA范畴，通过改进视觉提示和策略优化提升导航性能，与机器人动作预测和策略学习直接相关。",
+        "relevance_score": 7,
+        "tags": [
+          "Vision-Language",
+          "Policy Learning",
+          "Robot Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG"
+      ],
+      "arxiv_id": "2512.02631",
+      "authors": [
+        "Zhengcheng Wang",
+        "Zichuan Lin",
+        "Yijun Yang",
+        "Haobo Fu",
+        "Deheng Ye"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-10-28T01:59:52.267280Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2512.02631/v2/fig1-panel1.png"
+            ],
+            "caption": "The key motivations. Left: Analysis for different error types from VLA models. Right: Examples of different error types in the navigation task.",
+            "image_urls": [
+              "https://arxiv.org/html/2512.02631v2/Figures/figs/motivation.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2512.02631v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2512.02631/v2/fig2-panel1.png"
+            ],
+            "caption": "Overview of SeeNav-Agent. Different from previous VLN works tend to use single view image as input and use method like GRPO or GiGPO for RFT, our SeeNav-Agent designs a dual-view input with visual prompt to enhance the visual module in a zero-shot manner, and proposes SRGPO to efficiently introduce process reward signals by randomly grouping steps. The upper-middle schematic shows the dual-view visual prompt, with FV on the left and BEV on the right.",
+            "image_urls": [
+              "https://arxiv.org/html/2512.02631v2/Figures/figs/framework.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2512.02631v2#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2512.02631v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-28T01:59:52.267280Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2025-12-02T10:40:46Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2512.02631",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2512.02631",
+        "project_url": null
+      },
+      "title": "SeeNav-Agent: Enhancing Vision-Language Navigation with Visual Prompt and Step-Level Policy Optimization",
+      "title_zh": "SeeNav-Agent：利用视觉提示与步级策略优化增强视觉语言导航",
+      "updated_at": "2026-10-27T08:13:11Z",
+      "version": 2
     },
     {
       "abstract": "Growing demands from tasks like code generation, deep reasoning, and long-document understanding have made long-context generation a crucial capability for large language models (LLMs). Speculative decoding is one of the most direct and effective approaches for accelerating generation. It follows a draft-verify paradigm, where a lightweight draft model proposes several candidate tokens and the target model verifies them. However, we find that as the context length grows, verification becomes the dominant bottleneck. To further accelerate speculative decoding in long-context generation, we introduce SpecPV, a self-speculative decoding approach that performs fast verification using partial key-value states (KV) and periodically applies full verification to eliminate accumulated errors. We validate SpecPV across multiple long-context benchmarks and models, including LLaMA-3.1-8B-Instruct and Qwen3-series. Experimental results show that SpecPV achieves up to 6x decoding speedup over standard autoregressive decoding with minor degradation.",
@@ -1940,22 +2287,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 84,
-    "completion_tokens": 16195,
+    "cache_hits": 95,
+    "completion_tokens": 26908,
     "error_categories": {
-      "ValidationError": 2
+      "ValidationError": 3
     },
-    "failed": 2,
-    "fetched": 1443,
-    "figure_available": 102,
-    "figure_cache_hits": 78,
+    "failed": 3,
+    "fetched": 2121,
+    "figure_available": 144,
+    "figure_cache_hits": 84,
     "figure_failed": 0,
-    "figure_requests": 43,
-    "figure_unavailable": 19,
-    "model_calls": 51,
-    "prefiltered": 135,
-    "prompt_tokens": 43956,
-    "published": 121,
-    "total_tokens": 60151
+    "figure_requests": 74,
+    "figure_unavailable": 14,
+    "model_calls": 82,
+    "prefiltered": 177,
+    "prompt_tokens": 69571,
+    "published": 158,
+    "total_tokens": 96479
   }
 }
