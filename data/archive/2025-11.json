@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-30T02:25:14.210858Z",
+  "generated_at": "2026-10-30T10:45:18.900358Z",
   "papers": [
     {
       "abstract": "World models simulate environmental dynamics to enable embodied agents to plan and reason about future states. While real-world perception is inherently multimodal, existing approaches focus primarily on visual observations, leaving crucial spatial and temporal acoustic cues underexplored. In this work, we present a unified formulation of Audio-Visual World Models (AVWM), casting multimodal environment simulation under action control as a partially observable Markov decision process with synchronized audio-visual observations. As a foundational benchmark, we construct AVW-4k, comprising 30 hours of action-annotated binaural audio-visual trajectories across 76 indoor environments. To capture these physically grounded multisensory dynamics, we propose AV-CDiT (Audio-Visual Conditional Diffusion Transformer), featuring a novel modality expert architecture that balances visual and auditory learning, optimized via a three-stage training strategy. Extensive experiments demonstrate that AV-CDiT achieves high-fidelity prediction across both visual and auditory modalities. Furthermore, we validate its practical utility in embodied navigation, showing that AVWM significantly enhances a pretrained agent in continuous audio-visual navigation tasks.",
@@ -178,6 +178,90 @@
       "version": 2
     },
     {
+      "abstract": "Low-rank factorization of weight matrices is a promising approach to compress large language models (LLMs), but its practical effectiveness depends on allocating ranks across layers and efficiently representing the resulting factors. We introduce three complementary methods for improving SVD-based LLM compression. First, FermiGrad formulates global layer-wise rank allocation as a differentiable optimization problem by replacing discrete singular-value truncation with continuous Fermi gates. Because FermiGrad optimizes only rank parameters over precomputed low-rank factors, it avoids repeated activation decompositions and backpropagation through SVD operations. Second, the Targeted Compressor extends FermiGrad with a task-specific objective that directs limited model capacity toward a selected domain. At 60% parameter density for Llama-3.1-8B-Instruct, SciQ-targeted compression achieves 60% MMLU accuracy, exceeding the reported quantized Dobi-SVD result by 10 percentage points, while deliberately trading performance on unrelated tasks for domain specialization. Third, PivGa provides a lossless secondary compression of low-rank factors by exploiting the gauge freedom in their parametrization. The proposed framework is modular, computationally efficient, and applicable at scale, as demonstrated by compressing Llama-3.3-70B-Instruct to 50% parameter density.",
+      "analysis": {
+        "key_results": "Llama-3.1-8B-Instruct在60%参数密度下，SciQ定向压缩达到60% MMLU准确率，超过报告的量化Dobi-SVD结果10个百分点；并将Llama-3.3-70B-Instruct压缩至50%参数密度。",
+        "limitations": "摘要未说明。",
+        "main_contribution": "引入三种互补方法改进SVD压缩：FermiGrad通过可微优化全局分配各层秩，Targeted Compressor加入任务特定目标实现领域定向压缩，PivGa利用规范自由度对低秩因子进行无损二次压缩。",
+        "method": "FermiGrad将离散奇异值截断替换为连续Fermi门，仅优化秩参数；Targeted Compressor扩展FermiGrad并指定任务目标；PivGa利用低秩因子参数化中的规范自由度进行无损二次压缩。",
+        "one_sentence_summary": "提出FermiGrad-SVD，一种结合全局秩分配、任务定向压缩和规范固定三种方法的SVD低秩分解LLM压缩框架。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文专注于大语言模型的低秩压缩与量化，与VLA（视觉-语言-动作）或WAM（世界-动作模型）无直接关系，但其提高推理效率的量化/压缩技术可作为VLA/WAM模型部署的潜在工具。",
+        "relevance_score": 8,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "stat.ML"
+      ],
+      "arxiv_id": "2512.03062",
+      "authors": [
+        "Roman Rausch",
+        "David Jansen",
+        "Sukhbinder Singh",
+        "Rom\\'an Or\\'us"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-10-30T10:45:18.900358Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2512.03062/v2/fig1-panel1.png"
+            ],
+            "caption": "a) Illustration of FermiGrad for a single layer: F F is the active Fermi tensor that softens the SVD truncation while A A and B B are frozen, and μ \\mu provides a slider to select the singular values. b) Optimization space for two 1024 × \\times 1024 layers (2M parameters) and 1.57M target parameters. The grey area shows the box constraint for the ranks: 1 ≤ r l ≤ 1024 1\\leq r_{l}\\leq 1024 , l = 0 , 1 l=0,1 . The red crosses denote the hypothesized optimal solution. The blue (light blue) lines show the parameter constraints for regular (secondary) compression. For the regular constraint, the FermiGrad algorithm starts with full rank and moves along some trajectory to the optimized solution as the penalty term is increased (see text).",
+            "image_urls": [
+              "https://arxiv.org/html/2512.03062v2/FermiGradSketch.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2512.03062v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2512.03062/v2/fig2-panel1.png"
+            ],
+            "caption": "Inference speed of the PivGa approach compared to PiFa [35] and the pure SVD model (without PiFa/PivGa) for random tokens with sequence length 256, batch size 32 on",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2512.03062v2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2512.03062v2",
+        "recovery_checked_at": "2026-10-30T10:50:37.484958Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-30T10:45:18.900358Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2025-11-26T10:54:01Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2512.03062",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2512.03062",
+        "project_url": null
+      },
+      "title": "FermiGrad-SVD: An LLM Compression Pipeline with Global Rank Selection and Gauge Fixing",
+      "title_zh": "FermiGrad-SVD：基于全局秩选择与规范固定的LLM压缩流水线",
+      "updated_at": "2026-10-29T08:53:09Z",
+      "version": 2
+    },
+    {
       "abstract": "Vision-Language-Action (VLA) policies excel in aligning language, perception, and robot control. However, most VLAs are trained purely by imitation, which overfits to demonstrations, and is brittle under distribution shift. Reinforcement learning (RL) directly optimizes task reward and thus addresses this misalignment, but real-robot interaction is expensive and conventional simulators are hard to engineer and transfer. We address both data efficiency and optimization stability in VLA post-training via a learned world model and an RL procedure tailored to flow-based action heads. Specifically, we first introduce Prophet, a unified action-to-video robot world model pretrained on large-scale, heterogeneous robot data to learn reusable action-outcome dynamics and then few-shot adapted to new robots, objects, and environments, yielding a rollout-ready simulator. Upon Prophet, we reinforce action policies with our proposed FlowScale, which couples Flow-GRPO with intrinsic stepwise reweighting to stabilize gradients. Together, our solution provides a practical, data- and compute-efficient path to VLA post-training. Experiments show 5-17% success gains on public benchmarks and 24-30% on real robots across diverse VLA backbones.",
       "analysis": {
         "key_results": "在公共基准测试上成功提升5-17%，真实机器人上提升24-30%，涵盖多种VLA基座。",
@@ -313,7 +397,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2511.19972v4",
-        "recovery_checked_at": "2026-10-30T02:30:22.536660Z",
+        "recovery_checked_at": "2026-10-30T10:50:37.484958Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -638,7 +722,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2511.18191v2",
-        "recovery_checked_at": "2026-10-30T02:30:22.536660Z",
+        "recovery_checked_at": "2026-10-30T10:50:37.484958Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1170,7 +1254,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2511.10383v2",
-        "recovery_checked_at": "2026-10-30T02:30:22.536660Z",
+        "recovery_checked_at": "2026-10-30T10:50:37.484958Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1243,7 +1327,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2511.09681v3",
-        "recovery_checked_at": "2026-10-30T02:30:22.536660Z",
+        "recovery_checked_at": "2026-10-30T10:50:37.484958Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1315,7 +1399,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2511.09681v2",
-        "recovery_checked_at": "2026-10-30T02:30:22.536660Z",
+        "recovery_checked_at": "2026-10-30T10:50:37.484958Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1546,22 +1630,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 57,
-    "completion_tokens": 20928,
+    "cache_hits": 89,
+    "completion_tokens": 22419,
     "error_categories": {
-      "ValidationError": 1
+      "ValidationError": 6
     },
-    "failed": 1,
-    "fetched": 1400,
-    "figure_available": 81,
-    "figure_cache_hits": 48,
+    "failed": 6,
+    "fetched": 1838,
+    "figure_available": 113,
+    "figure_cache_hits": 78,
     "figure_failed": 0,
-    "figure_requests": 58,
-    "figure_unavailable": 25,
-    "model_calls": 62,
-    "prefiltered": 119,
-    "prompt_tokens": 54576,
-    "published": 106,
-    "total_tokens": 75504
+    "figure_requests": 57,
+    "figure_unavailable": 22,
+    "model_calls": 74,
+    "prefiltered": 163,
+    "prompt_tokens": 59875,
+    "published": 135,
+    "total_tokens": 82294
   }
 }

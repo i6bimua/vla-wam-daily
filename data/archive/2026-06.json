@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-30T02:25:14.210858Z",
+  "generated_at": "2026-10-30T10:45:18.900358Z",
   "papers": [
     {
       "abstract": "Traditional robot programming is notoriously challenging: it requires orchestrating multimodal perception, managing physical contact dynamics, and handling diverse environment configurations and execution failures. We introduce ASPIRE (Agentic Skill Programming through Iterative Robot Exploration), a continual learning system that autonomously writes and refines robot control programs in a code-as-policy paradigm while compounding experience into a reusable skill library. ASPIRE operates in an open-ended learning loop, consisting of three components: (1) a closed-loop robot execution engine that exposes fine-grained multimodal traces, enabling the agent to autonomously diagnose failures, synthesize repairs, and validate outcomes; (2) a continually expanding skill library that distills validated fixes into reusable, transferable robotic knowledge; and (3) an evolutionary search procedure that generates diverse programs, systematically debugging them to explore beyond single-trajectory refinement. ASPIRE surpasses prior methods by up to 77% on manipulation tasks under perturbation, 72% on Robosuite's bimanual handover task, and up to 32% on long-horizon household tasks. The accumulated skill library further enables zero-shot generalization: on representative unseen long-horizon tasks, ASPIRE achieves 31% success, outperforming the 4% success rate of prior methods. Performance scales with the capabilities of frontier models. With Claude Opus 5.5, ASPIRE nearly saturates these benchmarks, achieving 99% average success across all 80 LIBERO-Pro tasks and 100% success on representative Robosuite and BEHAVIOR-1K tasks. Beyond simulation, skills discovered in simulation reduce real-world robot programming effort across embodiments and robot APIs, while skills acquired through online interaction with physical robots enable ASPIRE to solve a Rubik's Cube with progressively improving efficiency.",
@@ -403,7 +403,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.30639v2",
-        "recovery_checked_at": "2026-10-30T02:30:22.536660Z",
+        "recovery_checked_at": "2026-10-30T10:50:37.484958Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -727,7 +727,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.28712v2",
-        "recovery_checked_at": "2026-10-30T02:30:22.536660Z",
+        "recovery_checked_at": "2026-10-30T10:50:37.484958Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1497,7 +1497,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.25987v2",
-        "recovery_checked_at": "2026-10-30T02:30:22.536660Z",
+        "recovery_checked_at": "2026-10-30T10:50:37.484958Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1945,6 +1945,76 @@
       "title": "Data Scale, Not Latency, Shapes Cross-Lingual Encoder Transfer in Streaming ASR",
       "title_zh": "数据规模而非延迟影响流式ASR中跨语言编码器迁移",
       "updated_at": "2026-09-13T17:20:48Z",
+      "version": 2
+    },
+    {
+      "abstract": "Larger models and longer contexts make the KV cache a memory and bandwidth bottleneck. We introduce Block-GTQ, a framework that uses the two-dimensional frequency blocks of rotary position embeddings (RoPE) to allocate cached-key precision. A blockwise logit-error bound motivates a label-free query-key energy score, which we combine with codec-dependent rate penalties. Under equal-cost budgets and diminishing marginal gains, largest-marginal-gain allocation exactly minimizes the separable integer proxy. We instantiate Block-GTQ with TurboQuant-MSE (TQ-MSE), grouping equal-rate blocks to support attention over packed caches without materializing a decoded fp16 KV cache. Across ten model configurations, K-only diagnostics reduce layer-averaged logit mean absolute error by about 32-80% relative to uniform TQ-MSE, improving all 367 layers at both 2- and 3-bit average logical key rates. At K2V2 (2 average logical bits per K/V coordinate) on Llama-3.1-8B-Instruct, Block-GTQ raises the six-task needle-in-a-haystack (NIAH) average from 70.6 to 97.4 and LongBench-EN from 33.7 to 44.9; K2V2 gains also hold on the tested 32B and 70B models. On DeepSeek-R1-Distill-Qwen-7B at K3V2, without fp16 sink or recent-token buffers, it achieves 49.6/38.8% avg@8 on AIME 2024/2025 versus fp16's 54.2/37.9%, where uniform TQ-MSE scores zero on both. On Qwen2.5-3B-Instruct, packed K3V3 serving on one H800 reduces resident KV footprint by a factor of 3.24 and retains perplexity close to fp16 at 128K, while uniform TQ-MSE degrades severely.",
+      "analysis": {
+        "key_results": "在十个模型配置上，K-only诊断将层平均logit平均绝对误差相对均匀TQ-MSE降低32-80%，所有367层在2/3位平均逻辑键率下均改善；Llama-3.1-8B-Instruct K2V2的NIAH从70.6提升至97.4，LongBench-EN从33.7提升至44.9；DeepSeek-R1-Distill-Qwen-7B K3V2在AIME 2024/2025上avg@8达49.6/38.8%，而均匀TQ-MSE得分为零；Qwen2.5-3B-Instruct打包K3V3服务在128K上下文下KV占用降低3.24倍，困惑度接近fp16。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出Block-GTQ框架，利用旋转位置编码的二维频率块分配缓存键的量化精度，并在等成本预算下通过最大边际增益分配精确最小化可分离整数代理目标。",
+        "method": "基于RoPE频域块的块级logit误差界，设计无标签的查询-键能量评分并结合码率惩罚，使用最大边际增益分配进行非均匀量化；实例化TurboQuant-MSE以在打包缓存上支持注意力计算，无需物化解码后的fp16 KV缓存。",
+        "one_sentence_summary": "提出基于RoPE二维频域块的非均匀KV缓存量化框架，通过边际增益分配提升长上下文模型推理精度。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文专注于KV缓存量化这一通用高效推理技术，未直接涉及VLA、WAM或机器人领域。其方法可降低长上下文Transformer的内存和带宽开销，对部署在资源受限设备上的机器人策略模型可能具有间接价值，但摘要未建立直接联系。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Model Quantization"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.CL"
+      ],
+      "arxiv_id": "2606.24033",
+      "authors": [
+        "Fengfeng Liang",
+        "Yuechen Zhang",
+        "Jiaya Jia"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-10-30T10:45:18.900358Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2606.24033/v2/fig1-panel1.png"
+            ],
+            "caption": "RoPE-block precision allocation. (a) A RoPE query–key logit decomposes over two-dimensional frequency blocks. (b) Block energy scores for Qwen3-8B layer 10, KV head 4, median-normalized for display, span orders of magnitude. (c) At the same average 3-bit logical rate, Block-GTQ reallocates precision from low-score to high-score blocks instead of assigning a uniform width.",
+            "image_urls": [
+              "https://arxiv.org/html/2606.24033v2/teaser.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2606.24033v2#S1.F1"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2606.24033v2",
+        "recovery_checked_at": "2026-10-30T10:50:37.484958Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-30T10:45:18.900358Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-06-23T00:17:48Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2606.24033",
+        "code_url": "https://github.com/JIA-Lab-research/blockgtq",
+        "pdf_url": "https://arxiv.org/pdf/2606.24033",
+        "project_url": null
+      },
+      "title": "Block-GTQ: RoPE-Block Rate Allocation for KV-Cache Quantization",
+      "title_zh": "Block-GTQ：用于KV缓存量化的RoPE块率分配方法",
+      "updated_at": "2026-10-29T08:06:58Z",
       "version": 2
     },
     {
@@ -2425,7 +2495,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.21600v2",
-        "recovery_checked_at": "2026-10-30T02:30:22.536660Z",
+        "recovery_checked_at": "2026-10-30T10:50:37.484958Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -2575,7 +2645,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.21386v2",
-        "recovery_checked_at": "2026-10-30T02:30:22.536660Z",
+        "recovery_checked_at": "2026-10-30T10:50:37.484958Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -2648,7 +2718,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.21372v2",
-        "recovery_checked_at": "2026-10-30T02:30:22.536660Z",
+        "recovery_checked_at": "2026-10-30T10:50:37.484958Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -3772,7 +3842,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.18250v2",
-        "recovery_checked_at": "2026-10-30T02:30:22.536660Z",
+        "recovery_checked_at": "2026-10-30T10:50:37.484958Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -6815,7 +6885,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.08653v3",
-        "recovery_checked_at": "2026-10-30T02:30:22.536660Z",
+        "recovery_checked_at": "2026-10-30T10:50:37.484958Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -6897,7 +6967,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.08653v2",
-        "recovery_checked_at": "2026-10-30T02:30:22.536660Z",
+        "recovery_checked_at": "2026-10-30T10:50:37.484958Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -7837,7 +7907,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.06837v2",
-        "recovery_checked_at": "2026-10-30T02:30:22.536660Z",
+        "recovery_checked_at": "2026-10-30T10:50:37.484958Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -7862,6 +7932,92 @@
       "title": "SEAM: Shortcut-Aware Real-Time Detection of Scripted vs. Spontaneous Speech for Interview Guardrails",
       "title_zh": "SEAM：面向访谈防护的脚本化与自发语音的捷径感知实时检测",
       "updated_at": "2026-08-17T19:50:03Z",
+      "version": 2
+    },
+    {
+      "abstract": "Diffusion language models generate text by iteratively denoising an entire response in parallel, holding a noisy draft of the answer at every step. We show that these intermediate states surface salient entities early in the denoising trajectory, making them a useful lookahead signal for retrieval-augmented generation (RAG). We further demonstrate that grounding generation in retrieved evidence sharply reduces inter-token dependence, making RAG particularly well suited to parallel decoding. We exploit both through Self-Augmenting Retrieval for Diffusion Language Models (SARDI), a dynamic RAG framework that uses speculative token predictions to guide retrieval during denoising. SARDI is training-free, retriever-agnostic, and applicable to any reasoning-capable discrete diffusion language model. Across five multi-hop QA benchmarks, SARDI outperforms training-free diffusion and autoregressive retrieval baselines at up to 4x higher throughput.",
+      "analysis": {
+        "key_results": "在五个多跳 QA 基准上，SARDI 超越了无训练扩散和自回归检索基线，吞吐量提升高达 4 倍。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出 Self-Augmenting Retrieval for Diffusion Language Models (SARDI)，一个利用扩散模型中间状态作为前瞻信号来指导检索的无训练、检索器无关的动态 RAG 框架。",
+        "method": "使用扩散语言模型去噪过程中的推测性 token 预测来引导检索，实现在去噪过程中动态检索证据。",
+        "one_sentence_summary": "提出 SARDI，一个利用去噪过程中的推测性 token 预测来引导检索的无训练、检索器无关的动态 RAG 框架，在多个多跳 QA 基准上超越基线且吞吐量提升高达 4 倍。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "本文专注于扩散语言模型的高效推理，与 VLA 或 WAM 无直接关系。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CL",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "arxiv_id": "2606.06474",
+      "authors": [
+        "Paul J\\\"unger",
+        "Justin Lovelace",
+        "Linxi Zhao",
+        "Dongyoung Go",
+        "Kilian Q. Weinberger"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-10-30T10:45:18.900358Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2606.06474/v2/fig1-panel1.png"
+            ],
+            "caption": "Diffusion Language Models hold a noisy draft of the entire response at every denoising step. SARDI turns that draft into a retrieval query, retrieves new documents, and conditions the next step on the refreshed evidence. This way, evidence needed for later reasoning hops can be retrieved as the response takes shape.",
+            "image_urls": [
+              "https://arxiv.org/html/2606.06474v2/retrieve_during_denoising.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2606.06474v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2606.06474/v2/fig2-panel1.png"
+            ],
+            "caption": "Static question-only retrieval can fail on multi-hop QA when the question does not specify the bridge entity. Intermediate diffusion states often surface such entities early, enabling retrieval of later-hop evidence before the output is finalized.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2606.06474v2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2606.06474v2",
+        "recovery_checked_at": "2026-10-30T10:50:37.484958Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:speculative_generation"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-30T10:45:18.900358Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-06-04T17:56:27Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2606.06474",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2606.06474",
+        "project_url": null
+      },
+      "title": "Self-Augmenting Retrieval for Diffusion Language Models",
+      "title_zh": "扩散语言模型的自增强检索",
+      "updated_at": "2026-10-29T16:45:03Z",
       "version": 2
     },
     {
@@ -8405,6 +8561,89 @@
       "version": 2
     },
     {
+      "abstract": "Deep Neural Networks (DNNs) are increasingly being deployed in security-critical and safety-sensitive applications, which makes rigorous testing essential to identify and mitigate model weaknesses. Existing DNN testing approaches explore either the input space or a learned latent space. While latent-space generation can better maintain plausibility than direct input-space mutation, current methods still face a trade-off among exploration controllability, failure diversity, and seed-relative semantic drift. To overcome these limitations, we propose Latte, a black-box testing framework that generates semantically proximate, diverse, and fault-revealing test cases by leveraging the latent space. Specifically, Latte encodes each input seed with a pre-trained VQ-VAE and performs a seed-centered, one-step latent mutation along directions defined by anchors sampled from alternative classes, followed by quantization and decoding back to the input space. This explores local neighborhoods around each seed within the learned latent manifold, resulting in a larger number and broader diversity of oracle-triggering prediction discrepancies under the same budget. We evaluated Latte on 5 datasets and 10 DNN models in single-model and multi-model testing scenarios. Across the evaluated datasets and models, Latte improves fault exposure and behavioral diversity under matched testing budgets. Under the single-model setting, it also maintains low seed-relative semantic drift with respect to the source seeds.",
+      "analysis": {
+        "key_results": "在5个数据集和10个DNN模型上，Latte在匹配测试预算下提高了故障暴露和行为多样性，且在单模型设置下保持较低的种子相对语义漂移。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出Latte框架，利用VQ-VAE潜在空间和锚点驱动的局部变异生成故障揭示测试用例，在相同预算下提升故障暴露和多样性。",
+        "method": "使用预训练VQ-VAE编码输入，在潜在空间以种子为中心、沿由替代类锚点定义的方向执行一步变异，经过量化解码回输入空间。",
+        "one_sentence_summary": "提出Latte黑盒测试框架，通过潜在空间种子中心的一步变异生成语义接近、多样且能触发模型错误的测试样本。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文聚焦于DNN测试生成，不直接涉及VLA、WAM或机器人动作-世界模型，但提到使用VQ-VAE（离散潜在变量），其中量化步骤与模型量化中的离散表示思想相关，可为相关研究的测试评估提供方法参考。",
+        "relevance_score": 6,
+        "tags": [
+          "Model Quantization",
+          "Evaluation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.SE"
+      ],
+      "arxiv_id": "2606.04310",
+      "authors": [
+        "Bin Duan",
+        "Matthew B. Dwyer",
+        "Guowei Yang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-10-30T10:45:18.900358Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2606.04310/v2/fig1-panel1.png"
+            ],
+            "caption": "Latent Semantic Manifolds and Uncertainty Regions",
+            "image_urls": [
+              "https://arxiv.org/html/2606.04310v2/background.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2606.04310v2#S2.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2606.04310/v2/fig2-panel1.png"
+            ],
+            "caption": "Overview of LATTE",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2606.04310v2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2606.04310v2",
+        "recovery_checked_at": "2026-10-30T10:50:37.484958Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-10-30T10:45:18.900358Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-06-03T00:33:21Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2606.04310",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2606.04310",
+        "project_url": null
+      },
+      "title": "Latent Anchor-Driven Test Generation for Deep Neural Networks",
+      "title_zh": "基于潜在锚驱动的深度神经网络测试生成方法",
+      "updated_at": "2026-10-29T10:05:40Z",
+      "version": 2
+    },
+    {
       "abstract": "Curating training data is among the most consequential yet labor-intensive parts of modern AI development: practitioners iteratively propose, implement, evaluate, and revise data policies against noisy benchmark feedback. We ask whether generalist coding agents can automate this data-curation loop. We introduce *Curation-Bench*, an agent-centric benchmark that fixes the model, training recipe, and evaluation suite while giving agents command-line access to inspect data, implement policies, submit them to a fixed training/evaluation pipeline, and revise. In a vision-language instruction-tuning instantiation, out-of-the-box agents reach strong published data-selection baselines within ten iterations. However, trajectory analysis reveals a persistent *execution-research gap*: agents mainly tune local policy variants rather than explore new policy families, even when given strategy guides and paper references. Scaffolds requiring each iteration to cite, instantiate, and adapt a prior method shift agents toward method-guided exploration. The scaffolded agent autonomously composes -- without human design input -- a data-selection policy that outperforms strong published baselines at one-tenth their data budget. Overall, current agents can run the curation loop, but reliable data research requires scaffolded method adaptation, not open-ended prompting alone. Code and benchmark are open-sourced.",
       "analysis": {
         "key_results": "开箱即用的智能体在十次迭代内达到已发表基线的性能；存在执行-研究差距；通过脚手架强制引用、实例化和调整先验方法，智能体自主组合出在十分之一数据预算下优于强基线的策略。",
@@ -8638,7 +8877,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2606.03603v2",
-        "recovery_checked_at": "2026-10-30T02:30:22.536660Z",
+        "recovery_checked_at": "2026-10-30T10:50:37.484958Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -9997,22 +10236,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 57,
-    "completion_tokens": 20928,
+    "cache_hits": 89,
+    "completion_tokens": 22419,
     "error_categories": {
-      "ValidationError": 1
+      "ValidationError": 6
     },
-    "failed": 1,
-    "fetched": 1400,
-    "figure_available": 81,
-    "figure_cache_hits": 48,
+    "failed": 6,
+    "fetched": 1838,
+    "figure_available": 113,
+    "figure_cache_hits": 78,
     "figure_failed": 0,
-    "figure_requests": 58,
-    "figure_unavailable": 25,
-    "model_calls": 62,
-    "prefiltered": 119,
-    "prompt_tokens": 54576,
-    "published": 106,
-    "total_tokens": 75504
+    "figure_requests": 57,
+    "figure_unavailable": 22,
+    "model_calls": 74,
+    "prefiltered": 163,
+    "prompt_tokens": 59875,
+    "published": 135,
+    "total_tokens": 82294
   }
 }
