@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-03T03:49:58.777816Z",
+  "generated_at": "2026-11-03T11:43:10.165257Z",
   "papers": [
     {
       "abstract": "Indoor 3D scenes are ultimately meant to be used: an embodied agent should be able to navigate, reach objects, and complete diverse activities. Yet whether a given scene actually supports these activities for a specific agent profile is rarely verified. Existing evaluations of indoor 3D scenes typically focus on visual quality and semantic plausibility. In contrast, the feasibility of an activity depends on geometric, agent-specific constraints such as reach, clearance, and navigable space availability. These properties are not captured by visual plausibility metrics, and, as we show, VLMs, which are increasingly used to reason about 3D scenes, often fail to determine action feasibility in a single shot. We present SceneTeract, a verification interface that separates semantic action understanding from physical feasibility. Given a scene, an activity, and an embodied agent profile, we decompose the activity into atomic actions on scene objects. Explicit geometric checks then decide whether each step is executable and return a diagnostic trace explaining failures. In synthetic indoor scenes, SceneTeract reveals widespread functional and accessibility failures across diverse agent profiles. Moreover, when benchmarked against our verification, we find that existing VLMs systematically over-predict action feasibility, highlighting limited awareness of embodied functional constraints. In response, we post-train a lightweight VLM with verifier feedback, improving its assessment of physical feasibility. Although trained only on renders of synthetic scenes, we demonstrate that scene understanding improvements also generalize to real-world scenes. We will release our verification suite, benchmark labels, and diagnostic trace datasets.",
@@ -833,7 +833,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2603.23617v2",
-        "recovery_checked_at": "2026-11-03T03:53:45.245947Z",
+        "recovery_checked_at": "2026-11-03T11:49:59.798710Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1373,6 +1373,78 @@
       "version": 3
     },
     {
+      "abstract": "A fine-tuned Vision-Language-Action (VLA) policy can easily place the alphabet soup in the basket on command, just as it saw during fine-tuning. However, if the basket is shifted five centimeters to the left, it drops the soup off the table. We developed an interpretability pipeline to investigate what such a policy is computing. Injecting task A's activations into the action expert while the policy looks at task B's scene makes $\\pi_{0.5}$ execute task A's motor trajectory in 99.6\\% of episodes ($n{=}1{,}968$). The injected program is bound to absolute workspace coordinates and ignores the visible scene, which provides a mechanistic account of the perturbation brittleness that concurrent benchmarks report. The binding holds on a physical UR10e: directed replay redirects the commanded task in 26/26 rollouts in one direction and 18/26 in the other, with no-injection and random-direction controls at the floor, and once the source object is moved 10-15 cm the arm grasps and releases at the recorded coordinates in 50/50 trials, picking up the wrong block when one sits there and closing on empty air when none does. Applying the same interventions to five VLAs on LIBERO, MetaWorld, SimplerEnv, and ALOHA over $420{,}000+$ rollouts yields three further findings: every architecture encodes the instruction, and four of the five weight it below vision whenever the scene alone identifies the goal; under the standard replacement write-back the SAE pooling that preserves behavior is architecture-specific ($\\pi_{0.5}$ per-token, SmolVLA indifferent), and goal selection and motor generation separate into VLM and expert pathways wherever the two are distinguishable. We release \\textbf{Action Atlas} (https://action-atlas.com), an interactive platform covering all 520+ trained SAEs, 79 identified concepts, and the scored UR10e rollouts. Code: https://cwru-aism.github.io/vla-interp-page/",
+      "analysis": {
+        "key_results": "注入任务A的激活可使π0.5在99.6%的回合中执行任务A的动作轨迹；动作程序绑定到绝对工作空间坐标而非可见场景；在五个VLA模型上验证发现四个模型在场景能识别目标时对指令的权重低于视觉；目标选择与运动生成在可区分处分离到VLM和专家路径。",
+        "limitations": "摘要未说明",
+        "main_contribution": "开发了一个可解释性流水线，通过激活注入定位并分析了VLA策略中与任务指令和动作生成相关的内部表征，并发布了交互式平台Action Atlas。",
+        "method": "采用激活注入等干预手段，分析VLA模型内部表征，并结合多个基准（LIBERO、MetaWorld、SimplerEnv、ALOHA）和真实机器人（UR10e）进行大规模验证。",
+        "one_sentence_summary": "本文通过可解释性干预实验揭示了微调后的视觉-语言-动作模型在扰动场景下表现脆弱的机制原因：模型可能依赖绝对工作空间坐标而非视觉场景来生成动作。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该研究直接以视觉-语言-动作（VLA）模型为对象，通过机制可解释性分析揭示其内部表征和脆弱性根源，对VLA的鲁棒性和世界模型建模具有重要参考价值。",
+        "relevance_score": 10,
+        "tags": [
+          "Robot Learning",
+          "Evaluation",
+          "Vision-Language",
+          "Action Prediction"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2603.19233",
+      "authors": [
+        "Bryce Grant",
+        "Xijia Zhao",
+        "Peng Wang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-11-03T11:43:10.165257Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2603.19233/v6/fig1-panel1.png"
+            ],
+            "caption": "Methodology overview. Top: record a VLA’s activations during a successful rollout and replay them under cross-task injection and counterfactual prompts. Middle: per-token SAEs decompose the same activations into features. Bottom: features are clustered, searched, and validated by ablation and steering in Action Atlas.",
+            "image_urls": [
+              "https://arxiv.org/html/2603.19233v6/figures/fig_system_arch.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2603.19233v6#S3.F1"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2603.19233v6",
+        "recovery_checked_at": "2026-11-03T11:49:59.798710Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-11-03T11:43:10.165257Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-03-19T17:59:55Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2603.19233",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2603.19233",
+        "project_url": "https://action-atlas.com/"
+      },
+      "title": "Not All Features Are Created Equal: A Mechanistic Study of Vision-Language-Action Models",
+      "title_zh": "并非所有特征生而平等：视觉-语言-动作模型的机制研究",
+      "updated_at": "2026-11-02T18:58:54Z",
+      "version": 6
+    },
+    {
       "abstract": "A fine-tuned Vision-Language-Action (VLA) policy can easily place the alphabet soup in the basket on command, just as it saw during fine-tuning. However, if the basket is shifted five centimeters to the left, it drops the soup off the table. We developed an interpretability pipeline to investigate what such a policy is computing. Injecting task A's activations into the action expert while the policy looks at task B's scene makes pi0.5 execute task A's motor trajectory in 99.6\\% of episodes ($n{=}1{,}968$). The injected program is bound to absolute workspace coordinates and ignores the visible scene, which provides a mechanistic account of the perturbation brittleness that concurrent benchmarks report. The binding holds on a physical UR10e: directed replay redirects the commanded task in 26/26 rollouts in one direction and 18/26 in the other, with no-injection and random-direction controls at the floor, and once the source object is moved 10--15\\,cm the arm grasps and releases at the recorded coordinates in 50/50 trials, picking up the wrong block when one sits there and closing on empty air when none does. Applying the same interventions to six VLAs on LIBERO, MetaWorld, SimplerEnv, and ALOHA over 420{,}000+ rollouts yields three further findings: every architecture encodes the instruction, and four of the five weight it below vision whenever the scene alone identifies the goal; under the standard replacement write-back the SAE pooling that preserves behavior is architecture-specific (pi0.5 per-token, SmolVLA indifferent), and goal selection and motor generation separate into VLM and expert pathways wherever the two are distinguishable. We release \\textbf{Action Atlas} (https://action-atlas.com), an interactive platform covering all 520+ trained SAEs, 79 identified concepts, and the scored UR10e rollouts. Code: https://github.com/CWRU-AISM/action-atlas",
       "analysis": {
         "key_results": "注入任务A激活后，pi0.5在99.6%的回合中执行任务A轨迹；物理UR10e上重放成功率26/26（一方向）和18/26（另一方向）；源物体移动10-15cm后，50/50次在录制坐标抓取释放；在LIBERO、MetaWorld、SimplerEnv、ALOHA上超过420,000次rollout验证了多个架构特异性发现。",
@@ -1416,7 +1488,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2603.19233v5",
-        "recovery_checked_at": "2026-11-03T03:53:45.245947Z",
+        "recovery_checked_at": "2026-11-03T11:49:59.798710Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1487,7 +1559,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2603.19233v4",
-        "recovery_checked_at": "2026-11-03T03:53:45.245947Z",
+        "recovery_checked_at": "2026-11-03T11:49:59.798710Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1559,7 +1631,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2603.19233v3",
-        "recovery_checked_at": "2026-11-03T03:53:45.245947Z",
+        "recovery_checked_at": "2026-11-03T11:49:59.798710Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1901,7 +1973,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2603.18853v3",
-        "recovery_checked_at": "2026-11-03T03:53:45.245947Z",
+        "recovery_checked_at": "2026-11-03T11:49:59.798710Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -3450,6 +3522,98 @@
       "version": 2
     },
     {
+      "abstract": "Vision-language-action (VLA) models have shown great promise as generalist policies for a large range of relatively simple tasks. However, they demonstrate limited performance on more complex tasks, such as those requiring complex spatial or semantic understanding, manipulation in clutter, or precise manipulation. We propose OmniGuide, a flexible framework that improves VLA performance on such tasks by leveraging arbitrary sources of guidance, such as 3D foundation models, semantic-reasoning VLMs, and human pose models. We show how many kinds of guidance can be naturally expressed as differentiable energy functions with task-specific attractors and repellers located in 3D space, that influence the sampling of VLA actions. In this way, OmniGuide enables guidance sources with complementary task-relevant strengths to improve a VLA model's performance on challenging tasks. Extensive experiments in both simulation and real-world environments, across diverse sources of guidance, demonstrate that OmniGuide enhances the performance of state-of-the-art generalist policies (e.g., $\\pi_{0.5}$, GR00T N1.6) significantly across success and safety rates. Critically, our unified framework matches or surpasses the performance of prior methods designed to incorporate specific sources of guidance into VLA policies. Project page: https://omniguide.github.io/",
+      "analysis": {
+        "key_results": "在模拟和真实环境中的大量实验表明，OmniGuide显著提升了最先进通用策略（如π0.5、GR00T N1.6）的成功率和安全率；该统一框架匹配或超越了此前为特定引导源设计的专用方法。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出OmniGuide，一个灵活的框架，利用任意来源的引导（如3D基础模型、语义推理VLM、人体姿态模型）作为可微能量函数，以任务特定的吸引子和排斥子影响VLA动作采样，从而提升VLA在复杂任务上的性能。",
+        "method": "将多种引导源表达为3D空间中的可微能量函数（包含任务特定的吸引子和排斥子），并利用这些能量函数影响VLA模型的行动采样过程。",
+        "one_sentence_summary": "提出OmniGuide框架，通过将任意引导源表达为可微能量函数来影响VLA动作采样，从而提升复杂任务性能。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "本文直接针对VLA（视觉-语言-动作）模型，旨在提升其在复杂任务中的表现，属于本站核心主题。通过引入空间引导场改进动作生成，对VLA和机器人操作有直接贡献。",
+        "relevance_score": 9,
+        "tags": [
+          "Vision-Language",
+          "Robot Manipulation",
+          "Policy Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.LG"
+      ],
+      "arxiv_id": "2603.10052",
+      "authors": [
+        "Yunzhou Song",
+        "Long Le",
+        "Yong-Hyun Park",
+        "Jie Wang",
+        "Junyao Shi",
+        "Lingjie Liu",
+        "Jiatao Gu",
+        "Eric Eaton",
+        "Dinesh Jayaraman",
+        "Kostas Daniilidis"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-11-03T11:43:10.165257Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2603.10052/v2/fig1-panel1.png"
+            ],
+            "caption": "OmniGuide unifies different sources of guidance via attractive and repulsive fields to improve the performance of generalist robot policies.",
+            "image_urls": [
+              "https://arxiv.org/html/2603.10052v2/teaser_real.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2603.10052v2#S0.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2603.10052/v2/fig2-panel1.png"
+            ],
+            "caption": "Left: Method Overview. For each denoising step, OmniGuide first estimates the clean action chunk 𝐀 ~ τ \\tilde{\\mathbf{A}}^{\\tau} using the base policy 𝐯 θ \\mathbf{v}_{\\theta} , and maps it through differentiable kinematic models or decoders to Cartesian trajectories 𝐗 \\mathbf{X} . Then they are evaluated by task energy functions ℒ 𝐲 \\mathcal{L}_{\\mathbf{y}} constructed from foundation models, whose gradients are backpropagated to the noisy actions 𝐀 τ \\mathbf{A}^{\\tau} . Right: Guidance Visualization. Repulsive collision energies push predicted trajectories away from obstacles, while attractive semantic energies pull the gripper toward grounded targets; multiple guidance sources naturally blend by summing energies.",
+            "image_urls": [
+              "https://arxiv.org/html/2603.10052v2/corl_method.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2603.10052v2#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2603.10052v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-11-03T11:43:10.165257Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-03-09T17:18:13Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2603.10052",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2603.10052",
+        "project_url": "https://omniguide.github.io/"
+      },
+      "title": "OmniGuide: Universal Spatial Guidance Fields for Enhancing Generalist Robot Policies",
+      "title_zh": "OmniGuide：用于增强通用机器人策略的通用空间引导场",
+      "updated_at": "2026-11-02T18:26:52Z",
+      "version": 2
+    },
+    {
       "abstract": "Long-horizon indoor mobile manipulation (MoMa) requires robots to execute extended navigation-manipulation sequences whose feasibility depends on state changes induced by preceding skills. Vision-language models (VLMs) can decompose instructions into plausible skill sequences, but they do not reliably track such cumulative embodiment constraints or revise a plan when execution deviates from expectation. We present MoMaStage, a map-light framework for state-consistent planning and closed-loop execution in long-horizon indoor MoMa. MoMaStage couples a frozen VLM with robot execution through three mechanisms: (i) a hierarchical library of grounded, executable skills and a topology-only projection of a Skill-State Graph (SSG) that constrains the VLM's planning space; (ii) an SSG verifier that propagates scene-region and gripper-occupancy state to reject infeasible plans before execution; and (iii) an event-driven monitor that triggers graph-grounded repair only when an observed outcome invalidates the remaining plan. The SSG captures the compact embodiment state needed for skill sequencing without requiring a dense scene map, while geometric and contact-level conditions remain within the underlying controllers. Experiments in physics-rich simulation and on a real mobile manipulator show that MoMaStage improves planning validity and long-horizon execution survival over the evaluated baselines, while reducing latency and model token consumption.",
       "analysis": {
         "key_results": "在物理仿真和真实移动操作平台上，MoMaStage 相比评估的基线方法提升了规划有效性和长时程执行存活率，同时降低了延迟和模型 token 消耗。",
@@ -4534,22 +4698,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 0,
-    "completion_tokens": 16280,
+    "cache_hits": 30,
+    "completion_tokens": 29607,
     "error_categories": {
-      "ValidationError": 1
+      "ValidationError": 3
     },
-    "failed": 1,
-    "fetched": 562,
-    "figure_available": 31,
-    "figure_cache_hits": 0,
+    "failed": 3,
+    "fetched": 1603,
+    "figure_available": 82,
+    "figure_cache_hits": 27,
     "figure_failed": 0,
-    "figure_requests": 42,
-    "figure_unavailable": 11,
-    "model_calls": 47,
-    "prefiltered": 47,
-    "prompt_tokens": 42017,
-    "published": 42,
-    "total_tokens": 58297
+    "figure_requests": 79,
+    "figure_unavailable": 24,
+    "model_calls": 92,
+    "prefiltered": 122,
+    "prompt_tokens": 79478,
+    "published": 106,
+    "total_tokens": 109085
   }
 }

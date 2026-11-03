@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-03T03:49:58.777816Z",
+  "generated_at": "2026-11-03T11:43:10.165257Z",
   "papers": [
     {
       "abstract": "Active perception - the ability of a robot to proactively select viewpoints to acquire task-relevant information - is essential for robust operation in real-world environments. However, existing approaches are typically limited to fixed objectives or constrained settings, and struggle to generalize to open-ended perception intents specified in natural language. We propose I-Perceive, a foundation model for language-conditioned active perception in large-scale indoor environments. Given a query image, a set of context images, and a natural language instruction, I-Perceive predicts a 6D camera pose that fulfills the specified perception intent. The model integrates a vision-language pathway for semantic grounding with a geometric reasoning pathway for multi-view 3D understanding, connected via multi-layer semantic fusion to enable language-conditioned geometric reasoning. To support scalable training, we construct a large-scale dataset of language-viewpoint pairs from both real-world scene-scanning data and simulated environments using an automated pipeline. Extensive experiments demonstrate that I-Perceive significantly outperforms strong baselines on prediction accuracy, viewpoint feasibility, and instructions alignment. The model exhibits strong zero-shot generalization to unseen scenes and instructions, and enables closed-loop active perception, progressively refining viewpoints over sequential interactions.",
@@ -812,7 +812,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2602.18532v5",
-        "recovery_checked_at": "2026-11-03T03:53:45.245947Z",
+        "recovery_checked_at": "2026-11-03T11:49:59.798710Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -3357,6 +3357,95 @@
       "version": 2
     },
     {
+      "abstract": "Large language models (LLMs) have achieved strong performance in language-centric tasks. However, in agentic settings, LLMs often struggle to anticipate action consequences and adapt to environment dynamics, highlighting the need for world-modeling capabilities in LLM-based agents. We propose Reinforcement World Model Learning (RWML), a self-supervised method that learns action-conditioned world models for LLM-based agents on textual states using sim-to-real gap rewards. Our method aligns simulated next states produced by the model with realized next states observed from the environment, encouraging consistency between internal world simulations and actual environment dynamics in a pre-trained embedding space. Unlike next-state token prediction, which prioritizes token-level fidelity (i.e., reproducing exact wording) over semantic equivalence and can lead to model collapse, our method provides a more robust training signal and is empirically less susceptible to reward hacking than LLM-as-a-judge. We evaluate our method on ALFWorld and $\\tau^2$ Bench and observe significant gains over the base model, despite using no expert data, task-success rewards, or strong-LLM annotations - only an off-the-shelf embedding model as a distance metric. When combined with task-success rewards, our method outperforms direct task-success reward RL by 6.9 and 5.7 points on ALFWorld and $\\tau^2$ Bench respectively; it further outperforms expert-data training on ALFWorld and is comparable to it on $\\tau^2$ Bench.",
+      "analysis": {
+        "key_results": "在ALFWorld和τ² Bench上相比基座模型显著提升；与任务成功奖励结合时，分别超过直接任务成功奖励RL 6.9和5.7分；在ALFWorld上超过专家数据训练，在τ² Bench上与之相当。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出RWML，一种自监督方法，利用模拟-真实差距奖励为LLM智能体学习动作条件世界模型，并在无专家数据、任务成功奖励或强LLM标注的情况下显著提升性能。",
+        "method": "RWML使用自监督学习，通过模拟-真实差距奖励对齐模型生成的模拟下一状态与环境中观察到的真实下一状态，在预训练嵌入空间中鼓励内部世界模拟与实际环境动态的一致性。",
+        "one_sentence_summary": "提出一种自监督方法RWML，通过模拟-真实差距奖励为基于文本状态的LLM智能体学习动作条件世界模型。",
+        "primary_topic": "World Model",
+        "relation_to_vla_wam": "该工作属于世界模型学习，专注于文本状态下LLM智能体的动作条件世界建模，与VLA/WAM主题具有相关性，但其环境为文本模拟而非机器人物理世界，未直接涉及机器人动作或视觉输入。",
+        "relevance_score": 8,
+        "tags": [
+          "World Modeling",
+          "Policy Learning",
+          "Robot Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CL"
+      ],
+      "arxiv_id": "2602.05842",
+      "authors": [
+        "Xiao Yu",
+        "Baolin Peng",
+        "Ruize Xu",
+        "Yelong Shen",
+        "Pengcheng He",
+        "Suman Nath",
+        "Nikhil Singh",
+        "Jiangfeng Gao",
+        "Zhou Yu"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-11-03T11:43:10.165257Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2602.05842/v3/fig1-panel1.png"
+            ],
+            "caption": "We propose RWML as a scalable, self- supervised method to improve the world modeling ability of LLM-based agent by learning from next- states, prior to downstream policy RL which learns",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2602.05842v3"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2602.05842/v3/fig2-panel1.png"
+            ],
+            "caption": "Overview of RWML. Given a target model π θ \\pi_{\\theta} , we first collect training data for RWML by using π θ \\pi_{\\theta} to gather rollouts ( s 0 , a 0 , s 1 , a 1 , … ​ s T ) (s_{0},a_{0},s_{1},a_{1},...s_{T}) with the environment, and then convert these rollouts into ⟨ s ≤ t , a t , s t + 1 ⟩ \\left\\langle s_{\\leq t},a_{t},s_{t+1}\\right\\rangle triplets for all t t , after subsampling “too easy” samples defined in Equation 1 . We then train π θ \\pi_{\\theta} to reason as a world model via GRPO, using lightweight reward functions (e.g., embedding-based cosine similarity) to compare the predicted s ^ t + 1 \\hat{s}_{t+1} with the real s t + 1 s_{t+1} .",
+            "image_urls": [
+              "https://arxiv.org/html/2602.05842v3/wmrl-main_algo_cropped.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2602.05842v3#S2.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2602.05842v3",
+        "recovery_checked_at": "2026-11-03T11:49:59.798710Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-11-03T11:43:10.165257Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-02-05T16:30:08Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2602.05842",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2602.05842",
+        "project_url": null
+      },
+      "title": "Reinforcement World Model Learning for LLM-based Agents",
+      "title_zh": "面向LLM智能体的强化世界模型学习",
+      "updated_at": "2026-11-01T23:07:53Z",
+      "version": 3
+    },
+    {
       "abstract": "Speculative decoding accelerates inference for (M)LLMs, yet a training-decoding discrepancy persists: while existing methods optimize single greedy trajectories, decoding involves verifying and ranking multiple sampled draft paths. We propose Variational Speculative Decoding (VSD), formulating draft training as variational inference over latent proposals (draft paths). VSD maximizes the marginal probability of target-model acceptance, yielding an ELBO that promotes high-quality latent proposals while minimizing divergence from the target distribution. To enhance quality and reduce variance, we incorporate a path-level utility and optimize via an Expectation-Maximization procedure. The E-step draws Monte Carlo samples from an oracle-filtered posterior, while the M-step maximizes weighted likelihood using Adaptive Rejection Weighting (ARW) and Confidence-Aware Regularization (CAR). Theoretical analysis confirms that VSD increases expected acceptance length and speedup. Extensive experiments across LLMs and MLLMs show that VSD achieves up to a 9.6% speedup over EAGLE-3 and 7.9% over ViSpec, significantly improving decoding efficiency.",
       "analysis": {
         "key_results": "在LLMs和MLLMs上，VSD比EAGLE-3加速高达9.6%，比ViSpec加速7.9%。",
@@ -4257,6 +4346,171 @@
       "version": 2
     },
     {
+      "abstract": "Large language models (LLMs) achieve strong performance in long-horizon agentic tasks through multi-step interaction and reasoning at test time. However, repeatedly invoking these models incurs substantial inference cost over an episode. Post-training quantization (PTQ) reduces this cost, but using a fixed low precision throughout an episode can sharply lower task success. We observe that interaction steps differ sharply in their sensitivity to quantization: given the same context, decoding a step at low precision turns a success into a failure at only about 1% of the steps, which we call critical steps. Based on this observation, we propose Dynamic Mixed-Precision Routing (DMR), a framework that adaptively selects between high-precision and low-precision versions of the same LLM at each decision step. Leveraging an entire-space factorization to jointly predict a step's divergence and its effect on the outcome, DMR learns to recognize these critical steps by training only a lightweight router on the model's hidden state. By reusing a shared high-precision KV cache and the hidden states, DMR avoids redundant context prefill and a separate text encoder, enabling precision switching with less than 1 ms of overhead per step and adding less than 0.11% to step latency for routing. This mixed-precision design also enables nested quantization, reducing the memory footprint by 39% on average compared with FP16. Across three long-horizon agentic benchmarks with nested quantization, DMR achieves an average 2.44x decode speedup over FP16 at comparable task success rates, without fine-tuning the underlying model. On ALFWorld with GPTQ, DMR achieves a 1.71x decode speedup with 86.9% success, compared with 87.2% for FP16.",
+      "analysis": {
+        "key_results": "在三个长时程智能体基准上，嵌套量化下DMR相比FP16实现平均2.44倍解码加速；在ALFWorld上达到86.9%成功率，FP16为87.2%，解码加速1.71倍；路由开销小于1ms，占步骤延迟不到0.11%；内存占用平均降低39%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出动态混合精度路由（DMR）框架，通过轻量级路由器预测关键步骤，在保持任务成功率的同时实现混合精度切换，减少推理成本。",
+        "method": "利用全空间分解联合预测步骤发散性和结果影响，训练轻量路由器识别关键步骤；复用高精度KV缓存和隐藏状态避免冗余预填充和额外文本编码器，支持精度切换开销小于1ms；同时支持嵌套量化以降低内存占用。",
+        "one_sentence_summary": "本文提出动态混合精度路由框架DMR，在每个决策步骤自适应选择高/低精度LLM版本，以减少长时程智能体任务中的推理成本并保持任务成功率。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文专注于LLM的量化推理效率，不直接涉及视觉-语言-动作（VLA）模型或世界-动作模型（WAM）。但其提出的动态精度路由方法对于在机器人策略或世界模型中实施高效量化推理具有潜在借鉴价值，可作为量化技术在具身智能中应用的参考。",
+        "relevance_score": 8,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.AI"
+      ],
+      "arxiv_id": "2602.02711",
+      "authors": [
+        "Yuanzhe Li",
+        "Jianing Deng",
+        "Jingtong Hu",
+        "Tianlong Chen",
+        "Song Wang",
+        "Huanrui Yang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-11-03T11:43:10.165257Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2602.02711/v3/fig1-panel1.png"
+            ],
+            "caption": "Overview of DMR. (a) Precision tiers of the same LLM share a high-precision KV cache, enabling step-level routing without redundant context prefill. Low-precision responses are re-prefilled at high precision in subsequent steps (§3). (b) The router predicts step criticality through an entire-space factorization of action divergence and conditional criticality, using hidden-state features and counterfactual supervision (§4.2). (c) Iterative label collection combines agent rollouts, paired decoding, and counterfactual branching to",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2602.02711v3"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2602.02711v3",
+        "recovery_checked_at": "2026-11-03T11:49:59.798710Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:post-training-quantization",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-11-03T11:43:10.165257Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-02-02T19:24:04Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2602.02711",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2602.02711",
+        "project_url": null
+      },
+      "title": "Dynamic Mixed-Precision Routing for Efficient Multi-step LLM Interaction",
+      "title_zh": "动态混合精度路由：面向高效多步骤大型语言模型交互",
+      "updated_at": "2026-11-02T17:42:52Z",
+      "version": 3
+    },
+    {
+      "abstract": "Language-conditioned goal navigation requires embodied agents to locate user-specified targets without step-by-step guidance. However, existing benchmarks largely focus on category-level goals or rely on instance descriptions generated by vision-language models, which often contain ambiguities and semantic errors, limiting systematic and reliable evaluation. We introduce HieraNav, an open-vocabulary navigation task with goals at four hierarchical semantic levels: scene, room, region, and instance. We present Language as a Map (LangMap), the first goal navigation benchmark to enrich real-world indoor 3D scans with human-verified semantic annotations supporting tasks across all four goal levels. Built on HM3D using a contrastive annotation protocol that compares same-scene regions and instances, LangMap provides region labels and discriminative region and instance descriptions covering 414 object categories and contains over 18K tasks. Each target has concise and detailed descriptions, enabling evaluation across instruction styles. Automated and human evaluations validate our annotation quality: our descriptions improve text-to-view matching accuracy over GOAT-Bench's by 23 points on all shared annotated instances, and an independent human audit yields 92.5% unique-and-correct matches. We also propose PlaNaVid, an RGB-only baseline that combines Bounded Diverse Memory with high-level planning to prime a reactive policy for multi-goal navigation, achieving top-tier success rates without depth, 3D scene representations, or object masks. Further analyses reveal that exploration and hierarchical disambiguation failures become more prominent at finer goal levels, while long-tail categories, small objects, distant targets, timely stopping, and multi-goal completion remain challenging. Benchmark and code: https://bo-miao.github.io/LangMap",
+      "analysis": {
+        "key_results": "文本到视角匹配准确率比GOAT-Bench在共享标注实例上提高23个百分点；独立人工审计得到92.5%的唯一且正确匹配率；PlaNaVid在无深度、无3D场景表示、无物体掩码的情况下取得领先成功率。",
+        "limitations": "摘要未说明",
+        "main_contribution": "构建了一个人工验证的分层开放词汇目标导航基准LangMap，包含场景、房间、区域和实例四个语义级别的导航任务，并提供高质量的区域标签和区分性描述。",
+        "method": "采用对比标注协议，在HM3D数据集上为真实世界室内3D扫描添加人工验证的语义注释，覆盖414个对象类别，生成超过18K个任务；同时提出结合Bounded Diverse Memory与高层规划的RGB-only基线PlaNaVid。",
+        "one_sentence_summary": "该论文提出一个基于真实室内3D扫描的人工验证基准LangMap，用于四个语义层级上的开放词汇目标导航任务，并配套一个仅RGB的基线方法PlaNaVid。",
+        "primary_topic": "Benchmark",
+        "relation_to_vla_wam": "虽然该工作聚焦于具身导航基准，而非直接针对VLA或世界-动作模型，但其提供的语言-视觉对应关系、逐级细化的语义标注和仅RGB的导航基线，可作为预训练VLA或构建面向导航的世界模型的潜在数据来源与评测工具，具有明确的方法论借鉴价值。",
+        "relevance_score": 6,
+        "tags": [
+          "Vision-Language",
+          "Robot Learning",
+          "Evaluation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.RO"
+      ],
+      "arxiv_id": "2602.02220",
+      "authors": [
+        "Bo Miao",
+        "Weijia Liu",
+        "Jun Luo",
+        "Lachlan Shinnick",
+        "Jian Liu",
+        "Thomas Hamilton-Smith",
+        "Yuhe Yang",
+        "Zijie Wu",
+        "Vanja Videnovic",
+        "Feras Dayoub",
+        "Anton van den Hengel"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-11-03T11:43:10.165257Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2602.02220/v4/fig1-panel1.png"
+            ],
+            "caption": "HieraNav requires agents to navigate to language-specified goals at four semantic levels: scene , room , region , and instance . Targets are color-coded.",
+            "image_urls": [
+              "https://arxiv.org/html/2602.02220v4/Fig1_demo.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2602.02220v4#S1.F2.fig1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2602.02220/v4/fig2-panel1.png"
+            ],
+            "caption": "GOAT-Bench annotation quality on ten scenes: 39.8% of instance-level instructions are erroneous or ambiguous.",
+            "image_urls": [
+              "https://arxiv.org/html/2602.02220v4/goat_error_distribution.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2602.02220v4#S1.F2.fig2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2602.02220v4",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-11-03T11:43:10.165257Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-02-02T15:26:19Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2602.02220",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2602.02220",
+        "project_url": "https://bo-miao.github.io/LangMap"
+      },
+      "title": "LangMap: A Human-Verified Benchmark for Hierarchical Open-Vocabulary Goal Navigation",
+      "title_zh": "LangMap: 一个用于分层开放词汇目标导航的人工验证基准",
+      "updated_at": "2026-11-02T06:38:25Z",
+      "version": 4
+    },
+    {
       "abstract": "Language-conditioned goal navigation (LGN) requires embodied agents to locate user-specified targets without step-by-step guidance. However, existing benchmarks largely focus on category-level goals or rely on instance descriptions generated by vision-language models, which often contain ambiguities and semantic errors, limiting systematic and reliable evaluation. We introduce HieraNav, an open-vocabulary LGN task with goals at four hierarchical semantic levels: scene, room, region, and instance. We present Language as a Map (LangMap), the first LGN benchmark to enrich real-world indoor 3D scans with human-verified semantic annotations supporting tasks across all four goal levels. Built on HM3D using a contrastive annotation protocol that compares same-scene regions and instances, LangMap provides region labels and discriminative region and instance descriptions covering 414 object categories and contains over 18K tasks. Each target has concise and detailed descriptions, enabling evaluation across instruction styles. Automated and human evaluations validate our annotation quality: our descriptions improve text-to-view matching accuracy over GOAT-Bench's by 23 points on all shared annotated instances, and an independent human audit yields 92.5% unique-and-correct matches. We also propose PlaNaVid, an RGB-only baseline that combines Bounded Diverse Memory with high-level planning to prime a reactive policy for multi-goal navigation, achieving top-tier success rates without depth, 3D scene representations, or object masks. Further analyses reveal that exploration and hierarchical disambiguation failures become more prominent at finer goal levels, while long-tail categories, small objects, distant targets, timely stopping, and multi-goal completion remain challenging. Benchmark and code: https://bo-miao.github.io/LangMap",
       "analysis": {
         "key_results": "在共享标注实例上，文本到视角匹配准确率比GOAT-Bench提高23个百分点；独立人工审核达到92.5%的唯一且正确匹配率；PlaNaVid在不使用深度、3D场景表示或物体掩码的情况下达到顶尖成功率。",
@@ -4353,22 +4607,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 0,
-    "completion_tokens": 16280,
+    "cache_hits": 30,
+    "completion_tokens": 29607,
     "error_categories": {
-      "ValidationError": 1
+      "ValidationError": 3
     },
-    "failed": 1,
-    "fetched": 562,
-    "figure_available": 31,
-    "figure_cache_hits": 0,
+    "failed": 3,
+    "fetched": 1603,
+    "figure_available": 82,
+    "figure_cache_hits": 27,
     "figure_failed": 0,
-    "figure_requests": 42,
-    "figure_unavailable": 11,
-    "model_calls": 47,
-    "prefiltered": 47,
-    "prompt_tokens": 42017,
-    "published": 42,
-    "total_tokens": 58297
+    "figure_requests": 79,
+    "figure_unavailable": 24,
+    "model_calls": 92,
+    "prefiltered": 122,
+    "prompt_tokens": 79478,
+    "published": 106,
+    "total_tokens": 109085
   }
 }
