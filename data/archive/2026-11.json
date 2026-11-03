@@ -1,0 +1,551 @@
+{
+  "generated_at": "2026-11-03T03:49:58.777816Z",
+  "papers": [
+    {
+      "abstract": "This report presents GatedVLA, our entry for the Physical AI AV (PAI-AV) track. Our learned vision-language-action (VLA) policy pairs the driving-pretrained Qwen-Drive-1.0-4B vision-language model with a layer-wise flow-matching action expert that outputs a 2.5 s horizon of acceleration and curvature controls, augmented with a soft visual mask applied to the expert's cross-attention. Compared to an identically trained baseline, the masked policy achieves comparable overall open-loop error while reducing error on left turns. In local closed-loop evaluation across the same 150 scenes (two rollouts per scene), the visual mask increases the mean scene score from 0.479 to 0.517 (paired difference +0.038, 95% bootstrap CI [-0.018, +0.093], wins/losses 37/26, sign test p = 0.21). Incorporating a rule-based automatic emergency braking (AEB) module at deployment further increases the mean score to 0.599 (+0.082, CI [+0.023, +0.143]) and reduces the mean number of scenes with at-fault collisions from 34.0 to 11.0.",
+      "analysis": {
+        "key_results": "局部闭环评估中，视觉掩码使平均场景得分从0.479提高至0.517，结合AEB后进一步提高至0.599，有责碰撞场景数从34.0降至11.0。",
+        "limitations": "视觉掩码的总体开环误差与基线相当，仅在左转错误上有所减少；配对差值的95%置信区间包含零，符号检验p值为0.21，统计显著性不强。",
+        "main_contribution": "提出GatedVLA策略，通过软视觉掩码增强跨注意力，并集成规则式自动紧急制动模块，在闭环评估中显著提升性能。",
+        "method": "驾驶预训练的Qwen-Drive-1.0-4B视觉语言模型与逐层流匹配动作专家输出2.5秒加速度和曲率控制，并使用软视觉掩码应用于专家的跨注意力；部署时加入基于规则的自动紧急制动模块。",
+        "one_sentence_summary": "本报告介绍了一种将驾驶预训练视觉语言模型与流匹配动作专家相结合的视觉语言动作策略，用于自动驾驶闭环控制。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该工作属于视觉语言动作模型（VLA）在机器人（自动驾驶）中的应用，通过注意力机制和规则模块提升闭环控制性能，与VLA主题直接相关。",
+        "relevance_score": 8,
+        "tags": [
+          "Vision-Language",
+          "Action Prediction",
+          "Robot Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.RO"
+      ],
+      "arxiv_id": "2611.01663",
+      "authors": [
+        "Kaneyoshi Hiratsuka",
+        "Naoki Takada",
+        "Makoto Kawano"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-11-03T03:49:58.777816Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2611.01663/v1/fig1-panel1.png"
+            ],
+            "caption": "System overview. (a) GatedVLA policy, trained end-to-end: the visual mask m p m_{p} biases the expert’s cross-attention to the VLM’s image tokens. (b) Pretrained detector and rule-based AEB, integrated only at deployment: they re-time the planned waypoints along their path.",
+            "image_urls": [
+              "https://arxiv.org/html/2611.01663v1/fig_system.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2611.01663v1#S3.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2611.01663/v1/fig2-panel1.jpg"
+            ],
+            "caption": "Evolution of the visual mask on a left-turn validation sample across training: steps 0, 1,000, 5,000, 20,000, and 38,400 (top to bottom). Panels from left to right: current front-camera frame; retention weight m m ; standardized gate score z z ; DiT cross-attention map on the frame; and bird’s-eye view showing past trajectory, ground truth, prediction, and target point (lateral axis positive to the right).",
+            "image_urls": [
+              "https://arxiv.org/html/2611.01663v1/figures/evo_left.jpg"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2611.01663v1#A3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2611.01663v1",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-11-03T03:49:58.777816Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-11-01T07:16:10Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2611.01663",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2611.01663",
+        "project_url": null
+      },
+      "title": "GatedVLA with Camera-Based Emergency Braking: AlpaSim E2E Closed Loop Challenge Technical Report",
+      "title_zh": "GatedVLA与基于摄像头的紧急制动：AlpaSim端到端闭环挑战技术报告",
+      "updated_at": "2026-11-01T07:16:10Z",
+      "version": 1
+    },
+    {
+      "abstract": "Speculative decoding accelerates vision-language model (VLM) inference without altering the output distribution, yet two factors limit its gains. Existing drafters either lack the image evidence required for visually grounded tokens or pay to condition on every visual token, although a short draft block typically depends on only a few image regions. Moreover, the value of verifying additional candidates varies with GPU load, so no fixed verification structure is efficient across serving conditions. We present Uni-LaSpec, a block-parallel speculative decoding framework that addresses both factors. To improve draft quality, Uni-LaSpec reuses the verifier's own attention: the query retained from the preceding verification ranks the cached, int8-quantized visual keys, and a cross-layer vote selects a few visual tokens that the drafter fuses through gated cross-attention. Acceptance-aware training further weights each draft position by its contribution to the accepted prefix. To allocate verification, a marginal-cost criterion selects the structure per request and per round: draft trees exploit idle verifier capacity under light load, whereas a dynamic head truncates linear drafts under heavy load. Across six VLMs from three model families and 17 text and multimodal benchmarks, selecting eight visual tokens retains at least 98.6% of the acceptance obtained from the full image at sub-millisecond selection cost. With greedy decoding at concurrency one, Uni-LaSpec achieves up to 5.11x text and 3.24x multimodal throughput over autoregressive decoding. Across six load levels and three GPU types, it outperforms autoregressive decoding in every setting and matches or exceeds the best fixed verification strategy in 123 of 144 settings; under bursty arrivals, it reduces mean end-to-end latency by 47.6% relative to linear verification.",
+      "analysis": {
+        "key_results": "在六个 VLM、17 个基准上，选择八个视觉 token 在亚毫秒选择成本下保留至少 98.6% 的接受度；贪心解码并发为 1 时，文本吞吐量最高加速 5.11 倍，多模态吞吐量最高加速 3.24 倍；在六种负载水平和三种 GPU 类型下均优于自回归解码，在 144 种设置中的 123 种匹配或超过最佳固定验证策略；突发到达下平均端到端延迟降低 47.6%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出 Uni-LaSpec 框架，通过复用验证器注意力选择少量关键视觉 token 以提升草稿质量，并根据 GPU 负载动态调整验证结构，实现负载自适应的推测解码。",
+        "method": "复用验证器注意力中的查询对缓存的 int8 量化视觉键进行排序，通过跨层投票选择少量视觉 token 并通过门控交叉注意力融合；使用接受感知训练按草稿位置加权；根据边际成本标准在每个请求和每轮中动态选择验证结构（草稿树或截断线性草稿）。",
+        "one_sentence_summary": "提出 Uni-LaSpec，一个针对视觉语言模型的自适应推测解码框架，通过复用验证器注意力选择关键视觉 token 并动态分配验证结构，在不改变输出分布的前提下加速推理。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "本文专注于视觉语言模型的推测解码效率优化，不直接涉及 VLA 或 WAM。但其提出的视觉 token 选择机制和负载自适应验证策略可作为通用高效推理技术，对 VLA 或机器人世界模型中的视觉编码器和自回归解码组件具有潜在的方法学借鉴价值。",
+        "relevance_score": 8,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.AI",
+        "cs.CV"
+      ],
+      "arxiv_id": "2611.01617",
+      "authors": [
+        "Hong Nie",
+        "Zhangchi Gao",
+        "Yuqian Liang",
+        "Jun Yu",
+        "Bo Wang",
+        "Jianqing Sun",
+        "and Shengping Liu"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-11-03T03:49:58.777816Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2611.01617/v1/fig2-panel1.png"
+            ],
+            "caption": "Comparison of visual evidence acquisition mechanisms in MSD [17], DREAM [18], ViSpec [21], and Uni-LaSpec. In each panel, the verifier is on the left and the drafter is on the right. Uni-LaSpec scores the visual tokens with the quantized visual keys cached by the verifier, fuses only the selected tokens through gated cross-attention, and drafts a masked block in one pass.",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2611.01617v1"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2611.01617v1",
+        "recovery_checked_at": "2026-11-03T03:53:45.245947Z",
+        "recovery_status": "not_found",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:speculative-decoding",
+        "composite:speculative_generation",
+        "composite:draft_verification_decoding",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-11-03T03:49:58.777816Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-11-01T06:09:55Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2611.01617",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2611.01617",
+        "project_url": null
+      },
+      "title": "Seeing What Matters, Verifying What Pays: Load-Adaptive Speculative Decoding for Vision-Language Models",
+      "title_zh": "关注关键视觉信息，验证有效负担：面向视觉语言模型的负载自适应推测解码",
+      "updated_at": "2026-11-01T06:09:55Z",
+      "version": 1
+    },
+    {
+      "abstract": "Robots manipulating in cluttered spaces must often plan from partial views where foreground objects occlude the target, surrounding geometry, and usable free space. Reactive policies often miss these hidden constraints, while exhaustive search becomes computationally prohibitive in dense clutter. We present SCOUT, an occlusion-aware planning framework that bridges high-level deliberation with grounded physical rollouts. SCOUT leverages an object-centric scene representation to reconstruct hidden geometry and derive a relational planning state capturing blocker hierarchies and accessibility corridors. To navigate the vast action space in clutter, an LLM proposes structured action candidates which are then rigorously evaluated via Monte Carlo Tree Search (MCTS) using a learned action-conditioned world model. Evaluations on 'Reveal' and 'Placement' tasks show that SCOUT outperforms Vision-Language-Action (VLA) policies, embodied agents, and 3D world models, with significant gains in long-horizon tasks requiring reasoning over occluded geometry. We further validate the framework's robustness through real-world robotic manipulation in a cluttered shelf environment.",
+      "analysis": {
+        "key_results": "在“Reveal”和“Placement”任务上，SCOUT优于VLA策略、具身智能体及3D世界模型，尤其在需要推理遮挡几何的长程任务中提升显著；在真实杂乱货架环境中验证了框架的鲁棒性。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出SCOUT框架，通过对象中心场景表示重建隐藏几何并推导关系规划状态，LLM生成结构化动作候选，MCTS结合学习到的动作条件世界模型进行严格评估，有效规划在遮挡下的机器人操作。",
+        "method": "使用对象中心场景表示重建被遮挡的几何结构，推导包含阻挡层次和可达走廊的关系规划状态；通过LLM提出结构化动作候选，并利用学习到的动作条件世界模型进行蒙特卡洛树搜索（MCTS）来评估和选择动作。",
+        "one_sentence_summary": "提出一个遮挡感知的机器人操作规划框架SCOUT，使用对象中心场景表示和LLM提出的动作候选，通过学到的动作条件世界模型进行MCTS推演，以处理部分观测下的复杂杂乱环境操作。",
+        "primary_topic": "World Model",
+        "relation_to_vla_wam": "论文直接涉及机器人操作与动作条件世界模型，使用学习到的世界模型进行规划，属于VLA/WAM核心主题。它解决了VLA策略在遮挡和部分观测场景下的失败问题，通过世界模型推演提升长程操作规划能力，对本站具有高度相关性。",
+        "relevance_score": 10,
+        "tags": [
+          "Robot Manipulation",
+          "World Modeling",
+          "Policy Learning",
+          "Robot Learning",
+          "Vision-Language",
+          "Generalist Robotics"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.AI",
+        "cs.CV"
+      ],
+      "arxiv_id": "2611.01600",
+      "authors": [
+        "Amir Hossain Raj",
+        "Xuesu Xiao"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-11-03T03:49:58.777816Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2611.01600/v1/fig1-panel1.png"
+            ],
+            "caption": "Overview of SCOUT. From partial RGB-D observations, GHOST reconstructs an object-centric hidden scene representation, which is converted into a relational planning state. An LLM generates structured action proposals, and MCTS with a learned world model evaluates simulated rollouts to guide selection of a multi-step plan.",
+            "image_urls": [
+              "https://arxiv.org/html/2611.01600v1/pipeline_v4.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2611.01600v1#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2611.01600/v1/fig2-panel1.png"
+            ],
+            "caption": "GHOST scene representation pipeline. Multi-view RGB-D observations are fused into object-centric slots, refined via slot interactions, and rendered into a unified 3D scene representation.",
+            "image_urls": [
+              "https://arxiv.org/html/2611.01600v1/GHOST.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2611.01600v1#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2611.01600v1",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "exact:action-conditioned-world-model",
+        "composite:vision_language_robotics",
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-11-03T03:49:58.777816Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-11-01T05:32:18Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2611.01600",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2611.01600",
+        "project_url": null
+      },
+      "title": "SCOUT: Planning under Occlusion via Object-Centric World Model Rollouts",
+      "title_zh": "SCOUT：基于对象中心世界模型推演的在遮挡下规划框架",
+      "updated_at": "2026-11-01T05:32:18Z",
+      "version": 1
+    },
+    {
+      "abstract": "We present See, Think, Use, a protocol that traces each answer of a vision-language model to perception, reasoning or the use of perception. The diagnosis shows a developer which stage to improve and directs test-time compute to the stage that fails. Benchmarks score the final answer, and an answer that rests on the image earns the same credit as a guess or a memorized prior. The protocol asks the model two extra questions per item and needs no access to its weights. A localization probe asks for a box around every instance and measures seeing, and a text-replacement probe answers from a description and measures thinking. Use is the rate at which the answer follows the model's own perception across counterfactual image pairs. The rate needs no answer labels, because the question and its prior are the same on both images. On two model families and six datasets the protocol shows that the knob that helps follows the task family. Answers follow the model's perception except on images that contradict a common prior, and asking the model to localize first repairs this failure when its boxes are right. Allocating compute by the measured stages comes close to the best uniform policy at lower cost and beats a random allocation of the same compute wherever a knob raises the short stage. We will release the code, the prompts and the per-question outputs.",
+      "analysis": {
+        "key_results": "在两个模型家族和六个数据集上，协议显示有帮助的策略遵循任务家族；模型通常遵循自身感知，但在与常见先验矛盾的图像上失败，先定位可修复该失败；按测量阶段分配计算接近最佳均匀策略且成本更低，并优于随机分配。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出See, Think, Use协议，将视觉语言模型答案追溯到感知、推理或感知使用阶段，并据此指导测试时计算分配。",
+        "method": "通过定位探针（要求框出每个实例）和文本替换探针（根据描述回答）来分别衡量感知和推理，使用反事实图像对衡量感知使用率。",
+        "one_sentence_summary": "提出了一种无需访问模型权重的协议，通过两个额外问题诊断视觉语言模型在感知、推理与使用感知三个阶段的失败。",
+        "primary_topic": "Benchmark",
+        "relation_to_vla_wam": "该工作聚焦于视觉语言模型的诊断与评估，不直接针对机器人动作预测或世界模型，但其方法学对VLA中感知与推理模块的故障诊断可能具有借鉴价值。",
+        "relevance_score": 6,
+        "tags": [
+          "Evaluation",
+          "Vision-Language"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.AI",
+        "cs.CL"
+      ],
+      "arxiv_id": "2611.01467",
+      "authors": [
+        "Jiacheng Ding",
+        "Yanliang Qi",
+        "Cong Guo",
+        "Peihua Mai"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-11-03T03:49:58.777816Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2611.01467/v1/fig2-panel1.png"
+            ],
+            "caption": "The protocol on one counterfactual pair. The model answers the question on the edited image v v and on its original v ′ v^{\\prime} . The model also boxes every instance in probe A and answers from a text in place of the image in probe B. The probes place each answer into one of five outcomes, and each outcome names the knob for its short stage. On the pig the boxes follow the edit and the answer does not, which is a failure of use .",
+            "image_urls": [
+              "https://arxiv.org/html/2611.01467v1/fig2_flow.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2611.01467v1#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2611.01467v1",
+        "recovery_checked_at": "2026-11-03T03:53:45.245947Z",
+        "recovery_status": "not_found",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-11-03T03:49:58.777816Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-11-01T02:56:06Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2611.01467",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2611.01467",
+        "project_url": null
+      },
+      "title": "See, Think, Use: Diagnosing Perception and Reasoning Failures in VLMs",
+      "title_zh": "See, Think, Use：诊断视觉语言模型的感知与推理失败",
+      "updated_at": "2026-11-01T02:56:06Z",
+      "version": 1
+    },
+    {
+      "abstract": "Private fine-tuning of large language models increasingly pairs DP-SGD with low-rank adapters on frozen, quantized backbones, and every such stack inherits one unstated premise: frozen layers keep each record's clipped gradient a function of that record alone. We show that LLM.int8 breaks this premise. It routes outlier activation columns to a higher-precision path using a union over the whole batch, so one record decides how every other record's activations are computed, even though the weights are frozen and the quantization scales are per row. We bound the resulting sensitivity inflation, state a record-isolation contract that restores the standard bound, and define record-owned precision dispatch that meets it with the same GEMMs as batched LLM.int8, so isolation needs no extra arithmetic. We then audit the native CUDA stack (bitsandbytes, PEFT, Opacus) against four matched controls. A constructed LoRA-Opacus witness reaches $15.0\\times$ the add/remove bound. On pretrained OPT-125M with natural text, other records alter 20% of record-layer precision splits at batch size 16. An exploratory re-clipping analysis finds 10 of 64 candidate neighbors above the bound once every gradient is clipped; the top pair, revalidated natively, reaches $1.065C$ while every control stays within $C$, and forcing one layer's outlier mask removes the excess. A two-million-draw audit of the released adapters yields $\\varepsilon$ lower bounds ($3.25$ at $\\delta=10^{-5}$) below the advertised guarantee ($4.38$). Resolving an excess this small at the release level would take about 200 times more draws, whereas checking the sensitivity contract directly exposes it in a few native runs, which makes contract checking the practical audit for private quantized training.",
+      "analysis": {
+        "key_results": "构造的 LoRA-Opacus 见证达到 15.0 倍添加/删除界；批量大小 16 时其他记录改变 20% 的记录层精度拆分；重裁剪分析发现 10/64 候选邻居超过界；两百万次抽样审计得到 ε 下界为 3.25（δ=10^-5），低于广告保证的 4.38。",
+        "limitations": "摘要未说明",
+        "main_contribution": "证明了 LLM.int8 的批量并集路由在私有量化微调中导致跨记录敏感性膨胀，提出了记录隔离契约和记录拥有精度调度，并展示了无需额外算术的审计方法。",
+        "method": "对 LLM.int8 的离群激活列路由机制进行敏感性分析和隐私审计，通过构造 LoRA-Opacus 见证、在 OPT-125M 上验证、重裁剪分析和两百万次抽样审计量化影响。",
+        "one_sentence_summary": "论文揭示了在私有量化微调中，LLM.int8 的跨记录精度路由破坏了 DP-SGD 的记录隔离假设，导致敏感性膨胀，并提出记录拥有精度调度来恢复标准界。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "论文研究量化模型的高效微调与差分隐私结合，未直接涉及 VLA 或 WAM，但量化与高效微调是机器人模型部署的重要相关技术，可为在机器人策略中安全使用量化微调提供依据。",
+        "relevance_score": 8,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG"
+      ],
+      "arxiv_id": "2611.01411",
+      "authors": [
+        "Annan Zhang",
+        "Shengjie Song",
+        "Wenshuai Yao",
+        "Lihao Zhang",
+        "Tianmiao"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-11-03T03:49:58.777816Z",
+        "figures": [],
+        "html_url": "https://arxiv.org/html/2611.01411v1",
+        "recovery_checked_at": "2026-11-03T03:53:45.245947Z",
+        "recovery_status": "not_found",
+        "recovery_version": 3,
+        "status": "not_found"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-11-03T03:49:58.777816Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-11-01T01:45:29Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2611.01411",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2611.01411",
+        "project_url": null
+      },
+      "title": "Sensitivity Inflation from Cross-Record Precision Routing in Private Quantized Fine-Tuning",
+      "title_zh": "私有量化微调中跨记录精度路由导致的敏感性膨胀",
+      "updated_at": "2026-11-01T01:45:29Z",
+      "version": 1
+    },
+    {
+      "abstract": "Agentic robots combine a vision-language brain, a tool-using harness, and a vision-language-action (VLA) policy. Serving a fleet of these agents introduces two coupled resource constraints: the brain repeatedly revisits long, growing key-value (KV) cache states, while the VLA executes action chunks under tight control deadlines. We characterize 80 LIBERO-PRO episodes generated by GPT-6-Astra, RPent, and pi0.5 (1,862 brain turns and 1,582 VLA inference chunks), profile both layers on H800 graphics processing units (GPUs), and replay the resulting agent programs on a vLLM serving engine. Brain contexts reach 215k tokens; the median Astra request takes 7.78 s, while the intervening environment-step gap is only 1.0 s. Under a 0.25 s action-chunk deadline, one VLA GPU meets the 1% starvation target for one robot; under a 1.0 s deadline, its measured capacity reaches at least 32. In sustained brain replay, increasing concurrency from 20 to 32 robots reduces throughput from about 2.4 to 0.6 requests/s as repetitive prefill displaces generation. A static active-episode cap restores 2.24-2.25 requests/s and raises completed trace-program throughput from 1.30 to 5.00-5.55 episodes/min. Our measurements expose the workload-dependent shift between action deadlines and brain KV residency, and establish practical principles for capacity planning and admission in sustained agentic robot fleets.",
+      "analysis": {
+        "key_results": "脑上下文达到215k tokens；Astra请求中位耗时7.78s而环境步间隔仅1.0s；在0.25s动作块截止期下单个VLA GPU满足1%饥饿目标仅支持1台机器人，1.0s截止期下容量至少32；持续脑回放中并发从20升至32时吞吐从约2.4降至0.6请求/s，静态活跃回合上限恢复至2.24-2.25请求/s并将完成轨迹吞吐从1.30提升至5.00-5.55回合/分钟。",
+        "limitations": "摘要未说明",
+        "main_contribution": "对智能机器人集群的推理工作负载进行系统表征，并提出了基于静态活跃回合上限的准入控制方法以缓解KV缓存颠簸、提升吞吐。",
+        "method": "收集GPT-6-Astra、RPent和pi0.5在80个LIBERO-PO任务上生成的智能体程序轨迹，在H800 GPU上进行分层剖析，并使用vLLM服务引擎回放以测量性能。",
+        "one_sentence_summary": "该文针对由视觉语言脑、工具使用和VLA策略组成的智能机器人集群服务展开研究，通过真实轨迹回放分析KV缓存与动作截止期下的吞吐和资源竞争问题。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "直接以VLA策略作为核心研究对象之一，聚焦其在机器人集群部署中的高效推理与服务，为本站主题提供了针对VLA推理系统的系统级评测与准入控制方法。",
+        "relevance_score": 10,
+        "tags": [
+          "Efficient Inference",
+          "Evaluation",
+          "Robot Learning",
+          "Vision-Language",
+          "Robot Manipulation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.DC"
+      ],
+      "arxiv_id": "2611.01404",
+      "authors": [
+        "Sida He"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-11-03T03:49:58.777816Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2611.01404/v1/fig2-panel1.png"
+            ],
+            "caption": "Within-episode tool gaps between brain turns. The empirical cumulative distribution functions (ECDFs) show positive environment-step gaps and simulator wall-time gaps; 38.6% of environment gaps advance zero steps. The plotted",
+            "image_urls": [
+              null
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_pdf",
+            "source_url": "https://arxiv.org/pdf/2611.01404v1"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2611.01404v1",
+        "recovery_checked_at": "2026-11-03T03:53:45.245947Z",
+        "recovery_status": "not_found",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-11-03T03:49:58.777816Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-11-01T01:15:32Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2611.01404",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2611.01404",
+        "project_url": null
+      },
+      "title": "Serving Agentic Robot Fleets: Workload Characterization, KV-Cache Thrashing, and Admission Control",
+      "title_zh": "服务智能机器人集群：工作负载特征、KV缓存颠簸与准入控制",
+      "updated_at": "2026-11-01T01:15:32Z",
+      "version": 1
+    },
+    {
+      "abstract": "Vision-language-action (VLA) models predict chunks of future actions, yet deployed robots waste time in two ways that are independent of model capability: they halt while the next chunk is inferred, and they move at the speed of slow, cautious demonstrations. Existing remedies remove one loss each, and stacking them fails, because asynchrony and speed-up each change the correspondence between planned progress and executed motion. We present Path-preserving Time Scaling (PTS), a training-free execution layer for frozen action-chunking policies built on one principle: the robot's motion is a time reparameterization of a reference path, and the path changes only in response to new observations. A path layer decodes every replan deterministically in one step and enters it at the progress consumed during inference. A time layer sums the planned increments, keeps the arm at 1x while the gripper moves, and caps the rate by the actuator's linear range and by chunk feasibility under latency. We show that misaligned entry and stochastic sampling add a bias and a variance to the continuation error, and derive a break-even success rate that states when speeding up pays off. On LIBERO with two frozen VLAs under injected inference latency, PTS raises task throughput over the strongest deployable baseline by 33% for pi0.5 and 104% for SmolVLA while matching or improving the success rate, is best on all six model-suite combinations, and exceeds zero-latency 1x execution. Against asynchronous 1x execution with the same one-step decoder, the time layer alone adds 28% and 38%. On LIBERO-Dynamic it improves on stop-and-wait execution by 38% and is comparable to asynchronous 1x execution.",
+      "analysis": {
+        "key_results": "在LIBERO上使用两个冻结VLA模型，PTS将任务吞吐量提升33%（pi0.5）和104%（SmolVLA），成功率匹配或提高；在LIBERO-Dynamic上比停止等待执行提高38%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出Path-preserving Time Scaling (PTS)，一种免训练执行层，用于在推理延迟下加速冻结的VLA模型的动作块执行，提高任务吞吐量而不降低成功率。",
+        "method": "设计路径层和时间层：路径层确定性解码重新规划并基于推理消耗进度进入参考路径；时间层累加计划增量，在夹爪移动时保持1x速度，并根据执行器线性范围和延迟下的动作块可行性限制速率。",
+        "one_sentence_summary": "针对VLA模型推理延迟和保守速度导致的机器人执行效率低问题，提出免训练执行层PTS，通过路径保持时间缩放实现更快执行。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "直接针对VLA模型在机器人上部署时的执行效率问题，通过训练免费执行层加速动作块执行，属于VLA模型的高效推理与实时执行优化。",
+        "relevance_score": 9,
+        "tags": [
+          "Vision-Language",
+          "Action Prediction",
+          "Efficient Inference",
+          "Policy Learning",
+          "Robot Manipulation"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.LG"
+      ],
+      "arxiv_id": "2611.01390",
+      "authors": [
+        "Fuyi Chen"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-11-03T03:49:58.777816Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2611.01390/v1/fig1-panel1.png"
+            ],
+            "caption": "Same policy, same episode, less time. a , Frozen π 0.5 \\pi_{0.5} on a LIBERO-Long task (same initial state and seed; columns at equal times, counted in 50 ms control steps; the time line marks steps halted for inference). Stop-and-wait (Sync-1 × \\times ) halts at every inference, asynchronous execution (Async-1 × \\times ) never halts but stays at demonstration speed, and PTS never halts and traverses the planned path faster. b , Success rate versus mean attempt duration on the full π 0.5 \\pi_{0.5} test set; gray lines have equal throughput Θ = 1000 ​ P / 𝔼 ⁡ [ T ] \\Theta=1000\\,P/\\mathbb{E}[T] . c , Pooled throughput of PTS against the strongest deployable baseline of each model.",
+            "image_urls": [
+              "https://arxiv.org/html/2611.01390v1/teaser.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2611.01390v1#S0.F1"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2611.01390v1",
+        "recovery_checked_at": "2026-11-03T03:53:45.245947Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-11-03T03:49:58.777816Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-11-01T00:53:26Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2611.01390",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2611.01390",
+        "project_url": null
+      },
+      "title": "Same Path, Less Time: Training-Free Fast Execution of Vision-Language-Action Models under Inference Latency",
+      "title_zh": "同一路径，更少时间：推理延迟下视觉-语言-动作模型的免训练快速执行",
+      "updated_at": "2026-11-01T00:53:26Z",
+      "version": 1
+    }
+  ],
+  "schema_version": "1",
+  "stats": {
+    "cache_hits": 0,
+    "completion_tokens": 16280,
+    "error_categories": {
+      "ValidationError": 1
+    },
+    "failed": 1,
+    "fetched": 562,
+    "figure_available": 31,
+    "figure_cache_hits": 0,
+    "figure_failed": 0,
+    "figure_requests": 42,
+    "figure_unavailable": 11,
+    "model_calls": 47,
+    "prefiltered": 47,
+    "prompt_tokens": 42017,
+    "published": 42,
+    "total_tokens": 58297
+  }
+}

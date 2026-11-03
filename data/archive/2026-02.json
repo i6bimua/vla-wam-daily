@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-30T10:45:18.900358Z",
+  "generated_at": "2026-11-03T03:49:58.777816Z",
   "papers": [
     {
       "abstract": "Active perception - the ability of a robot to proactively select viewpoints to acquire task-relevant information - is essential for robust operation in real-world environments. However, existing approaches are typically limited to fixed objectives or constrained settings, and struggle to generalize to open-ended perception intents specified in natural language. We propose I-Perceive, a foundation model for language-conditioned active perception in large-scale indoor environments. Given a query image, a set of context images, and a natural language instruction, I-Perceive predicts a 6D camera pose that fulfills the specified perception intent. The model integrates a vision-language pathway for semantic grounding with a geometric reasoning pathway for multi-view 3D understanding, connected via multi-layer semantic fusion to enable language-conditioned geometric reasoning. To support scalable training, we construct a large-scale dataset of language-viewpoint pairs from both real-world scene-scanning data and simulated environments using an automated pipeline. Extensive experiments demonstrate that I-Perceive significantly outperforms strong baselines on prediction accuracy, viewpoint feasibility, and instructions alignment. The model exhibits strong zero-shot generalization to unseen scenes and instructions, and enables closed-loop active perception, progressively refining viewpoints over sequential interactions.",
@@ -490,6 +490,99 @@
       "version": 3
     },
     {
+      "abstract": "Dynamic runtime latency and memory constraints necessitate flexible large language model (LLM) deployment, where an LLM can be inferred with various quantization precisions based on available computational resources. Recent work on such any-precision quantization either relies on hardware-inefficient vector quantization or induces additional scaling factors when switching between bit-widths. Meanwhile, existing post-training quantization (PTQ) methods calibrated for a fixed low precision show poor generalizability under runtime precision change. In this work, we attribute the source of poor generalization across bit-widths to a precision-dependent outlier migration phenomenon where the distribution of PTQ-sensitive tokens changes across precisions. Motivated by this observation, we propose MoBiQuant, a novel any-precision Mixture-of-Bits quantization framework that adjusts weight precision for flexible LLM inference based on token sensitivity. Specifically, we propose a many-in-one recursive residual quantization that can iteratively reconstruct higher-precision weights at runtime and mitigates outlier migration with a token-aware router to dynamically select the optimal inference precision of each token.Extensive experiments show that MoBiQuant matches or surpasses frontier single-precision PTQ while exhibiting strong elasticity, achieving significant memory savings and throughput gains of up to $1.34\\times$ over state-of-the-art any-precision methods. Our code is available at https://github.com/SimWangArizona/MoBiQuant.",
+      "analysis": {
+        "key_results": "匹配或超越前沿单精度PTQ方法，相比最先进的任意精度方法实现高达1.34倍的吞吐量提升和显著内存节省。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出MoBiQuant，一种令牌自适应的任意精度混合位数量化框架，包含多合一递归残差量化和令牌感知路由器，以缓解精度相关的离群点迁移现象，匹配或超越单精度PTQ方法并提升吞吐量。",
+        "method": "使用多合一递归残差量化迭代重建高精度权重，结合令牌感知路由器动态选择每个令牌的最佳推理精度。",
+        "one_sentence_summary": "提出MoBiQuant任意精度量化框架，通过混合位数量化和令牌感知路由解决跨位宽泛化问题，实现灵活的大模型内存与吞吐量优化。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "该论文专注于任意精度量化这一独立高效推理主题，未直接涉及VLA、WAM或机器人领域，但对模型量化技术在机器人政策或世界模型中的应用具有潜在的方法学参考价值。",
+        "relevance_score": 7,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.CL"
+      ],
+      "arxiv_id": "2602.20191",
+      "authors": [
+        "Dongwei Wang",
+        "Jinhee Kim",
+        "Seokho Han",
+        "Denis Gudovskiy",
+        "Yohei Nakata",
+        "Tomoyuki Okuno",
+        "KhayTze Peong",
+        "Kang Eun Jeon",
+        "Jong Hwan Ko",
+        "Yiran Chen",
+        "Huanrui Yang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-11-03T03:49:58.777816Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2602.20191/v3/fig1-panel1.png"
+            ],
+            "caption": "(Left) Existing PTQ methods poorly generalize under calibration–inference precision mismatch, e.g., inference at 4-bit with 3-bit calibrated parameters ( green vs. red ). Incorporating token-aware bit adjustment partially mitigates this degradation ( pink ). Our MoBiQuant improves generalization across precisions ( orange ). (Right) Per-token quantization error distribution at layer 5 in LLaMA3-8B: quantization outliers are highly non-uniform at each bit-width. Tokens well-fitted at 4-bit can become outliers at 3-bit, while 4-bit outliers may not be the primary error source at 3-bit.",
+            "image_urls": [
+              "https://arxiv.org/html/2602.20191v3/Motivation_combine.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2602.20191v3#S3.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2602.20191/v3/fig2-panel1.png"
+            ],
+            "caption": "MoBiQuant enables token-adaptive any-precision inference for linear blocks in LLMs (a). It consists of two main components: MoBiSlice that supports multiple precisions by decomposing FP16 weights into bit slices via recursive quantization (b); and MoBiRoute with token-adaptive precision adjustment that is trained to route each token to the optimal bit slice under a budget (c).",
+            "image_urls": [
+              "https://arxiv.org/html/2602.20191v3/main.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2602.20191v3#S4.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2602.20191v3",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:post-training-quantization",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-11-03T03:49:58.777816Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-02-21T21:11:08Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2602.20191",
+        "code_url": "https://github.com/SimWangArizona/MoBiQuant",
+        "pdf_url": "https://arxiv.org/pdf/2602.20191",
+        "project_url": null
+      },
+      "title": "MoBiQuant: Mixture-of-Bits Quantization for Token-Adaptive Any-Precision LLM",
+      "title_zh": "MoBiQuant：面向令牌自适应任意精度大语言模型的混合位数量化",
+      "updated_at": "2026-10-31T19:11:45Z",
+      "version": 3
+    },
+    {
       "abstract": "World models learned from high-dimensional visual observations allow agents to make decisions and plan directly in latent space, avoiding pixel-level reconstruction. However, recent latent predictive architectures (JEPAs), including the DINO world model (DINO-WM), display a degradation in test time robustness due to their sensitivity to ``slow features\". These include visual variations such as background changes and distractors that are irrelevant to the task being solved. We address this limitation by augmenting the predictive objective with a bisimulation encoder that enforces control-relevant state equivalence, mapping states with similar transition dynamics to nearby latent states while limiting contributions from slow features. We evaluate our model on a navigation task (PointMaze) and on a manipulation task (PushT) under different test-time background changes and visual distractors. Across all benchmarks, our model consistently improves robustness to slow features while operating in a reduced latent space, up to $10\\times$ smaller than that of DINO-WM. Moreover, our model is agnostic to the choice of pre-trained visual encoder and maintains robustness when paired with DINOv2, SimDINOv2, and iBOT features.",
       "analysis": {
         "key_results": "在PointMaze和PushT任务上，模型对背景变化和视觉干扰的鲁棒性一致提升，隐空间大小可减小至DINO-WM的1/10。",
@@ -719,7 +812,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2602.18532v5",
-        "recovery_checked_at": "2026-11-02T12:07:59.108584Z",
+        "recovery_checked_at": "2026-11-03T03:53:45.245947Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -4260,22 +4353,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 89,
-    "completion_tokens": 22419,
+    "cache_hits": 0,
+    "completion_tokens": 16280,
     "error_categories": {
-      "ValidationError": 6
+      "ValidationError": 1
     },
-    "failed": 6,
-    "fetched": 1838,
-    "figure_available": 113,
-    "figure_cache_hits": 78,
+    "failed": 1,
+    "fetched": 562,
+    "figure_available": 31,
+    "figure_cache_hits": 0,
     "figure_failed": 0,
-    "figure_requests": 57,
-    "figure_unavailable": 22,
-    "model_calls": 74,
-    "prefiltered": 163,
-    "prompt_tokens": 59875,
-    "published": 135,
-    "total_tokens": 82294
+    "figure_requests": 42,
+    "figure_unavailable": 11,
+    "model_calls": 47,
+    "prefiltered": 47,
+    "prompt_tokens": 42017,
+    "published": 42,
+    "total_tokens": 58297
   }
 }
