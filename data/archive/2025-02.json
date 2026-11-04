@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-01T11:06:26.475853Z",
+  "generated_at": "2026-11-04T02:52:41.131290Z",
   "papers": [
     {
       "abstract": "Large Language Models (LLMs) are leading a new technological revolution as one of the most promising research streams toward artificial general intelligence. The scaling of these models, accomplished by increasing the number of parameters and the magnitude of the training datasets, has been linked to various so-called emergent abilities that were previously unobserved. These emergent abilities, ranging from advanced reasoning and in-context learning to coding and problem-solving, have sparked an intense scientific debate: Are they truly emergent, or do they simply depend on external factors, such as training dynamics, the type of problems, or the chosen metric? What underlying mechanism causes them? Despite their transformative potential, emergent abilities remain poorly understood, leading to misconceptions about their definition, nature, predictability, and implications. In this work, we shed light on emergent abilities by conducting a comprehensive review of the phenomenon, addressing both its scientific underpinnings and real-world consequences. We first critically analyze existing definitions, exposing inconsistencies in conceptualizing emergent abilities. We then explore the conditions under which these abilities appear, evaluating the role of scaling laws, task complexity, pre-training loss, quantization, and prompting strategies. Our review extends beyond traditional LLMs and includes Large Reasoning Models (LRMs), which leverage reinforcement learning and inference-time search to amplify reasoning and self-reflection. However, emergence is not inherently positive. As AI systems gain autonomous reasoning capabilities, they also develop harmful behaviors, including deception, manipulation, and reward hacking. We highlight growing concerns about safety and governance, emphasizing the need for better evaluation frameworks and regulatory oversight.",
@@ -84,6 +84,69 @@
       "title_zh": "大型语言模型中的涌现能力：综述",
       "updated_at": "2026-08-26T13:04:50Z",
       "version": 3
+    },
+    {
+      "abstract": "Large Language Models (LLMs) have become an indispensable part of natural language processing tasks. However, autoregressive sampling has become an efficiency bottleneck. Multi-Draft Speculative Decoding (MDSD) is a recent approach where, when generating each token, a small draft model generates multiple drafts, and the target LLM verifies them in parallel, ensuring that the final output conforms to the target model distribution. The two main design choices in MDSD are the draft sampling method and the verification algorithm. For a fixed draft sampling method, the optimal acceptance rate is a solution to an optimal transport problem, but the complexity of this problem makes it difficult to solve for the optimal acceptance rate and measure the gap between existing verification algorithms and the theoretical upper bound. This paper discusses the dual of the optimal transport problem, providing a way to efficiently compute the optimal acceptance rate. For the first time, we measure the theoretical upper bound of MDSD efficiency for vocabulary sizes in the thousands and quantify the gap between existing verification algorithms and this bound. We also compare different draft sampling methods based on their optimal acceptance rates. Our results show that the draft sampling method strongly influences the optimal acceptance rate, with sampling without replacement outperforming sampling with replacement. Additionally, existing verification algorithms do not reach the theoretical upper bound for both without replacement and with replacement sampling. Our findings suggest that carefully designed draft sampling methods can potentially improve the optimal acceptance rate and enable the development of verification algorithms that closely match the theoretical upper bound.",
+      "analysis": {
+        "key_results": "无放回采样优于有放回采样；现有验证算法在两种采样方式下均未达到理论上界。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出利用最优传输问题的对偶高效计算多草案推测解码的理论最优接受率，首次在数千词汇规模下量化现有验证算法与理论上界的差距。",
+        "method": "将多草案推测解码的接受率视为最优传输问题，通过求解其对偶问题来计算最优接受率，并比较不同草案采样方法。",
+        "one_sentence_summary": "本文通过求解最优传输问题的对偶，首次高效计算多草案推测解码的理论最优接受率，并量化现有验证算法与理论上限的差距。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "本文专注于独立于机器人的推测解码效率问题，未涉及 VLA/WAM 或机器人世界模型，但对提升大语言模型和潜在多模态模型的推理效率具有基础性价值。",
+        "relevance_score": 8,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CL",
+        "cs.DS"
+      ],
+      "arxiv_id": "2502.18779",
+      "authors": [
+        "Zhengmian Hu",
+        "Tong Zheng",
+        "Vignesh Viswanathan",
+        "Ziyi Chen",
+        "Ryan A. Rossi",
+        "Yihan Wu",
+        "Dinesh Manocha",
+        "Heng Huang"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-11-04T02:52:41.131290Z",
+        "figures": [],
+        "html_url": "https://arxiv.org/html/2502.18779v2",
+        "recovery_checked_at": "2026-11-04T02:57:37.428020Z",
+        "recovery_status": "not_found",
+        "recovery_version": 3,
+        "status": "not_found"
+      },
+      "matched_rules": [
+        "exact:speculative-decoding",
+        "composite:speculative_generation",
+        "composite:draft_verification_decoding"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-11-04T02:52:41.131290Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2025-02-26T03:22:44Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2502.18779",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2502.18779",
+        "project_url": null
+      },
+      "title": "Towards Optimal Multi-draft Speculative Decoding",
+      "title_zh": "迈向最优多草案推测解码",
+      "updated_at": "2026-11-02T23:49:57Z",
+      "version": 2
     },
     {
       "abstract": "Training instability in modern deep learning systems is frequently triggered by rare but extreme gradient-norm spikes, which can induce oversized parameter updates, corrupt optimizer state, and lead to slow recovery or divergence. Widely used safeguards such as gradient clipping mitigate these failures but require threshold tuning and indiscriminately truncate large updates. We propose GradientStabilizer, a lightweight, drop-in gradient transform that preserves the instantaneous gradient direction while replacing the update magnitude with a statistically stabilized estimate derived from running gradient-norm statistics. We prove that the resulting stabilized magnitude is uniformly bounded on spike steps, independent of the spike size, and show how this boundedness controls optimizer state evolution in adaptive methods. Across LLM pre-training (FP16), quantization-aware pre-training (FP4), ImageNet classification, reinforcement learning, and time-series forecasting, GradientStabilizer consistently improves training stability, widens stable learning-rate regions, and reduces divergence relative to clipping-based baselines, even substantially reducing Adam's sensitivity to weight-decay strength. Code will be released soon.",
@@ -496,7 +559,7 @@
         "checked_at": "2026-09-11T00:47:49.532444Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2502.00858v4",
-        "recovery_checked_at": "2026-11-02T12:07:59.108584Z",
+        "recovery_checked_at": "2026-11-04T02:57:37.428020Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "html_unavailable"
@@ -525,20 +588,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 40,
-    "completion_tokens": 632,
-    "error_categories": {},
-    "failed": 0,
-    "fetched": 377,
-    "figure_available": 35,
-    "figure_cache_hits": 33,
+    "cache_hits": 93,
+    "completion_tokens": 17437,
+    "error_categories": {
+      "ValidationError": 2
+    },
+    "failed": 2,
+    "fetched": 1921,
+    "figure_available": 110,
+    "figure_cache_hits": 84,
     "figure_failed": 0,
-    "figure_requests": 3,
-    "figure_unavailable": 1,
-    "model_calls": 2,
-    "prefiltered": 42,
-    "prompt_tokens": 1738,
-    "published": 36,
-    "total_tokens": 2370
+    "figure_requests": 48,
+    "figure_unavailable": 22,
+    "model_calls": 52,
+    "prefiltered": 145,
+    "prompt_tokens": 44812,
+    "published": 132,
+    "total_tokens": 62249
   }
 }
