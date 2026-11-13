@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-13T03:06:44.606785Z",
+  "generated_at": "2026-11-13T11:57:46.366577Z",
   "papers": [
     {
       "abstract": "Character names in large language model (LLM) fiction concentrate on a handful of recurrent names such as 'Elara' and 'Elias', a measurable face of AI slop. Existing fixes either require logit access or retraining, or operate per request and cannot control concentration across a corpus. How much prompt-level strategies reduce concentration, and at what cost to name naturalness, has not been systematically measured. We present an empirical study of name-concentration control across eight strategies and introduce speculative naming, a fine-tuning-free method that adapts the draft-verify-reject paradigm of speculative decoding from tokens to names. The method requests candidate name-sets through verbalized sampling, scores them against a SlopTracker that combines a per-model fingerprint with a runtime counter, and selects through a temperature-controlled rule or its strict variant (HARD). We use 20 LLMs to generate 44,782 stories in four languages from text and visual stimuli (88,919 named characters), and measure concentration with a list-free collision metric (Slop Ratio, SR) decomposed into known and emergent components. List-based strategies do not remove slop: static banlists displace concentration to emergent names and more than halve the share of attested real names. Speculative naming removes it: the sampling scaffold alone cuts SR by 89% on average, the dynamic tracker brings the total reduction to 95%, mean collision probability falls from 7.3% to 0.4%, and known-name collisions hold at zero while naturalness stays close to baseline (42-69% attested by language) and within-story collisions drop from 4.3% to 0.2%. The strategy ranking is stable across languages, model families, and name-counting conventions. Name concentration is thus controllable at the corpus level without logit access or retraining; broader creative diversity beyond naming remains open.",
@@ -1061,7 +1061,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2611.00843v2",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1131,7 +1131,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2611.00843v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1384,7 +1384,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2611.00671v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1784,7 +1784,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2611.00615v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -2912,6 +2912,101 @@
       "version": 1
     },
     {
+      "abstract": "Robot agents built on vision-language models depend on both the planner and its harness: the tools, feedback, memory, and recovery logic around it. Can improvements to a large teacher's harness be carried into a compact agent with lower inference compute cost? We present TinyAstral, a two-stage approach. We first freeze an open-weight teacher and improve its harness through recursive self-improvement (RSI): frontier LLM agents read the teacher's trajectories and propose harness edits, and each edit is accepted only if it passes a paired statistical test. We then freeze the final harness, collect teacher trajectories with reasoning and failure recovery, and distill a small student that replaces the teacher in the same harness. On RoboTwin, harness evolution raises the teacher's success from 33.4% to 63.6%; the final 4B student reaches 62.8%. Across four harness versions, distilled 4B students score close to their corresponding teachers, and later versions yield stronger students, showing that harness evolution gains carry into compact models. The harness gains also transfer to other frozen planners without retraining. On identical episodes, the final 4B student outperforms open 4B agents, the open 27B harness-RSI model SenseNova-RoboRSI, and our own teacher model placed in three competitors' harnesses. It stays close to its teacher on all three training benchmarks, and on three benchmarks never used for RSI or training it scores close to a 552B planner running the same harness. On the measured deployment episodes, it uses about one fifth of its teacher's accelerator time. Project page: https://garfield-kh.github.io/TinyAstral/",
+      "analysis": {
+        "key_results": "在RoboTwin上，框架进化将教师成功率从33.4%提升至63.6%，最终4B学生成功率为62.8%；蒸馏学生性能接近各自教师；框架增益可迁移到其他冻结规划器；最终4B学生在相同情节上超过4B开放智能体、SenseNova-RoboRSI和置于三个竞争对手框架中的教师模型；在三个训练基准上与教师接近，在三个未用于RSI或训练的基准上与552B规划器接近；部署时间约为教师的五分之一。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出两阶段方法：首先冻结大型教师模型，通过递归自改进（RSI）优化其外部执行框架；然后冻结改进后的框架，将教师轨迹蒸馏到一个小型学生模型，实现低推理成本的通用操作智能体。",
+        "method": "两阶段蒸馏：第一阶段使用前沿LLM智能体对教师模型的执行框架提出修改建议，并通过配对统计检验筛选有效修改；第二阶段收集教师轨迹（包含推理和故障恢复），蒸馏一个4B学生模型替换教师。",
+        "one_sentence_summary": "该论文提出TinyAstral，通过先递归自改进大型视觉-语言-动作模型的执行框架（harness），再将改进后的框架和推理蒸馏到4B参数的小模型，以降低推理成本并保持性能。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "论文直接涉及机器人操作与视觉-语言模型，通过改进执行框架和模型蒸馏实现高效推理，属于VLA应用的效率改进，与WAM无直接关联。",
+        "relevance_score": 8,
+        "tags": [
+          "Robot Manipulation",
+          "Vision-Language",
+          "Efficient Inference",
+          "Data",
+          "Policy Learning",
+          "Generalist Robotics"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO",
+        "cs.CV"
+      ],
+      "arxiv_id": "2610.41216",
+      "authors": [
+        "Kehong Gong",
+        "Xiaoxu Zheng",
+        "Guanli Hou",
+        "Seunghun Lee",
+        "Mengqi Guo",
+        "Runjia Tan",
+        "Zhengyu Wen",
+        "Qi Wang",
+        "Xiaoyu He",
+        "Mingyuan Zhang",
+        "Michael Bi Mi"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-11-13T11:57:46.366577Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2610.41216/v2/fig1-panel1.png"
+            ],
+            "caption": "TinyAstral transfers harness evolution gains to tiny robot agents. (a) With teacher weights frozen, RSI improves the harness; we then freeze the final harness, collect teacher trajectories, and distill small students. (b) Harness evolution improves the teacher and other frozen planners. Students trained separately at four harness versions each approach their corresponding teacher. (c) Final students on training and unseen benchmarks. Solid/dashed lines: 4B/0.8B students; filled/hollow points: comparisons under the same constraints versus additional advantages or different protocols ( Tab. 2 ). Axes are scaled independently.",
+            "image_urls": [
+              "https://arxiv.org/html/2610.41216v2/teaser_fig.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2610.41216v2#S0.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2610.41216/v2/fig2-panel1.png"
+            ],
+            "caption": "Overview of TinyAstral. Stage 1: humans specify the rules and budget in advance. A master of frontier LLM agents reads trajectories of the frozen teacher acting through the harness (tools, feedback, memory, recovery) and proposes harness edits, which are accepted only if a paired A/B test on selection seeds passes a pre-registered statistical gate; model weights never change. Stage 2: after evolution ends, we freeze H ∗ H^{*} and collect teacher trajectories, including reasoning and recovery branches. These are mixed with offline real-robot supervision to train tiny students (0.8B–4B), which replace the teacher in the same harness. Evaluation covers three training domains and three unseen benchmarks, plus three closed-loop real-robot tasks on an SO-ARM101 arm.",
+            "image_urls": [
+              "https://arxiv.org/html/2610.41216v2/fig_overview_3col.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2610.41216v2#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2610.41216v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-11-13T11:57:46.366577Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-10-30T03:53:42Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2610.41216",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2610.41216",
+        "project_url": "https://garfield-kh.github.io/TinyAstral/"
+      },
+      "title": "TinyAstral: Transferring Self-Evolving Harnesses to Tiny Generalist Manipulation Agents",
+      "title_zh": "TinyAstral：将自进化执行框架迁移到微型通用操作智能体",
+      "updated_at": "2026-11-12T16:03:26Z",
+      "version": 2
+    },
+    {
       "abstract": "Robot agents built on vision-language models depend on both the planner and its harness: the tools, feedback, memory, and recovery logic around it. Can improvements to a large teacher's harness be carried into a compact agent with lower inference compute cost? We present TinyAstral, a two-stage approach. We first freeze an open-weight teacher and improve its harness through recursive self-improvement (RSI): frontier LLM agents read the teacher's trajectories and propose harness edits, and each edit is accepted only if it passes a paired statistical test. We then freeze the final harness, collect teacher trajectories with reasoning and failure recovery, and distill a small student that replaces the teacher in the same harness. On RoboTwin, harness evolution raises the teacher's success from 33.4% to 63.6%; the final 4B student reaches 62.8%. Across four harness versions, distilled 4B students score close to their corresponding teachers, and later versions yield stronger students, showing that harness evolution gains carry into compact models. The harness gains also transfer to other frozen planners without retraining. On identical episodes, the final 4B student outperforms open 4B agents, the open 27B harness-RSI model SenseNova-RoboRSI, and our own teacher model placed in three competitors' harnesses. It stays close to its teacher on all three training benchmarks, and on three benchmarks never used for RSI or training it scores close to a 552B planner running the same harness. On the measured deployment episodes, it uses about one fifth of its teacher's accelerator time.",
       "analysis": {
         "key_results": "在RoboTwin上，harness进化将教师成功率从33.4%提升至63.6%，最终4B学生模型达到62.8%；在相同部署片段上，4B学生的加速器耗时约为教师的五分之一，并在多个基准上接近其教师，超越多个基线。",
@@ -3232,7 +3327,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.41112v2",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -3311,7 +3406,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.41009v2",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -3885,7 +3980,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.40430v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -5627,7 +5722,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.40002v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -7304,6 +7399,78 @@
     {
       "abstract": "Learning from offline datasets is limited in scalability, as collecting new experience is often costly or unsafe in the real world. World models offer an alternative way to generate new experience through a learned dynamics model, yet learning policies in latent space is limited due to compounding errors in imagined rollouts. To this end, we propose using the world model as a local transition generator, leveraging critic guidance to choose actions inside that model to generate synthetic experiences. We study action refinement methodologies, introducing Critic-Guided Synthetic Experience (CGSE) generation in world models. Specifically, CGSE augments an existing offline dataset by sampling candidate actions using an offline policy and refining each to maximize a first-order approximation of the $Q$-function within a trust region. We then use a frozen latent world model to imagine the future state given each updated action, and use the critic to choose the best one, appending this synthetic transition to the replay buffer. Our method requires no additional real-environment interaction or test-time planner, as it generates synthetic experience offline using the world model. On three OGBench manipulation tasks, CGSE improves an offline policy by a relative improvement of $7.1\\%$ on the average success rate.",
       "analysis": {
+        "key_results": "在三个 OGBench 操作任务上，CGSE 使离线策略的平均成功率相对提升 7.1%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出 CGSE 方法，将世界模型作为局部转移生成器，利用评论家在信任区域内细化候选动作，生成合成转移扩充离线数据集，无需额外真实环境交互或测试时规划。",
+        "method": "CGSE 利用离线策略采样候选动作，在信任区域内最大化 Q 函数的一阶近似来细化动作，使用冻结的潜在世界模型想象下一状态，并由评论家选择最佳转移加入重放缓冲区。",
+        "one_sentence_summary": "通过评论家引导的合成经验生成（CGSE），在潜在世界模型内离线增强操作数据集，提升离线策略成功率。",
+        "primary_topic": "World Model",
+        "relation_to_vla_wam": "该研究直接涉及世界模型在机器人操作中的应用，通过合成数据生成增强离线策略学习，属于世界模型辅助机器人学习范畴，与 VLA/WAM（视觉-语言-动作/世界-动作模型）主题高度相关。",
+        "relevance_score": 9,
+        "tags": [
+          "Robot Manipulation",
+          "World Modeling",
+          "Policy Learning",
+          "Data"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "arxiv_id": "2610.39100",
+      "authors": [
+        "Jorge de Freitas",
+        "Christos Ziakas",
+        "Alessandra Russo"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-11-13T11:57:46.366577Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2610.39100/v2/fig1-panel1.png"
+            ],
+            "caption": "CGSE transition generation in world model. Starting from an offline latent z 0 z_{0} , the fixed BC-flow actor samples N N candidate first actions and FMQ-style guidance applies a one-step trust-region critic-gradient refinement to each candidate. The refined candidates are rolled out under f ψ f_{\\psi} , scored with Q ϕ Q_{\\phi} , and the best branch supplies only its first action a ∗ a^{\\mathrm{*}} and first model successor z ψ ′ = f ψ ​ ( z 0 , a ∗ ) z^{\\prime}_{\\psi}=f_{\\psi}(z_{0},a^{\\mathrm{*}}) . The resulting synthetic transition ( z 0 , a ∗ , z ψ ′ ) (z_{0},a^{\\mathrm{*}},z^{\\prime}_{\\psi}) is appended to the replay buffer.",
+            "image_urls": [
+              "https://arxiv.org/html/2610.39100v2/fmq_datagen.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2610.39100v2#S2.F1"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2610.39100v2",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-11-13T11:57:46.366577Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-10-29T00:41:38Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2610.39100",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2610.39100",
+        "project_url": null
+      },
+      "title": "Generating Critic-Guided Synthetic Experience in Latent World Models",
+      "title_zh": "在潜在世界模型中生成评论家引导的合成经验",
+      "updated_at": "2026-11-11T21:17:29Z",
+      "version": 2
+    },
+    {
+      "abstract": "Learning from offline datasets is limited in scalability, as collecting new experience is often costly or unsafe in the real world. World models offer an alternative way to generate new experience through a learned dynamics model, yet learning policies in latent space is limited due to compounding errors in imagined rollouts. To this end, we propose using the world model as a local transition generator, leveraging critic guidance to choose actions inside that model to generate synthetic experiences. We study action refinement methodologies, introducing Critic-Guided Synthetic Experience (CGSE) generation in world models. Specifically, CGSE augments an existing offline dataset by sampling candidate actions using an offline policy and refining each to maximize a first-order approximation of the $Q$-function within a trust region. We then use a frozen latent world model to imagine the future state given each updated action, and use the critic to choose the best one, appending this synthetic transition to the replay buffer. Our method requires no additional real-environment interaction or test-time planner, as it generates synthetic experience offline using the world model. On three OGBench manipulation tasks, CGSE improves an offline policy by a relative improvement of $7.1\\%$ on the average success rate.",
+      "analysis": {
         "key_results": "在三个OGBench操作任务上，CGSE将离线策略的平均成功率相对提高了7.1%。",
         "limitations": "摘要未说明",
         "main_contribution": "提出Critic-Guided Synthetic Experience (CGSE)方法，通过冻结的潜在世界模型和评论家引导生成合成经验，无需额外真实环境交互或测试时规划，即可提升离线策略性能。",
@@ -7347,7 +7514,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.39100v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -9178,7 +9345,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.38277v2",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -9251,7 +9418,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.38277v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -10214,7 +10381,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.38095v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -10532,7 +10699,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.37909v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -11557,7 +11724,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.37364v2",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -11700,7 +11867,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.37364v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -11871,7 +12038,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.37266v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -12556,7 +12723,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.37056v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -12717,7 +12884,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.36925v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -12866,7 +13033,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.36852v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -13457,7 +13624,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.36729v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -13717,7 +13884,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.36587v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -14385,7 +14552,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.35850v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -14459,7 +14626,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.35833v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -14543,7 +14710,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.35832v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -15632,7 +15799,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.35615v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -16127,7 +16294,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.35985v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -17245,7 +17412,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.34828v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -18332,7 +18499,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.34519v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -18401,7 +18568,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.34495v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -19862,7 +20029,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.34031v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -20184,7 +20351,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.33964v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -20666,7 +20833,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.33866v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -20740,7 +20907,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.33839v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -22234,7 +22401,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.32881v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -22913,7 +23080,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.32431v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -23600,7 +23767,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.32271v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -26951,7 +27118,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.30938v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -27213,7 +27380,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.30814v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -28159,7 +28326,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.30644v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -29226,7 +29393,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.30129v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -30082,7 +30249,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.29749v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -30246,7 +30413,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.29720v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -31982,7 +32149,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.29203v2",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -32057,7 +32224,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.29203v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -32855,7 +33022,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.28937v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -33758,7 +33925,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.28594v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -34211,7 +34378,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.28495v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -34807,7 +34974,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.28184v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -36257,7 +36424,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.27794v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -36418,7 +36585,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.27699v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -36495,7 +36662,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.27698v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -36818,7 +36985,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.27621v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -39110,7 +39277,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.26660v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -42265,7 +42432,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.25666v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -42905,7 +43072,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.25460v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -43197,7 +43364,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.25418v2",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -43274,7 +43441,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.25418v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -44054,7 +44221,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.25130v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -44991,7 +45158,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.24890v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -45235,7 +45402,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.24766v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -47833,7 +48000,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.24365v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -47944,6 +48111,81 @@
       "version": 2
     },
     {
+      "abstract": "Vision-Language Navigation (VLN) requires long-horizon instruction-consistent planning and short-horizon path planning grounded in the currently observed geometry. Anticipating how future observations evolve along the instructed route provides predictive guidance beyond the current field of view, motivating video-action models (VAMs) that learn representations of future visual states. However, many existing VAMs couple future visual prediction with action generation during inference, despite their distinct temporal requirements: instruction-conditioned route guidance can be reused across multiple control steps, whereas local trajectories must continuously adapt to fresh observations. To bridge this gap, we introduce HAVANA, a dual-system VAM that decouples predictive reasoning from reactive local planning. A slow system produces a compact language-conditioned latent plan from observation history, while a fast system combines the latest plan with the current observation to generate local trajectories. Their asynchronous execution enables rapid adaptation without repeated future prediction, and no future video is generated during inference. Experiments on OmniNavBench demonstrate state-of-the-art navigation performance over prior baselines, while zero-shot real-world deployments further show robust generalization to unseen environments.",
+      "analysis": {
+        "key_results": "在OmniNavBench上取得最优导航性能，零样本真实世界部署展示对未见环境的鲁棒泛化。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出HAVANA，一个双系统视频-动作模型，将指令条件的潜在规划（慢系统）与基于当前观测的局部轨迹生成（快系统）解耦，实现异步执行而不在推理时生成未来视频。",
+        "method": "双系统架构：慢系统基于观测历史生成紧凑的语言条件潜在计划；快系统结合最新计划与当前观测生成局部轨迹，执行异步推理。",
+        "one_sentence_summary": "提出一种分层视频-动作模型，将预测性推理与反应式局部规划解耦，以实现高效且稳健的视觉-语言导航。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该工作属于视频-动作模型（VAM）在视觉-语言导航任务中的应用，通过解耦预测与动作生成，直接提升了机器人导航的推理效率与泛化能力，与VLA和WAM主题高度相关。",
+        "relevance_score": 10,
+        "tags": [
+          "Vision-Language",
+          "Robot Learning",
+          "Efficient Inference",
+          "Action Prediction"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV",
+        "cs.RO"
+      ],
+      "arxiv_id": "2610.24122",
+      "authors": [
+        "Dongzhihan Wang",
+        "Yi Du",
+        "Chen Wang",
+        "Xiuxian Li",
+        "Liang Xu"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-11-13T11:57:46.366577Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2610.24122/v2/fig2-panel1.png"
+            ],
+            "caption": "Overview of the HAVANA training pipeline. Left: The slow system processes an RGB observation history, a navigation instruction, and four learnable time-conditioned queries with a video reasoner. Its contextual and query states form the understanding (UND) stream. The query states are also decoded by a supervised MLP into four egocentric waypoints ( waypoint prediction ). A clean conditioning latent and noisy future latents form the generation (GEN) stream. UND uses causal self-attention; GEN jointly attends to both streams within each sample. Future latents are supervised by flow matching. Right: RGB, depth, and UND latents condition a 1D U-Net for flow-matching-based prediction of a 24-step trajectory.",
+            "image_urls": [
+              "https://arxiv.org/html/2610.24122v2/havana_pipeline.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2610.24122v2#S2.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2610.24122v2",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
+        "recovery_status": "not_found",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:video-action-model",
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-11-13T11:57:46.366577Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-10-16T18:48:16Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2610.24122",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2610.24122",
+        "project_url": null
+      },
+      "title": "HAVANA: A Hierarchical Video-Action Model for Vision-Language Navigation",
+      "title_zh": "HAVANA：用于视觉-语言导航的分层视频-动作模型",
+      "updated_at": "2026-11-12T10:09:33Z",
+      "version": 2
+    },
+    {
       "abstract": "A segmentation policy assigns to each byte string at most one segmentation into tokens. Call it finitely verifiable when a finite automaton over marked strings, bytes paired with boundary bits, accepts exactly the policy's own segmentations. The automaton judges a proposed segmentation and need not compute one. From a supplied verifier the paper gives constructive decisions for four questions, whether a window certifies a token boundary, whether the boundary gap is bounded, whether a mask can keep generation from dead-ending, and whether two policies are equivalent. The last three specialize limitedness, co-accessibility and the equivalence of single-valued transducers. The first refines the synchronizing cut of code theory, and two more ask whether a certified cut, or the cuts of an inventory, let each piece scan alone. The class sits strictly between the online-scannable policies and those with regular domains, and online scannability is decidable in polynomial time through Choffrut's theorem. Markings are length-preserving, so the class is exactly the rational segmentation policies, a normal form rather than a restriction. The class is closed under four pipeline operations, composition over a labeled stage, restriction to a regular schema, splitting at character-class changes, and byte-fallback union of literal policies. Each composite inherits the six decisions, and certificates transfer between stages under four laws. Under rational, unifilar, almost surely stopping finite-state sources, each mass of the weighted section is an exact rational, and so is each rate where expected length is positive. Maximal-munch lexing, canonical byte-pair encoding and two-mode WordPiece instantiate the interface, and the munch library implements all six decisions. Every theorem carries an executable check, and every reported statistic is a program's own output.",
       "analysis": {
         "key_results": "四个判定问题可判定；在线可扫描性可在多项式时间内判定；该类别恰好是理性分词策略，为正规形式而非限制；在四个管道操作下封闭。",
@@ -47986,7 +48228,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.30168v2",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -48061,7 +48303,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.23841v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -48213,7 +48455,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.23796v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -48289,7 +48531,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.23787v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -48363,7 +48605,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.23668v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -48807,7 +49049,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.23479v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -49137,7 +49379,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.23372v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -49473,7 +49715,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.23319v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -50605,7 +50847,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.22811v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -50805,6 +51047,92 @@
       "version": 1
     },
     {
+      "abstract": "The training loss of binary and ternary neural networks, expanded as a multilinear polynomial over the discrete weights, is structurally equivalent to the energy of a hierarchical high-order Ising model. We exploit this equivalence to apply Ising solvers to discrete-weight network training, while accounting for a fundamental difference in objectives: an Ising solver seeks the ground state of a fixed energy function, whereas training seeks solutions that generalize to unseen data. Our key contribution is $\\Sigma\\Delta$-Sampler, an optimizer that reconciles these objectives by embedding a stochastic sampling-and-annealing step as a noisy quantizer inside a first-order $\\Sigma\\Delta$ noise-shaping loop. The loop pushes noise from weight quantization, high-order frustration, and mini-batch sampling out of the low-frequency adaptation band, so that discrete weight updates follow the smooth descent trajectories embedded in the rugged loss landscape. We validate the framework on a planted quadratic unconstrained binary optimization (QUBO) benchmark with a known minimizer; on CIFAR-10, where a $13$M-parameter ternary model comes within $1\\%$ of full-precision accuracy; on ImageNet-1k, where a ternary ResNet-18 comes within $0.4\\%$ Top-5 accuracy of a ternary baseline; on class-incremental continual learning, where prior-task accuracy is preserved; and on MatMul-free language models up to $2.7$B parameters, where it outperforms a straight-through-estimator baseline under matched continued pre-training. Compared with standard quantization-aware training, $\\Sigma\\Delta$-Sampler reduces the training memory footprint by over $50\\%$, delivers an order-of-magnitude speed-up, and reduces weight-update memory traffic by four orders of magnitude, making it attractive for on-device training and fine-tuning of large binary and ternary models.",
+      "analysis": {
+        "key_results": "CIFAR-10 上 13M 参数三值模型准确率差距在 1% 以内；ImageNet-1k 上三值 ResNet-18 的 Top-5 准确率与基线差距 0.4%；类增量持续学习中保持先前任务准确率；2.7B 参数 MatMul-free 语言模型上优于直通估计基线。训练内存占用减少超 50%，速度提升一个数量级，权重更新内存流量减少四个数量级。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出 ΣΔ-Sampler，一种将 Ising 求解器与神经网络训练目标统一的优化器，通过噪声整形环将量化、高阶挫败和小批量采样的噪声推出低频自适应带。",
+        "method": "将随机采样和退火作为噪声量化器嵌入一阶 ΣΔ 噪声整形环中，使离散权重更新跟随平滑下降轨迹。",
+        "one_sentence_summary": "提出 ΣΔ-Sampler，通过将随机采样与退火步骤嵌入一阶 ΣΔ 噪声整形环中，实现二值和三值神经网络的可扩展训练。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "该论文专注于模型量化这一独立的高效推理主题，未直接涉及 VLA 或 WAM；但其提出的 ΣΔ-Sampler 方法可用于二值和三值模型的高效训练，与 VLA/WAM 中的模型量化需求有间接关联。",
+        "relevance_score": 7,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.LG"
+      ],
+      "arxiv_id": "2610.22621",
+      "authors": [
+        "Zihao Chen",
+        "Zhili Xiao",
+        "Rui-Jie Zhu",
+        "Yipeng Wang",
+        "Jason Eshraghian",
+        "Shantanu Chakrabartty"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-11-13T11:57:46.366577Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2610.22621/v2/fig1-panel1.png"
+            ],
+            "caption": "Σ ​ Δ \\Sigma\\Delta -Sampler for training discrete neural networks. (a) A feedforward binary neural network with weights constrained to 𝐖 ∈ { − 1 , + 1 } D \\mathbf{W}\\in\\{-1,+1\\}^{D} . (b) Equivalence between discrete parameter neural networks and a hierarchical high-order Ising machine under stationary data distribution ( 𝐱 , 𝐲 ) (\\mathbf{x},\\mathbf{y}) . (c) Conceptual loss/energy profiles for increasing Ising order, where low-order expansions give a smooth landscape and higher-order couplings add frustration, many local minima, and high-frequency components in the gradient space. (d) A general sampler architecture for training discrete weight neural networks. (e) The effect of noise-shaping in spectral domain, where the white-noise is pushed out of the low-frequency adaptation band towards high-frequency. (f) Histogram showing noise-shaping of the Ising decomposition, resulting in the smoother optimization contour that benefits generalization. (g) Rugged non-convex optimization landscape due to parameter discretizations, where traditional simulated annealing optimizers are slow and do not perform well. (h) Optimization trajectory of the Σ ​ Δ \\Sigma\\Delta -Sampler on the smoothened landscape is more stable and computationally scalable. (i) Parameter update rate maps for a Σ ​ Δ \\Sigma\\Delta -Sampler at different stages of temperature annealing, early( T 0 T_{0} ), mid( T n T_{n} ), and late( T N T_{N} ), while training a single layer, showing adaptive regularization on the model parameters tracks the smooth optimization contour.",
+            "image_urls": [
+              "https://arxiv.org/html/2610.22621v2/Figures/fig1.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2610.22621v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2610.22621/v2/fig2-panel1.png"
+            ],
+            "caption": "Spectral and dynamic analysis of Σ ​ Δ \\Sigma\\Delta -Sampler on a planted Quadratic Unconstrained Binary Optimization (QUBO) problem. (a) Block diagram of the Σ ​ Δ \\Sigma\\Delta -Sampler update rule. (b) Optimization plot showing convergence towards the planted global optimum 𝐖 ∗ \\mathbf{W}^{*} over 1,000 1{,}000 steps for four different optimizers: SF (single-flip SA), PF and PF-20 (parallel-flip SA at 100 % 100\\% and 20 % 20\\% flip rates respectively), and Σ ​ Δ \\Sigma\\Delta -Sampler. (c) Principal component visualization of the optimization trajectories, with (d) showing the convergence on a shorter time-scale. (e), (f) Temporally windowed normalized parameter update rate of PF SA and Σ ​ Δ \\Sigma\\Delta -Sampler showing smoothing of the parameter update trajectories due to noise shaping. (g) Power spectra of the quantization errors (difference in the decision signal vs. update signals) in different optimizers, showing the effect of noise-shaping. (h) Linear extrapolation of average | g n | |g^{n}| and | ω n | |\\omega^{n}| against overall parameter update rate during the optimization process.",
+            "image_urls": [
+              "https://arxiv.org/html/2610.22621v2/Figures/fig2.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2610.22621v2#S2.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2610.22621v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:quantization-aware-training",
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-11-13T11:57:46.366577Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-10-15T20:23:10Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2610.22621",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2610.22621",
+        "project_url": null
+      },
+      "title": "Noise-shaped Sampling and Annealing for Scalable On-the-edge Training of Binary and Ternary AI Models",
+      "title_zh": "针对二值和三值AI模型可扩展边缘训练的噪声整形采样与退火方法",
+      "updated_at": "2026-11-11T21:40:26Z",
+      "version": 2
+    },
+    {
       "abstract": "Diffusion language models (DLMs) promise parallel text generation, but in practice face an unresolved speed-quality trade-off. Exact decoding fills in only one masked position per model pass, while faster multi-token decoding schemes are lossy. Speculative decoding is the standard lossless acceleration for autoregressive models. However, it does not transfer directly to DLMs, which must choose both what to generate and where. We show that this order is the missing piece: the model's own predictions from the previous pass already give the right token at over $90\\%$ of positions, but not which position comes next. We introduce Speculating Positions Order Trajectory (SPOT), a 0.62M-parameter model that reads only the target's output distributions, predicts this order and proposes a tree of candidate continuations, which the target verifies in a single pass by state equality. Coupled-noise match, which shares Gumbel noise between drafter and target, keeps this verification exact at any temperature. This approach also inspired us to introduce SPOT-Sets for dynamic threshold decoding, where a pass commits several positions: SPOT-Sets drafts whole commit sets together with their tokens. Our comprehensive experiments show that SPOT cuts target passes by up to $6.8\\times$ and reaches up to $3.4\\times$ the throughput of standard decoding on SDAR-8B, matching or beating the calibrated and training-free drafting baselines in every task and budget at $T=0$ and $T=1$. In addition, we show that SPOT's learned drafter transfers across models, demonstrating successful transfer across six different DLMs; with a light calibration, the SPOT-Sets drafter transfers as well. On top of dynamic threshold decoding, SPOT-Sets improves the throughput of SDAR-8B by 59% on average over the threshold decoder alone. Project page: https://eliezer318.github.io/SPOT-dLLM/",
       "analysis": {
         "key_results": "SPOT在SDAR-8B上将目标传递次数减少高达6.8倍，吞吐量达到标准解码的3.4倍；在T=0和T=1的所有任务和预算中匹配或优于校准和无训练基线；SPOT草稿模型可跨六个不同DLM迁移；SPOT-Sets在动态阈值解码基础上平均提高59%吞吐量。",
@@ -50848,7 +51176,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.22543v2",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -51029,7 +51357,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.22363v2",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -51114,7 +51442,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.22363v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -51193,7 +51521,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.22362v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -52821,7 +53149,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.21808v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -52980,7 +53308,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.21783v2",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -53051,7 +53379,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.21783v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -53442,7 +53770,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.21621v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -53840,7 +54168,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.21522v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -55057,7 +55385,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.21257v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -56075,7 +56403,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.20532v2",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -56998,7 +57326,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.19361v2",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -58422,7 +58750,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.16491v2",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -60443,7 +60771,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.14603v2",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -60608,7 +60936,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.13943v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -60895,7 +61223,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.13767v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -61203,7 +61531,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.13628v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -61715,7 +62043,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.13433v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -62420,7 +62748,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.13117v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -62845,7 +63173,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.12939v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -67240,6 +67568,92 @@
       "version": 2
     },
     {
+      "abstract": "When humans hand each other objects, they incorporate both geometric and semantic information into this process. For example, passing a knife with the handle towards the recipient, rather than the blade, is both more ergonomic and safer. Recent state-of-the-art methods for task-oriented robot-human handovers have progressed from modeling object geometry to incorporating object affordances. However, they often forgo predicting the explicit, task-specific hand poses a human selects to utilize an object. Since many objects support multiple interaction modalities, e.g., a claw hammer used to strike or pull nails, this variability must be modeled to achieve robust task-oriented handovers. To tackle this, we propose a novel approach, GENESIS-Handover (GENErative HypotheSIS), which leverages VLM image generation to produce a variety of task-specific hand-object interaction hypotheses. These hypotheses are matched in real time to the observed human hand pose, enabling inference of the most suitable handover configuration. By leveraging VLMs as priors of plausible hand-object interactions, the method produces task-conditioned handover strategies for previously unseen object-task pairs. We evaluate the standalone interaction proposal module before deploying the full system on a mobile manipulator. In a user study with 12 participants across five task-object pairs, 83.3% perceived our method to have better task understanding than the previous state of the art.",
+      "analysis": {
+        "key_results": "用户研究（12名参与者，5个任务物体对）显示83.3%认为该方法比之前最先进方法具有更好的任务理解。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出一种新方法GENESIS-Handover，利用视觉语言模型（VLM）生成任务特定的手物交互假设，并实时匹配观察人手姿态，推断最合适的交接配置。",
+        "method": "利用VLM图像生成产生多样化任务特定手物交互假设，将假设与实时观察的人手姿态匹配，推断最佳交接配置。",
+        "one_sentence_summary": "提出GENESIS-Handover方法，利用VLM图像生成多种任务特定手物交互假设，并实时匹配观察人手姿态，实现任务导向的机器人交接。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "该论文与VLA高度相关，因为它利用视觉语言模型作为手物交互的先验知识，预测任务特定的人手姿态，从而实现任务导向的机器人交接。这属于使用VLM进行机器人操作和动作预测的范畴。",
+        "relevance_score": 9,
+        "tags": [
+          "Robot Manipulation",
+          "Vision-Language",
+          "Action Prediction",
+          "Policy Learning",
+          "Robot Learning"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.RO"
+      ],
+      "arxiv_id": "2610.08003",
+      "authors": [
+        "Carmen Scheidemann",
+        "Andreea Tulbure",
+        "Pascal Burkhard",
+        "Marco Hutter"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-11-13T11:57:46.366577Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2610.08003/v2/fig1-panel1.png"
+            ],
+            "caption": "Example for the tool-task pair screwdriver, to screw . Initially, GENESIS-Handover generates multiple hand-object interaction hypotheses via a VLM. At handover onset (I), the human hand pose is observed by the onboard camera, and each hypothesis is scored based on joint-level similarity to the observed pose. The closest hypothesis is selected for execution. During execution, the robot continuously adapts its target to the human hand (II and III, hand pose from previous frame blended in). Finally, the handover occurs with the hand configuration matching the selected hypothesis (IV).",
+            "image_urls": [
+              "https://arxiv.org/html/2610.08003v2/Figure0.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2610.08003v2#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2610.08003/v2/fig2-panel1.png"
+            ],
+            "caption": "Overview of GENESIS-Handover. The system generates task-conditioned hand-object interaction hypotheses (blue), selects the best-matching hypothesis based on the observed human hand (purple), and computes a reactive end-effector target by anchoring the selected relation to the live hand pose (dark green). AFT-Handover provides affordance priors for alignment initialization and object placement in the gripper (white). All inputs to the system are shown in light green.",
+            "image_urls": [
+              "https://arxiv.org/html/2610.08003v2/figures/Overview_Only_No_Math.drawio.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2610.08003v2#S2.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2610.08003v2",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:vision_language_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-11-13T11:57:46.366577Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-10-06T09:01:10Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2610.08003",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2610.08003",
+        "project_url": null
+      },
+      "title": "Reactive Task-Oriented Robot-Human Handovers via Generative Hypothesis Selection",
+      "title_zh": "基于生成式假设选择的反应式任务导向机器人-人物体交接",
+      "updated_at": "2026-11-12T17:18:15Z",
+      "version": 2
+    },
+    {
       "abstract": "Ternary language models such as BitNet b1.58, Falcon-E and BitCPM are fine-tuned through higher-precision latents and deployed as ternary codes by an export that, in the labs' documented pipelines, first casts latents to bf16. We audit releases from three labs. In released checkpoints, fp32 quantization of the shipped latents disagrees with deployed codes on 0.83-1.77% of codes (Falcon-E, BitCPM) and 1.530% (2B-4T); most Falcon-E and BitCPM disagreements are bf16 products exactly on the threshold, which ties-to-even maps to zero, and the unmodified onebitllms exporter reproduces all four Falcon-E releases byte for byte. At fine-tuned endpoints with ULP-matched rates, the documented export lowers greedy GSM8K strict accuracy from 58.79% to 0.78% (Falcon-E-1B-Base) and 36.13% to 0.39% (BitCPM-CANN-0.5B), and a bf16 save and reload lowers 2B-4T's by 27.54 points while its last-number accuracy rises at that endpoint. The strict decrease recurs at each of three new seeds in all three models and has the same direction on 607 reserve test rows, but it is recipe-dependent: at Falcon-E's online-loss-selected rate the export was non-inferior, and after a longer recipe no difference was detected. Two remedies, writing the trained codes directly or adjusting bf16 inputs so unchanged tools emit them, met an inherited 4-point strict-accuracy non-inferiority criterion in all three models, also for the pooled mean over three fixed new trajectories per model and, separately, on the reserve rows. In a frozen study of bf16 latents in fine-tuning (one task, one trajectory per arm), native bf16 writes left 2B-4T's endpoint codes unchanged and changed one Falcon-E code; emulated stochastic-rounding and compensated writers changed codes and were non-inferior to fp32 training at that margin. In two model families, randomized threshold-distance interventions support distance-dependent selection of changed codes.",
       "analysis": {
         "key_results": "在发布的检查点中，fp32量化潜在变量与部署代码不一致的比例在0.83-1.77%之间（Falcon-E、BitCPM）及1.530%（2B-4T）；文档化导出流程使Falcon-E-1B-Base在GSM8K上的严格准确率从58.79%降至0.78%，BitCPM-CANN-0.5B从36.13%降至0.39%；两种补救方法在三个模型中均满足4个百分点的严格准确率非劣效性标准。",
@@ -67283,7 +67697,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.07853v3",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -67448,7 +67862,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.07767v2",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -68895,7 +69309,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.03454v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -70011,7 +70425,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.02943v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -71105,6 +71519,92 @@
       "version": 1
     },
     {
+      "abstract": "Despite the success of discrete diffusion language models (dLMs) for fast parallel decoding, their non-smooth, high-dimensional space hinders trajectory steering for reasoning and inference acceleration. To overcome this, we present Nemotron-Labs-Sigma, the first family of large-scale (3B/8B) continuous dLMs built on steerable, low-dimensional ODE/SDE latent trajectories. Trained blockwise via likelihood optimization, Nemotron-Labs-Sigma jointly denoises Gaussian-corrupted token embeddings while learning an optimal embedding geometry, and leverages pretrained autoregressive (AR) weights for warm-starting. At inference, we identify classifier-free guidance and score temperature as essential for high-fidelity reasoning and coding. Against state-of-the-art discrete counterparts (masked dLMs and AR baselines), Nemotron-Labs-Sigma outperforms them on standard benchmarks after pretraining (e.g., GSM8K, Minerva, HumanEval, MBPP) and on challenging reasoning tasks after supervised fine-tuning (e.g., MATH-500, AIME), with the largest consistent gains on coding. Beyond accuracy, we exploit two structural properties unique to continuous dLMs. First, smooth trajectories degrade gracefully at low NFEs and enable efficient few-step distillation: distribution matching proves strongest among the methods we study, giving roughly 8x acceleration on math and 4x on coding (8 and 4 tokens per forward pass) with negligible accuracy loss and preserved diversity. In addition, the one-step speculative decoding on the (pre-SFT) distilled 8B model yields a further ~3.5x throughput gain over the AR counterpart (on GB200), outperforming masked dLM baselines. Second, embedding-space steering controls the quality--diversity trade-off, yielding strong pass@$k$ that keeps improving as $k$ grows. Together, these results establish continuous dLMs as a promising paradigm for efficient language generation.",
+      "analysis": {
+        "key_results": "在标准基准（GSM8K、Minerva、HumanEval、MBPP）上超越掩码离散扩散模型和AR基线；监督微调后在MATH-500、AIME等挑战任务上取得最佳结果；分布匹配蒸馏带来约8倍（数学）和4倍（编码）加速；单步推测解码在蒸馏8B模型上相较AR基线获得约3.5倍吞吐量提升。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出首个大规模（3B/8B）连续离散扩散语言模型家族Nemotron-Labs-Sigma，在低维潜在轨迹上实现可操控的ODE/SDE去噪，并利用预训练AR权重进行warm-start。",
+        "method": "连续离散扩散语言模型，基于低维ODE/SDE潜在轨迹，联合去噪高斯损坏的token嵌入并学习最优嵌入几何；推理中采用无分类器引导和分数温度控制；通过分布匹配蒸馏实现少步生成，并利用单步推测解码加速。",
+        "one_sentence_summary": "提出首个大规模连续离散扩散语言模型家族Nemotron-Labs-Sigma，通过可操控的低维ODE/SDE潜在轨迹实现高效并行解码，并在推理和编码任务上超越离散基线，同时利用蒸馏和推测解码实现显著加速。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "无直接关系。论文专注于语言模型的高效推理加速（推测解码与蒸馏），不涉及VLA、WAM或机器人动作-世界建模。",
+        "relevance_score": 8,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CL",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "arxiv_id": "2610.02665",
+      "authors": [
+        "Zhihan Yang",
+        "Wei Guo",
+        "Jean-Marie Lemercier",
+        "Simon Welker",
+        "Mohammad Mahdi Kamani",
+        "Yonggan Fu",
+        "Sajad Norouzi",
+        "Julius Berner",
+        "Tomas Geffner",
+        "Karsten Kreis",
+        "Yongxin Chen",
+        "Molei Tao",
+        "John Thickstun",
+        "Pavlo Molchanov",
+        "Ante Juki\\'c",
+        "Arash Vahdat",
+        "Morteza Mardani"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-11-13T11:57:46.366577Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2610.02665/v2/fig2-panel1.png"
+            ],
+            "caption": "Training procedure of Sigma (a) and its transformer attention mask (b) for an example sequence 𝐱 {\\mathbf{x}} of length L = 6 L=6 with block size L ′ = 2 L^{\\prime}=2 . During pretraining, we feed the clean discrete tokens 𝐱 \\mathbf{x} to the AR stream (a, left part) and the noisy continuous embeddings 𝐳 \\mathbf{z} to the diffusion stream (a, right part). For the diffusion stream, each block is randomly chosen to either compute the reconstruction loss (1st block, t = 0 t=0 ) or the diffusion loss (2nd & 3rd blocks, t ∼ Unif ⁡ [ 0 , 1 ] t\\sim\\operatorname{Unif}[0,1] ); see 5 . Reconstruction loss is the cross entropy between the logits and the ground truth tokens, while for diffusion loss we use categorical reparameterization to obtain the mean embedding prediction and compute the mean squared error against the ground truth diffusion embeddings.",
+            "image_urls": [
+              "https://arxiv.org/html/2610.02665v2/llaconda-architecture.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2610.02665v2#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2610.02665v2",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
+        "recovery_status": "not_found",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:speculative-decoding",
+        "composite:speculative_generation"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-11-13T11:57:46.366577Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-10-02T01:34:44Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2610.02665",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2610.02665",
+        "project_url": "https://huggingface.co/collections/nvidia/nemotron-labs-sigma"
+      },
+      "title": "Large Language Continuous Diffusion Models",
+      "title_zh": "大型语言连续扩散模型",
+      "updated_at": "2026-11-12T18:38:36Z",
+      "version": 2
+    },
+    {
       "abstract": "Vision-language-action (VLA) models increasingly incorporate intermediate reasoning to improve robotic manipulation, yet existing approaches primarily reason about observed states without explicitly anticipating future scene evolution. Extending such reasoning to explicit future rollouts at every inference step, however, introduces substantial computational overhead. We propose IG-VLA, a VLA reasoning framework that enables models to imagine the future and internalize the gist. Our Latent Spatiotemporal Reasoning learns to imagine task-relevant future scene evolution directly in visual representation space, guiding action prediction without costly pixel-level video generation. To further reduce inference overhead, we introduce Scene Gist Memory, which internalizes reasoning-derived scene-behavior associations into a compact Scene Gist Token, preserving the benefits of future reasoning while bypassing explicit future imagination at inference. Extensive experiments on LIBERO, LIBERO-Plus, and VLABench demonstrate the effectiveness and efficiency of IG-VLA. On the LIBERO-Plus Language suite, both the reasoning and gist policies outperform the strongest baseline by nearly 6% in success rate. The gist policy also achieves up to 6.38x speedup over baselines, reducing inference latency from 1081ms to 169.5ms per action chunk on a single NVIDIA A6000 GPU. These results demonstrate that future spatiotemporal reasoning can be effectively internalized for efficient VLA deployment.",
       "analysis": {
         "key_results": "在LIBERO、LIBERO-Plus和VLABench上，推理策略和要点策略均比最强基线成功率高近6%；要点策略在单卡A6000上推理延迟从1081ms降至169.5ms，加速高达6.38倍。",
@@ -71928,7 +72428,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.02021v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -72855,7 +73355,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.01559v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -73016,7 +73516,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.01439v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -73089,7 +73589,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.01351v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -73603,7 +74103,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.01092v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -74117,7 +74617,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2610.00982v1",
-        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_checked_at": "2026-11-13T12:02:08.742629Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -74327,22 +74827,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 0,
-    "completion_tokens": 33930,
+    "cache_hits": 67,
+    "completion_tokens": 18749,
     "error_categories": {
       "ValidationError": 1
     },
     "failed": 1,
-    "fetched": 1167,
-    "figure_available": 59,
-    "figure_cache_hits": 0,
+    "fetched": 1623,
+    "figure_available": 80,
+    "figure_cache_hits": 57,
     "figure_failed": 0,
-    "figure_requests": 87,
-    "figure_unavailable": 28,
-    "model_calls": 100,
-    "prefiltered": 100,
-    "prompt_tokens": 88703,
-    "published": 87,
-    "total_tokens": 122633
+    "figure_requests": 49,
+    "figure_unavailable": 26,
+    "model_calls": 55,
+    "prefiltered": 122,
+    "prompt_tokens": 48579,
+    "published": 106,
+    "total_tokens": 67328
   }
 }
