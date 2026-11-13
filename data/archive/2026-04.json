@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-04T02:52:41.131290Z",
+  "generated_at": "2026-11-13T03:06:44.606785Z",
   "papers": [
     {
       "abstract": "The inception of Large Language Models (LLMs) has catalyzed AI adoption in the finance sector, yet their reliability in complex, jurisdiction-specific tasks like Indian Chartered Accountancy (CA) remains limited. The models display difficulty in executing numerical tasks which require multiple steps while also needing advanced knowledge about legal regulations and the method of scaling their operations is not feasible in settings which have limited access to resources. We present CA-ThinkFlow as a parameter-efficient Retrieval-Augmented Generation (RAG) framework which operates with a 14B, 4-bit-quantized reasoning model, 14B-DeepSeek-R1, and a layout-aware Docling extraction system which maintains document structure during extraction. CA-ThinkFlow uses a basic RAG method which automatically adds retrieved information into the prompt, while it depends on the model's built-in Chain-of-Thought (CoT) functions to create context and produce correct answers. The system we developed system operates at performance levels which match large proprietary models when we tested it on the multi-level CA-Ben benchmark, achieving Scholastic Reliability Coefficient (SRC) results which equal 68.75\\% of GPT-4o and Claude 3.5 Sonnet. The framework shows high efficiency and strength in handling parameters, but essential reasoning abilities fail to process complex regulatory texts which exist in fields such as Taxation.",
@@ -1500,6 +1500,66 @@
       "version": 2
     },
     {
+      "abstract": "Quantization has become a standard tool for efficient LLM deployment, especially for local inference, where models are now routinely served at 2-3 bits per parameter. The state of the art is currently split into simple scalar quantization techniques, such as GPTQ or AWQ, which are widely deployed but plateau in accuracy at 3-4 bits per parameter (bpp), and \"second-generation\" vector- or trellis-quantized methods, such as QTIP, GPTVQ and AQLM, which push the accuracy frontier but are notoriously hard to implement and to scale. In this paper, we ask whether this gap is fundamental, or whether a carefully optimized $\\textit{scalar}$ quantizer can recover most of it. We answer in the affirmative, by introducing GSQ (Gumbel-Softmax Quantization), a post-training scalar quantization method which jointly learns the per-coordinate grid assignments and the per-group scales using a Gumbel-Softmax relaxation of the discrete grid. GSQ matches the cardinality of the relaxation to the small number of levels available in the target bit-width regime (e.g., 3-8 levels for ternary and 3 bpp, respectively), making optimization tractable. Practically, on the standard Llama-3.1-8B/70B-Instruct models, GSQ closes most of the gap between scalar quantization and the QTIP frontier at 2 and 3 bits, while using a symmetric scalar grid with group-wise quantization, and thus remains compatible with existing scalar inference kernels. We further show that the same discrete-assignment optimization can be applied to practical GGUF K-Quant checkpoints: starting from publicly released GGUF models, GSQ improves accuracy while projecting the result back into the same deployment format. Finally, GSQ scales to trillion-scale Mixture-of-Experts models such as Kimi-K2.5, where vector-quantized methods are difficult to apply. The source code is publicly available at https://github.com/IST-DASLab/GSQ.",
+      "analysis": {
+        "key_results": "在Llama-3.1-8B/70B-Instruct模型上，GSQ在2和3比特下消除了标量量化与QTIP前沿之间的大部分差距；可应用于GGUF K-Quant检查点并转换回相同部署格式；扩展到万亿级MoE模型Kimi-K2.5。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出GSQ（Gumbel-Softmax Quantization），一种联合学习每坐标网格分配和每组尺度的后训练标量量化方法，在2-3比特下接近矢量量化前沿精度，同时保持与现有标量推理内核兼容。",
+        "method": "使用Gumbel-Softmax松弛离散网格，匹配目标比特宽度下可用级别数量，联合优化每坐标网格分配和每组尺度。",
+        "one_sentence_summary": "本文提出GSQ，一种基于Gumbel-Softmax松弛的后训练标量量化方法，可在2-3比特下显著缩小标量量化与矢量量化前沿方法之间的精度差距。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文专注于大语言模型的标量量化，属于高效推理技术。文中未涉及VLA、世界模型或机器人策略，但其提出的GSQ方法可适用于任何大型神经网络（包括VLA/WAM），具有提升边缘部署效率的潜在价值。",
+        "relevance_score": 8,
+        "tags": [
+          "Model Quantization",
+          "Efficient Inference"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CL",
+        "cs.LG"
+      ],
+      "arxiv_id": "2604.18556",
+      "authors": [
+        "Alireza Dadgarnia",
+        "Soroush Tabesh",
+        "Mahdi Nikdan",
+        "Michael Helcig",
+        "Eldar Kurtic",
+        "Maximilian Kleinegger",
+        "Dan Alistarh"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-11-13T03:06:44.606785Z",
+        "figures": [],
+        "html_url": "https://arxiv.org/html/2604.18556v3",
+        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_status": "not_found",
+        "recovery_version": 3,
+        "status": "not_found"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-11-13T03:06:44.606785Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-04-20T17:45:47Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2604.18556",
+        "code_url": "https://github.com/IST-DASLab/GSQ",
+        "pdf_url": "https://arxiv.org/pdf/2604.18556",
+        "project_url": null
+      },
+      "title": "GSQ: Highly-Accurate Low-Precision Scalar Quantization for LLMs via Gumbel-Softmax Sampling",
+      "title_zh": "GSQ：通过Gumbel-Softmax采样实现高精度低比特LLM标量量化",
+      "updated_at": "2026-11-10T13:28:54Z",
+      "version": 3
+    },
+    {
       "abstract": "As the world of agentic artificial intelligence applied to robotics evolves, the need for agents capable of building and retrieving memories and observations efficiently is increasing. Robots operating in complex environments must build memory structures to enable useful human-robot interactions by leveraging the mnemonic representation of the current operating context. People interacting with robots may expect the embodied agent to provide information about locations, events, or objects, which requires the agent to provide precise answers within human-like inference times to be perceived as responsive. We propose the Embodied Light Graph Retrieval Agent (EmbodiedLGR-Agent), a visual-language model (VLM)-driven agent architecture that constructs dense and efficient representations of robot operating environments. EmbodiedLGR-Agent directly addresses the need for an efficient memory representation of the environment by providing a hybrid building-retrieval approach built on parameter-efficient VLMs that store low-level information about objects and their positions in a semantic graph, while retaining high-level descriptions of the observed scenes with a traditional retrieval-augmented architecture. EmbodiedLGR-Agent is evaluated on the popular NaVQA dataset, achieving state-of-the-art performance in inference and querying times for embodied agents, while retaining competitive accuracy on the global task relative to the current state-of-the-art approaches. Moreover, EmbodiedLGR-Agent was successfully deployed on a physical robot, showing practical utility in real-world contexts through human-robot interaction, while running the visual-language model and the building-retrieval pipeline locally.",
       "analysis": {
         "key_results": "在NaVQA数据集上取得最先进的推理和查询时间性能，同时保持具有竞争力的全局任务精度，并在物理机器人上成功部署。",
@@ -2429,7 +2489,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2604.13824v2",
-        "recovery_checked_at": "2026-11-10T04:39:28.582909Z",
+        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -5014,7 +5074,7 @@
         "checked_at": "2026-08-13T05:41:39.833674Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2604.02047v2",
-        "recovery_checked_at": "2026-11-10T04:39:28.582909Z",
+        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -5299,22 +5359,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 93,
-    "completion_tokens": 17437,
+    "cache_hits": 0,
+    "completion_tokens": 33930,
     "error_categories": {
-      "ValidationError": 2
+      "ValidationError": 1
     },
-    "failed": 2,
-    "fetched": 1921,
-    "figure_available": 110,
-    "figure_cache_hits": 84,
+    "failed": 1,
+    "fetched": 1167,
+    "figure_available": 59,
+    "figure_cache_hits": 0,
     "figure_failed": 0,
-    "figure_requests": 48,
-    "figure_unavailable": 22,
-    "model_calls": 52,
-    "prefiltered": 145,
-    "prompt_tokens": 44812,
-    "published": 132,
-    "total_tokens": 62249
+    "figure_requests": 87,
+    "figure_unavailable": 28,
+    "model_calls": 100,
+    "prefiltered": 100,
+    "prompt_tokens": 88703,
+    "published": 87,
+    "total_tokens": 122633
   }
 }

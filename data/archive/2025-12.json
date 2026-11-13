@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-04T02:52:41.131290Z",
+  "generated_at": "2026-11-13T03:06:44.606785Z",
   "papers": [
     {
       "abstract": "A long-standing challenge in AI is to develop agents capable of solving a wide range of physical tasks and generalizing to new, unseen tasks and environments. A popular recent approach involves training a world model from state-action trajectories and subsequently use it with a planning algorithm to solve new tasks. Planning is commonly performed in the input space, but a recent family of methods has introduced planning algorithms that optimize in the learned representation space of the world model, with the promise that abstracting irrelevant details yields more efficient planning. In this work, we characterize models from this family as JEPA-WMs and investigate the technical choices that make algorithms from this class work. We propose a comprehensive study of several key components with the objective of finding the optimal approach within the family. We conducted experiments using both simulated environments and real-world robotic data, and studied how the model architecture, the training objective, and the planning algorithm affect planning success. We combine our findings to propose a model that outperforms two established baselines, DINO-WM and V-JEPA-2-AC, in both navigation and manipulation tasks. Code, data and checkpoints are available at https://github.com/facebookresearch/jepa-wms.",
@@ -927,6 +927,65 @@
       "version": 2
     },
     {
+      "abstract": "Early-exit (EE) LLMs let confident tokens skip a model's deep layers, but batched serving loses most of this gain. Current systems either force tokens to exit before their own ramp is confident, an error the ramp does not bound, or save almost nothing when decoding is weight-bound, because any continuing token makes a step read the deep weights. We present DREX, a batched EE serving system that never forces a token to exit. DREX introduces cross-iteration batching: tokens that continue past the exit layer wait there, and every few steps one deep pass over all waiting tokens reads the deep weights once for several steps. Its two policies differ in what such a token's request does: holding pauses it until the deep pass, and speculative holding lets it keep decoding from the exit layer's own guess, which the next deep pass verifies. Exited tokens are trusted and never verified. Using a calibrated cost model, a controller picks speculative holding where reading weights dominates a step and guesses are often right, and holding elsewhere. DREX keeps vLLM's asynchronous scheduling by planning each deep pass from exit counts of earlier steps. With synthetic exits where 90% of tokens exit at a quarter of the depth and 40% of guesses are correct, DREX achieves 2.22-2.24$\\times$ decode speedup over non-EE across batch sizes on Llama-2-70B, while per-row skipping (vSkipper's design) gains at most 7.0%. On LayerSkip models, DREX adds no statistically resolved quality loss to the EE model's own. On CNN/DM at full memory, DREX with LayerSkip achieves 1.58-1.91$\\times$ decode speedup while remaining within 1.4 ROUGE-2 points of the non-EE model. These speedups are 9-63% larger than EAGLE's across the evaluated model sizes, with each method measured against its own non-EE target.",
+      "analysis": {
+        "key_results": "在合成退出上实现2.22-2.24倍解码加速；在LayerSkip模型上无统计显著质量损失；在CNN/DM上1.58-1.91倍加速且ROUGE-2下降在1.4以内；比EAGLE快9-63%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出DREX，一种从不强制令牌退出的批处理早退LLM服务系统，引入跨迭代批处理并保持vLLM的异步调度。",
+        "method": "跨迭代批处理；两种策略：保持暂停令牌和投机保持从退出层猜测；使用校准成本模型和控制器选择策略。",
+        "one_sentence_summary": "DREX是一种批处理早退LLM推理系统，通过跨迭代批处理和可信退出来实现显著解码加速。",
+        "primary_topic": "Speculative Decoding",
+        "relation_to_vla_wam": "无直接关系，但该工作聚焦于LLM的高效推断，其思想可能适用于VLA或WAM的部署优化。",
+        "relevance_score": 8,
+        "tags": [
+          "Efficient Inference",
+          "Speculative Decoding"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.DC",
+        "cs.LG"
+      ],
+      "arxiv_id": "2512.15705",
+      "authors": [
+        "Xuting Liu",
+        "Daniel Alexander",
+        "Jiaheng Lu",
+        "Siva Kesava Reddy Kakarla",
+        "Behnaz Arzani",
+        "Vincent Liu"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-11-13T03:06:44.606785Z",
+        "figures": [],
+        "html_url": "https://arxiv.org/html/2512.15705v2",
+        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
+        "recovery_status": "not_found",
+        "recovery_version": 3,
+        "status": "not_found"
+      },
+      "matched_rules": [
+        "composite:speculative_generation"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-11-13T03:06:44.606785Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2025-12-17T18:55:45Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2512.15705",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2512.15705",
+        "project_url": null
+      },
+      "title": "Batched Early-Exit LLM Inference Done Right with DREX",
+      "title_zh": "DREX：正确的批处理早退LLM推理",
+      "updated_at": "2026-11-11T00:42:10Z",
+      "version": 2
+    },
+    {
       "abstract": "Contemporary reservoir computing relies heavily on globally Lipschitz, well-behaved activation functions, limiting applications in defense, disaster response, and pharmaceutical modeling where robust operation under extreme conditions is critical. We systematically investigate non-smooth activation functions, including chaotic, stochastic, and fractal variants, in echo state networks. Through parameter sweeps across 36,610 reservoir configurations, we demonstrate that several non-smooth functions not only maintain behavior consistent with the Echo State Property (ESP) but outperform traditional smooth activations in convergence speed and spectral radius tolerance. Notably, the Cantor function (continuous everywhere, zero derivative almost everywhere) maintains ESP-consistent behavior up to spectral radii of rho = 10, an order of magnitude beyond typical bounds for traditional functions, while achieving 2.6x faster convergence than tanh and ReLU. We introduce a theoretical framework for quantized activation functions, defining a Degenerate Echo State Property (d-ESP) capturing stability for discrete-output functions, and prove that d-ESP implies traditional ESP. We conjecture a critical crowding ratio Q=N/k (reservoir size / quantization levels) predicting failure thresholds for discrete activations. Our analysis reveals that preprocessing topology, rather than continuity, determines stability: monotone, compressive preprocessing maintains ESP across scales, while dispersive or discontinuous preprocessing triggers sharp failures. Our findings challenge assumptions about activation function design in reservoir computing; the exceptional performance of certain fractal functions is only partially explained by the effective-gain analysis presented here, suggesting fundamental gaps in our understanding of how geometric properties of activation functions influence reservoir dynamics.",
       "analysis": {
         "key_results": "康托函数在谱半径高达10时仍保持ESP一致行为（远超传统函数），且收敛速度比tanh和ReLU快2.6倍；单调压缩预处理维持ESP，而分散或不连续预处理导致急剧失败。",
@@ -1319,7 +1378,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2512.11393v3",
-        "recovery_checked_at": "2026-11-10T04:39:28.582909Z",
+        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -1750,7 +1809,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2512.07419v3",
-        "recovery_checked_at": "2026-11-10T04:39:28.582909Z",
+        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -2085,7 +2144,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2512.03620v2",
-        "recovery_checked_at": "2026-11-10T04:39:28.582909Z",
+        "recovery_checked_at": "2026-11-13T03:14:49.276615Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -2638,22 +2697,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 93,
-    "completion_tokens": 17437,
+    "cache_hits": 0,
+    "completion_tokens": 33930,
     "error_categories": {
-      "ValidationError": 2
+      "ValidationError": 1
     },
-    "failed": 2,
-    "fetched": 1921,
-    "figure_available": 110,
-    "figure_cache_hits": 84,
+    "failed": 1,
+    "fetched": 1167,
+    "figure_available": 59,
+    "figure_cache_hits": 0,
     "figure_failed": 0,
-    "figure_requests": 48,
-    "figure_unavailable": 22,
-    "model_calls": 52,
-    "prefiltered": 145,
-    "prompt_tokens": 44812,
-    "published": 132,
-    "total_tokens": 62249
+    "figure_requests": 87,
+    "figure_unavailable": 28,
+    "model_calls": 100,
+    "prefiltered": 100,
+    "prompt_tokens": 88703,
+    "published": 87,
+    "total_tokens": 122633
   }
 }
