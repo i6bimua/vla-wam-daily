@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-13T11:57:46.366577Z",
+  "generated_at": "2026-11-16T02:32:59.168270Z",
   "papers": [
     {
       "abstract": "Active perception - the ability of a robot to proactively select viewpoints to acquire task-relevant information - is essential for robust operation in real-world environments. However, existing approaches are typically limited to fixed objectives or constrained settings, and struggle to generalize to open-ended perception intents specified in natural language. We propose I-Perceive, a foundation model for language-conditioned active perception in large-scale indoor environments. Given a query image, a set of context images, and a natural language instruction, I-Perceive predicts a 6D camera pose that fulfills the specified perception intent. The model integrates a vision-language pathway for semantic grounding with a geometric reasoning pathway for multi-view 3D understanding, connected via multi-layer semantic fusion to enable language-conditioned geometric reasoning. To support scalable training, we construct a large-scale dataset of language-viewpoint pairs from both real-world scene-scanning data and simulated environments using an automated pipeline. Extensive experiments demonstrate that I-Perceive significantly outperforms strong baselines on prediction accuracy, viewpoint feasibility, and instructions alignment. The model exhibits strong zero-shot generalization to unseen scenes and instructions, and enables closed-loop active perception, progressively refining viewpoints over sequential interactions.",
@@ -490,6 +490,93 @@
       "version": 3
     },
     {
+      "abstract": "Vision-language-action models must enable agents to execute long-horizon tasks under partial observability. However, most existing approaches remain observation-driven, relying on short context windows or repeated queries to vision-language models (VLMs). This leads to loss of task progress, action repetition under perceptual aliasing, and high inference latency. While semantic grounding is important, long-horizon manipulation fundamentally requires persistent, action-conditioned state representations. Current VLAs lack such representations and exhibit limited temporal and physical reasoning, making them ill-suited for multi-stage control. This paper introduces RB-VLA, a belief-centric architecture trained with self-supervised world-model objectives that maintains a compact latent state encoding task-relevant history, dynamics, and object interactions. Queried once per task, the VLM provides high-level intent, while the belief tracks task progress and enables phase-aware, causally grounded control under partial observability without storing raw observations or scaling memory with time. The belief and intent jointly condition a diffusion policy for robust closed-loop execution. RB-VLA outperforms prior VLAs on long-horizon benchmarks, achieving 52.5 percent and 37.5 percent higher success rates on multi-stage pick-and-place and stacking tasks, respectively, compared to pi_0. It also reduces inference latency by up to five times relative to baselines and eliminates memory growth across timesteps observed in existing VLAs. Ablations show the belief module is the primary driver of performance, increasing success rates from 32.5 percent without belief to 77.5 percent with belief.",
+      "analysis": {
+        "key_results": "在长时程基准上优于先前VLA，多阶段拾取放置和堆叠任务成功率分别比pi_0高52.5%和37.5%；推理延迟较基线降低最多5倍；消除现有VLA中随时间的记忆增长；消融显示信念模块使成功率从32.5%提升至77.5%。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出RB-VLA，一种信念中心的VLA架构，通过自监督世界模型目标训练紧凑隐状态，实现动作条件的状态表示和长时程任务的高效闭环执行。",
+        "method": "信念中心架构结合自监督世界模型目标；VLM每任务仅查询一次提供高层意图；信念跟踪任务进展并实现相位感知、因果接地控制；信念与意图联合条件扩散策略执行动作。",
+        "one_sentence_summary": "RB-VLA引入信念中心架构与自监督世界模型目标，在部分可观测条件下实现长时程机器人操作的高效闭环控制。",
+        "primary_topic": "VLA",
+        "relation_to_vla_wam": "论文直接聚焦VLA，并引入世界模型目标训练信念状态，将动作条件状态表示与长时程操作结合，对VLA与WAM的交叉研究具有核心参考价值。",
+        "relevance_score": 9,
+        "tags": [
+          "Action Prediction",
+          "Policy Learning",
+          "Robot Manipulation",
+          "Vision-Language",
+          "World Modeling"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.AI"
+      ],
+      "arxiv_id": "2602.20659",
+      "authors": [
+        "Vaidehi Bagaria",
+        "Bijo Sebastian",
+        "Nirav Kumar Patel"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-11-16T02:32:59.168270Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2602.20659/v3/fig1-panel1.png"
+            ],
+            "caption": "Overall Architecture of RB-VLA . a) A VLM generates high-level intent from the current observation and instruction at t=0, implicitly grounding task semantics and relevant scene entities. b) Recursive belief estimator maintains a compact belief encoding task-relevant history. c) A DiT-based action head generates action chunks for closed-loop control",
+            "image_urls": [
+              "https://arxiv.org/html/2602.20659v3/main_new.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2602.20659v3#S1.F1"
+          },
+          {
+            "cached_image_paths": [
+              "/figures/2602.20659/v3/fig2-panel1.png"
+            ],
+            "caption": "Environment with similar objects",
+            "image_urls": [
+              "https://arxiv.org/html/2602.20659v3/belief_tokens.png"
+            ],
+            "label": "Figure 2",
+            "number": 2,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2602.20659v3#S3.F2"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2602.20659v3",
+        "recovery_checked_at": null,
+        "recovery_status": "available",
+        "recovery_version": 0,
+        "status": "available"
+      },
+      "matched_rules": [
+        "exact:vision-language-action",
+        "composite:vision_language_robotics",
+        "composite:world_video_robotics"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-11-16T02:32:59.168270Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2026-02-24T08:02:16Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2602.20659",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2602.20659",
+        "project_url": null
+      },
+      "title": "Recursive Belief Vision Language Action Models",
+      "title_zh": "递归信念视觉-语言-动作模型",
+      "updated_at": "2026-11-13T10:29:15Z",
+      "version": 3
+    },
+    {
       "abstract": "Dynamic runtime latency and memory constraints necessitate flexible large language model (LLM) deployment, where an LLM can be inferred with various quantization precisions based on available computational resources. Recent work on such any-precision quantization either relies on hardware-inefficient vector quantization or induces additional scaling factors when switching between bit-widths. Meanwhile, existing post-training quantization (PTQ) methods calibrated for a fixed low precision show poor generalizability under runtime precision change. In this work, we attribute the source of poor generalization across bit-widths to a precision-dependent outlier migration phenomenon where the distribution of PTQ-sensitive tokens changes across precisions. Motivated by this observation, we propose MoBiQuant, a novel any-precision Mixture-of-Bits quantization framework that adjusts weight precision for flexible LLM inference based on token sensitivity. Specifically, we propose a many-in-one recursive residual quantization that can iteratively reconstruct higher-precision weights at runtime and mitigates outlier migration with a token-aware router to dynamically select the optimal inference precision of each token.Extensive experiments show that MoBiQuant matches or surpasses frontier single-precision PTQ while exhibiting strong elasticity, achieving significant memory savings and throughput gains of up to $1.34\\times$ over state-of-the-art any-precision methods. Our code is available at https://github.com/SimWangArizona/MoBiQuant.",
       "analysis": {
         "key_results": "匹配或超越前沿单精度PTQ方法，相比最先进的任意精度方法实现高达1.34倍的吞吐量提升和显著内存节省。",
@@ -812,7 +899,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2602.18532v5",
-        "recovery_checked_at": "2026-11-15T11:49:41.119645Z",
+        "recovery_checked_at": "2026-11-16T02:34:22.071412Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -4391,7 +4478,7 @@
           }
         ],
         "html_url": "https://arxiv.org/html/2602.02711v3",
-        "recovery_checked_at": "2026-11-15T11:49:41.119645Z",
+        "recovery_checked_at": "2026-11-16T02:34:22.071412Z",
         "recovery_status": "available",
         "recovery_version": 3,
         "status": "available"
@@ -4697,22 +4784,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 67,
-    "completion_tokens": 18749,
+    "cache_hits": 0,
+    "completion_tokens": 5600,
     "error_categories": {
       "ValidationError": 1
     },
     "failed": 1,
-    "fetched": 1623,
-    "figure_available": 80,
-    "figure_cache_hits": 57,
+    "fetched": 304,
+    "figure_available": 12,
+    "figure_cache_hits": 0,
     "figure_failed": 0,
-    "figure_requests": 49,
-    "figure_unavailable": 26,
-    "model_calls": 55,
-    "prefiltered": 122,
-    "prompt_tokens": 48579,
-    "published": 106,
-    "total_tokens": 67328
+    "figure_requests": 14,
+    "figure_unavailable": 2,
+    "model_calls": 19,
+    "prefiltered": 19,
+    "prompt_tokens": 15969,
+    "published": 14,
+    "total_tokens": 21569
   }
 }
