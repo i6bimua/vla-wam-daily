@@ -1,6 +1,78 @@
 {
-  "generated_at": "2026-09-24T01:01:30.835035Z",
+  "generated_at": "2026-11-28T04:29:36.197259Z",
   "papers": [
+    {
+      "abstract": "Personalizing a text-to-image diffusion model by full fine-tuning gives the strongest subject fidelity but produces a full copy of the model per subject: a thousand personalized Stable Diffusion checkpoints approach five terabytes, so storage, not compute, is what fails to scale. We present Delta-SVD, which compresses the weight change that personalization makes rather than the model. Given only a finished checkpoint and its base, it takes a truncated SVD of each layer's weight delta and keeps the few components that carry its spectral energy, selected by a per-layer energy threshold or by a global byte budget filled by water-filling, optimal for the continuous relaxation and empirically near-optimal for discrete rank allocation. Nothing is trained and no subject image is read, so the method applies to legacy and third-party checkpoints for which training-time adapters such as LoRA were never produced. The factors merge back into dense weights at load time, so serving runs at the uncompressed model's exact latency, whereas whole-model 8-bit and 4-bit quantization slow inference by 1.5-3.4 times. On the 30-subject DreamBooth benchmark, Delta-SVD matches the uncompressed model to within 0.01 DINO at 7-fold compression and keeps 98% of its fidelity at 33-fold compression. Among post-hoc baselines, only dense-delta quantization at 411 MiB matches it; below that size Delta-SVD dominates pruning, random-rank selection, and both whole-model and dense-delta quantization on the storage-quality frontier. The same holds on 84 diverse CustomConcept101 subjects, where a 9 MiB adapter reproduces the uncompressed outputs at paired DINO 0.77, and on a fully fine-tuned SD3.5-medium MMDiT, where a 531 MB adapter matches the uncompressed model to within 0.01 DINO.",
+      "analysis": {
+        "key_results": "在30主体DreamBooth基准上，7倍压缩时与未压缩模型DINO差距在0.01以内，33倍压缩时保持98%保真度；在84主体CustomConcept101和SD3.5-medium上同样表现优异。",
+        "limitations": "摘要未说明",
+        "main_contribution": "提出Delta-SVD方法，对个性化模型与基座模型之间的权重差进行截断奇异值分解，并按层能量阈值或全局字节预算（water-filling）分配秩，实现存储压缩且推理延迟不变。",
+        "method": "对已完成微调的个性化模型与基座模型逐层权重差进行截断SVD，保留主要奇异值分量；秩分配采用逐层能量阈值或全局字节预算下的注水算法，加载时合并回稠密权重。",
+        "one_sentence_summary": "提出Delta-SVD，通过截断SVD压缩个性化扩散模型相对基座模型的权重增量，在不训练、不读取图像的情况下实现存储高效且推理零开销的压缩。",
+        "primary_topic": "Quantization",
+        "relation_to_vla_wam": "本文针对文本到图像扩散模型的权重增量压缩，与VLA或机器人世界模型无直接关系；但所提Delta-SVD作为独立后处理压缩技术，在原理上可迁移用于压缩机器人策略或世界模型的权重增量，具有潜在方法学价值。",
+        "relevance_score": 7,
+        "tags": [
+          "Efficient Inference",
+          "Model Quantization"
+        ]
+      },
+      "arxiv_categories": [
+        "cs.CV"
+      ],
+      "arxiv_id": "2508.16863",
+      "authors": [
+        "Tangyuan Zhang",
+        "Shangyu Chen",
+        "Qixiang Chen",
+        "Junyu Yan",
+        "Jingwen Ye",
+        "Jianfei Cai"
+      ],
+      "figure_gallery": {
+        "checked_at": "2026-11-28T04:29:36.197259Z",
+        "figures": [
+          {
+            "cached_image_paths": [
+              "/figures/2508.16863/v2/fig1-panel1.png"
+            ],
+            "caption": "Delta-SVD overview. (a) Each layer’s delta Δ ​ W = W ft − W pre \\Delta W=W_{\\text{ft}}-W_{\\text{pre}} ( W 0 W_{0} in the text) is truncated by SVD to the components carrying its spectral energy, selected by a threshold τ \\tau or a byte budget; the factors A = U t ​ Σ t A=U_{t}\\Sigma_{t} , B = V t ⊤ B=V_{t}^{\\top} are the only per-subject artifact. (b) At load time Δ ​ W ~ = A ​ B \\widetilde{\\Delta W}=AB is merged into the shared base, so serving uses a standard dense checkpoint; no training and no subject images are needed.",
+            "image_urls": [
+              "https://arxiv.org/html/2508.16863v2/delta-svd-overview.png"
+            ],
+            "label": "Figure 1",
+            "number": 1,
+            "source": "arxiv_html",
+            "source_url": "https://arxiv.org/html/2508.16863v2#S1.F1"
+          }
+        ],
+        "html_url": "https://arxiv.org/html/2508.16863v2",
+        "recovery_checked_at": "2026-11-28T04:36:20.445200Z",
+        "recovery_status": "available",
+        "recovery_version": 3,
+        "status": "available"
+      },
+      "matched_rules": [
+        "composite:model_quantization"
+      ],
+      "provenance": {
+        "analysis_scope": "title_and_abstract",
+        "analyzed_at": "2026-11-28T04:29:36.197259Z",
+        "model": "deepseek-v4-pro",
+        "prompt_version": "2"
+      },
+      "published_at": "2025-08-23T01:21:46Z",
+      "resources": {
+        "arxiv_url": "https://arxiv.org/abs/2508.16863",
+        "code_url": null,
+        "pdf_url": "https://arxiv.org/pdf/2508.16863",
+        "project_url": null
+      },
+      "title": "Delta-SVD: Efficient Compression for Personalized Text-to-Image Models",
+      "title_zh": "Delta-SVD：面向个性化文本到图像模型的高效压缩",
+      "updated_at": "2026-11-25T14:28:37Z",
+      "version": 2
+    },
     {
       "abstract": "Test-time scaling strategies for Large Language Models predominantly rely on either reinforcement learning with sparse outcome rewards or search-based methods guided by static Process Reward Models. However, outcome-based RL often suffers from training instability and sample inefficiency, while static PRMs require expensive step-wise supervision and are susceptible to reward hacking due to distributional shifts. In this paper, we introduce AIRL-S, a unified framework that integrates Adversarial Inverse Reinforcement Learning with Group Relative Policy Optimization. By inferring a dense, step-wise reward model directly from reference trajectories, AIRL-S eliminates the dependency on labeled process data and uses the same learned PRM as both a training signal and a verifier for search-based TTS. Extensive evaluations across eight benchmarks in mathematics, science, and code generation demonstrate that our policy model improves average performance by 9\\% over the base model, matching GPT-4o. We further analyze how the AIRL and GRPO objectives complement each other and how the learned PRM transfers across generators and search algorithms, establishing a robust and cost-effective methodology for scaling test-time computation in complex reasoning tasks.",
       "analysis": {
@@ -481,7 +553,7 @@
         "checked_at": "2026-08-28T06:28:28.076086Z",
         "figures": [],
         "html_url": "https://arxiv.org/html/2508.06753v3",
-        "recovery_checked_at": "2026-11-23T03:32:44.622953Z",
+        "recovery_checked_at": "2026-11-28T04:36:20.445200Z",
         "recovery_status": "not_found",
         "recovery_version": 3,
         "status": "not_found"
@@ -778,23 +850,22 @@
   ],
   "schema_version": "1",
   "stats": {
-    "cache_hits": 117,
-    "completion_tokens": 13632,
+    "cache_hits": 0,
+    "completion_tokens": 33227,
     "error_categories": {
-      "DeepSeekResponseError": 1,
-      "ValidationError": 4
+      "ValidationError": 3
     },
-    "failed": 5,
-    "fetched": 1838,
-    "figure_available": 122,
-    "figure_cache_hits": 106,
+    "failed": 3,
+    "fetched": 746,
+    "figure_available": 71,
+    "figure_cache_hits": 0,
     "figure_failed": 0,
-    "figure_requests": 35,
-    "figure_unavailable": 19,
-    "model_calls": 46,
-    "prefiltered": 163,
-    "prompt_tokens": 36074,
-    "published": 141,
-    "total_tokens": 49706
+    "figure_requests": 85,
+    "figure_unavailable": 14,
+    "model_calls": 97,
+    "prefiltered": 97,
+    "prompt_tokens": 84891,
+    "published": 85,
+    "total_tokens": 118118
   }
 }
